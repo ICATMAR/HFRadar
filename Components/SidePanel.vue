@@ -2,6 +2,9 @@
   <!-- Container -->
   <div id='side-panel' ref='sidepanel'>
     side panel
+    <div>
+      HERE GOES INFORMATION ABOUT THE RADAR
+    </div>
   </div>
 </template>
 
@@ -39,7 +42,7 @@ export default {
 <style scoped>
 #side-panel{
   min-width: 500px;
-  background: blue;
+  background: rgb(240, 240, 255);
   height: 100vh;
 }
 </style>
