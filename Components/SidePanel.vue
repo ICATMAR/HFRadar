@@ -1,9 +1,77 @@
 <template>
   <!-- Container -->
   <div id='side-panel' ref='sidepanel'>
-    side panel
-    <div>
-      HERE GOES INFORMATION ABOUT THE RADAR
+    <div class="accordion" id="accordionPanelsStayOpenExample">
+
+      <!-- HF Radar -->
+      <div class="accordion-item">
+        <h2 class="accordion-header" id="headingSectionOne">
+          <button class="accordion-button" type="button" data-bs-toggle="collapse"
+            data-bs-target="#bodySectionOne" aria-expanded="true"
+            aria-controls="bodySectionOne">
+            HF Radar #1
+          </button>
+        </h2>
+        <div id="bodySectionOne" class="accordion-collapse collapse show"
+          aria-labelledby="headingSectionOne">
+          <div class="accordion-body" v-html="content">
+          </div>
+        </div>
+      </div>
+
+
+      <!-- Data point ? -->
+      <div class="accordion-item">
+        <h2 class="accordion-header" id="headingSection2">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+            data-bs-target="#bodySection2" aria-expanded="false"
+            aria-controls="bodySection2">
+            Selected Data Point #1
+          </button>
+        </h2>
+        <div id="bodySection2" class="accordion-collapse collapse"
+          aria-labelledby="headingSection2">
+          <div class="accordion-body" v-html="dataPointContent">
+          </div>
+        </div>
+      </div>
+
+      <!-- <div class="accordion-item">
+        <h2 class="accordion-header" id="panelsStayOpen-headingTwo">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+            data-bs-target="#panelsStayOpen-collapseTwo" aria-expanded="false"
+            aria-controls="panelsStayOpen-collapseTwo">
+            Accordion Item #2
+          </button>
+        </h2>
+        <div id="panelsStayOpen-collapseTwo" class="accordion-collapse collapse"
+          aria-labelledby="panelsStayOpen-headingTwo">
+          <div class="accordion-body">
+            <strong>This is the second item's accordion body.</strong> It is hidden by default, until the collapse
+            plugin adds the appropriate classes that we use to style each element. These classes control the overall
+            appearance, as well as the showing and hiding via CSS transitions. You can modify any of this with custom
+            CSS or overriding our default variables. It's also worth noting that just about any HTML can go within the
+            <code>.accordion-body</code>, though the transition does limit overflow.
+          </div>
+        </div>
+      </div> -->
+
+      <!-- About setion -->
+      <div class="accordion-item">
+        <h2 class="accordion-header" id="aboutHeading">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+            data-bs-target="#about" aria-expanded="false"
+            aria-controls="about">
+            About
+          </button>
+        </h2>
+        <div id="about" class="accordion-collapse collapse"
+          aria-labelledby="aboutHeading">
+          <div class="accordion-body">
+            This application visualizes data from HF Radars (CODAR). The application is developed under the project SOCAT-ICATMAR, funded by Generalitat de Catalunya and CSIC.
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -20,11 +88,21 @@ export default {
     
   },
   mounted() {
-    
+    // EVENT LISTENERS
+    window.eventBus.on('LoadedHFRadarData', (hfRadarData) => {
+      // Create HTML content
+      let str = '';
+      let keys = Object.keys(hfRadarData.header);
+      for (let i = 0; i < keys.length; i++){
+        str += '<p><strong>' + keys[i] + '</strong>: ' + hfRadarData.header[keys[i]] + '<br></p>';
+      }
+      this.content = str;
+    });
   },
   data (){
     return {
-        
+        content: '',
+        dataPointContent: '',
     }
   },
   methods: {
@@ -42,7 +120,13 @@ export default {
 <style scoped>
 #side-panel{
   min-width: 500px;
+  max-width: 500px;
   background: rgb(240, 240, 255);
   height: 100vh;
+}
+
+.accordion-body{
+  max-height: 50vh;
+  overflow-y: auto;
 }
 </style>

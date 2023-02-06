@@ -66,7 +66,8 @@ const parseText = function(rawText){
   }
 
 
-
+  // Emit event
+  window.eventBus.emit('LoadedHFRadarData', {header, 'data': out});
 
   return {header, 'data': out};
 }
