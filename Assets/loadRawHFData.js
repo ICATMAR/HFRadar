@@ -52,7 +52,23 @@ const parseText = function(rawText){
     
   }
 
-  return out;
+
+
+  // Get metadata
+  let headerText = rawText.substring(0, rawText.indexOf('%TableType'));
+  headerText = headerText.replaceAll('%', '');
+  let headerRows = headerText.split('\n');
+  let header = {};
+  // Iterate columns
+  for (let i = 0; i < headerRows.length; i++) {
+    let itemName = headerRows[i].split(':')[0];
+    header[itemName] = headerRows[i].split(':')[1];
+  }
+
+
+
+
+  return {header, 'data': out};
 }
 
 

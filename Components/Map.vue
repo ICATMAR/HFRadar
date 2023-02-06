@@ -382,18 +382,77 @@ export default {
 
       // Add data
       window.loadData()
-        .then(res => window.createImage(res))
         .then(res => {
+          let sourceData = window.createImage(res);
+          // Create image
           this.layers.rawHFData = 
             new ol.layer.Image({
               source: new ol.source.ImageStatic({
-                url: res.url,
-                imageExtent: res.imageExtent,
-                projection: res.projection
+                url: sourceData.url,
+                imageExtent: sourceData.imageExtent,
+                projection: sourceData.projection
               }),
             });
           this.map.addLayer(this.layers.rawHFData);
-        });
+          // Create Radar icon
+          // Get radar location
+          let locationStr = res.header.Origin;
+          let location = locationStr.replace(/\s\s+/g, ',').replace(',', '').split(',');
+          // Create feature
+          let feature =  new ol.Feature({
+                  geometry: new ol.geom.Point(ol.proj.fromLonLat(location.reverse())),
+                  name: 'HF Radar',
+                });
+          // Create style
+          let featStyle = new ol.style.Style({
+                    image: new ol.style.Icon({
+                      // anchor: [0.5, 46],
+                      // anchorXUnits: 'fraction',
+                      // anchorYUnits: 'pixels',
+                      src: 'Assets/antenna.png',
+                      width: 10,
+                      height: 10,
+                      scale: [0.5, 0.5]
+                    })
+                  });
+          feature.setStyle(featStyle);
+
+          // Create layer with feature
+          this.layers.HFIcon = new ol.layer.Vector({
+            source: new ol.source.Vector({
+              features: [feature]
+            })
+          });
+          // Add to map
+          this.map.addLayer(this.layers.HFIcon);
+
+          // Show radar points
+          // TODO: is this optimal?
+          let featPoints = [];
+          for (let i = 0; i<res.data.length; i++){
+            let dataPoint = res.data[i];
+            let featPoint = new ol.Feature({
+              geometry: new ol.geom.Point(ol.proj.fromLonLat([dataPoint.Longitude, dataPoint.Latitude])),
+            });
+            featPoint.setStyle( new ol.style.Style({
+              image: new ol.style.Circle({
+                radius: 2,
+                fill: new ol.style.Fill({
+                  color: [255, 0, 0, 0.5],
+                  opacity: 0.5,
+                })
+              })
+            }))
+            featPoints[i] = featPoint;
+          }
+          this.layers.HFPoints = new ol.layer.Vector({
+            source: new ol.source.Vector({
+              features: featPoints
+            })
+          })
+          this.map.addLayer(this.layers.HFPoints);
+
+        })
     },
 
 
