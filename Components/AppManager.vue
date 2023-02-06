@@ -11,7 +11,7 @@
     </div>
 
     <!-- Central Panel -->
-    <central-panel></central-panel>
+    <!-- <central-panel></central-panel> -->
 
     <!-- Banner -->
     <img class="Banner" src="Assets/Banner.png">
@@ -26,7 +26,7 @@
 // Import components
 import Map from "./Map.vue"
 import SidePanel from "./SidePanel.vue"
-import CentralPanel from "./CentralPanel.vue"
+// import CentralPanel from "./CentralPanel.vue"
 
 
 export default {
@@ -53,7 +53,7 @@ export default {
   components: {
     "mapOL": Map,
     "side-panel": SidePanel,
-    "central-panel": CentralPanel,
+    // "central-panel": CentralPanel,
   }
 }
 </script>
