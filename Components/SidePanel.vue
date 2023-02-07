@@ -12,7 +12,7 @@
             HF Radar #1
           </button>
         </h2>
-        <div id="bodySectionOne" class="accordion-collapse collapse show"
+        <div ref="HFRadar" id="bodySectionOne" class="accordion-collapse collapse show"
           aria-labelledby="headingSectionOne">
           <div class="accordion-body" v-html="content">
           </div>
@@ -26,10 +26,10 @@
           <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
             data-bs-target="#bodySection2" aria-expanded="false"
             aria-controls="bodySection2">
-            Selected Data Point #1
+            Selected Data Point
           </button>
         </h2>
-        <div id="bodySection2" class="accordion-collapse collapse"
+        <div ref="dataPoint" id="bodySection2" class="accordion-collapse collapse"
           aria-labelledby="headingSection2">
           <div class="accordion-body" v-html="dataPointContent">
           </div>
@@ -102,6 +102,27 @@ export default {
       }
       this.content = str;
     });
+    // On DataPoint click on Map.vue
+    window.eventBus.on('ClickedDataPoint', (dataPoint) => {
+      // Create HTML content
+      let str = '';
+      let keys = Object.keys(dataPoint);
+      for (let i = 0; i < keys.length; i++){
+        str += '<p><strong>' + keys[i] + '</strong>: ' + dataPoint[keys[i]] + '<br></p>';
+      }
+      this.dataPointContent = str;
+      let collapse = new window.bootstrap.Collapse(this.$refs.dataPoint, {toggle: false});
+      collapse.show();
+      collapse = new window.bootstrap.Collapse(this.$refs.HFRadar, {toggle: false});
+      collapse.hide();
+    });
+    // On DataPoint deselected on Map.vue
+    window.eventBus.on('DeselectedDataPoint', () => {
+      // Remove HTML content
+      this.dataPointContent = '';
+      let collapse = new window.bootstrap.Collapse(this.$refs.dataPoint, {toggle: false});
+      collapse.hide();
+    })
   },
   data (){
     return {
@@ -127,6 +148,8 @@ export default {
   max-width: 500px;
   background: rgb(240, 240, 255);
   height: 100vh;
+  max-height: 100vh;
+  overflow-y: auto;
 }
 
 .accordion-body{

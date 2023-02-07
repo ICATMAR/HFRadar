@@ -10,12 +10,19 @@ import es from './lang/es.js';
 // // DataManager
 // import DataManager from "/OBSEA/data/DataManager.js"
 // window.DataManager = DataManager;
+// Declare event emitter
+// https://github.com/developit/mitt
+window.eventBus = window.mitt();
+
+
 // Load scripts
 import {loadRawHFData, readFile} from './Assets/loadRawHFData.js';
 import CreateImage from './Assets/createImage.js';
+import DataManager from './Assets/DataManager.js';
 window.loadData = loadRawHFData;
 window.readFile = readFile;
 window.createImage = CreateImage;
+window.DataManager = new DataManager();
 
 
 // Declare translations
@@ -26,9 +33,7 @@ const i18n = VueI18n.createI18n({
   missingWarn: false,
   fallbackWarn: false,
 });
-// Declare event emitter
-// https://github.com/developit/mitt
-window.eventBus = window.mitt();
+
 
 const options = {
   moduleCache: { vue: Vue },

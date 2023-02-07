@@ -237,6 +237,7 @@ export default {
       // Interaction (tracks clicked)
       const selectInteraction = new ol.interaction.Select({style: null});
       selectInteraction.on('select', (e) => {
+        console.log(e);
         // Nothing clicked
         if (e.selected[0] === undefined)
           return false;
@@ -254,27 +255,9 @@ export default {
       this.map.addInteraction(selectInteraction);
 
       // Map single click
-      // this.map.on('singleclick',  (evt) => {
-      //   //document.getElementById('info').innerHTML = '';
-      //   debugger;
-      //   let view = this.map.getView();
-      //   const viewResolution = view.getResolution();
-      //   const url = this.layers.seaHabitats.getSource().getFeatureInfoUrl(
-      //     evt.coordinate,
-      //     viewResolution,
-      //     'EPSG:3857',
-      //     {'INFO_FORMAT': 'text/html'}
-      //   );
-      //   if (url) {
-      //     fetch(url)
-      //       .then((response) => response.text())
-      //       .then((html) => {
-      //         console.log(html);
-      //         //document.getElementById('info').innerHTML = html;
-      //       });
-      //   }
-      // });
+      this.map.on('singleclick', this.onMapClick);
       
+
       // Register tile load progress
       Object.keys(this.baseLayerSources).forEach(key => {
         let blSource = this.baseLayerSources[key];
@@ -283,6 +266,12 @@ export default {
       //this.registerLoadTilesEvents(this.layers.seaHabitats);
 
     },
+
+
+
+
+  
+
 
 
 
@@ -344,7 +333,7 @@ export default {
       for (let i = 0; i<HFRadarData.data.length; i++){
         let dataPoint = HFRadarData.data[i];
         let featPoint = new ol.Feature({
-          geometry: new ol.geom.Point(ol.proj.fromLonLat([dataPoint.Longitude, dataPoint.Latitude])),
+          geometry: new ol.geom.Point(ol.proj.fromLonLat([dataPoint['Longitude (deg)'], dataPoint['Latitude (deg)']])),
         });
         featPoint.setStyle( new ol.style.Style({
           image: new ol.style.Circle({
@@ -386,7 +375,74 @@ export default {
   
 
 
+    // USER EVENTS
+    // MAP CLICK
+    onMapClick: function(evt) {
+      let distMin = 999;
+      let coord = ol.proj.transform(evt.coordinate, 'EPSG:3857', 'EPSG:4326');
+      let closestDataPoint;
+      // Find closest points
+      if (window.DataManager){
+        let radars = window.DataManager.visibleHFRadars;
+        for (let i = 0; i < radars.length; i++){
+          let radar = radars[i];
+          for (let j = 0; j < radar.data.length; j++){
+            let dataPoint = radar.data[j];
+            // Calculate distance (could do it in km with the right formula, but this is interaction and it does not matter that much)
+            let dist = Math.sqrt( Math.pow(dataPoint['Longitude (deg)'] - coord[0], 2) + Math.pow(dataPoint['Latitude (deg)'] - coord[1], 2));
+            // Find closest point
+            if (dist < distMin){
+              distMin = dist;
+              closestDataPoint = dataPoint;
+            }
+          }
+        }
+        // Limit by distance in pixels
+        console.log(evt.originalEvent.clientX + ", " + evt.originalEvent.clientY);
+        
+        
+        if (closestDataPoint){
+          let epsg3857coord = ol.proj.fromLonLat([closestDataPoint['Longitude (deg)'], closestDataPoint['Latitude (deg)']]);
+          let pixelCoord = this.map.getPixelFromCoordinate(epsg3857coord);
+          console.log(pixelCoord);
 
+          let pixelDistance = Math.sqrt(Math.pow(evt.originalEvent.clientX - pixelCoord[0],2) + Math.pow(evt.originalEvent.clientY - pixelCoord[1],2));
+          // Click distance to point
+          if (pixelDistance < 60){
+            window.eventBus.emit('ClickedDataPoint', closestDataPoint);
+            // Create map layer with styled point
+              let featPoint = new ol.Feature({
+                geometry: new ol.geom.Point(epsg3857coord),
+              });
+              featPoint.setStyle( new ol.style.Style({
+                image: new ol.style.Circle({
+                  radius: 4,
+                  fill: new ol.style.Fill({
+                    color: [255, 255, 0, 0.5],
+                    opacity: 0.5,
+                  })
+                })
+              }))
+            this.layers.HFSelPoint = new ol.layer.Vector({
+              name: 'HFSelPoint',
+              source: new ol.source.Vector({
+                features: [featPoint]
+              })
+            })
+            if (this.getMapLayer('HFSelPoint')) this.map.removeLayer(this.getMapLayer('HFSelPoint'));
+            this.map.addLayer(this.layers.HFSelPoint);
+          }
+          // Too far away from any point (more than X pixels away)
+          else {
+            // Remove layer
+            if (this.getMapLayer('HFSelPoint')) this.map.removeLayer(this.getMapLayer('HFSelPoint'));
+            // Remove info from side panel
+            window.eventBus.emit('DeselectedDataPoint');
+          }
+
+        }
+      }
+    },
 
     // INTERNAL EVENTS
     // Change the styles (WMSLegend.vue emit)
@@ -436,6 +492,8 @@ export default {
     onMapMoveStart: function(){
       this.isMapMoving = true;
     },
+
+
 
 
     // Declare loading tile events
