@@ -2,6 +2,7 @@ const firstDate = new Date('2023-01-26T06:00Z');
 const lastDate = new Date('2023-02-02T06:00Z');
 
 
+// Parse text
 const parseText = function(rawText){
   // Index header
   let tableStartIndex = rawText.indexOf('TableStart:') + 12;
@@ -98,4 +99,25 @@ const loadRawHFData = function(timestamp){
 
 }
 
-export default loadRawHFData;
+
+
+// Reads files from drag and drop
+const readFile = function(file){
+  let reader = new FileReader();
+  reader.fileName = file.name;
+
+  // On load file
+  reader.addEventListener('load', e => {
+    parseText(reader.result);
+  });
+  reader.addEventListener('error', e => {
+    console.error('Could not read file ' + reader.file.name);
+    console.error(e);
+  })
+  // Read as text
+  reader.readAsText(file);
+}
+
+
+
+export { loadRawHFData, readFile };

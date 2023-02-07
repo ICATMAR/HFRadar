@@ -68,7 +68,10 @@
         <div id="about" class="accordion-collapse collapse"
           aria-labelledby="aboutHeading">
           <div class="accordion-body">
-            This application visualizes data from HF Radars (CODAR). The application is developed under the project SOCAT-ICATMAR, funded by Generalitat de Catalunya and CSIC.
+            <p>This application visualizes data from HF Radars (CODAR). The application is developed under the project SOCAT-ICATMAR,
+            funded by Generalitat de Catalunya and CSIC.</p>
+            <p>The application is developed with OpenLayers, Bootstrap and Vue. Map attributions: © Esri, Maxar, GeoEye, Earthstar
+              Geographics, CNES/Airbus DS, USDA, USGS, AeroGRID, IGN, and the GIS User Community</p>
           </div>
         </div>
       </div>
@@ -89,6 +92,7 @@ export default {
   },
   mounted() {
     // EVENT LISTENERS
+    // On HFRadar data load
     window.eventBus.on('LoadedHFRadarData', (hfRadarData) => {
       // Create HTML content
       let str = '';
@@ -128,5 +132,10 @@ export default {
 .accordion-body{
   max-height: 50vh;
   overflow-y: auto;
+  font-size: small;
+}
+
+.accordion-body ::v-deep p{
+  margin-bottom: 0.3rem;
 }
 </style>

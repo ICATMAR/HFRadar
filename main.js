@@ -11,9 +11,10 @@ import es from './lang/es.js';
 // import DataManager from "/OBSEA/data/DataManager.js"
 // window.DataManager = DataManager;
 // Load scripts
-import LoadRawHFData from './Assets/loadRawHFData.js';
+import {loadRawHFData, readFile} from './Assets/loadRawHFData.js';
 import CreateImage from './Assets/createImage.js';
-window.loadData = LoadRawHFData;
+window.loadData = loadRawHFData;
+window.readFile = readFile;
 window.createImage = CreateImage;
 
 

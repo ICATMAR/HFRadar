@@ -2,7 +2,7 @@
     <div id="app-map">
       <!-- LAYOUT -->
       <!-- OL map -->
-      <div id="map" ref="OLMap"></div>
+      <div id="map" ref="OLMap" v-on:drop="onDropFile($event)" v-on:dragover="onDragOver($event)"></div>
 
       <!-- Time Range Bar
       <time-range-bar ref="timeRangeBar" id="time-range-bar" 
@@ -133,140 +133,25 @@ export default {
              //projection: 'EPSG:3857'
            //}),
         })
-        // shoreline: new ol.layer.VectorTile({
-        //   name: 'shoreline',
-        //   maxZoom: 22,
-        //   source: new ol.source.VectorTile({
-        //     attributions: '© European Environment Agency',
-        //     format: new ol.format.MVT(),
-        //     url: '../geoportal/data/shoreline-tiles/{z}/{x}/{y}.pbf',
-        //     maxZoom: 10, // Defined in MVT folders
-        //     zDirection: -1
-        //   }),
-        //   style: new ol.style.Style({
-        //     stroke: new ol.style.Stroke({
-        //       color: 'rgba(0,0,0,0.7)',
-        //       width: 1
-        //     })
-        //   }),
-        // }),
-        // eez12nm: new ol.layer.VectorTile({
-        //   name: '12nauticmiles',
-        //   maxZoom: 22,
-        //   source: new ol.source.VectorTile({
-        //     attributions: '© Flanders Marine Institute',
-        //     format: new ol.format.MVT(),
-        //     url: '../geoportal/data/eez_12nm/{z}/{x}/{y}.pbf',
-        //     maxZoom: 9, // Defined in MVT folders
-        //     zDirection: -1
-        //   }),
-        //   style: new ol.style.Style({
-        //     stroke: new ol.style.Stroke({
-        //       color: 'rgba(240,150,150,0.6)',
-        //       width: 1
-        //     })
-        //   }),
-        // }),
-
-        // Ports
-        // portsLayer: new ol.layer.Vector({
-        //   source: new ol.source.Vector({
-        //     url: 'data/ports.geojson',
-        //     format: new ol.format.GeoJSON()
-        //   }),
-        //   minZoom: 3,
-        //   //declutter: true,
-        //   style: function(feature, resolution) {
-        //     let name = feature.get('name');
-        //     let paletteColor = palette[name].color || [255,255,255];
-
-        //     // Text size computation using resolution
-        //     // Min text size: 9
-        //     // Max text size: 16
-        //     let textSize = Math.min(Math.max(16*(1200 - resolution)/900, 9), 16);
-              
-            
-        //     return new ol.style.Style({
-        //       text: new ol.style.Text({
-        //         text: name,
-        //         font: textSize + 'px Arial, Helvetica, sans-serif',
-        //         textAlign: 'right',
-        //         offsetX: -10,
-        //         fill: new ol.style.Fill({
-        //           color: 'rgba(0,0,0,0.9)',
-        //         }),
-        //         stroke: new ol.style.Stroke({
-        //           color: 'rgba('+paletteColor.toString()+', 0.3)',//'rgba(255,255,255,0.5)',
-        //           width: 3
-        //         })
-        //       }),
-        //       image: new ol.style.Circle({
-        //         radius: 5,
-        //         //fill: new ol.style.Fill({color: 'rgba(255,255,255,0.6)'}),
-        //         fill: new ol.style.Fill({color: 'rgba('+paletteColor.toString()+', 0.6)'}),
-        //         stroke: new ol.style.Stroke({color: 'rgba(0,0,0,0.8)', width: 1})
-        //       })
-        //     })
 
 
-        //   },
-        // }),
-
-        // Clima data (weather and sea)
-        // data: new ol.layer.Tile({
-        //   name: 'data',
-        //   zIndex: -2,
-        // }),
-        // // Fishing effort
-        // fishingEffort: new ol.layer.Image({
-        //   name: 'fishingEffort',
-        //   source: new ol.source.ImageStatic({
-        //     url: 'data/fishingEffortExample_m1_39_6_44.png',
-        //     imageExtent: [-1, 39, 6, 44],
-        //     projection: 'EPSG:4326'
-        //   }),
-        //   zIndex: -1,
-        //   opacity: 0.8,
-        // }),
-        // Sea habitats
-        //seaHabitats: new ol.layer.Tile({
-        // seaHabitats: new ol.layer.Image({
-        //   name: 'seaHabitats',
-        //   // source: new ol.source.TileWMS({
-        //   //   url: 'https://ows.emodnet-seabedhabitats.eu/geoserver/emodnet_view/wms',
-        //   //   params: {
-        //   //     'LAYERS': 'eusm2021_eunis2019_group',
-        //   //     'TILED': 'TRUE',
-        //   //   },
-        //   //   crossOrigin: 'anonymous',
-        //   // }),
-          
-        //   source: new ol.source.ImageStatic({
-        //     // https://ows.emodnet-seabedhabitats.eu/geoserver/emodnet_view/wms?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap&FORMAT=image%2Fpng8&TRANSPARENT=true&LAYERS=eusm2021_eunis2019_group&TILED=TRUE&WIDTH=2048&HEIGHT=2048&CRS=EPSG%3A3857&STYLES=&BBOX=0.0%2C4836921.25%2C556597.45%2C5311971.85
-        //     url: 'data/SeaHabitats_0_39.8_5_43.png',
-        //     //imageExtent: [0, 39.8, 5, 43],
-        //     //projection: 'EPSG:4326'
-        //     imageExtent: [0.0, 4836921.25, 556597.45, 5311971.85],
-        //     projection: 'EPSG:3857'
-        //   }),
-        //   zIndex: -2,
-        //   opacity: 0.0
-        // }),
     };
 
 
     this.layerData = undefined;
     this.pixelColor = [0, 0, 0, 0];
 
-    // Load fishing tracks
-    // if (window.serverConnection)
-    // getTrackLines('http://localhost:8080/trackLines', 'data/trackLines.json');
-    // getTrackLines('data/trackLines.json', undefined);
-    // this.fishingTracks = new FishingTracks('data/trackLines.json', undefined, this.onLoadTracks);//new TrackLines(address, staticFile, onLoadTracks)
   },
+
   mounted () {
     this.initMap();
     this.$refs.OLMap.addEventListener('mousemove', this.onMouseMove);
+    // EVENT LISTENERS
+    window.eventBus.on('LoadedHFRadarData', (HFRadarData) => { // From loadRawHFData.js
+      let imgData = window.createImage(HFRadarData);
+      this.updateHFRadarData(HFRadarData, imgData);
+    });
+
   },
   umounted () {
     this.$refs.OLMap.removeEventListener('mousemove', this.onMouseMove);
@@ -284,7 +169,25 @@ export default {
     }
   },
   methods: {
-
+    // USER ACTIONS
+    // DRAG & DROP FILES
+    onDragOver: function(event) {
+        event.preventDefault();
+        event.stopPropagation();
+    },
+    // On drop event
+    onDropFile: function(event) {
+        event.preventDefault();
+        event.stopPropagation();
+        let files = event.dataTransfer.files;
+        console.log(files.length + " files dropped.");
+        // Iterate files
+        for (let i = 0; i < files.length; i++) {
+            let file = files[i];
+            // Read files
+            window.readFile(file);
+        }
+    },
     // PRIVATE METHODS
     // Figure clicked (TODO: emit)
     initMap: function () {
@@ -300,7 +203,7 @@ export default {
           // Graticule layer
           this.layers.graticule,
           // Raw HF Data
-          this.layers.rawHFData,
+          // this.layers.rawHFData,
           // 12 nm
           //this.layers.eez12nm,
           // Shoreline
@@ -379,81 +282,93 @@ export default {
       });
       //this.registerLoadTilesEvents(this.layers.seaHabitats);
 
+    },
 
-      // Add data
-      window.loadData()
-        .then(res => {
-          let sourceData = window.createImage(res);
-          // Create image
-          this.layers.rawHFData = 
-            new ol.layer.Image({
-              source: new ol.source.ImageStatic({
-                url: sourceData.url,
-                imageExtent: sourceData.imageExtent,
-                projection: sourceData.projection
-              }),
+
+
+
+
+    // Update HFRadar data
+    updateHFRadarData: function(HFRadarData, imgData) {
+
+      // Add image layer with HF Radar data
+      this.layers.rawHFData = new ol.layer.Image({
+        name: 'rawHFData',
+        source: new ol.source.ImageStatic({
+          url: imgData.url,
+          imageExtent: imgData.imageExtent,
+          projection: imgData.projection
+        }),
+      });
+      if (this.getMapLayer('rawHFData')) this.map.removeLayer(this.getMapLayer('rawHFData')); // Remove layer before adding. Not optimal but prettier
+      this.map.addLayer(this.layers.rawHFData);
+
+
+      // Create Radar icon
+      // Get radar location
+      let locationStr = HFRadarData.header.Origin;
+      let location = locationStr.replace(/\s\s+/g, ',').replace(',', '').split(',');
+      // Create feature
+      let feature =  new ol.Feature({
+              geometry: new ol.geom.Point(ol.proj.fromLonLat(location.reverse())),
+              name: 'HF Radar',
             });
-          this.map.addLayer(this.layers.rawHFData);
-          // Create Radar icon
-          // Get radar location
-          let locationStr = res.header.Origin;
-          let location = locationStr.replace(/\s\s+/g, ',').replace(',', '').split(',');
-          // Create feature
-          let feature =  new ol.Feature({
-                  geometry: new ol.geom.Point(ol.proj.fromLonLat(location.reverse())),
-                  name: 'HF Radar',
-                });
-          // Create style
-          let featStyle = new ol.style.Style({
-                    image: new ol.style.Icon({
-                      // anchor: [0.5, 46],
-                      // anchorXUnits: 'fraction',
-                      // anchorYUnits: 'pixels',
-                      src: 'Assets/antenna.png',
-                      width: 10,
-                      height: 10,
-                      scale: [0.5, 0.5]
-                    })
-                  });
-          feature.setStyle(featStyle);
-
-          // Create layer with feature
-          this.layers.HFIcon = new ol.layer.Vector({
-            source: new ol.source.Vector({
-              features: [feature]
-            })
-          });
-          // Add to map
-          this.map.addLayer(this.layers.HFIcon);
-
-          // Show radar points
-          // TODO: is this optimal?
-          let featPoints = [];
-          for (let i = 0; i<res.data.length; i++){
-            let dataPoint = res.data[i];
-            let featPoint = new ol.Feature({
-              geometry: new ol.geom.Point(ol.proj.fromLonLat([dataPoint.Longitude, dataPoint.Latitude])),
-            });
-            featPoint.setStyle( new ol.style.Style({
-              image: new ol.style.Circle({
-                radius: 2,
-                fill: new ol.style.Fill({
-                  color: [255, 0, 0, 0.5],
-                  opacity: 0.5,
+      // Create style
+      let featStyle = new ol.style.Style({
+                image: new ol.style.Icon({
+                  // anchor: [0.5, 46],
+                  // anchorXUnits: 'fraction',
+                  // anchorYUnits: 'pixels',
+                  src: 'Assets/antenna.png',
+                  width: 10,
+                  height: 10,
+                  scale: [0.5, 0.5]
                 })
-              })
-            }))
-            featPoints[i] = featPoint;
-          }
-          this.layers.HFPoints = new ol.layer.Vector({
-            source: new ol.source.Vector({
-              features: featPoints
+              });
+      feature.setStyle(featStyle);
+
+      // Create layer with feature
+      this.layers.HFIcon = new ol.layer.Vector({
+        name: 'HFIcon',
+        source: new ol.source.Vector({
+          features: [feature]
+        })
+      });
+      // Add to map
+      if (this.getMapLayer('HFIcon')) this.map.removeLayer(this.getMapLayer('HFIcon'));
+      this.map.addLayer(this.layers.HFIcon);
+
+      // Show radar points
+      // TODO: is this optimal?
+      let featPoints = [];
+      for (let i = 0; i<HFRadarData.data.length; i++){
+        let dataPoint = HFRadarData.data[i];
+        let featPoint = new ol.Feature({
+          geometry: new ol.geom.Point(ol.proj.fromLonLat([dataPoint.Longitude, dataPoint.Latitude])),
+        });
+        featPoint.setStyle( new ol.style.Style({
+          image: new ol.style.Circle({
+            radius: 2,
+            fill: new ol.style.Fill({
+              color: [255, 0, 0, 0.5],
+              opacity: 0.5,
             })
           })
-          this.map.addLayer(this.layers.HFPoints);
-
+        }))
+        featPoints[i] = featPoint;
+      }
+      this.layers.HFPoints = new ol.layer.Vector({
+        name: 'HFPoints',
+        source: new ol.source.Vector({
+          features: featPoints
         })
+      })
+      if (this.getMapLayer('HFPoints')) this.map.removeLayer(this.getMapLayer('HFPoints'));
+      this.map.addLayer(this.layers.HFPoints);
+
+
     },
+
 
 
 
