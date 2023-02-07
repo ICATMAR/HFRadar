@@ -8,14 +8,16 @@ const parseText = function(rawText){
   let tableStartIndex = rawText.indexOf('TableStart:') + 12;
   let tableEndIndex = rawText.indexOf('%TableEnd:');
 
-  // Index data
-  let lastMetadataIndex = rawText.indexOf('RngCell') + 8;
+  let tableStr = rawText.substring(tableStartIndex, tableEndIndex);
+
+  // Index data start
+  // let lastMetadataIndex = rawText.indexOf('RngCell') + 8;
+  let headerRowsRaw = tableStr.substring(tableStr.indexOf('%%'), tableStr.indexOf('%%') + 500).split('\n');
+  let dataStartIndex = tableStr.indexOf('%%') + headerRowsRaw[0].length + headerRowsRaw[1].length + 3;
 
   // Col names
-  let tableStartStr = rawText.substring(tableStartIndex, lastMetadataIndex);
-  let tableStartRows = tableStartStr.split('\n');
-  let tableHeaders = tableStartRows[0];
-  let tableUnits = tableStartRows[1];
+  let tableHeaders = headerRowsRaw[0];
+  let tableUnits = headerRowsRaw[1];
 
   tableHeaders = tableHeaders.replaceAll(' Distance', '-Distance');
   tableHeaders = tableHeaders.replaceAll(' comp', '-comp');
@@ -25,18 +27,17 @@ const parseText = function(rawText){
   tableUnits = tableUnits.replaceAll('%', '').replace( /\s\s+/g, ',').replaceAll(' ', ',').split(',');
   tableUnits.shift();
 
-  // Table headers exceptions
-  tableHeaders[tableHeaders.indexOf('Spatial')] = 'Spatial Quality';
-  tableHeaders[tableHeaders.indexOf('Temporal')] = 'Temporal Quality';
-  tableHeaders[tableHeaders.indexOf('Pattern')] = 'Pattern Distance';
-  tableHeaders[tableHeaders.indexOf('Velocity')] = 'Velocity Maximum';
-  tableHeaders[tableHeaders.lastIndexOf('Velocity')] = 'Velocity Minimum';
-  tableHeaders[tableHeaders.lastIndexOf('Spatial')] = 'Spatial Count';
-  tableHeaders[tableHeaders.lastIndexOf('Temporal')] = 'Temporal Count';
-  tableHeaders[tableHeaders.indexOf('Spectra')] = 'Spectra RngCell';
+  // Table columns check
+  let numTableColumns = 1*getParamFromTable(rawText, 'TableColumns');
+  if (tableHeaders.length != tableUnits.length || tableHeaders.length != numTableColumns)
+    console.error('Table columns missmatch when reading table.');
+
+  // Table headers
+  for (let i = 0; i < tableHeaders.length; i++)
+    tableHeaders[i] += ' ' + tableUnits[i];
 
 
-  let dataStr = rawText.substring(lastMetadataIndex, tableEndIndex);
+  let dataStr = tableStr.substring(dataStartIndex, tableEndIndex);
   let dataRows = dataStr.split('\n');
 
 
@@ -44,7 +45,7 @@ const parseText = function(rawText){
   for (let i = 0; i < dataRows.length; i++){
     let dataRow = dataRows[i].replace( /\s\s+/g, ',').replaceAll(' ', ',').split(',');
     dataRow.shift();
-    if (dataRow.length == 20){ // Some lines at the end of file? %TableEnd
+    if (dataRow.length == numTableColumns){ // Some lines at the end of file? %TableEnd
       out[i] = {};
       for (let j = 0; j < dataRow.length; j++){
         out[i][tableHeaders[j]] = dataRow[j] * 1;
@@ -72,6 +73,20 @@ const parseText = function(rawText){
 
   return {header, 'data': out};
 }
+
+
+
+
+// Extract values from table
+const getParamFromTable = function(rawText, param, tableType){
+
+  let paramIndex = rawText.indexOf(param) + param.length;
+  let cols = rawText.substring(paramIndex, paramIndex + 200).split('\n');
+  return cols[0].replaceAll(':', '').replaceAll(' ', '');
+
+}
+
+
 
 
 // Returns a promise of loading the data

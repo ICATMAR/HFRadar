@@ -11,10 +11,10 @@ const createImage = function(HFRadarData){
   let maxLong = -999;
 
   for (let i = 0; i< data.length; i++){
-    if (data[i].Longitude > maxLong) maxLong = data[i].Longitude;
-    if (data[i].Longitude < minLong) minLong = data[i].Longitude;
-    if (data[i].Latitude > maxLat) maxLat = data[i].Latitude;
-    if (data[i].Latitude < minLat) minLat = data[i].Latitude;
+    if (data[i]['Longitude (deg)'] > maxLong) maxLong = data[i]['Longitude (deg)'];
+    if (data[i]['Longitude (deg)'] < minLong) minLong = data[i]['Longitude (deg)'];
+    if (data[i]['Latitude (deg)'] > maxLat) maxLat = data[i]['Latitude (deg)'];
+    if (data[i]['Latitude (deg)'] < minLat) minLat = data[i]['Latitude (deg)'];
   }
 
   // Margins
@@ -43,8 +43,8 @@ const createImage = function(HFRadarData){
   for (let i = 0; i< data.length; i++){
     let dataPoint = data[i];
 
-    let x = (dataPoint.Longitude - minLong) / rangeLong
-    let y = (dataPoint.Latitude - minLat) / rangeLat;
+    let x = (dataPoint['Longitude (deg)'] - minLong) / rangeLong
+    let y = (dataPoint['Latitude (deg)'] - minLat) / rangeLat;
 
     ctx.fillStyle = 'rgba(255, 0, 0, 0.5)';
     ctx.beginPath();
@@ -57,8 +57,8 @@ const createImage = function(HFRadarData){
     ctx.beginPath();
     ctx.moveTo(x*canvas.width, y*canvas.height);
     // https://stackoverflow.com/questions/7477003/calculating-new-longitude-latitude-from-old-n-meters
-    let nextLong = dataPoint.Longitude + (factor * dataPoint['U-comp'] / earthRadius) * (180 / Math.PI) / Math.cos(dataPoint.Latitude * Math.PI / 180);
-    let nextLat = dataPoint.Latitude + (factor * dataPoint['V-comp'] / earthRadius) * (180 / Math.PI);
+    let nextLong = dataPoint['Longitude (deg)'] + (factor * dataPoint['U-comp (cm/s)'] / earthRadius) * (180 / Math.PI) / Math.cos(dataPoint['Latitude (deg)'] * Math.PI / 180);
+    let nextLat = dataPoint['Latitude (deg)'] + (factor * dataPoint['V-comp (cm/s)'] / earthRadius) * (180 / Math.PI);
 
     let nextX = (nextLong - minLong) / rangeLong;
     let nextY = (nextLat - minLat) / rangeLat;
