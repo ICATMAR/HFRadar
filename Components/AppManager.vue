@@ -41,6 +41,9 @@ export default {
     window.onresize =  () => {
       this.$refs.appManager.style.height = window.innerHeight + 'px';
     }; 
+
+    // Load data
+    window.DataManager.loadStaticFiles();
   },
   data (){
     return {
@@ -69,10 +72,10 @@ export default {
   .Banner {
     width: 180px;
     position:absolute;
-    top: 10px;
-    left: 40px;
+    top: 20px;
+    left: 60px;
   }
-  @media screen and (max-width: 800px) {
+  @media screen and (max-width: 1000px) {
     .Banner {
       width: 100px;
     }
