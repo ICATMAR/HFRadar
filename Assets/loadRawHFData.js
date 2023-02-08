@@ -1,5 +1,4 @@
-const firstDate = new Date('2023-01-26T06:00Z');
-const lastDate = new Date('2023-02-02T06:00Z');
+
 
 
 // Parse text
@@ -69,7 +68,7 @@ const parseText = function(rawText){
 
 
   // Emit event
-  window.eventBus.emit('LoadedHFRadarData', {header, 'data': out});
+  //window.eventBus.emit('LoadedHFRadarData', {header, 'data': out});
 
   return {header, 'data': out};
 }
@@ -94,8 +93,10 @@ const loadRawHFData = function(timestamp){
 
   console.log(window.location.href);
 
+  let baseURL = window.location.href.replace('index.html', '');
+
   let date = new Date(timestamp);
-  date = firstDate; // HACK
+  //date = firstDate; // HACK
   let dateISO = date.toISOString();
   dateISO = dateISO.substring(0, 14) + '00:00.000Z'; // Hourly
   let year = dateISO.substring(0,4);
@@ -104,11 +105,12 @@ const loadRawHFData = function(timestamp){
   let hour = dateISO.substring(11,13);
 
 
-  let url = window.location.href + 'data/Radials4Conchy/RDLm_CREU_' + year + '_' + month + '_' + day + '_' + hour + '00.ruv';
+  let url = baseURL + 'data/Radials4Conchy/RDLm_CREU_' + year + '_' + month + '_' + day + '_' + hour + '00.ruv';
 
   return fetch(url)
     .then (r => r.text())
-    .then (res => parseText(res)).catch(e => { throw e });
+    .then (res => parseText(res))
+    .catch(e => { throw e });
 
   
 
@@ -123,7 +125,7 @@ const readFile = function(file){
 
   // On load file
   reader.addEventListener('load', e => {
-    parseText(reader.result);
+    window.eventBus.emit('LoadedDropedHFRadarData', parseText(reader.result));
   });
   reader.addEventListener('error', e => {
     console.error('Could not read file ' + reader.file.name);

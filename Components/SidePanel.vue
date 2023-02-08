@@ -93,12 +93,18 @@ export default {
   mounted() {
     // EVENT LISTENERS
     // On HFRadar data load
-    window.eventBus.on('LoadedHFRadarData', (hfRadarData) => {
+    // TODO: THIS INFORMATION SHOULD COME FROM MAP.VUE.
+    // --> Add time slider
+    // --> Map.vue (or time slider? -- decide visible radars)
+    // --> TimeSlider create events that update information to SidePanel
+    // --> Map.vue should be aware of the visible layers for the click events
+    // --> Maybe create an AppController? > Receives and sends all user events, stores information about the visible layers etc...
+    window.eventBus.on('LoadedDropedHFRadarData', (HFRadarData) => {
       // Create HTML content
       let str = '';
-      let keys = Object.keys(hfRadarData.header);
+      let keys = Object.keys(HFRadarData.header);
       for (let i = 0; i < keys.length; i++){
-        str += '<p><strong>' + keys[i] + '</strong>: ' + hfRadarData.header[keys[i]] + '<br></p>';
+        str += '<p><strong>' + keys[i] + '</strong>: ' + HFRadarData.header[keys[i]] + '<br></p>';
       }
       this.content = str;
     });

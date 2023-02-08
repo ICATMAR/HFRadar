@@ -124,15 +124,15 @@ export default {
             })
           }),
         }),
-        rawHFData: new ol.layer.Image({
-          //: new ol.source.ImageStatic({
-            //url: 'data/SeaHabitats_0_39.8_5_43.png',
-            //imageExtent: [0, 39.8, 5, 43],
-            //projection: 'EPSG:4326'
-            //imageExtent: [0.0, 4836921.25, 556597.45, 5311971.85],
-             //projection: 'EPSG:3857'
-           //}),
-        })
+        // rawHFData: new ol.layer.Image({
+        //   //: new ol.source.ImageStatic({
+        //     //url: 'data/SeaHabitats_0_39.8_5_43.png',
+        //     //imageExtent: [0, 39.8, 5, 43],
+        //     //projection: 'EPSG:4326'
+        //     //imageExtent: [0.0, 4836921.25, 556597.45, 5311971.85],
+        //      //projection: 'EPSG:3857'
+        //    //}),
+        // })
 
 
     };
@@ -147,9 +147,22 @@ export default {
     this.initMap();
     this.$refs.OLMap.addEventListener('mousemove', this.onMouseMove);
     // EVENT LISTENERS
-    window.eventBus.on('LoadedHFRadarData', (HFRadarData) => { // From loadRawHFData.js
+    window.eventBus.on('LoadedDropedHFRadarData', (HFRadarData) => { // From loadRawHFData.js
       let imgData = window.createImage(HFRadarData);
       this.updateHFRadarData(HFRadarData, imgData);
+      // Check if the radar in that position is already shown
+      let isSet = false;
+      for (let i = 0; i < this.visibleHFRadars.length; i++){
+        let id = HFRadarData.header.PatternUUID;
+        if (id == this.visibleHFRadars[i].header.PatternUUID){
+          this.visibleHFRadars[i] = HFRadarData;
+          isSet = true;
+        }
+      }
+      // If the radar was not present, add to the map
+      if (!isSet)
+        this.visibleHFRadars.push(HFRadarData);
+      console.log(this.visibleHFRadars.length + " shown radars.")
     });
 
   },
@@ -166,6 +179,7 @@ export default {
       },
       isLayerDataReady: false,
       WMSLegendURL: '',
+      visibleHFRadars: []
     }
   },
   methods: {
@@ -235,24 +249,24 @@ export default {
 
       // Declare interactions
       // Interaction (tracks clicked)
-      const selectInteraction = new ol.interaction.Select({style: null});
-      selectInteraction.on('select', (e) => {
-        console.log(e);
-        // Nothing clicked
-        if (e.selected[0] === undefined)
-          return false;
-        // Track line is cliked
-        if (e.selected[0].getProperties().featType == "trackLine"){
-          this.setSelectedTrack(e.selected[0].getProperties().id);
-        }
-        // Port is clicked
-        // else if (e.selected[0].getProperties().featType == "port") {
-        //   portClicked(e);
-        // }
-      });
+      // const selectInteraction = new ol.interaction.Select({style: null});
+      // selectInteraction.on('select', (e) => {
+      //   console.log(e);
+      //   // Nothing clicked
+      //   if (e.selected[0] === undefined)
+      //     return false;
+      //   // Track line is cliked
+      //   if (e.selected[0].getProperties().featType == "trackLine"){
+      //     this.setSelectedTrack(e.selected[0].getProperties().id);
+      //   }
+      //   // Port is clicked
+      //   // else if (e.selected[0].getProperties().featType == "port") {
+      //   //   portClicked(e);
+      //   // }
+      // });
 
-      // Add interaction to map
-      this.map.addInteraction(selectInteraction);
+      // // Add interaction to map
+      // this.map.addInteraction(selectInteraction);
 
       // Map single click
       this.map.on('singleclick', this.onMapClick);
@@ -279,18 +293,21 @@ export default {
 
     // Update HFRadar data
     updateHFRadarData: function(HFRadarData, imgData) {
+      // ID of the radar
+      let radarID = HFRadarData.header.PatternUUID;
+      let radarImgLayerName = 'rawHFData' + radarID;
 
       // Add image layer with HF Radar data
-      this.layers.rawHFData = new ol.layer.Image({
-        name: 'rawHFData',
+      this.layers[radarImgLayerName] = new ol.layer.Image({
+        name: radarImgLayerName,
         source: new ol.source.ImageStatic({
           url: imgData.url,
           imageExtent: imgData.imageExtent,
           projection: imgData.projection
         }),
       });
-      if (this.getMapLayer('rawHFData')) this.map.removeLayer(this.getMapLayer('rawHFData')); // Remove layer before adding. Not optimal but prettier
-      this.map.addLayer(this.layers.rawHFData);
+      if (this.getMapLayer(radarImgLayerName)) this.map.removeLayer(this.getMapLayer(radarImgLayerName)); // Remove layer before adding. Not optimal but prettier
+      this.map.addLayer(this.layers[radarImgLayerName]);
 
 
       // Create Radar icon
@@ -317,15 +334,16 @@ export default {
       feature.setStyle(featStyle);
 
       // Create layer with feature
-      this.layers.HFIcon = new ol.layer.Vector({
-        name: 'HFIcon',
+      let radarIconLayerName = 'HFIcon' + radarID;
+      this.layers[radarIconLayerName] = new ol.layer.Vector({
+        name: radarIconLayerName,
         source: new ol.source.Vector({
           features: [feature]
         })
       });
       // Add to map
-      if (this.getMapLayer('HFIcon')) this.map.removeLayer(this.getMapLayer('HFIcon'));
-      this.map.addLayer(this.layers.HFIcon);
+      if (this.getMapLayer(radarIconLayerName)) this.map.removeLayer(this.getMapLayer(radarIconLayerName));
+      this.map.addLayer(this.layers[radarIconLayerName]);
 
       // Show radar points
       // TODO: is this optimal?
@@ -346,14 +364,15 @@ export default {
         }))
         featPoints[i] = featPoint;
       }
-      this.layers.HFPoints = new ol.layer.Vector({
-        name: 'HFPoints',
+      let radarPointsLayerName = 'HFPoints' + radarID;
+      this.layers[radarPointsLayerName] = new ol.layer.Vector({
+        name: radarPointsLayerName,
         source: new ol.source.Vector({
           features: featPoints
         })
       })
-      if (this.getMapLayer('HFPoints')) this.map.removeLayer(this.getMapLayer('HFPoints'));
-      this.map.addLayer(this.layers.HFPoints);
+      if (this.getMapLayer(radarPointsLayerName)) this.map.removeLayer(this.getMapLayer(radarPointsLayerName));
+      this.map.addLayer(this.layers[radarPointsLayerName]);
 
 
     },
@@ -382,8 +401,8 @@ export default {
       let coord = ol.proj.transform(evt.coordinate, 'EPSG:3857', 'EPSG:4326');
       let closestDataPoint;
       // Find closest points
-      if (window.DataManager){
-        let radars = window.DataManager.visibleHFRadars;
+      if (this.visibleHFRadars.length != 0){
+        let radars = this.visibleHFRadars;
         for (let i = 0; i < radars.length; i++){
           let radar = radars[i];
           for (let j = 0; j < radar.data.length; j++){
@@ -398,13 +417,9 @@ export default {
           }
         }
         // Limit by distance in pixels
-        console.log(evt.originalEvent.clientX + ", " + evt.originalEvent.clientY);
-        
-        
         if (closestDataPoint){
           let epsg3857coord = ol.proj.fromLonLat([closestDataPoint['Longitude (deg)'], closestDataPoint['Latitude (deg)']]);
           let pixelCoord = this.map.getPixelFromCoordinate(epsg3857coord);
-          console.log(pixelCoord);
 
           let pixelDistance = Math.sqrt(Math.pow(evt.originalEvent.clientX - pixelCoord[0],2) + Math.pow(evt.originalEvent.clientY - pixelCoord[1],2));
           // Click distance to point
