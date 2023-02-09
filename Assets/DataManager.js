@@ -9,21 +9,33 @@ class DataManager {
   HFRadars = {};
 
   constructor(){
-
+    // EVENT LISTENERS
     window.eventBus.on('LoadedHFRadarData', (HFRadarData) => { // From loadRawHFData.js
-      // Find UUID
-      let UUID = HFRadarData.header.PatternUUID.replaceAll(" ", "");
-      // HFRadar exists
-      if (this.HFRadars.UUID != undefined){
-        this.HFRadars.UUID.addRadarData(HFRadarData);
-      } else {
-        // Create HFRadar
-        let hFRadar = new HFRadar(HFRadarData);
-        this.HFRadars.UUID = hFRadar;
-      }
-     
+      this.addHFRadarData(HFRadarData);
+    });
+    window.eventBus.on('LoadedDropedHFRadarData', (HFRadarData) => { // From loadRawHFData.js
+      this.addHFRadarData(HFRadarData);
     });
   }
+
+
+  // INTERNAL METHODS
+  addHFRadarData(HFRadarData){
+    // Find UUID
+    let UUID = HFRadarData.header.PatternUUID.replaceAll(" ", "");
+    // HFRadar exists
+    if (this.HFRadars[UUID] != undefined){
+      this.HFRadars[UUID].addRadarData(HFRadarData);
+    } else {
+      console.log("New Radar! Site: " + HFRadarData.header.Site);
+      // Create HFRadar
+      let hFRadar = new HFRadar(HFRadarData);
+      this.HFRadars[UUID] = hFRadar;
+    }
+    return this.HFRadars[UUID];
+  }
+
+
 
 
   // PUBLIC METHODS
@@ -32,10 +44,14 @@ class DataManager {
     let radarsData = [];
     let keys = Object.keys(this.HFRadars);
     for (let i = 0; i < keys.length; i++){
-      if (this.HFRadars[keys[i]].radarData[timestamp] != undefined){
-        let radarData = this.HFRadars[keys[i]].radarData[timestamp];
-        radarsData.push(radarData);
-      }
+      let radar = this.HFRadars[keys[i]];
+      if (radar.data[timestamp] != undefined){
+        
+        radar.currentData = radar.data[timestamp];
+        
+        radarsData.push(radar);
+      } else
+        radar.currentData = "undefined";
     }
      return radarsData;
   }
@@ -47,7 +63,7 @@ class DataManager {
     // Iterate radars to find latest and earliest dates
     let keys = Object.keys(this.HFRadars);
     for (let i = 0; i < keys.length; i++){
-      Object.keys(this.HFRadars[keys[i]].radarData).forEach(tmst => {
+      Object.keys(this.HFRadars[keys[i]].data).forEach(tmst => {
         if (new Date(tmst) < startDate)
           startDate = new Date(tmst);
         if (new Date(tmst) > endDate )
@@ -75,28 +91,40 @@ class DataManager {
 
     Promise.all(promises).then(values => {
 
-      // TODO: STORE DATA HERE, FIND START END DATES
+      let lastHFRadar;
       for (let i = 0; i < values.length; i++){
-        let HFRadarData = values[i];
-        // Find UUID
-        let UUID = HFRadarData.header.PatternUUID.replaceAll(" ", "");
-        // HFRadar exists
-        if (this.HFRadars.UUID != undefined){
-          this.HFRadars.UUID.addRadarData(HFRadarData);
-        } else {
-          // Create HFRadar
-          let hFRadar = new HFRadar(HFRadarData);
-          this.HFRadars.UUID = hFRadar;
-        }
+        lastHFRadar = this.addHFRadarData(values[i]);
       }
       
-      let lastHFRadarData = values[values.length -1];
-      // HACK --> TODO: CHANGE EVENT NAME. AFTER THIS USE TIMESLIDER TO SELECT DATES
-      window.eventBus.emit('LoadedDropedHFRadarData', lastHFRadarData); // TODO, FIX THIS, IT SHOULD BE DIFFERENT WHEN LOADING STATIC DATA THAN FROM DROPING
-      window.eventBus.emit('StaticDataLoaded', lastHFRadarData);
-
-
+      window.eventBus.emit('HFRadarDataLoaded', lastHFRadar.lastLoadedTimestamp);
     });
+  }
+
+
+  // Load files that were dropped
+  loadDroppedFiles(files){
+    console.log(files.length + " files dropped.");
+    let promises = [];
+    // Iterate files
+    for (let i = 0; i < files.length; i++) {
+        let file = files[i];
+        // Read files
+        promises.push(window.readFile(file));
+    }
+
+    Promise.all(promises).then(values => {
+      let lastHFRadar;
+      for (let i = 0; i < values.length; i++){
+        lastHFRadar = this.addHFRadarData(values[i]);
+      }
+      window.eventBus.emit('HFRadarDataLoaded', lastHFRadar.lastLoadedTimestamp);
+    })
+  }
+
+
+  // Resolve promises
+  store(promises){
+
   }
 
 
@@ -109,21 +137,29 @@ class DataManager {
 // HFRadar class (for data managing purposes)
 class HFRadar {
 
-  radarData = {};
+  data = {};
+  headers = {}; // Headers contain some time information too
 
   constructor(HFRadarData){
 
+    this.header = HFRadarData.header;
+
+
     // Define header
     let keys = Object.keys(HFRadarData.header)
-
+    // TO FIX - IS THIS NECESSARY?
     for (let i = 0; i < keys.length; i++){
       let key = keys[i];
-      this.key = HFRadarData.header[key];
+      if (HFRadarData.header[key] != undefined)
+        this[key] = HFRadarData.header[key];
     }
+
+    // UUID
+    this.UUID = HFRadarData.header.PatternUUID.replaceAll(" ", "");
 
     // Store data
     this.addRadarData(HFRadarData);
-    
+
   }
 
   // PUBLIC METHODS
@@ -141,12 +177,16 @@ class HFRadar {
     let timestamp = dd.toISOString();
 
     // Check if timestamp already exists
-    if (this.radarData[timestamp] != undefined) 
+    if (this.data[timestamp] != undefined) 
       console.warn ("Overwritting. HFRadar: " + HFRadarData.header.Site + " on timestamp: " + timestamp);
 
     // Store data
-    this.radarData[timestamp] = HFRadarData.data;
-    
+    this.data[timestamp] = HFRadarData.data;
+    // Store header too
+    this.headers[timestamp] = HFRadarData.header;
+
+    // Store latest data timestamp
+    this.lastLoadedTimestamp = timestamp;
   }
 }
 

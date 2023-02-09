@@ -118,19 +118,24 @@ const loadRawHFData = function(timestamp){
 
 // Reads files from drag and drop
 const readFile = function(file){
-  let reader = new FileReader();
-  reader.fileName = file.name;
+  return new Promise((resolve, reject) => {
+    let reader = new FileReader();
+    reader.fileName = file.name;
 
-  // On load file
-  reader.addEventListener('load', e => {
-    window.eventBus.emit('LoadedDropedHFRadarData', parseText(reader.result));
-  });
-  reader.addEventListener('error', e => {
-    console.error('Could not read file ' + reader.file.name);
-    console.error(e);
+    // On load file
+    reader.addEventListener('load', e => {
+      // Store in Data Manager
+      resolve(parseText(reader.result));
+    });
+    reader.addEventListener('error', e => {
+      console.error('Could not read file ' + reader.file.name);
+      console.error(e);
+      reject(e);
+    })
+    // Read as text
+    reader.readAsText(file);
   })
-  // Read as text
-  reader.readAsText(file);
+  
 }
 
 

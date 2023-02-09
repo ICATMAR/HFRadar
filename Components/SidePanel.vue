@@ -3,8 +3,29 @@
   <div id='side-panel' ref='sidepanel'>
     <div class="accordion" id="accordionPanelsStayOpenExample">
 
+
+      <div class="accordion-item" v-for="(radar, index) in visibleRadars" :key="radar['UUID']">
+        <h2 class="accordion-header" :id="'headingSection' + index">
+          <button class="accordion-button" type="button" data-bs-toggle="collapse"
+            :data-bs-target="'#bodySection' + index" aria-expanded="true"
+            :aria-controls="'bodySection' + index">
+            HF Radar #{{index+1}}
+          </button>
+        </h2>
+        <div ref="HFRadar" :id="'bodySectionOne' + index" class="accordion-collapse collapse show"
+          :aria-labelledby="'headingSectionOne' + index">
+          <div class="accordion-body">
+            <p v-for="(hItem, key) in radar.header">
+              <strong>{{key}}: </strong>{{ hItem }}
+              <br>
+            </p>
+          </div>
+        </div>
+      </div>
+
+
       <!-- HF Radar -->
-      <div class="accordion-item">
+      <!-- <div class="accordion-item">
         <h2 class="accordion-header" id="headingSectionOne">
           <button class="accordion-button" type="button" data-bs-toggle="collapse"
             data-bs-target="#bodySectionOne" aria-expanded="true"
@@ -17,7 +38,7 @@
           <div class="accordion-body" v-html="content">
           </div>
         </div>
-      </div>
+      </div> -->
 
 
       <!-- Data point ? -->
@@ -99,15 +120,26 @@ export default {
     // --> TimeSlider create events that update information to SidePanel
     // --> Map.vue should be aware of the visible layers for the click events
     // --> Maybe create an AppController? > Receives and sends all user events, stores information about the visible layers etc...
-    window.eventBus.on('LoadedDropedHFRadarData', (HFRadarData) => {
+    window.eventBus.on('HFRadarDataLoaded', (tmst) => {
+
+      this.updateInformation(tmst);
+
+
+      return;
       // Create HTML content
       let str = '';
-      let keys = Object.keys(HFRadarData.header);
+      let keys = Object.keys(HFRadar.header);
       for (let i = 0; i < keys.length; i++){
-        str += '<p><strong>' + keys[i] + '</strong>: ' + HFRadarData.header[keys[i]] + '<br></p>';
+        str += '<p><strong>' + keys[i] + '</strong>: ' + HFRadar.header[keys[i]] + '<br></p>';
       }
       this.content = str;
     });
+
+    // Selected date changes
+    window.eventBus.on('SelectedDateChanged', (tmst) => {
+      this.updateInformation(tmst);
+    });
+
     // On DataPoint click on Map.vue
     window.eventBus.on('ClickedDataPoint', (dataPoint) => {
       // Create HTML content
@@ -134,10 +166,24 @@ export default {
     return {
         content: '',
         dataPointContent: '',
+        visibleRadars: [],
     }
   },
   methods: {
     //onclick: function(e){},
+    updateInformation(tmst){
+      // Get current active radars on that date
+      let activeRadars = window.DataManager.getRadarsDataOn(tmst);
+      this.visibleRadars = [];
+      if (activeRadars.length != 0 ){
+        for (let i = 0; i < activeRadars.length; i++){
+          let HFRadar = activeRadars[i];
+          console.log(HFRadar.headers[tmst].TimeStamp)
+          // Update vue data
+          this.visibleRadars.push({header: HFRadar.headers[tmst], data: HFRadar.data[tmst]});
+        }
+      }
+    }
   },
   components: {
     //'map': Map,

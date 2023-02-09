@@ -150,22 +150,12 @@ export default {
     this.initMap();
     this.$refs.OLMap.addEventListener('mousemove', this.onMouseMove);
     // EVENT LISTENERS
-    window.eventBus.on('LoadedDropedHFRadarData', (HFRadarData) => { // From loadRawHFData.js
-      let imgData = window.createImage(HFRadarData);
-      this.updateHFRadarData(HFRadarData, imgData);
-      // Check if the radar in that position is already shown
-      let isSet = false;
-      for (let i = 0; i < this.visibleHFRadars.length; i++){
-        let id = HFRadarData.header.PatternUUID;
-        if (id == this.visibleHFRadars[i].header.PatternUUID){
-          this.visibleHFRadars[i] = HFRadarData;
-          isSet = true;
-        }
-      }
-      // If the radar was not present, add to the map
-      if (!isSet)
-        this.visibleHFRadars.push(HFRadarData);
-      console.log(this.visibleHFRadars.length + " shown radars.")
+    // New HFRadar data
+    window.eventBus.on('HFRadarDataLoaded', (tmst) =>{
+      this.selectedDateChanged(tmst);
+    });
+    window.eventBus.on('SelectedDateChanged', (tmst) =>{
+      this.selectedDateChanged(tmst);
     });
 
   },
@@ -196,13 +186,8 @@ export default {
     onDropFile: function(event) {
         event.preventDefault();
         event.stopPropagation();
-        let files = event.dataTransfer.files;
-        console.log(files.length + " files dropped.");
-        // Iterate files
-        for (let i = 0; i < files.length; i++) {
-            let file = files[i];
-            // Read files
-            window.readFile(file);
+        if (window.DataManager){
+          window.DataManager.loadDroppedFiles(event.dataTransfer.files);
         }
     },
     // PRIVATE METHODS
@@ -293,12 +278,41 @@ export default {
 
 
 
+    // HFRADAR
+    // Selected date change, thus upate radar data
+    selectedDateChanged: function(tmst){
+      // Remove layers
+      this.removeHFlayers();
+      // Get current active radars on that date
+      let activeRadars = window.DataManager.getRadarsDataOn(tmst);
+      if (activeRadars.length != 0 ){
+        for (let i = 0; i < activeRadars.length; i++){
+          let HFRadar = activeRadars[i];
+          // TODO: HFRadar.data.timestamp {dataPoints: [X], imgData: ...}
+          let imgData = window.createImage(HFRadar, tmst);
+          this.updateHFRadarData(HFRadar, tmst, imgData);
+          this.updateVisibleRadars(HFRadar);
+        }
+      }
+    },
+
+    // Remove HFRadar layers HFData, HFIcon, HFPoints
+    removeHFlayers: function(){
+      this.map.getLayers().getArray().slice().forEach(layerItem => {
+          if (layerItem != undefined){
+            let layerName = layerItem.get('name');
+            if (layerName.includes('HFData') || layerName.includes('HFPoints') || layerName.includes('HFIcon')){// Temporary - in the future this layer should not be deleted
+              this.map.removeLayer(layerItem);
+            }
+          }
+        });
+    },
 
     // Update HFRadar data
-    updateHFRadarData: function(HFRadarData, imgData) {
+    updateHFRadarData: function(HFRadar, tmst, imgData) {
       // ID of the radar
-      let radarID = HFRadarData.header.PatternUUID;
-      let radarImgLayerName = 'rawHFData' + radarID;
+      let radarID = HFRadar.header.PatternUUID;
+      let radarImgLayerName = 'HFData' + radarID;
 
       // Image-Static layer
       // Add image layer with HF Radar data
@@ -318,7 +332,7 @@ export default {
       // Vector - Icon layer
       // Create Radar icon
       // Get radar location
-      let locationStr = HFRadarData.header.Origin;
+      let locationStr = HFRadar.header.Origin;
       let location = locationStr.replace(/\s\s+/g, ',').replace(',', '').split(',');
       // Create feature
       let feature =  new ol.Feature({
@@ -356,8 +370,8 @@ export default {
       // Show radar points
       // TODO: is this optimal?
       let featPoints = [];
-      for (let i = 0; i<HFRadarData.data.length; i++){
-        let dataPoint = HFRadarData.data[i];
+      for (let i = 0; i<HFRadar.data[tmst].length; i++){
+        let dataPoint = HFRadar.data[tmst][i];
         let featPoint = new ol.Feature({
           geometry: new ol.geom.Point(ol.proj.fromLonLat([dataPoint['Longitude (deg)'], dataPoint['Latitude (deg)']])),
         });
@@ -386,6 +400,28 @@ export default {
     },
 
 
+    // Update the visible radars
+    updateVisibleRadars: function(HFRadar){
+      // Check if the radar is already shown
+      let isSet = false;
+      for (let i = 0; i < this.visibleHFRadars.length; i++){
+        let id = HFRadar.header.PatternUUID;
+        if (id == this.visibleHFRadars[i].header.PatternUUID){
+          this.visibleHFRadars[i] = HFRadar;
+          isSet = true;
+        }
+      }
+      // If the radar was not present, add to the map
+      if (!isSet)
+        this.visibleHFRadars.push(HFRadar);
+      console.log(this.visibleHFRadars.length + " shown radars.")
+    },
+
+
+
+
+
+
 
 
     // Get layer function
@@ -412,7 +448,7 @@ export default {
         for (let i = 0; i < radars.length; i++){
           let radar = radars[i];
           for (let j = 0; j < radar.data.length; j++){
-            let dataPoint = radar.data[j];
+            let dataPoint = radar.data[j]; // TODO--> RADAR.DATA[TIMESTAMP][J]
             // Calculate distance (could do it in km with the right formula, but this is interaction and it does not matter that much)
             let dist = Math.sqrt( Math.pow(dataPoint['Longitude (deg)'] - coord[0], 2) + Math.pow(dataPoint['Latitude (deg)'] - coord[1], 2));
             // Find closest point

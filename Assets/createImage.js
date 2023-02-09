@@ -1,8 +1,10 @@
 const earthRadius = 6378;
 
-const createImage = function(HFRadarData){
 
-  let data = HFRadarData.data;
+
+const createImage = function(HFRadar, tmst){
+
+  let data = HFRadar.data[tmst];
 
   // Calculate range
   let minLat = 999;
