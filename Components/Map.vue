@@ -297,6 +297,7 @@ export default {
       let radarID = HFRadarData.header.PatternUUID;
       let radarImgLayerName = 'rawHFData' + radarID;
 
+      // Image-Static layer
       // Add image layer with HF Radar data
       this.layers[radarImgLayerName] = new ol.layer.Image({
         name: radarImgLayerName,
@@ -310,6 +311,8 @@ export default {
       this.map.addLayer(this.layers[radarImgLayerName]);
 
 
+
+      // Vector - Icon layer
       // Create Radar icon
       // Get radar location
       let locationStr = HFRadarData.header.Origin;
@@ -345,6 +348,8 @@ export default {
       if (this.getMapLayer(radarIconLayerName)) this.map.removeLayer(this.getMapLayer(radarIconLayerName));
       this.map.addLayer(this.layers[radarIconLayerName]);
 
+
+      // Vector - Features layer
       // Show radar points
       // TODO: is this optimal?
       let featPoints = [];
@@ -378,8 +383,7 @@ export default {
     },
 
 
-
-
+    
 
     // Get layer function
     getMapLayer: function(layerName){
@@ -392,7 +396,6 @@ export default {
       return selLayer;
     },
   
-
 
     // USER EVENTS
     // MAP CLICK
@@ -460,23 +463,6 @@ export default {
     },
 
     // INTERNAL EVENTS
-    // Change the styles (WMSLegend.vue emit)
-    changeStyle: function(newStyle){
-      // Get params
-      let params = this.getMapLayer('data').getSource().getParams();
-      // Check if the new style is the current
-      if (params.STYLES == newStyle)
-        return;
-      // If style is different, update source
-      params.STYLES = newStyle;
-      // Set params
-      this.getMapLayer('data').getSource().updateParams(params);
-      // Source needs to reload
-      this.isLayerDataReady = false;
-      // Update ForecastBar if it exists
-      this.$emit('changeWMSStyle', newStyle);
-    },
-
     // Mouse move on map
     onMouseMove: function(event){
       // Return if map is moving
@@ -574,6 +560,18 @@ export default {
       return color;
     },
 
+    // Center on the coordinate
+    centerOnCoord(coord){
+      // Center map to track
+      let view = this.map.getView();
+      let currentZoom = view.getZoom();
+      view.animate({
+        center: ol.proj.fromLonLat([coord[0], coord[1]]),
+        zoom: Math.max(9.5, currentZoom),
+        duration: 1000,
+      });
+    },
+
 
     // The time range has changed. Update the track lines
     onTimeRangeChange: function(dates){
@@ -596,137 +594,16 @@ export default {
 
 
     // PUBLIC METHODS
-    // Update WMS data source. This function is called from AppManager.vue
-    updateSourceWMS: function (infoWMS){
-      // Create tile grid for faster rendering for low resolution WMS
-      let extent = ol.proj.get('EPSG:3857').getExtent();
-      let tileSize = 512;
-      let maxResolution = ol.extent.getWidth(extent) / tileSize;
-      let resolutions = new Array(6);
-      for (let i = 0; i < resolutions.length; i++){
-        resolutions[i] = maxResolution / Math.pow(2,i);
-      }
-      // Assign to openlayers WMS tile source
-      infoWMS.tileGrid = new ol.tilegrid.TileGrid({
-        extent: extent,
-        resolutions: resolutions,
-        tileSize: tileSize
-      });
-      
-      // Avoid cross origin problems when getting pixel data (The canvas has been tainted by cross-origin data.)
-      infoWMS.crossOrigin='anonymous';
-      infoWMS.cacheSize = 500;
-
-      // Create OL source from ForecastBar.vue object
-      let source = new ol.source.TileWMS(infoWMS);
-      this.getMapLayer('data').setSource(source);
-      // Tracking the load progress
-      this.registerLoadTilesEvents(source);
-      
-      // Update legend
-      if (this.$refs.legendWMS)
-        this.$refs.legendWMS.setWMSLegend(infoWMS);
-      if (this.WMSLegendURL != undefined){
-        let url = source.getLegendUrl(this.map.getView().getResolution()) + '&TRANSPARENT=TRUE';
-        url += '&PALETTE=' + infoWMS.params.STYLES.split('/')[1];
-        url += '&COLORSCALERANGE=' + infoWMS.params.COLORSCALERANGE;
-        this.WMSLegendURL = url;
-
-        //https://nrt.cmems-du.eu/thredds/wms/med-cmcc-sal-an-fc-d?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetLegendGraphic&FORMAT=image%2Fpng&LAYER=so&SCALE=2544411.053285503&TRANSPARENT=TRUE
-      }
-    },
-
-    
-    // HIDDEN BECAUSE: it is not as simple as updating the date. Each data type has two WMS services associated sometimes (reanalysis and forecast).
-    //                 Depending on the date one or the other service will be used. Additionally, the date in Layers panel need to change, thus the connection
-    //                  between Map.vue and LayerPanel.vue has to be made anyway.
-    // Update the date of the WMS source
-    // updateWMSDate: function(date){ // yyyy-mm-dd
-    //   // Get data layer
-    //   let dataLayer = this.getMapLayer('data');
-    //   if (dataLayer == undefined) // No data layer is present
-    //     return;
-        
-    //   let wmsSource = dataLayer.getSource();
-    //   if (wmsSource == null) // No source yet
-    //     return;
-    //   // Get parameters and modify them
-    //   debugger;
-    //   let params = wmsSource.getParams();
-    //   // TODO: We are adding yyyy-mm-dd with Thh:mm:ss:mmm. It can be that the hours/minutes change depending on the WMS service and the date. Be careful
-    //   params.TIME = date + params.TIME.substring(10);
-    //   // Use params.TIME to change from reanalysis to forecast and viceversa
-    //   let dataTypes = preLoadedDataTypes;
-    //   debugger;
-      
-    //   wmsSource.updateParams(params);
-    //   // TODO: not as simple as that, because it can switch from reanalysis to forecast.
-
-    // },
-
-    
     // Get OL map object
     getOLMap: function(){
       return this.map;
     },
 
-    // Receive selected track and show it
-    // This event can come from HaulInfo.vue or TracksTimeLine
-    setSelectedTrack: function(id){
-      
-      // If id is undefined, it hides the selected mark
-      if (this.$refs.tracksTimeLine){
-        if (id == undefined)
-          this.$refs.tracksTimeLine.hideSelectedTrack(id);
-        else{
-          this.$refs.tracksTimeLine.showSelectedTrack(id);
-        }
-      }
 
-      // Center timeline
-      let feature = FishingTracks.getFeatureById(id);
-      if (this.$refs['timeRangeBar']){
-        let trackDate = new Date(feature.properties.info.Date);
-        this.$refs['timeRangeBar'].centerOnDate(trackDate);
-      }
+    
 
-      // Center map to track
-      let view = this.map.getView();
-      let coord = [...feature.geometry.coordinates[0]];
-      let currentZoom = view.getZoom();
-      let longCorrection = 0;//currentZoom > 11 ? 0.1 : 0.3;
-      view.animate({
-        center: ol.proj.fromLonLat([coord[0] + longCorrection, coord[1]]),
-        zoom: Math.max(9.5, currentZoom),
-        duration: 1000,
-      });
 
-      // Update map style
-      FishingTracks.setSelectedTrack(id);
-      this.fishingTracks.updateStyle();
 
-      
-
-      // Emit to open side panel fishing tracks and to udate WMS date in layers panel
-      this.$emit('onTrackClicked', id);
-      
-    },
-
-    setEffortLayerOpacity: function(opacity){
-      let effortLayer = this.getMapLayer('fishingEffort');
-      effortLayer.setOpacity(parseFloat(opacity));
-    },
-    setEffortMap: function(inUrl){
-      let effortLayer = this.getMapLayer('fishingEffort');
-      // let olSource = effortLayer.getSource(); // setUrl does not exists for ol.Layer.Image
-      let source = new ol.source.ImageStatic({
-        url: inUrl, // 'data/fishingEffort_<effortType>_<year>_<gear>'
-        imageExtent: [-1, 39, 6, 44],
-        projection: 'EPSG:4326'
-      });
-      // Assign new source to layer
-      effortLayer.setSource(source);
-    },
 
     setBaseLayer: function(baseLayerName){
       let source = this.baseLayerSources[baseLayerName];
@@ -771,42 +648,6 @@ export default {
 
 
 
-
-    // Panel was open or closed by clicking a tab
-    onTabClicked: function(){
-      if (this.$refs['timeRangeBar']){
-        this.$refs['timeRangeBar'].onTabOpenClose();
-      }
-    },
-
-
-
-
-    // CALLBACKS
-    // Once the fishing tracks have been loaded
-    onLoadTracks: function(){
-      // Add to layer
-      this.map.addLayer(this.fishingTracks.getLayer());
-      // TODO;
-      // Update start and end dates
-      // Get start and end from timerange
-      //this.fishingTracks.setStartEndDates(); // Set starting and ending dates in fishing tracks
-      
-      // Track lines overlay
-      //let gjson = this.fishingTracks.getGeoJSON();
-      let gjson = FishingTracks.getGeoJSON();
-      if (this.$refs.tracksTimeLine){
-        this.$refs.tracksTimeLine.setFeatures(gjson.features);
-      }
-
-      // Emit geojson loaded
-      this.$emit('onFishingTracksLoad', gjson);
-      
-      // OPTIONS:
-      // PAINT IN A CANVAS -> TRANSFORM TO IMAGE -> MAKE IMAGE AS BACKGROUND OF TIMERANGE
-      // OVERLAY, BUT BELOW TIMERANGE?
-      // CREATE A VUE OVERLAY INSIDE TIMERANGE?
-    },
 
 
   },
