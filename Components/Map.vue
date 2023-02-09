@@ -22,6 +22,8 @@
         </div>
       </div>
 
+      <time-slider></time-slider>
+
       <!-- Tracks on the timeline -->
       <!-- <tracks-timeline ref="tracksTimeLine" @clickTrackMark="setSelectedTrack" style="bottom: 120px; position: relative; z-index: 2"></tracks-timeline> -->
 
@@ -48,6 +50,7 @@
 
 
 <script>
+import TimeSlider from "./TimeSlider.vue";
 // import TimeRangeBar from "TimeRangeBar.vue";
 // import TracksTimeLine from "TracksTimeLine.vue";
 //import WMSLegend from "WMSLegend.vue";
@@ -383,7 +386,7 @@ export default {
     },
 
 
-    
+
 
     // Get layer function
     getMapLayer: function(layerName){
@@ -652,6 +655,7 @@ export default {
 
   },
   components: {
+    "time-slider": TimeSlider,
     // "time-range-bar": TimeRangeBar,
     // "tracks-timeline": TracksTimeLine,
     //"wms-legend": WMSLegend
@@ -678,6 +682,7 @@ export default {
   background-color: red;
   width: 100%;
   height: 100vh;
+  position: relative;
 }
 
 #map {

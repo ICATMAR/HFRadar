@@ -91,8 +91,6 @@ const getParamFromTable = function(rawText, param, tableType){
 // Returns a promise of loading the data
 const loadRawHFData = function(timestamp){
 
-  console.log(window.location.href);
-
   let baseURL = window.location.href.replace('index.html', '');
 
   let date = new Date(timestamp);

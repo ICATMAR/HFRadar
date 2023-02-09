@@ -74,10 +74,27 @@ class DataManager {
     }
 
     Promise.all(promises).then(values => {
+
+      // TODO: STORE DATA HERE, FIND START END DATES
+      for (let i = 0; i < values.length; i++){
+        let HFRadarData = values[i];
+        // Find UUID
+        let UUID = HFRadarData.header.PatternUUID.replaceAll(" ", "");
+        // HFRadar exists
+        if (this.HFRadars.UUID != undefined){
+          this.HFRadars.UUID.addRadarData(HFRadarData);
+        } else {
+          // Create HFRadar
+          let hFRadar = new HFRadar(HFRadarData);
+          this.HFRadars.UUID = hFRadar;
+        }
+      }
       
       let lastHFRadarData = values[values.length -1];
       // HACK --> TODO: CHANGE EVENT NAME. AFTER THIS USE TIMESLIDER TO SELECT DATES
-      window.eventBus.emit('LoadedDropedHFRadarData', lastHFRadarData);
+      window.eventBus.emit('LoadedDropedHFRadarData', lastHFRadarData); // TODO, FIX THIS, IT SHOULD BE DIFFERENT WHEN LOADING STATIC DATA THAN FROM DROPING
+      window.eventBus.emit('StaticDataLoaded', lastHFRadarData);
+
 
     });
   }
