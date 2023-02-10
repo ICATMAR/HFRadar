@@ -14,22 +14,35 @@ const parseText = function(rawText){
   let headerRowsRaw = tableStr.substring(tableStr.indexOf('%%'), tableStr.indexOf('%%') + 500).split('\n');
   let dataStartIndex = tableStr.indexOf('%%') + headerRowsRaw[0].length + headerRowsRaw[1].length + 3;
 
+  // Num columns
+  let numCols = getParamFromTable(rawText, 'TableColumns')*1;
+  console.log(numCols)
+
   // Col names
   let tableHeaders = headerRowsRaw[0];
   let tableUnits = headerRowsRaw[1];
-
+  // Fixes
   tableHeaders = tableHeaders.replaceAll(' Distance', '-Distance');
   tableHeaders = tableHeaders.replaceAll(' comp', '-comp');
+  tableHeaders = tableHeaders.replaceAll(' StdDev', '-StdDev');
+  
   
   tableHeaders = tableHeaders.replaceAll('%', '').replace( /\s\s+/g, ',').replaceAll(' ', ',').split(','); // Remove starting %%, remove spaces in between, split
   tableHeaders.shift();
   tableUnits = tableUnits.replaceAll('%', '').replace( /\s\s+/g, ',').replaceAll(' ', ',').split(',');
   tableUnits.shift();
 
+  // Combined radar data file fix
+  if (tableHeaders[15] == 'Site'){ // Hardcoded index
+    for (let i = 15; i<numCols; i++)
+      tableHeaders[i] = 'Site Contri';
+  }
+
   // Table columns check
   let numTableColumns = 1*getParamFromTable(rawText, 'TableColumns');
-  if (tableHeaders.length != tableUnits.length || tableHeaders.length != numTableColumns)
+  if (tableHeaders.length != tableUnits.length || tableHeaders.length != numTableColumns || numTableColumns != numCols){
     console.error('Table columns missmatch when reading table.');
+  }
 
   // Table headers
   for (let i = 0; i < tableHeaders.length; i++)
@@ -66,9 +79,8 @@ const parseText = function(rawText){
     header[itemName] = headerRows[i].split(':')[1];
   }
 
+  // TODO: COMBINED RADAR DATA DOES NOT HAVE PATTERNUUID. IT HAS AN EXTRA TABLE WITH THE LOCATION OF THE RADARS. SHOULD ADD..
 
-  // Emit event
-  //window.eventBus.emit('LoadedHFRadarData', {header, 'data': out});
 
   return {header, 'data': out};
 }
