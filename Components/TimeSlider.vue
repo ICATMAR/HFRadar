@@ -29,9 +29,10 @@ export default {
       this.$refs.slider.min = sDate.getTime()/(1000*60*60);
       this.$refs.slider.max = eDate.getTime()/(1000*60*60);
 
-      this.$refs.slider.value = this.$refs.slider.max;
+      let currentDate = new Date(tmst);
+      this.$refs.slider.value = currentDate.getTime()/(1000*60*60);
 
-      this.timeStr = eDate.toISOString();
+      this.timeStr = currentDate.toISOString();
 
       // let timeDiff = eDate.getTime() - sDate.getTime();
       // let numHours = timeDiff/(1000*60*60);

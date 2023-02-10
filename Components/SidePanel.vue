@@ -1,18 +1,17 @@
 <template>
   <!-- Container -->
   <div id='side-panel' ref='sidepanel'>
-    <div class="accordion" id="accordionPanelsStayOpenExample">
-
+    <div class="accordion">
 
       <div class="accordion-item" v-for="(radar, index) in visibleRadars" :key="radar['UUID']">
         <h2 class="accordion-header" :id="'headingSection' + index">
           <button class="accordion-button" type="button" data-bs-toggle="collapse"
             :data-bs-target="'#bodySection' + index" aria-expanded="true"
-            :aria-controls="'bodySection' + index">
+            :aria-controls="'bodySection' + index" @click="onHeaderClick($event, index)">
             HF Radar #{{index+1}}
           </button>
         </h2>
-        <div ref="HFRadar" :id="'bodySectionOne' + index" class="accordion-collapse collapse show"
+        <div :ref="'HFRadar' + index" :id="'bodySectionOne' + index" class="accordion-collapse collapse show"
           :aria-labelledby="'headingSectionOne' + index">
           <div class="accordion-body">
             <p v-for="(hItem, key) in radar.header">
@@ -24,25 +23,9 @@
       </div>
 
 
-      <!-- HF Radar -->
-      <!-- <div class="accordion-item">
-        <h2 class="accordion-header" id="headingSectionOne">
-          <button class="accordion-button" type="button" data-bs-toggle="collapse"
-            data-bs-target="#bodySectionOne" aria-expanded="true"
-            aria-controls="bodySectionOne">
-            HF Radar #1
-          </button>
-        </h2>
-        <div ref="HFRadar" id="bodySectionOne" class="accordion-collapse collapse show"
-          aria-labelledby="headingSectionOne">
-          <div class="accordion-body" v-html="content">
-          </div>
-        </div>
-      </div> -->
-
 
       <!-- Data point ? -->
-      <div class="accordion-item">
+      <div class="accordion-item" v-show="isDataPointVisible">
         <h2 class="accordion-header" id="headingSection2">
           <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
             data-bs-target="#bodySection2" aria-expanded="false"
@@ -121,23 +104,13 @@ export default {
     // --> Map.vue should be aware of the visible layers for the click events
     // --> Maybe create an AppController? > Receives and sends all user events, stores information about the visible layers etc...
     window.eventBus.on('HFRadarDataLoaded', (tmst) => {
-
       this.updateInformation(tmst);
-
-
-      return;
-      // Create HTML content
-      let str = '';
-      let keys = Object.keys(HFRadar.header);
-      for (let i = 0; i < keys.length; i++){
-        str += '<p><strong>' + keys[i] + '</strong>: ' + HFRadar.header[keys[i]] + '<br></p>';
-      }
-      this.content = str;
     });
 
     // Selected date changes
     window.eventBus.on('SelectedDateChanged', (tmst) => {
       this.updateInformation(tmst);
+      this.dataPointContent = '';
     });
 
     // On DataPoint click on Map.vue
@@ -148,11 +121,17 @@ export default {
       for (let i = 0; i < keys.length; i++){
         str += '<p><strong>' + keys[i] + '</strong>: ' + dataPoint[keys[i]] + '<br></p>';
       }
+      
       this.dataPointContent = str;
       let collapse = new window.bootstrap.Collapse(this.$refs.dataPoint, {toggle: false});
       collapse.show();
-      collapse = new window.bootstrap.Collapse(this.$refs.HFRadar, {toggle: false});
-      collapse.hide();
+      this.isDataPointVisible = true;
+
+      for (let i = 0; i < this.visibleRadars.length; i++){
+        collapse = new window.bootstrap.Collapse(this.$refs['HFRadar' + i], {toggle: false});
+        collapse.hide(); 
+      }
+         
     });
     // On DataPoint deselected on Map.vue
     window.eventBus.on('DeselectedDataPoint', () => {
@@ -160,17 +139,25 @@ export default {
       this.dataPointContent = '';
       let collapse = new window.bootstrap.Collapse(this.$refs.dataPoint, {toggle: false});
       collapse.hide();
+      this.isDataPointVisible = false;
     })
   },
   data (){
     return {
         content: '',
         dataPointContent: '',
+        isDataPointVisible: false,
         visibleRadars: [],
     }
   },
   methods: {
-    //onclick: function(e){},
+    // USER ACTIONS
+    onHeaderClick: function(e, index){
+      new window.bootstrap.Collapse(this.$refs['HFRadar'+index], {toggle: true});
+    },
+    
+
+    // INTERNAL EVENTS
     updateInformation(tmst){
       // Get current active radars on that date
       let activeRadars = window.DataManager.getRadarsDataOn(tmst);
