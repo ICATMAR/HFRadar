@@ -289,8 +289,11 @@ export default {
         for (let i = 0; i < activeRadars.length; i++){
           let HFRadar = activeRadars[i];
           // TODO: HFRadar.data.timestamp {dataPoints: [X], imgData: ...}
-          let imgData = window.createImage(HFRadar, tmst);
-          this.updateHFRadarData(HFRadar, tmst, imgData);
+          if (HFRadar.images[tmst] == undefined){
+            let imgData = window.createImage(HFRadar, tmst);
+            HFRadar.images[tmst] = imgData;
+          }
+          this.updateHFRadarData(HFRadar, tmst, HFRadar.images[tmst]);
           this.updateVisibleRadars(HFRadar);
         }
       }
@@ -313,7 +316,6 @@ export default {
       // ID of the radar
       let radarID = HFRadar.header.PatternUUID;
       let radarImgLayerName = 'HFData' + radarID;
-
       // Image-Static layer
       // Add image layer with HF Radar data
       this.layers[radarImgLayerName] = new ol.layer.Image({
@@ -447,8 +449,9 @@ export default {
         let radars = this.visibleHFRadars;
         for (let i = 0; i < radars.length; i++){
           let radar = radars[i];
-          for (let j = 0; j < radar.data.length; j++){
-            let dataPoint = radar.data[j]; // TODO--> RADAR.DATA[TIMESTAMP][J]
+          
+          for (let j = 0; j < radar.currentData.length; j++){
+            let dataPoint = radar.currentData[j]; 
             // Calculate distance (could do it in km with the right formula, but this is interaction and it does not matter that much)
             let dist = Math.sqrt( Math.pow(dataPoint['Longitude (deg)'] - coord[0], 2) + Math.pow(dataPoint['Latitude (deg)'] - coord[1], 2));
             // Find closest point

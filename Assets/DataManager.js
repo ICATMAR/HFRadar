@@ -139,6 +139,7 @@ class HFRadar {
 
   data = {};
   headers = {}; // Headers contain some time information too
+  images = {};
 
   constructor(HFRadarData){
 
