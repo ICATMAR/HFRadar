@@ -1,10 +1,22 @@
 <template>
   <!-- Container -->
   <div id='timeSlider' ref='timeSlider'>
+    <!-- Tooltip -->
     <div id="toolTip" ref="toolTip" style="display: flex; justify-content: center;">
       <div>{{ timeStr }}</div>
     </div>
+    <!-- Slider -->
     <input type="range" ref="slider" id="slider" min="0" max="10" v-on:click="onClick($event)" v-on:change="onChange($event)" v-on:input="onInput($event)">
+
+    <!-- Data availability -->
+    <div id='dataAvailability'>
+      Data availability
+      <template v-for="(isAvailable, index) in isDataAvailableAtHour">
+        <div class="circle" v-show="isAvailable" v-bind:style="'left: ' + 100*index/numHours + '%'"></div>
+      </template>
+      
+    </div>
+
   </div>
 </template>
 
@@ -34,14 +46,16 @@ export default {
 
       this.timeStr = currentDate.toISOString();
 
-      // let timeDiff = eDate.getTime() - sDate.getTime();
-      // let numHours = timeDiff/(1000*60*60);
+      
+      this.updateDataAvailability(sDate, eDate);
     })
     
   },
   data (){
     return {
       timeStr:'Loading latest data...',
+      isDataAvailableAtHour: new Array(),
+      numHours: 1,
     }
   },
   methods: {
@@ -50,7 +64,8 @@ export default {
       //e.stopPropagation();
     },
 
-    // When element loses focus
+    // When element loses focus (mouseup)
+    // Slider change
     onChange: function(e){
       let timestamp = new Date(e.target.value*1000*60*60).toISOString();
       // Date change event
@@ -62,6 +77,30 @@ export default {
       // Update self tooltip
       let dd = new Date(e.target.value*1000*60*60);
       this.timeStr = dd.toISOString();
+    },
+
+
+    // INTERNAL EVENTS
+    updateDataAvailability: function(sDate, eDate){
+      let timeDiff = eDate.getTime() - sDate.getTime();
+      this.numHours = timeDiff/(1000*60*60);
+      this.isDataAvailableAtHour = new Array(this.numHours).fill(false);
+
+      // TODO ITERATE ALL LOADED RADARS AND CHECK TIMESTAMPS
+      if (window.DataManager){
+        let HFRadars = window.DataManager.HFRadars;
+        for (let i = 0; i < Object.keys(HFRadars).length; i++){
+
+          let HFRadar = HFRadars[Object.keys(HFRadars)[i]];
+          let timestamps = Object.keys(HFRadar.data);
+          for (let j = 0; j<timestamps.length; j++){
+            let tmpDate = new Date(timestamps[j]);
+            let hourIndex = (tmpDate.getTime() - sDate.getTime())/(1000*60*60);
+            this.isDataAvailableAtHour[hourIndex] = true;
+          }
+        }
+        console.log(this.isDataAvailableAtHour)
+      }
     },
   },
   components: {
@@ -94,5 +133,23 @@ export default {
   padding: 5px;
   border-radius: 5px;
   margin-bottom: 5px;
+}
+
+#dataAvailability {
+  background: rgba(184, 238, 255, 0.5);
+  border-radius: 5px;
+  position: relative;
+  display: flex;
+  justify-content: center;
+}
+
+.circle {
+  position:absolute;
+  top: 50%;
+  border-radius: 100%;
+  background-color: rgb(49, 131, 255);
+  padding: 3px;
+  transform: translateX(-1.5px);
+  -ms-transform: translateX(-1.5px);
 }
 </style>
