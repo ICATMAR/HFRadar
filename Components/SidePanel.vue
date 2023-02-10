@@ -166,7 +166,6 @@ export default {
       if (activeRadars.length != 0 ){
         for (let i = 0; i < activeRadars.length; i++){
           let HFRadar = activeRadars[i];
-          console.log(HFRadar.headers[tmst].TimeStamp)
           // Update vue data
           this.visibleRadars.push({header: HFRadar.headers[tmst], data: HFRadar.data[tmst]});
         }
