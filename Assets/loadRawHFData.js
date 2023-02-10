@@ -16,7 +16,6 @@ const parseText = function(rawText){
 
   // Num columns
   let numCols = getParamFromTable(rawText, 'TableColumns')*1;
-  console.log(numCols)
 
   // Col names
   let tableHeaders = headerRowsRaw[0];
