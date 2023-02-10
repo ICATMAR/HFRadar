@@ -111,6 +111,7 @@ export default {
     window.eventBus.on('SelectedDateChanged', (tmst) => {
       this.updateInformation(tmst);
       this.dataPointContent = '';
+      this.isDataPointVisible = false;
     });
 
     // On DataPoint click on Map.vue

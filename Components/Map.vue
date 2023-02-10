@@ -304,7 +304,10 @@ export default {
       this.map.getLayers().getArray().slice().forEach(layerItem => {
           if (layerItem != undefined){
             let layerName = layerItem.get('name');
-            if (layerName.includes('HFData') || layerName.includes('HFPoints') || layerName.includes('HFIcon')){// Temporary - in the future this layer should not be deleted
+            if (layerName.includes('HFData') || 
+            layerName.includes('HFPoints') || 
+            layerName.includes('HFIcon') || // Temporary - in the future this layer should not be deleted
+            layerName.includes('HFSelPoint')){
               this.map.removeLayer(layerItem);
             }
           }
@@ -336,9 +339,13 @@ export default {
       // Get radar location
       let locationStr = HFRadar.header.Origin;
       let location = locationStr.replace(/\s\s+/g, ',').replace(',', '').split(',');
+      location = location.reverse();
+       // Center on coordinate
+       this.centerOnCoord(location);
+      
       // Create feature
       let feature =  new ol.Feature({
-              geometry: new ol.geom.Point(ol.proj.fromLonLat(location.reverse())),
+              geometry: new ol.geom.Point(ol.proj.fromLonLat(location)),
               name: 'HF Radar',
             });
       // Create style
@@ -416,7 +423,7 @@ export default {
       // If the radar was not present, add to the map
       if (!isSet)
         this.visibleHFRadars.push(HFRadar);
-      console.log(this.visibleHFRadars.length + " shown radars.")
+      console.log(this.visibleHFRadars.length + " loaded radars.")
     },
 
 
