@@ -21,6 +21,14 @@ class DataManager {
 
   // INTERNAL METHODS
   addHFRadarData(HFRadarData){
+
+    // TODO: HARDCORE FIX FOR COMBINED DATA FILES. --> should do a different processing for combined files
+    if (HFRadarData.header.PatternUUID == undefined){
+      HFRadarData.header.PatternUUID = 'Fake UUID';
+    }
+
+
+
     // Find UUID
     let UUID = HFRadarData.header.PatternUUID.replaceAll(" ", "");
     // HFRadar exists
@@ -144,7 +152,6 @@ class HFRadar {
   constructor(HFRadarData){
 
     this.header = HFRadarData.header;
-
 
     // Define header
     let keys = Object.keys(HFRadarData.header)
