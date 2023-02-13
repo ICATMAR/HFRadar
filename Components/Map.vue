@@ -24,6 +24,9 @@
 
       <time-slider></time-slider>
 
+      <!-- Animation Canvas -->
+      <animationCanvas ref="animationCanvas"></animationCanvas>
+
       <!-- Tracks on the timeline -->
       <!-- <tracks-timeline ref="tracksTimeLine" @clickTrackMark="setSelectedTrack" style="bottom: 120px; position: relative; z-index: 2"></tracks-timeline> -->
 
@@ -50,6 +53,7 @@
 
 
 <script>
+import AnimationCanvas from "./AnimationCanvas.vue";
 import TimeSlider from "./TimeSlider.vue";
 // import TimeRangeBar from "TimeRangeBar.vue";
 // import TracksTimeLine from "TracksTimeLine.vue";
@@ -296,7 +300,16 @@ export default {
           this.updateHFRadarData(HFRadar, tmst, HFRadar.images[tmst]);
           this.updateVisibleRadars(HFRadar);
         }
+
+
+
+        // Update animation canvas
+        if (this.$refs.animationCanvas){
+          this.$refs.animationCanvas.createAnimation(HFRadar.data[tmst], this.map)
+        }
       }
+
+      
     },
 
     // Remove HFRadar layers HFData, HFIcon, HFPoints
@@ -702,10 +715,8 @@ export default {
   },
   components: {
     "time-slider": TimeSlider,
-    // "time-range-bar": TimeRangeBar,
-    // "tracks-timeline": TracksTimeLine,
-    //"wms-legend": WMSLegend
-  },
+    "animationCanvas": AnimationCanvas,
+},
   computed: {
       //foo: function () {}
   }
