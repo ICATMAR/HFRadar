@@ -6,7 +6,7 @@
 // ParticleSystem
 // Particle
 
-
+const earthRadius = 6378;
 
 class AnimationEngine {
   // Static variables
@@ -459,7 +459,8 @@ class ParticleSystemHF {
     this.numParticles = source.data.length;
     // Create particles
     this.particles = [];
-    for (let i = 0; i < this.numParticles.length; i++){
+    
+    for (let i = 0; i < this.numParticles; i++){
       this.particles[i] = new ParticleHF(this, this.source.data[i]);
     }
   }
@@ -479,9 +480,15 @@ class ParticleSystemHF {
     this.numParticles = source.data.length;
     // Create particles
     this.particles = [];
-    for (let i = 0; i < this.numParticles.length; i++){
+    for (let i = 0; i < this.numParticles; i++){
       this.particles[i] = new ParticleHF(this, this.source.data[i]);
     }
+  }
+
+  repositionParticles(){
+    for (let i = 0; i < this.numParticles; i++)
+      this.particles[i].repositionParticle();
+
   }
 
 
@@ -489,7 +496,7 @@ class ParticleSystemHF {
   draw(dt){
     // Trail effect
     // https://codepen.io/Tyriar/pen/BfizE
-    this.ctx.fillStyle = 'rgba(255, 255, 255, .9)';
+    this.ctx.fillStyle = 'rgba(255, 255, 255, .95)';
     this.ctx.globalCompositeOperation = "destination-in";
     this.ctx.fillRect(0,0, this.canvas.width, this.canvas.height);
     this.ctx.globalCompositeOperation = "source-over";
@@ -500,6 +507,7 @@ class ParticleSystemHF {
     this.ctx.strokeStyle = 'rgba(0, 0, 0, 0.7)';
     this.ctx.lineWidth = 1.5;
     this.ctx.beginPath();
+    
     for (let i = 0; i < this.numParticles; i++)
       this.particles[i].draw(dt);
     this.ctx.stroke();
@@ -523,38 +531,72 @@ class ParticleHF {
 
     // Create two vertices per data point to define the movement of the particle
     // Measuring position
-    let lat = dataPoint['Latitude (deg)'];
-    let long = dataPoint['Longitude (deg)'];
+    this.lat = dataPoint['Latitude (deg)'];
+    this.long = dataPoint['Longitude (deg)'];
 
     // Current magnitude
     let u = dataPoint['U-comp (cm/s)'];
     let v = dataPoint['V-comp (cm/s)'];
     this.magnitude = Math.sqrt(u*u + v*v);
 
+    // Color according to magnitude
+    let colorLegend = [
+      [93.3, 'b40023'], 
+      [86.7, 'dc1820'],
+      [80, 'ed2d1c'],
+      [73.3, 'f54020'],
+      [66.7, 'fa7034'],
+      [60, 'fc964b'],
+      [53.3, 'ffb664'],
+      [46.7, 'fcd97d'],
+      [40, 'ffee9f'],
+      [33.3, 'eef7d9'],
+      [26.7, 'c6e7b5'],
+      [20, '97daa8'],
+      [13.3, '80cdc1'],
+      [6.7, '3c9dc2'],
+      [0, '2468b4']
+    ];
+    colorLegend.reverse();
+    let binIndex = colorLegend.length - 1;
+    for (let i = 0; i < colorLegend.length-1; i++){
+      if (this.magnitude > colorLegend[i][0] && this.magnitude < colorLegend[i+1][0])
+        binIndex = i;
+    }
+    this.color = colorLegend[binIndex][1];
+
+
     // Direction from radar
     let radarOrigin = [0,0];
-    let dir = [lat - radarOrigin[0], long - radarOrigin[1]];
+    let dir = [this.lat - radarOrigin[0], this.long - radarOrigin[1]];
     let distanceFromRadar = Math.sqrt(dir[0]*dir[0] + dir[1]*dir[1]);
 
     // TODO: FOR NOW UNIT MOVEMENT
     // From dataPoint origin, move along the dir to define start and ending points of drawing path
-    let nextLong = dataPoint['Longitude (deg)'] + ((u/this.magnitude) / earthRadius) * (180 / Math.PI) / Math.cos(dataPoint['Latitude (deg)'] * Math.PI / 180);
-    let nextLat = dataPoint['Latitude (deg)'] + ((v/this.magnitude) / earthRadius) * (180 / Math.PI);
+    this.nextLong = dataPoint['Longitude (deg)'] + ((u/this.magnitude) / earthRadius) * (180 / Math.PI) / Math.cos(dataPoint['Latitude (deg)'] * Math.PI / 180);
+    this.nextLat = dataPoint['Latitude (deg)'] + ((v/this.magnitude) / earthRadius) * (180 / Math.PI);
 
-    // Get points in pixel coordinates
-    let coord = ol.proj.transform([long, lat], 'EPSG:4326', 'EPSG:3857');
-    this.startPoint = this.source.map.getPixelFromCoordinates(coord);
-
-    coord = ol.proj.transform([nextLong, nextLat], 'EPSG:4326', 'EPSG:3857');
-    this.endPoint = this.startPoint = this.source.map.getPixelFromCoordinates(coord);
+    // Get points in pixel coordinates and position particle's path on screen
+    this.repositionParticle();
   
   }
+
+
+  repositionParticle(){
+    let coord = ol.proj.transform([this.long, this.lat], 'EPSG:4326', 'EPSG:3857');
+    this.startPoint = this.particleSystem.map.getPixelFromCoordinate(coord);
+    
+    coord = ol.proj.transform([this.nextLong, this.nextLat], 'EPSG:4326', 'EPSG:3857');
+    this.endPoint = this.particleSystem.map.getPixelFromCoordinate(coord);
+  }
+
+
 
 
   // Draw particle (wave)
   draw(dt){
     // Update life
-    let lifeIncrement = 0.01; // speed etc..
+    let lifeIncrement = 0.01*5; // speed etc..
     this.life += lifeIncrement;
     // Reset life
     if (this.life > 1){
@@ -577,17 +619,25 @@ class ParticleHF {
 
 
     // Draw in canvas
+    let canvas = this.particleSystem.canvas;
     let ctx = this.particleSystem.ctx;
+    
     // Change line width according to distance to radar?
     ctx.stroke();
     ctx.beginPath();
-    ctx.lineWidth = 20;
+    ctx.lineWidth = 10;
     // Change color according to legend?
-    let colorStr = 'rgba(' + this.color[0] + ',' + this.color[1] + ',' + this.color[2] + ', ' + alphaFactor * 0.5 + ')'
+    //let colorStr = 'rgba(' + this.color[0] + ',' + this.color[1] + ',' + this.color[2] + ', ' + alphaFactor * 0.5 + ')'
+    alphaFactor = Math.round(Math.min(alphaFactor*255, 255));
+    let colorStr =  '#' + this.color + alphaFactor.toString(16).padStart(2,'0');
     ctx.strokeStyle = colorStr; // Makes the app go slow, consider something different
     ctx.moveTo(x, y)
     ctx.lineTo(nextX, nextY);
   }
+
+
+
+  
 }
 
 
@@ -886,7 +936,7 @@ class Particle {
   }
 }
 
-
+export default AnimationEngine;
 
 
 

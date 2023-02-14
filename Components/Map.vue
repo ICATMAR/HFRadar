@@ -299,14 +299,14 @@ export default {
           }
           this.updateHFRadarData(HFRadar, tmst, HFRadar.images[tmst]);
           this.updateVisibleRadars(HFRadar);
+          // Update animation canvas
+          // TODO: SHOULD CHECK HOW MANY ACTIVE. RIGHT NOW ONLY ONE ACTIVE.
+          if (this.$refs.animationCanvas){
+            this.$refs.animationCanvas.createAnimation(HFRadar.data[tmst], this.map)
+          }
         }
 
 
-
-        // Update animation canvas
-        if (this.$refs.animationCanvas){
-          this.$refs.animationCanvas.createAnimation(HFRadar.data[tmst], this.map)
-        }
       }
 
       

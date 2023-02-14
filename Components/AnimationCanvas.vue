@@ -33,7 +33,9 @@ export default {
     // Create canvas
     createCanvas: function(canvasID){
       let canvas = document.createElement("canvas");
-      canvas.className = "position-absolute pe-none vh-100 vw-100";
+      canvas.className = "position-absolute pe-none h-100 w-100";
+      // Test
+      //canvas.style["background-color"] = "red";
       canvas.id = canvasID;
       return canvas;
     },
@@ -47,14 +49,18 @@ export default {
         this.$refs["animationCanvas"].appendChild(canvas);
         // Create animation
         this.animEngine = new AnimationEngine(canvas, map, {"HFRadarData": data});
+        // Test
+        // let ctx = canvas.getContext("2d");
+        // ctx.fillStyle="blue";
+        // ctx.fillRect(0,0, canvas.width, canvas.height);
 
       } else {
         // Update existing animation
         this.animEngine.setHFRadarData(data);
       }
       // Map events for animation
-      this.map.on('moveend', this.animEngine.onMapMoveEnd);
-      this.map.on('movestart', this.animEngine.onMapMoveStart);
+      map.on('moveend', this.animEngine.onMapMoveEnd);
+      map.on('movestart', this.animEngine.onMapMoveStart);
     },
 
   },
@@ -70,5 +76,10 @@ export default {
 <style scoped>
 #animationCanvas {
   background: none;
+  position:absolute;
+  width: 100%;
+  height: 100%;
+  top: 0px;
+  pointer-events: none;
 }
 </style>
