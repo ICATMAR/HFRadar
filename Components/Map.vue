@@ -27,6 +27,13 @@
       <!-- Animation Canvas -->
       <animationCanvas ref="animationCanvas"></animationCanvas>
 
+      <!-- Legends -->
+      <!-- <div style="position:absolute; top: 120px; left: 20px">
+        <div v-for="legend in legends">
+          <img :src="legend.img.src" style="width:100px; height:20px">
+        </div>
+      </div> -->
+
       <!-- Tracks on the timeline -->
       <!-- <tracks-timeline ref="tracksTimeLine" @clickTrackMark="setSelectedTrack" style="bottom: 120px; position: relative; z-index: 2"></tracks-timeline> -->
 
@@ -158,9 +165,14 @@ export default {
     window.eventBus.on('HFRadarDataLoaded', (tmst) =>{
       this.selectedDateChanged(tmst);
     });
+    // Selected date changed (slider moves or drag and drop files)
     window.eventBus.on('SelectedDateChanged', (tmst) =>{
       this.selectedDateChanged(tmst);
     });
+    // When legends are loaded
+    window.eventBus.on('legendsLoaded', (legends) => {
+      this.legends = legends;
+    })
 
   },
   umounted () {
@@ -176,7 +188,8 @@ export default {
       },
       isLayerDataReady: false,
       WMSLegendURL: '',
-      visibleHFRadars: []
+      visibleHFRadars: [],
+      legends: []
     }
   },
   methods: {
@@ -343,7 +356,7 @@ export default {
         }),
       });
       if (this.getMapLayer(radarImgLayerName)) this.map.removeLayer(this.getMapLayer(radarImgLayerName)); // Remove layer before adding. Not optimal but prettier
-      this.map.addLayer(this.layers[radarImgLayerName]);
+      //this.map.addLayer(this.layers[radarImgLayerName]);
 
 
 
@@ -401,7 +414,7 @@ export default {
           image: new ol.style.Circle({
             radius: 2,
             fill: new ol.style.Fill({
-              color: [255, 0, 0, 0.5],
+              color: [255, 255, 255, 0.2],
               opacity: 0.5,
             })
           })

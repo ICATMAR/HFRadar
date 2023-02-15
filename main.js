@@ -17,14 +17,18 @@ window.eventBus = window.mitt();
 
 // Load scripts
 import {loadRawHFData, readFile} from './Assets/loadRawHFData.js';
+import {loadLegends, getLegend} from './Assets/getLegend.js';
 import CreateImage from './Assets/createImage.js';
 import DataManager from './Assets/DataManager.js';
 import AnimationEngine from './Assets/AnimationEngine.js'
 window.loadData = loadRawHFData;
 window.readFile = readFile;
+window.getLegend = getLegend; // Should be deprecated in the following versions
+window.loadLegends = loadLegends;
 window.createImage = CreateImage;
 window.DataManager = new DataManager();
 window.AnimationEngine = AnimationEngine;
+
 
 
 // Declare translations

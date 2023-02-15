@@ -19,7 +19,11 @@ export default {
     
   },
   mounted() {
-    
+    // When legends are loaded
+    window.eventBus.on('legendsLoaded', (legends) => {
+      this.legends;
+      console.log(legends)
+    })
     
   },
   data (){

@@ -6,7 +6,14 @@
 // ParticleSystem
 // Particle
 
+// Constants
 const earthRadius = 6378;
+const HFRADARRANGE = [-100, 100];
+const LEGENDURLS = [
+  './Assets/Legends/GreenBlueWhiteOrangeRed.png',
+  './Assets/Legends/BlueWhiteRed.png',
+  './Assets/Legends/ModifiedOccam.png'
+];
 
 class AnimationEngine {
   // Static variables
@@ -75,11 +82,18 @@ class AnimationEngine {
     if (animInfo.HFRadarData){
       this.source = new SourceHFRadar(animInfo.HFRadarData);
       // Create particle system
-      this.particles = new ParticleSystemHF(this.canvasParticles, this.source, this.map);
+      this.particles = new ParticleSystemHF(this.canvasParticles, this.source, this.map, this.legend);
       this.particles.clear();
       // Start drawing loop (must call it only once)
       this.update();
     }
+
+    // Load color legends
+    window.getLegend(LEGENDURLS[0], 20)
+      .then(legend => {
+        this.legend = legend;
+        this.particles.updateLegend(legend);
+      });
   }
 
   destroyer(){
@@ -447,7 +461,7 @@ class SourceHFRadar {
 
 class ParticleSystemHF {
 
-  constructor(canvas, source, olMap){
+  constructor(canvas, source, olMap, legend){
     // Canvas
     this.canvas = canvas;
     this.ctx = canvas.getContext("2d");
@@ -455,13 +469,15 @@ class ParticleSystemHF {
     this.source = source;
     // Map
     this.map = olMap;
+    // Legend
+    this.legend = legend;
     // Num particles
     this.numParticles = source.data.length;
     // Create particles
     this.particles = [];
     
     for (let i = 0; i < this.numParticles; i++){
-      this.particles[i] = new ParticleHF(this, this.source.data[i]);
+      this.particles[i] = new ParticleHF(this, this.source.data[i], legend);
     }
   }
 
@@ -481,7 +497,7 @@ class ParticleSystemHF {
     // Create particles
     this.particles = [];
     for (let i = 0; i < this.numParticles; i++){
-      this.particles[i] = new ParticleHF(this, this.source.data[i]);
+      this.particles[i] = new ParticleHF(this, this.source.data[i], this.legend);
     }
   }
 
@@ -489,6 +505,12 @@ class ParticleSystemHF {
     for (let i = 0; i < this.numParticles; i++)
       this.particles[i].repositionParticle();
 
+  }
+
+  updateLegend(legend){
+    this.legend = legend;
+    for (let i = 0; i < this.numParticles; i++)
+      this.particles[i].updateLegend(legend);
   }
 
 
@@ -523,9 +545,11 @@ class ParticleSystemHF {
 
 class ParticleHF {
 
-  constructor(particleSystem, dataPoint){
+  constructor(particleSystem, dataPoint, legend){
     this.particleSystem = particleSystem;
     this.dataPoint = dataPoint;
+    this.legend = legend;
+
     this.life = Math.random();
     this.color = [255,255,255];
 
@@ -538,47 +562,55 @@ class ParticleHF {
     let u = dataPoint['U-comp (cm/s)'];
     let v = dataPoint['V-comp (cm/s)'];
     this.magnitude = Math.sqrt(u*u + v*v);
-
-    // Color according to magnitude
-    let colorLegend = [
-      [93.3, 'b40023'], 
-      [86.7, 'dc1820'],
-      [80, 'ed2d1c'],
-      [73.3, 'f54020'],
-      [66.7, 'fa7034'],
-      [60, 'fc964b'],
-      [53.3, 'ffb664'],
-      [46.7, 'fcd97d'],
-      [40, 'ffee9f'],
-      [33.3, 'eef7d9'],
-      [26.7, 'c6e7b5'],
-      [20, '97daa8'],
-      [13.3, '80cdc1'],
-      [6.7, '3c9dc2'],
-      [0, '2468b4']
-    ];
-    colorLegend.reverse();
-    let binIndex = colorLegend.length - 1;
-    for (let i = 0; i < colorLegend.length-1; i++){
-      if (this.magnitude > colorLegend[i][0] && this.magnitude < colorLegend[i+1][0])
-        binIndex = i;
-    }
-    this.color = colorLegend[binIndex][1];
-
-
     // Direction from radar
-    let radarOrigin = [0,0];
-    let dir = [this.lat - radarOrigin[0], this.long - radarOrigin[1]];
-    let distanceFromRadar = Math.sqrt(dir[0]*dir[0] + dir[1]*dir[1]);
+    this.signedMagnitude = this.dataPoint['Velocity (cm/s)'];
 
-    // TODO: FOR NOW UNIT MOVEMENT
+    // Color according to magnitude (if legend does not exist)
+    if (!this.legend || dataPoint["Site Contri #1"] !== undefined){
+      let colorLegend = [
+        [93.3, 'b40023'], 
+        [86.7, 'dc1820'],
+        [80, 'ed2d1c'],
+        [73.3, 'f54020'],
+        [66.7, 'fa7034'],
+        [60, 'fc964b'],
+        [53.3, 'ffb664'],
+        [46.7, 'fcd97d'],
+        [40, 'ffee9f'],
+        [33.3, 'eef7d9'],
+        [26.7, 'c6e7b5'],
+        [20, '97daa8'],
+        [13.3, '80cdc1'],
+        [6.7, '3c9dc2'],
+        [0, '2468b4']
+      ];
+      colorLegend.reverse();
+      let binIndex = colorLegend.length - 1;
+      for (let i = 0; i < colorLegend.length-1; i++){
+        if (this.magnitude > colorLegend[i][0] && this.magnitude < colorLegend[i+1][0])
+          binIndex = i;
+      }
+      this.color = colorLegend[binIndex][1];
+    }
+    // Use loaded legend
+    else{
+      this.defineColorWithLegend();
+    }
+    
+      
+
+    
     // From dataPoint origin, move along the dir to define start and ending points of drawing path
     this.nextLong = dataPoint['Longitude (deg)'] + ((u/this.magnitude) / earthRadius) * (180 / Math.PI) / Math.cos(dataPoint['Latitude (deg)'] * Math.PI / 180);
     this.nextLat = dataPoint['Latitude (deg)'] + ((v/this.magnitude) / earthRadius) * (180 / Math.PI);
+    // Move the starting point a bit backward
+    this.long = dataPoint['Longitude (deg)'] + ((-u*0.5/this.magnitude) / earthRadius) * (180 / Math.PI) / Math.cos(dataPoint['Latitude (deg)'] * Math.PI / 180);
+    this.lat = dataPoint['Latitude (deg)'] + ((-v*0.5/this.magnitude) / earthRadius) * (180 / Math.PI);
 
     // Get points in pixel coordinates and position particle's path on screen
     this.repositionParticle();
   
+    this.isCreated = true;
   }
 
 
@@ -591,12 +623,46 @@ class ParticleHF {
   }
 
 
+  
+  updateLegend(legend){
+    this.legend = legend;
+    this.defineColorWithLegend();
+  }
+  // These values depend on the variable range defined at the beginning of the file
+  defineColorWithLegend(legend){
+    legend = legend || this.legend;
+    if(legend == undefined)
+      return;
+
+    let steps = legend.colorsStr.length;
+    let range = HFRADARRANGE;
+    let unitStep = (range[1] - range[0])/steps;
+    let mag = this.signedMagnitude;
+    // Find color according to magnitude and legend
+    // Top bottom limits
+    if (mag < range[0])
+      this.color = legend.colorsStr[0];
+    else
+      this.color = legend.colorsStr[steps -1];
+    for (let i = 0; i < steps-1; i++){
+      let lowLim = range[0] + i*unitStep;
+      let highLim = range[0] + (i+1)*unitStep;
+      if (mag > lowLim && mag < highLim){
+        this.color = legend.colorsStr[i];
+        i = steps;
+      }
+    }
+  }
+
+
 
 
   // Draw particle (wave)
   draw(dt){
+    if (!this.isCreated)
+      return;
     // Update life
-    let lifeIncrement = 0.01*5; // speed etc..
+    let lifeIncrement = 0.01*2 + this.magnitude*0.001; // speed etc..
     this.life += lifeIncrement;
     // Reset life
     if (this.life > 1){
@@ -629,7 +695,12 @@ class ParticleHF {
     // Change color according to legend?
     //let colorStr = 'rgba(' + this.color[0] + ',' + this.color[1] + ',' + this.color[2] + ', ' + alphaFactor * 0.5 + ')'
     alphaFactor = Math.round(Math.min(alphaFactor*255, 255));
-    let colorStr =  '#' + this.color + alphaFactor.toString(16).padStart(2,'0');
+    // Check the format of the color
+    let colorStr = '';
+    if (this.color[0] == 'r')
+      colorStr = this.color.replace(')', ', ' + alphaFactor/255 + ')');
+    else // Hex
+      colorStr =  '#' + this.color + alphaFactor.toString(16).padStart(2,'0');
     ctx.strokeStyle = colorStr; // Makes the app go slow, consider something different
     ctx.moveTo(x, y)
     ctx.lineTo(nextX, nextY);
