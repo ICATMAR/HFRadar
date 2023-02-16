@@ -675,9 +675,11 @@ class ParticleHF {
   draw(dt){
     if (!this.isCreated)
       return;
-    // Prevent error?
-    if (!this.startPoint)
+    // Prevent error? TODO: STARTS DRAWING BEFORE DATA IS LOADED?
+    if (!this.startPoint || this.startPoint == null){
       this.repositionParticle();
+      return;
+    }
     // Update life
     let lifeIncrement = 0.01*2 + this.magnitude*0.001; // speed etc..
     this.life += lifeIncrement;
