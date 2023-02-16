@@ -3,9 +3,9 @@
   <div id='timeSlider' ref='timeSlider'>
     <!-- Tooltip -->
     <div id="toolTip" ref="toolTip">
-      <button v-show="isDataAvailableAtHour.length > 0" class="bbArrow backTime">&lt;</button>
+      <button v-show="isDataAvailableAtHour.length > 0" class="bbArrow backTime" @click="moveBackward">&lt;</button>
       <div>{{ timeStr }}</div>
-      <button v-show="isDataAvailableAtHour.length > 0" class="bbArrow forwardTime">></button>
+      <button v-show="isDataAvailableAtHour.length > 0" class="bbArrow forwardTime" @click="moveForward">></button>
     </div>
 
     <!-- Slider and data availability-->
@@ -84,6 +84,19 @@ export default {
       this.timeStr = dd.toISOString();
     },
 
+    // Time arrows clicked
+    moveForward: function(){
+      let tempValue = parseInt(this.$refs.slider.value) + 1;
+      this.$refs.slider.value = parseInt(Math.min(tempValue, this.$refs.slider.max)).toString();
+      this.onInput({target: this.$refs.slider});
+      this.onChange({target: this.$refs.slider});
+    },
+    moveBackward: function(){
+      let tempValue = parseInt(this.$refs.slider.value) - 1;
+      this.$refs.slider.value = parseInt(Math.max(tempValue, this.$refs.slider.min)).toString();
+      this.onInput({target: this.$refs.slider});
+      this.onChange({target: this.$refs.slider});
+    },
 
     // INTERNAL EVENTS
     updateDataAvailability: function(sDate, eDate){
