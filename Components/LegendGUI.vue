@@ -4,6 +4,11 @@
 
     <div v-show="legendsLoaded">
       <img class="selLegend" :src="legendSrc">
+      <div class="rangeValuesBox">
+        <div class="leftRange">-100 cm/s</div>
+        <div class="middleRange">0</div>
+        <div class="rightRange">100 cm/s</div>
+      </div>
     </div>
 
     <!-- Drop-down with other legends -->
@@ -79,7 +84,7 @@ export default {
   position: absolute;
   /* width: 80%; */
   bottom: 90px;
-  right: 10px;
+  right: 10%;
   z-index: 10;
 
   align-items: flex-end;
@@ -89,7 +94,7 @@ export default {
 }
 
 img {
-  width:100px; 
+  width:200px; 
   height:20px;
   border-radius: 5px;
 }
@@ -103,7 +108,28 @@ img {
   border-radius: 5px;
   border: 2px solid white;
   height: 22px;
-  width: 102px;
+  width: 202px;
   cursor:pointer;
+}
+
+.rangeValuesBox {
+  display: flex;
+  justify-content: space-between;
+  color: white;
+  font-size: small;
+}
+
+.leftRange {
+  transform: translateX(-50%);
+  -ms-transform: translateX(-50%);
+}
+
+.middleRange {
+  transform: translateX(-50%);
+  -ms-transform: translateX(-50%);
+}
+
+.rightRange {
+  transform: translateX(50%);
 }
 </style>
