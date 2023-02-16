@@ -48,7 +48,7 @@ const createImage = function(HFRadar, tmst){
     let x = (dataPoint['Longitude (deg)'] - minLong) / rangeLong
     let y = (dataPoint['Latitude (deg)'] - minLat) / rangeLat;
 
-    ctx.fillStyle = 'rgba(255, 0, 0, 0.5)';
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
     ctx.beginPath();
     ctx.arc(x*canvas.width, y*canvas.height, 5, 0, 2*Math.PI)
     ctx.fill();

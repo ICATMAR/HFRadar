@@ -44,6 +44,10 @@ export default {
 
     // Load data
     window.DataManager.loadStaticFiles();
+    // Load legends
+    window.loadLegends().then (values => {
+      window.eventBus.emit('legendsLoaded', values);
+    });
   },
   data (){
     return {

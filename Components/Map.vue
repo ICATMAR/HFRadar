@@ -24,6 +24,17 @@
 
       <time-slider></time-slider>
 
+      <!-- Animation Canvas -->
+      <animationCanvas ref="animationCanvas"></animationCanvas>
+
+      <!-- Legends -->
+      <legendGUI ref="legendGUI"></legendGUI>
+      <!-- <div style="position:absolute; top: 120px; left: 20px">
+        <div v-for="legend in legends">
+          <img :src="legend.img.src" style="width:100px; height:20px">
+        </div>
+      </div> -->
+
       <!-- Tracks on the timeline -->
       <!-- <tracks-timeline ref="tracksTimeLine" @clickTrackMark="setSelectedTrack" style="bottom: 120px; position: relative; z-index: 2"></tracks-timeline> -->
 
@@ -50,7 +61,9 @@
 
 
 <script>
+import AnimationCanvas from "./AnimationCanvas.vue";
 import TimeSlider from "./TimeSlider.vue";
+import LegendGUI from "./LegendGUI.vue";
 // import TimeRangeBar from "TimeRangeBar.vue";
 // import TracksTimeLine from "TracksTimeLine.vue";
 //import WMSLegend from "WMSLegend.vue";
@@ -154,9 +167,11 @@ export default {
     window.eventBus.on('HFRadarDataLoaded', (tmst) =>{
       this.selectedDateChanged(tmst);
     });
+    // Selected date changed (slider moves or drag and drop files)
     window.eventBus.on('SelectedDateChanged', (tmst) =>{
       this.selectedDateChanged(tmst);
     });
+    
 
   },
   umounted () {
@@ -172,7 +187,7 @@ export default {
       },
       isLayerDataReady: false,
       WMSLegendURL: '',
-      visibleHFRadars: []
+      visibleHFRadars: [],
     }
   },
   methods: {
@@ -295,8 +310,17 @@ export default {
           }
           this.updateHFRadarData(HFRadar, tmst, HFRadar.images[tmst]);
           this.updateVisibleRadars(HFRadar);
+          // Update animation canvas
+          // TODO: SHOULD CHECK HOW MANY ACTIVE. RIGHT NOW ONLY ONE ACTIVE.
+          if (this.$refs.animationCanvas){
+            this.$refs.animationCanvas.createAnimation(HFRadar.data[tmst], this.map)
+          }
         }
+
+
       }
+
+      
     },
 
     // Remove HFRadar layers HFData, HFIcon, HFPoints
@@ -330,7 +354,7 @@ export default {
         }),
       });
       if (this.getMapLayer(radarImgLayerName)) this.map.removeLayer(this.getMapLayer(radarImgLayerName)); // Remove layer before adding. Not optimal but prettier
-      this.map.addLayer(this.layers[radarImgLayerName]);
+      //this.map.addLayer(this.layers[radarImgLayerName]);
 
 
 
@@ -388,7 +412,7 @@ export default {
           image: new ol.style.Circle({
             radius: 2,
             fill: new ol.style.Fill({
-              color: [255, 0, 0, 0.5],
+              color: [255, 255, 255, 0.2],
               opacity: 0.5,
             })
           })
@@ -702,10 +726,9 @@ export default {
   },
   components: {
     "time-slider": TimeSlider,
-    // "time-range-bar": TimeRangeBar,
-    // "tracks-timeline": TracksTimeLine,
-    //"wms-legend": WMSLegend
-  },
+    "animationCanvas": AnimationCanvas,
+    "legendGUI": LegendGUI,
+},
   computed: {
       //foo: function () {}
   }
