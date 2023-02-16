@@ -2,8 +2,10 @@
   <!-- Container -->
   <div id='timeSlider' ref='timeSlider'>
     <!-- Tooltip -->
-    <div id="toolTip" ref="toolTip" style="display: flex; justify-content: center;">
+    <div id="toolTip" ref="toolTip">
+      <button v-show="isDataAvailableAtHour.length > 0" class="bbArrow backTime">&lt;</button>
       <div>{{ timeStr }}</div>
+      <button v-show="isDataAvailableAtHour.length > 0" class="bbArrow forwardTime">></button>
     </div>
 
     <!-- Slider and data availability-->
@@ -130,12 +132,36 @@ export default {
   width: 100%;
 }
 
+.bbArrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 100%;
+  font-size: large;
+  width: 30px;
+  margin-left: 5%;
+  margin-right: 5%;
+  height: 30px;
+  background-color: var(--lightBlue);
+}
+
+.bbArrow:hover {
+  background-color: var(--blue);
+}
+
+
+
 #toolTip {
-  background: rgba(255, 255, 255, 0.432);
+  /* background: rgba(255, 255, 255, 0.432); */
+  background: rgba(var(--lightBlueRGB), 0.4);
   color: white;
   padding: 5px;
   border-radius: 5px;
   margin-bottom: 5px;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 #dataAvailability {
@@ -164,7 +190,7 @@ export default {
   position:absolute;
   top: 50%;
   border-radius: 100%;
-  background-color: rgb(255, 125, 49);
+  background-color: var(--red);
   padding: 2px;
   transform: translateX(-2px);
   -ms-transform: translateX(-2px);

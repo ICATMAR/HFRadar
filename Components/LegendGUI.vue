@@ -138,7 +138,7 @@ img {
 
 .selLegend:hover, img:hover {
   border-radius: 5px;
-  border: 2px solid white;
+  border: 2px solid var(--lightBlue);
   height: 22px;
   width: 202px;
   cursor:pointer;

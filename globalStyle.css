@@ -1,0 +1,25 @@
+:root {
+    --blue: rgb(20, 120, 167);
+    --blueRGB: 20, 120, 167;
+    --darkBlue: rgb(15, 48, 98);
+    --darkBlueRGB: 15, 48, 98;
+    --lightBlue: rgb(82, 181, 217);
+    --lightBlueRGB: 82, 181, 217;
+    --red: rgb(255, 115, 105);
+    --redRGB: 255, 115, 105;
+}
+
+
+/* 
+input[type='range'] {
+    -webkit-appearance: none !important;
+    background:var(--red);
+    height: 7px;
+}
+input[type='range']::-webkit-slider-thumb {
+    -webkit-appearance: none !important;
+    background: var(--darkBlue);
+    height: 10px;
+    width: 10px;
+
+} */
