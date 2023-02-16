@@ -24,7 +24,12 @@ export default {
       this.legends;
       console.log(legends)
     })
-    
+    // When legend changes
+    window.eventBus.on('legendChanged_LegendGUI', (legend)=> {
+      if (this.animEngine){
+        this.animEngine.updateLegend(legend);
+      }
+    })
   },
   data (){
     return {

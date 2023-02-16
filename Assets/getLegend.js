@@ -1,7 +1,9 @@
 const LEGENDURLS = [
   './Assets/Legends/GreenBlueWhiteOrangeRed.png',
   './Assets/Legends/BlueWhiteRed.png',
-  './Assets/Legends/ModifiedOccam.png'
+  './Assets/Legends/ModifiedOccam.png',
+  './Assets/Legends/GrayScale.png',
+  './Assets/Legends/GrayScaleReverse.png'
 ];
 
 const loadLegends = function(steps){

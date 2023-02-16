@@ -125,6 +125,12 @@ class AnimationEngine {
   }
 
 
+  // Update legend colors
+  updateLegend(legend){
+    this.particles.updateLegend(legend);
+  }
+
+
   // Update the animation
   update(){
     // Check if it is deleted before anything else, to stop de loop
@@ -661,6 +667,9 @@ class ParticleHF {
   draw(dt){
     if (!this.isCreated)
       return;
+    // Prevent error?
+    if (!this.startPoint)
+      this.repositionParticle();
     // Update life
     let lifeIncrement = 0.01*2 + this.magnitude*0.001; // speed etc..
     this.life += lifeIncrement;

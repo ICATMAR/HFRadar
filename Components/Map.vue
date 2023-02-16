@@ -28,6 +28,7 @@
       <animationCanvas ref="animationCanvas"></animationCanvas>
 
       <!-- Legends -->
+      <legendGUI ref="legendGUI"></legendGUI>
       <!-- <div style="position:absolute; top: 120px; left: 20px">
         <div v-for="legend in legends">
           <img :src="legend.img.src" style="width:100px; height:20px">
@@ -62,6 +63,7 @@
 <script>
 import AnimationCanvas from "./AnimationCanvas.vue";
 import TimeSlider from "./TimeSlider.vue";
+import LegendGUI from "./LegendGUI.vue";
 // import TimeRangeBar from "TimeRangeBar.vue";
 // import TracksTimeLine from "TracksTimeLine.vue";
 //import WMSLegend from "WMSLegend.vue";
@@ -169,10 +171,7 @@ export default {
     window.eventBus.on('SelectedDateChanged', (tmst) =>{
       this.selectedDateChanged(tmst);
     });
-    // When legends are loaded
-    window.eventBus.on('legendsLoaded', (legends) => {
-      this.legends = legends;
-    })
+    
 
   },
   umounted () {
@@ -189,7 +188,6 @@ export default {
       isLayerDataReady: false,
       WMSLegendURL: '',
       visibleHFRadars: [],
-      legends: []
     }
   },
   methods: {
@@ -729,6 +727,7 @@ export default {
   components: {
     "time-slider": TimeSlider,
     "animationCanvas": AnimationCanvas,
+    "legendGUI": LegendGUI,
 },
   computed: {
       //foo: function () {}
