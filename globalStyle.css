@@ -23,3 +23,15 @@ input[type='range']::-webkit-slider-thumb {
     width: 10px;
 
 } */
+
+.accordion-button {
+    color:white;
+    background: var(--darkBlue);
+}
+
+.accordion-button:not(.collapsed){
+    background: var(--blue);
+    color:white;
+}
+
+
