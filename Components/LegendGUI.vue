@@ -121,6 +121,7 @@ img {
   color:white;
   transform: translateX(-50%);
   -ms-transform: translateX(-50%);
+  white-space: nowrap;
 }
 .tooltipLegendBar {
   position:absolute;

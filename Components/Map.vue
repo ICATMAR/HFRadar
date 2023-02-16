@@ -305,8 +305,9 @@ export default {
           let HFRadar = activeRadars[i];
           // TODO: HFRadar.data.timestamp {dataPoints: [X], imgData: ...}
           if (HFRadar.images[tmst] == undefined){
-            let imgData = window.createImage(HFRadar, tmst);
-            HFRadar.images[tmst] = imgData;
+            //let imgData = window.createImage(HFRadar, tmst);
+            //HFRadar.images[tmst] = imgData;
+            HFRadar.images[tmst] = null;
           }
           this.updateHFRadarData(HFRadar, tmst, HFRadar.images[tmst]);
           this.updateVisibleRadars(HFRadar);
@@ -342,18 +343,18 @@ export default {
     updateHFRadarData: function(HFRadar, tmst, imgData) {
       // ID of the radar
       let radarID = HFRadar.header.PatternUUID;
-      let radarImgLayerName = 'HFData' + radarID;
-      // Image-Static layer
-      // Add image layer with HF Radar data
-      this.layers[radarImgLayerName] = new ol.layer.Image({
-        name: radarImgLayerName,
-        source: new ol.source.ImageStatic({
-          url: imgData.url,
-          imageExtent: imgData.imageExtent,
-          projection: imgData.projection
-        }),
-      });
-      if (this.getMapLayer(radarImgLayerName)) this.map.removeLayer(this.getMapLayer(radarImgLayerName)); // Remove layer before adding. Not optimal but prettier
+      // let radarImgLayerName = 'HFData' + radarID;
+      // // Image-Static layer
+      // // Add image layer with HF Radar data
+      // this.layers[radarImgLayerName] = new ol.layer.Image({
+      //   name: radarImgLayerName,
+      //   source: new ol.source.ImageStatic({
+      //     url: imgData.url,
+      //     imageExtent: imgData.imageExtent,
+      //     projection: imgData.projection
+      //   }),
+      // });
+      // if (this.getMapLayer(radarImgLayerName)) this.map.removeLayer(this.getMapLayer(radarImgLayerName)); // Remove layer before adding. Not optimal but prettier
       //this.map.addLayer(this.layers[radarImgLayerName]);
 
 
