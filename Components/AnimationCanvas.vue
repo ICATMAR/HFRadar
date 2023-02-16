@@ -19,13 +19,9 @@ export default {
     
   },
   mounted() {
-    // When legends are loaded
-    window.eventBus.on('legendsLoaded', (legends) => {
-      this.legends;
-      console.log(legends)
-    })
     // When legend changes
     window.eventBus.on('legendChanged_LegendGUI', (legend)=> {
+      this.legend = legend;
       if (this.animEngine){
         this.animEngine.updateLegend(legend);
       }
@@ -57,7 +53,7 @@ export default {
         let canvas = this.createCanvas("canvasHFRadarAnimation");
         this.$refs["animationCanvas"].appendChild(canvas);
         // Create animation
-        this.animEngine = new AnimationEngine(canvas, map, {"HFRadarData": data});
+        this.animEngine = new AnimationEngine(canvas, map, {"HFRadarData": data}, this.legend);
         // Test
         // let ctx = canvas.getContext("2d");
         // ctx.fillStyle="blue";

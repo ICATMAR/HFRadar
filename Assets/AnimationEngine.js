@@ -45,7 +45,7 @@ class AnimationEngine {
   * 
   * isHFRadar: radar flag data
   */
-  constructor(inCanvas, inMap, animInfo){
+  constructor(inCanvas, inMap, animInfo, legend){
     AnimationEngine.numActiveAnimations += 1; // Count the active animations
 
     this.canvasParticles = inCanvas; // Canvas
@@ -88,12 +88,19 @@ class AnimationEngine {
       this.update();
     }
 
-    // Load color legends
-    window.getLegend(LEGENDURLS[0], 20)
-      .then(legend => {
-        this.legend = legend;
-        this.particles.updateLegend(legend);
-      });
+    // Load color legends if it was not passed as a constructor
+    // TODO: THIS SHOULD NOT BE NECESSARY
+    if (!legend){
+      window.getLegend(LEGENDURLS[0], 20)
+        .then(legend => {
+          this.legend = legend;
+          this.particles.updateLegend(legend);
+          console.log("Legend was undefined")
+        });
+    } else {
+      this.legend = legend;
+      this.particles.updateLegend(legend);
+    }
   }
 
   destroyer(){
@@ -127,6 +134,7 @@ class AnimationEngine {
 
   // Update legend colors
   updateLegend(legend){
+    this.legend = legend;
     this.particles.updateLegend(legend);
   }
 

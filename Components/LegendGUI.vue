@@ -30,9 +30,10 @@ export default {
   mounted() {
     // When legends are loaded
     window.eventBus.on('legendsLoaded', (legends) => {
-     this.legends = legends;
-     this.legendsLoaded = true;
-     this.legendSrc = legends[this.legendIndex].img.src;
+      this.legends = legends;
+      this.legendsLoaded = true;
+      this.legendSrc = legends[this.legendIndex].img.src;
+      this.emitLegendChanged(this.legends[this.legendIndex]);
     })
   },
   data (){
@@ -56,8 +57,13 @@ export default {
       this.legendIndex = index;
       this.legendSrc = this.legends[index].img.src;
       // Emit
-      window.eventBus.emit('legendChanged_LegendGUI', this.legends[index]);
-    }
+      this.emitLegendChanged(this.legends[index]);
+    },
+
+    // EVENT EMITTER
+    emitLegendChanged(legend){
+      window.eventBus.emit('legendChanged_LegendGUI', legend);
+    },
   },
   components: {
     //'map': Map,
