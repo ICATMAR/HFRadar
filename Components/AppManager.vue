@@ -74,14 +74,14 @@ export default {
   }
 
   .Banner {
-    width: 180px;
+    width: 100px;
     position:absolute;
     top: 20px;
     left: 60px;
   }
   @media screen and (max-width: 1000px) {
     .Banner {
-      width: 100px;
+      width: 60px;
     }
   }
 </style>
