@@ -29,11 +29,6 @@
 
       <!-- Legends -->
       <legendGUI ref="legendGUI"></legendGUI>
-      <!-- <div style="position:absolute; top: 120px; left: 20px">
-        <div v-for="legend in legends">
-          <img :src="legend.img.src" style="width:100px; height:20px">
-        </div>
-      </div> -->
 
       <!-- Tracks on the timeline -->
       <!-- <tracks-timeline ref="tracksTimeLine" @clickTrackMark="setSelectedTrack" style="bottom: 120px; position: relative; z-index: 2"></tracks-timeline> -->
@@ -103,6 +98,18 @@ export default {
           name: 'baseLayer',
           source: this.baseLayerSources['Imagery'],
           zIndex: -3,
+        }),
+        // Contours bathymetry
+        contours: new ol.layer.Tile({
+          name: 'contours',
+          source: new ol.source.TileWMS({
+                  url: 'https://ows.emodnet-bathymetry.eu/wms',
+                  params: {'LAYERS': 'emodnet:contours', 'TILED': true},
+                  serverType: 'geoserver',
+                  crossOrigin: 'anonymous',
+                  cacheSize: 500
+          }),
+          maxResolution: 500
         }),
 
         graticule: new ol.layer.Graticule({
@@ -219,6 +226,8 @@ export default {
           //this.layers.bathymetry,
           // Graticule layer
           this.layers.graticule,
+          // Contours
+          //this.layers.contours,
           // Raw HF Data
           // this.layers.rawHFData,
           // 12 nm
