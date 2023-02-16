@@ -1,6 +1,6 @@
 <template>
   <!-- Container -->
-  <div id='legendGUI' ref='legendGUI' @mouseover="mouseOver" @mouseleave="mouseLeave">
+  <div id='legendGUI' ref='legendGUI' @click="isMouseOver = true" @mouseleave="isMouseOver = false">
 
     <div v-show="legendsLoaded">
       <!-- Tooltip -->
@@ -72,12 +72,6 @@ export default {
   },
   methods: {
     // USER INTERACTION
-    mouseOver: function(){
-      this.isMouseOver = true;
-    },
-    mouseLeave: function(){
-      this.isMouseOver = false;
-    },
     // Legend clicked
     legendClicked: function(e, index){
       this.legendIndex = index;
