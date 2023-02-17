@@ -148,6 +148,11 @@ class HFRadar {
   data = {};
   headers = {}; // Headers contain some time information too
   images = {};
+  // GUI state variables
+  isVisible; // User decides
+  hasDataOnTmst; // Has data on selected timestamp
+  isAnimated; // User decides
+  pointVariable;
 
   constructor(HFRadarData){
 
@@ -195,6 +200,13 @@ class HFRadar {
 
     // Store latest data timestamp
     this.lastLoadedTimestamp = timestamp;
+  }
+
+  getRadarOrigin(){
+    let locationStr = this.header.Origin;
+    let location = locationStr.replace(/\s\s+/g, ',').replace(',', '').replace('\r', '').split(',');
+    location = location.reverse();
+    return location;
   }
 }
 
