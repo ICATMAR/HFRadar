@@ -80,6 +80,9 @@
         </div>
       </div>
     </div>
+
+    <!-- Fill empty space -->
+    <div class="sidePanelFiller"></div>
   </div>
 </template>
 
@@ -154,7 +157,15 @@ export default {
   methods: {
     // USER ACTIONS
     onHeaderClick: function(e, index){
+      // Toggle header
+      if (this.$refs['HFRadar'+index].classList.contains("show"))
+        e.target.classList.add("collapsed");
+      else
+        e.target.classList.remove("collapsed");
+
+      // Toggle body
       new window.bootstrap.Collapse(this.$refs['HFRadar'+index], {toggle: true});
+
     },
     
 
@@ -185,10 +196,14 @@ export default {
 #side-panel{
   min-width: 500px;
   max-width: 500px;
-  background: rgb(240, 240, 255);
   height: 100vh;
   max-height: 100vh;
   overflow-y: auto;
+
+  display: flex;
+  overflow-y: auto;
+  flex-direction: column;
+  flex-wrap: nowrap;
 }
 
 .accordion-body{
@@ -199,5 +214,12 @@ export default {
 
 .accordion-body ::v-deep p{
   margin-bottom: 0.3rem;
+}
+
+.sidePanelFiller {
+  background-image: url('Assets/TramaCorp.png');
+  background-size: 100% 100%;
+  width: 100%;
+  height: 100%;
 }
 </style>

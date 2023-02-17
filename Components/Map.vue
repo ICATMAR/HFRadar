@@ -314,8 +314,9 @@ export default {
           let HFRadar = activeRadars[i];
           // TODO: HFRadar.data.timestamp {dataPoints: [X], imgData: ...}
           if (HFRadar.images[tmst] == undefined){
-            let imgData = window.createImage(HFRadar, tmst);
-            HFRadar.images[tmst] = imgData;
+            //let imgData = window.createImage(HFRadar, tmst);
+            //HFRadar.images[tmst] = imgData;
+            HFRadar.images[tmst] = null;
           }
           this.updateHFRadarData(HFRadar, tmst, HFRadar.images[tmst]);
           this.updateVisibleRadars(HFRadar);
@@ -351,18 +352,18 @@ export default {
     updateHFRadarData: function(HFRadar, tmst, imgData) {
       // ID of the radar
       let radarID = HFRadar.header.PatternUUID;
-      let radarImgLayerName = 'HFData' + radarID;
-      // Image-Static layer
-      // Add image layer with HF Radar data
-      this.layers[radarImgLayerName] = new ol.layer.Image({
-        name: radarImgLayerName,
-        source: new ol.source.ImageStatic({
-          url: imgData.url,
-          imageExtent: imgData.imageExtent,
-          projection: imgData.projection
-        }),
-      });
-      if (this.getMapLayer(radarImgLayerName)) this.map.removeLayer(this.getMapLayer(radarImgLayerName)); // Remove layer before adding. Not optimal but prettier
+      // let radarImgLayerName = 'HFData' + radarID;
+      // // Image-Static layer
+      // // Add image layer with HF Radar data
+      // this.layers[radarImgLayerName] = new ol.layer.Image({
+      //   name: radarImgLayerName,
+      //   source: new ol.source.ImageStatic({
+      //     url: imgData.url,
+      //     imageExtent: imgData.imageExtent,
+      //     projection: imgData.projection
+      //   }),
+      // });
+      // if (this.getMapLayer(radarImgLayerName)) this.map.removeLayer(this.getMapLayer(radarImgLayerName)); // Remove layer before adding. Not optimal but prettier
       //this.map.addLayer(this.layers[radarImgLayerName]);
 
 
@@ -371,7 +372,7 @@ export default {
       // Create Radar icon
       // Get radar location
       let locationStr = HFRadar.header.Origin;
-      let location = locationStr.replace(/\s\s+/g, ',').replace(',', '').split(',');
+      let location = locationStr.replace(/\s\s+/g, ',').replace(',', '').replace('\r', '').split(',');
       location = location.reverse();
        // Center on coordinate
        this.centerOnCoord(location);
@@ -643,15 +644,36 @@ export default {
     },
 
     // Center on the coordinate
-    centerOnCoord(coord){
+    centerOnCoord(coord, forceCenter){
       // Center map to track
       let view = this.map.getView();
       let currentZoom = view.getZoom();
-      view.animate({
-        center: ol.proj.fromLonLat([coord[0], coord[1]]),
-        zoom: Math.max(9.5, currentZoom),
-        duration: 1000,
-      });
+      // Get extent
+      let bbox = this.map.getView().calculateExtent(this.map.getSize());
+      let coord3857 = ol.proj.fromLonLat([coord[0], coord[1]]);
+      let isInsideBBOX = false;
+      if (coord3857[0] > bbox[0] && coord3857[0] < bbox[2] && coord3857[1] > bbox[1] && coord3857[1] < bbox[3] )
+        isInsideBBOX = true;
+
+      // If point of interest is too far away from the center...
+      // Get pixels from coordinate
+      // let coordPixel = this.map.getPixelFromCoordinate(coord3857);
+      // let centerBBOXPixel = this.map.getPixelFromCoordinate([bbox[2]*0.5 + bbox[0]*0.5, bbox[3]*0.5+bbox[1]*0.5]);
+      // let distPixels = this.getDistance(coordPixel, centerBBOXPixel);
+      // // Relationship
+      // let smallestAspect = Math.min(...this.map.getSize());
+      // let ratio = (smallestAspect-distPixels) / smallestAspect;
+      // if (ratio < 0.6)
+      //   forceCenter = true;
+      
+
+      if (!isInsideBBOX || forceCenter){ 
+        view.animate({
+          center: ol.proj.fromLonLat([coord[0], coord[1]]),
+          zoom: Math.max(9.5, currentZoom),
+          duration: 1000,
+        });
+      }
     },
 
 
@@ -668,6 +690,13 @@ export default {
     },
     
 
+
+
+
+    // UTILS
+    getDistance: function(posA, posB){
+      return Math.sqrt( Math.pow(posA[0] - posB[0], 2) + Math.pow(posA[1] - posB[1], 2));
+    },
 
 
 
