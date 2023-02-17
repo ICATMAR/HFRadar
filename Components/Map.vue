@@ -308,9 +308,9 @@ export default {
       // Remove layers
       this.removeHFlayers();
       // Make all radars inactive
-        Object.keys(window.DataManager.HFRadars).forEach(key => {
-          window.DataManager.HFRadars[key].hasDataOnTmst = false;
-        })
+      Object.keys(window.DataManager.HFRadars).forEach(key => {
+        window.DataManager.HFRadars[key].hasDataOnTmst = false;
+      })
 
       // Get current active radars on that date
       let activeRadars = window.DataManager.getRadarsDataOn(tmst);
@@ -329,15 +329,21 @@ export default {
             HFRadar.images[tmst] = null;
           }
           this.updateHFRadarData(HFRadar, tmst, HFRadar.images[tmst]);
-          // Update animation canvas
-          // TODO: SHOULD CHECK HOW MANY ACTIVE. RIGHT NOW ONLY ONE ACTIVE.
-          if (this.$refs.animationCanvas){
-            this.$refs.animationCanvas.createAnimation(HFRadar.data[tmst], this.map)
-          }
         }
-
-
       }
+
+      // Update animations
+      Object.keys(window.DataManager.HFRadars).forEach(key => {
+        let HFRadar = window.DataManager.HFRadars[key];
+        // Update animation canvas
+        // TODO: SHOULD CHECK HOW MANY ACTIVE. RIGHT NOW ONLY ONE ACTIVE.
+        // TODO: SHOULD MOVE SOMEWHERE ELSE? OR SHOULD IT BE CALLED FROM MAP? --> NO MAP NO ANIMATION
+        if (this.$refs.animationCanvas){
+          this.$refs.animationCanvas.updateAnimation(HFRadar, HFRadar.data[tmst], this.map)
+        }
+      })
+
+                  
 
       
     },

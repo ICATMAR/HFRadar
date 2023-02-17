@@ -27,6 +27,7 @@ class AnimationEngine {
   frameTime = 0;
   FRAMERATE = 40; // in ms
   isDestroyed = false;
+  isStopped = false;
   
 
   // Constructor
@@ -150,6 +151,10 @@ class AnimationEngine {
       console.log("destroyed by destroyer");
       return;
     }
+    if (this.isStopped){
+      console.log("Animation stopped");
+      return;
+    }
     
     // Update timer
     let timeNow = performance.now();
@@ -177,6 +182,11 @@ class AnimationEngine {
     console.log("Source loaded!");
     // Reposition particles when data is loaded
     this.particles.repositionParticles();
+  }
+
+  clearCanvas(){
+    if (this.particles)
+      this.particles.clear();
   }
 
   resizeCanvas(){

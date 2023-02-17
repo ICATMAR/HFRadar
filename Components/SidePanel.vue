@@ -8,6 +8,7 @@
           <button class="accordion-button" :ref="'HFRadarHeader' + index" type="button" data-bs-toggle="collapse"
             @click="onHeaderClick($event, index)">
             HF Radar {{radar["Site"]}}
+            <onoffButton class="onoffRadar" @click="onoffRadar(radar, $event)"></onoffButton>
           </button>
         </h2>
         <div :ref="'HFRadar' + index" :id="'bodySectionOne' + index" class="accordion-collapse collapse show"
@@ -89,7 +90,7 @@
 <script>
 
 // Import components
-//import Map from 'Components/Map.vue'
+import onoffButton from './OnOffButton.vue'
 
 export default {
   name: 'SidePanel',
@@ -183,6 +184,13 @@ export default {
       new window.bootstrap.Collapse(this.$refs['HFRadar'+index], {toggle: true});
 
     },
+    // On Off Radar
+    onoffRadar(radar, e){
+      let isChecked = e.target.parentElement.children[0].checked;
+      radar.isVisible = isChecked;
+      window.eventBus.emit('RadarVisibilityChange', radar);
+    },
+
     
 
     // INTERNAL EVENTS
@@ -202,7 +210,7 @@ export default {
     }
   },
   components: {
-    //'map': Map,
+    'onoffButton': onoffButton,
   }
 }
 </script>
@@ -234,10 +242,23 @@ export default {
   margin-bottom: 0.3rem;
 }
 
+
+.accordion-button::after {
+  background-color: rgba(207, 207, 207, 0.74);
+  border-radius: 50%;
+}
+
+
 .sidePanelFiller {
   background-image: url('Assets/TramaCorp.png');
   background-size: 100% 100%;
   width: 100%;
   height: 100%;
 }
+
+.onoffRadar {
+  position:absolute;
+  right: 60px;
+}
+
 </style>
