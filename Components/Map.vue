@@ -508,6 +508,8 @@ export default {
       let distMin = 999;
       let coord = ol.proj.transform(evt.coordinate, 'EPSG:3857', 'EPSG:4326');
       let closestDataPoint;
+      let selRadar;
+      let closestRadar = undefined;
       // Find closest points or radars
       let radars = window.DataManager.HFRadars;
       if (Object.keys(radars).length != 0){
@@ -516,29 +518,42 @@ export default {
           let radar = radars[key];
           // Radar distance
           let location = radar.getRadarOrigin();
-
+          // If radar has data, then check the proximity
           if (radar.hasDataOnTmst){ // AND IS SELECTED? TWO RADARS TOGETHER, HOW TO SELECT ONE OR THE OTHER DATAPOINT?
             for (let j = 0; j < radar.currentData.length; j++){
               let dataPoint = radar.currentData[j]; 
               // Calculate distance (could do it in km with the right formula, but this is interaction and it does not matter that much)
-              let dist = Math.sqrt( Math.pow(dataPoint['Longitude (deg)'] - coord[0], 2) + Math.pow(dataPoint['Latitude (deg)'] - coord[1], 2));
+              let dist = Math.sqrt( Math.pow(dataPoint['Longitude (deg)'] - coord[0], 2) + Math.pow(dataPoint['Latitude (deg)'] - coord[1], 2));              
               // Find closest point
               if (dist < distMin){
                 distMin = dist;
                 closestDataPoint = dataPoint;
+                selRadar = radar;
+                // closestRadar = undefined;
               }
             }
           }
+          // Check if the radar is closest than a datapoint
+          // Find if a radar is the closest
+          let dist = this.getDistance(location, coord);
+          if (dist < distMin && radar.hasDataOnTmst){
+            distMin = dist;
+            closestRadar = radar;
+          }
         });
+        // If a radar is closest
+        if (closestRadar !== undefined){
+          window.eventBus.emit('ClickedHFRadar', closestRadar);
+        }
         // Limit by distance in pixels
-        if (closestDataPoint){
+        else if (closestDataPoint){
           let epsg3857coord = ol.proj.fromLonLat([closestDataPoint['Longitude (deg)'], closestDataPoint['Latitude (deg)']]);
           let pixelCoord = this.map.getPixelFromCoordinate(epsg3857coord);
 
           let pixelDistance = Math.sqrt(Math.pow(evt.originalEvent.clientX - pixelCoord[0],2) + Math.pow(evt.originalEvent.clientY - pixelCoord[1],2));
           // Click distance to point
           if (pixelDistance < 60){
-            window.eventBus.emit('ClickedDataPoint', closestDataPoint);
+            window.eventBus.emit('ClickedDataPoint', {"dataPoint": closestDataPoint, "HFRadar": selRadar});
             // Create map layer with styled point
               let featPoint = new ol.Feature({
                 geometry: new ol.geom.Point(epsg3857coord),
