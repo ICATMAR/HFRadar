@@ -4,11 +4,10 @@
     <div class="accordion">
 
       <div class="accordion-item" v-for="(radar, index) in visibleRadars" :key="radar['UUID']">
-        <h2 class="accordion-header" :id="'headingSection' + index">
+        <h2 class="accordion-header" >
           <button class="accordion-button" :ref="'HFRadarHeader' + index" type="button" data-bs-toggle="collapse"
-            :data-bs-target="'#bodySection' + index" aria-expanded="true"
-            :aria-controls="'bodySection' + index" @click="onHeaderClick($event, index)">
-            HF Radar #{{index+1}}
+            @click="onHeaderClick($event, index)">
+            HF Radar {{radar["Site"]}}
           </button>
         </h2>
         <div :ref="'HFRadar' + index" :id="'bodySectionOne' + index" class="accordion-collapse collapse show"
@@ -30,7 +29,7 @@
           <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
             data-bs-target="#bodySection2" aria-expanded="false"
             aria-controls="bodySection2">
-            Selected Data Point
+            Selected Data Point {{ radarNameOfDatapoint }}
           </button>
         </h2>
         <div ref="dataPoint" id="bodySection2" class="accordion-collapse collapse"
@@ -117,8 +116,18 @@ export default {
       this.isDataPointVisible = false;
     });
 
+    // On HF Radar clikc on Map.vue
+    window.eventBus.on('ClickedHFRadar', radar => {
+      console.log(radar);
+      console.log("Clicked HF Radar")
+      //TODO: ACTIVATE RADAR
+    });
+
     // On DataPoint click on Map.vue
-    window.eventBus.on('ClickedDataPoint', (dataPoint) => {
+    window.eventBus.on('ClickedDataPoint', e => {
+      let dataPoint = e.dataPoint;
+      let HFRadar = e.HFRadar;
+
       // Create HTML content
       let str = '';
       let keys = Object.keys(dataPoint);
@@ -127,6 +136,9 @@ export default {
       }
       
       this.dataPointContent = str;
+      this.radarNameOfDatapoint = '( HF Radar' + HFRadar.Site.replaceAll('\"', '') + ')';
+
+      // Accordion effects
       let collapse = new window.bootstrap.Collapse(this.$refs.dataPoint, {toggle: false});
       collapse.show();
       this.isDataPointVisible = true;
@@ -137,7 +149,6 @@ export default {
         collapse.hide();
         
         this.$refs['HFRadarHeader' + i].classList.add("collapsed");
-        console.log(this.$refs['HFRadarHeader' + i].innerHTML)
       }
          
     });
@@ -156,6 +167,7 @@ export default {
         dataPointContent: '',
         isDataPointVisible: false,
         visibleRadars: [],
+        radarNameOfDatapoint: ''
     }
   },
   methods: {
@@ -182,9 +194,11 @@ export default {
         for (let i = 0; i < activeRadars.length; i++){
           let HFRadar = activeRadars[i];
           // Update vue data
-          this.visibleRadars.push({header: HFRadar.headers[tmst], data: HFRadar.data[tmst]});
+          //this.visibleRadars.push({UUID: HFRadar.headers[tmst]['UUID'], header: HFRadar.headers[tmst], data: HFRadar.data[tmst]});
+          this.visibleRadars.push(HFRadar);
         }
       }
+      console.log(this.visibleRadars);
     }
   },
   components: {

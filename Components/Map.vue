@@ -529,7 +529,6 @@ export default {
                 distMin = dist;
                 closestDataPoint = dataPoint;
                 selRadar = radar;
-                // closestRadar = undefined;
               }
             }
           }
@@ -545,6 +544,7 @@ export default {
         if (closestRadar !== undefined){
           window.eventBus.emit('ClickedHFRadar', closestRadar);
         }
+        // If point is closest, emit only if click is close to point in pixels
         // Limit by distance in pixels
         else if (closestDataPoint){
           let epsg3857coord = ol.proj.fromLonLat([closestDataPoint['Longitude (deg)'], closestDataPoint['Latitude (deg)']]);

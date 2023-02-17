@@ -48,7 +48,8 @@ export default {
       this.emitLegendChanged(this.legends[this.legendIndex]);
     });
     // When mouse clicks a data point
-    window.eventBus.on('ClickedDataPoint', dataPoint => {
+    window.eventBus.on('ClickedDataPoint', e => {
+      let dataPoint = e.dataPoint;
 
       this.currentValue = dataPoint['Velocity (cm/s)'].toFixed(1);
       this.$refs.tooltipLegend.style.left = (100 * (this.currentValue - this.HFRADARRANGE[0]) / (this.HFRADARRANGE[1] - this.HFRADARRANGE[0])) + '%';
