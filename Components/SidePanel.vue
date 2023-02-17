@@ -5,7 +5,7 @@
 
       <div class="accordion-item" v-for="(radar, index) in visibleRadars" :key="radar['UUID']">
         <h2 class="accordion-header" :id="'headingSection' + index">
-          <button class="accordion-button" type="button" data-bs-toggle="collapse"
+          <button class="accordion-button" :ref="'HFRadarHeader' + index" type="button" data-bs-toggle="collapse"
             :data-bs-target="'#bodySection' + index" aria-expanded="true"
             :aria-controls="'bodySection' + index" @click="onHeaderClick($event, index)">
             HF Radar #{{index+1}}
@@ -132,8 +132,12 @@ export default {
       this.isDataPointVisible = true;
 
       for (let i = 0; i < this.visibleRadars.length; i++){
+        
         collapse = new window.bootstrap.Collapse(this.$refs['HFRadar' + i], {toggle: false});
-        collapse.hide(); 
+        collapse.hide();
+        
+        this.$refs['HFRadarHeader' + i].classList.add("collapsed");
+        console.log(this.$refs['HFRadarHeader' + i].innerHTML)
       }
          
     });
