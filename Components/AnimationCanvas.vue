@@ -90,10 +90,14 @@ export default {
 
       } else {
         if (radar.hasDataOnTmst){
+          debugger;
           // Update existing animation
           radar.animEngine.setHFRadarData(data);
+          let wasStopped = radar.animEngine.isStopped;
           radar.animEngine.isStopped = false;
-          radar.animEngine.update();
+          if (wasStopped)
+            radar.animEngine.update();
+          
         } else
           radar.animEngine.isStopped = true;
           radar.animEngine.clearCanvas();
