@@ -11,7 +11,7 @@ const parseText = function(rawText){
 
   // Index data start
   // let lastMetadataIndex = rawText.indexOf('RngCell') + 8;
-  let headerRowsRaw = tableStr.substring(tableStr.indexOf('%%'), tableStr.indexOf('%%') + 500).split('\n');
+  let headerRowsRaw = tableStr.substring(tableStr.indexOf('%%'), tableStr.indexOf('%%') + 1000).split('\n');
   let dataStartIndex = tableStr.indexOf('%%') + headerRowsRaw[0].length + headerRowsRaw[1].length + 3;
 
   // Num columns
