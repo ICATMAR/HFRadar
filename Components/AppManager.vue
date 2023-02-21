@@ -3,11 +3,11 @@
   <div id="app-manager" ref="appManager">
 
     <div style="display:flex;flex-direction: row;">
-    <!-- Map -->
-    <mapOL></mapOL>
+      <!-- Map -->
+      <mapOL></mapOL>
 
-    <!-- Side planel -->
-    <side-panel></side-panel>
+      <!-- Side planel -->
+      <side-panel></side-panel>
     </div>
 
     <!-- Central Panel -->

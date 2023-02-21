@@ -1,88 +1,94 @@
 <template>
   <!-- Container -->
-  <div id='side-panel' ref='sidepanel'>
-    <div class="accordion">
+  <div>
 
-      <div class="accordion-item" v-for="(radar, index) in visibleRadars" :key="radar['UUID']">
-        <h2 class="accordion-header" >
-          <button class="accordion-button" :ref="'HFRadarHeader' + index" type="button" data-bs-toggle="collapse"
-            @click="onHeaderClick($event, index)">
-            HF Radar {{radar["Site"]}}
-            <onoffButton class="onoffRadar" @click="onoffRadar(radar, $event)" :checked="radar.isActivated"></onoffButton>
-          </button>
-        </h2>
-        <div :ref="'HFRadar' + index" :id="'bodySectionOne' + index" class="accordion-collapse collapse show"
-          :aria-labelledby="'headingSectionOne' + index">
-          <div class="accordion-body">
-            <p v-for="(hItem, key) in radar.header">
-              <strong>{{key}}: </strong>{{ hItem }}
-              <br>
-            </p>
+    <!-- Side panel content-->
+    <div id='side-panel' ref='sidepanel' v-show="showPanel">
+      <div class="accordion">
+
+        <div class="accordion-item" v-for="(radar, index) in visibleRadars" :key="radar['UUID']">
+          <h2 class="accordion-header" >
+            <button class="accordion-button" :ref="'HFRadarHeader' + index" type="button" data-bs-toggle="collapse"
+              @click="onHeaderClick($event, index)">
+              HF Radar {{radar["Site"]}}
+              <onoffButton class="onoffRadar" @click="onoffRadar(radar, $event)" :checked="radar.isActivated"></onoffButton>
+            </button>
+          </h2>
+          <div :ref="'HFRadar' + index" :id="'bodySectionOne' + index" class="accordion-collapse collapse show"
+            :aria-labelledby="'headingSectionOne' + index">
+            <div class="accordion-body">
+              <p v-for="(hItem, key) in radar.header">
+                <strong>{{key}}: </strong>{{ hItem }}
+                <br>
+              </p>
+            </div>
+          </div>
+        </div>
+
+
+
+        <!-- Data point ? -->
+        <div class="accordion-item" v-show="isDataPointVisible">
+          <h2 class="accordion-header" id="headingSection2">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+              data-bs-target="#bodySection2" aria-expanded="false"
+              aria-controls="bodySection2">
+              Selected Data Point {{ radarNameOfDatapoint }}
+            </button>
+          </h2>
+          <div ref="dataPoint" id="bodySection2" class="accordion-collapse collapse"
+            aria-labelledby="headingSection2">
+            <div class="accordion-body" v-html="dataPointContent">
+            </div>
+          </div>
+        </div>
+
+        <!-- <div class="accordion-item">
+          <h2 class="accordion-header" id="panelsStayOpen-headingTwo">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+              data-bs-target="#panelsStayOpen-collapseTwo" aria-expanded="false"
+              aria-controls="panelsStayOpen-collapseTwo">
+              Accordion Item #2
+            </button>
+          </h2>
+          <div id="panelsStayOpen-collapseTwo" class="accordion-collapse collapse"
+            aria-labelledby="panelsStayOpen-headingTwo">
+            <div class="accordion-body">
+              <strong>This is the second item's accordion body.</strong> It is hidden by default, until the collapse
+              plugin adds the appropriate classes that we use to style each element. These classes control the overall
+              appearance, as well as the showing and hiding via CSS transitions. You can modify any of this with custom
+              CSS or overriding our default variables. It's also worth noting that just about any HTML can go within the
+              <code>.accordion-body</code>, though the transition does limit overflow.
+            </div>
+          </div>
+        </div> -->
+
+        <!-- About setion -->
+        <div class="accordion-item">
+          <h2 class="accordion-header" id="aboutHeading">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+              data-bs-target="#about" aria-expanded="false"
+              aria-controls="about">
+              About
+            </button>
+          </h2>
+          <div id="about" class="accordion-collapse collapse"
+            aria-labelledby="aboutHeading">
+            <div class="accordion-body">
+              <p>This application visualizes data from HF Radars (CODAR). The application is developed under the project SOCAT-ICATMAR,
+              funded by Generalitat de Catalunya and CSIC.</p>
+              <p>The application is developed with OpenLayers, Bootstrap and Vue. Map attributions: © Esri, Maxar, GeoEye, Earthstar
+                Geographics, CNES/Airbus DS, USDA, USGS, AeroGRID, IGN, and the GIS User Community</p>
+            </div>
           </div>
         </div>
       </div>
 
-
-
-      <!-- Data point ? -->
-      <div class="accordion-item" v-show="isDataPointVisible">
-        <h2 class="accordion-header" id="headingSection2">
-          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-            data-bs-target="#bodySection2" aria-expanded="false"
-            aria-controls="bodySection2">
-            Selected Data Point {{ radarNameOfDatapoint }}
-          </button>
-        </h2>
-        <div ref="dataPoint" id="bodySection2" class="accordion-collapse collapse"
-          aria-labelledby="headingSection2">
-          <div class="accordion-body" v-html="dataPointContent">
-          </div>
-        </div>
-      </div>
-
-      <!-- <div class="accordion-item">
-        <h2 class="accordion-header" id="panelsStayOpen-headingTwo">
-          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-            data-bs-target="#panelsStayOpen-collapseTwo" aria-expanded="false"
-            aria-controls="panelsStayOpen-collapseTwo">
-            Accordion Item #2
-          </button>
-        </h2>
-        <div id="panelsStayOpen-collapseTwo" class="accordion-collapse collapse"
-          aria-labelledby="panelsStayOpen-headingTwo">
-          <div class="accordion-body">
-            <strong>This is the second item's accordion body.</strong> It is hidden by default, until the collapse
-            plugin adds the appropriate classes that we use to style each element. These classes control the overall
-            appearance, as well as the showing and hiding via CSS transitions. You can modify any of this with custom
-            CSS or overriding our default variables. It's also worth noting that just about any HTML can go within the
-            <code>.accordion-body</code>, though the transition does limit overflow.
-          </div>
-        </div>
-      </div> -->
-
-      <!-- About setion -->
-      <div class="accordion-item">
-        <h2 class="accordion-header" id="aboutHeading">
-          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-            data-bs-target="#about" aria-expanded="false"
-            aria-controls="about">
-            About
-          </button>
-        </h2>
-        <div id="about" class="accordion-collapse collapse"
-          aria-labelledby="aboutHeading">
-          <div class="accordion-body">
-            <p>This application visualizes data from HF Radars (CODAR). The application is developed under the project SOCAT-ICATMAR,
-            funded by Generalitat de Catalunya and CSIC.</p>
-            <p>The application is developed with OpenLayers, Bootstrap and Vue. Map attributions: © Esri, Maxar, GeoEye, Earthstar
-              Geographics, CNES/Airbus DS, USDA, USGS, AeroGRID, IGN, and the GIS User Community</p>
-          </div>
-        </div>
-      </div>
+      <!-- Fill empty space -->
+      <div class="sidePanelFiller"></div>
     </div>
 
-    <!-- Fill empty space -->
-    <div class="sidePanelFiller"></div>
+    <div id='side-arrow' @click="onSideArrowClick"></div>
   </div>
 </template>
 
@@ -99,13 +105,6 @@ export default {
   },
   mounted() {
     // EVENT LISTENERS
-    // On HFRadar data load
-    // TODO: THIS INFORMATION SHOULD COME FROM MAP.VUE.
-    // --> Add time slider
-    // --> Map.vue (or time slider? -- decide visible radars)
-    // --> TimeSlider create events that update information to SidePanel
-    // --> Map.vue should be aware of the visible layers for the click events
-    // --> Maybe create an AppController? > Receives and sends all user events, stores information about the visible layers etc...
     window.eventBus.on('HFRadarDataLoaded', (tmst) => {
       this.updateInformation(tmst);
     });
@@ -168,7 +167,8 @@ export default {
         dataPointContent: '',
         isDataPointVisible: false,
         visibleRadars: [],
-        radarNameOfDatapoint: ''
+        radarNameOfDatapoint: '',
+        showPanel: true,
     }
   },
   methods: {
@@ -190,6 +190,11 @@ export default {
       let isChecked = e.target.parentElement.children[0].checked;
       radar.isActivated = isChecked;
       window.eventBus.emit('RadarVisibilityChange', radar);
+    },
+    // On hide/show panel
+    onSideArrowClick(){
+      this.showPanel = this.showPanel ? false : true;
+      window.eventBus.emit('SidePanelSizechanged', this.showPanel);
     },
 
     
@@ -259,6 +264,32 @@ export default {
 .onoffRadar {
   position:absolute;
   right: 60px;
+}
+
+#side-arrow {
+  cursor: pointer;
+  position:absolute;
+  margin-left: -40px;
+  width: 40px;
+  height: 60px;
+  border-top-left-radius: 50%;
+  border-bottom-left-radius: 50%;
+
+
+  background: var(--red);
+  color: white;
+  top:50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+    font-size: large;
+}
+
+#side-arrow::after {
+  content: '►';
+  
+  
 }
 
 </style>

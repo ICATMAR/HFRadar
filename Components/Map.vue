@@ -178,6 +178,12 @@ export default {
     window.eventBus.on('SelectedDateChanged', (tmst) =>{
       this.selectedDateChanged(tmst);
     });
+    // When the side panel is hiden
+    window.eventBus.on('SidePanelSizechanged', (isSidePanelOpen) => {
+      setTimeout(()=> this.map.updateSize(), 100);
+      this.map.updateSize();
+      console.log("helloadsofasdofi");
+    })
     
 
   },
@@ -819,7 +825,6 @@ export default {
 <style scoped>
 
 #app-map {
-  background-color: red;
   width: 100%;
   height: 100vh;
   position: relative;
@@ -828,7 +833,8 @@ export default {
 #map {
   width: 100%;
   height: 100vh;
-  background-color: rgb(255, 138, 138);
+  /* background-color: rgb(255, 138, 138); */
+  background-color: var(--darkBlue);
   z-index: 0; 
 }
 
