@@ -4,7 +4,7 @@
   <div id='onoffButton' ref='onoffButton' @click="e => e.stopPropagation()">
     <!-- Rounded switch -->
     <label class="switch">
-      <input type="checkbox" checked @mousedown="(e) => {e.stopPropagation(); e.preventDefault(); $emit('change', $event)}">
+      <input type="checkbox" :checked="checked" @mousedown="(e) => {e.stopPropagation(); e.preventDefault(); $emit('change', $event)}">
       <span class="slider round"></span>
     </label>
   </div>
@@ -18,15 +18,18 @@
 
 export default {
   name: 'onoffButton', // Caps, no -
+  props: {
+    checked: Boolean,
+  },
   created() {
     
   },
   mounted() {
 
   },
+  
   data (){
     return {
-      
     }
   },
   methods: {

@@ -149,7 +149,7 @@ class HFRadar {
   headers = {}; // Headers contain some time information too
   images = {};
   // GUI state variables
-  isVisible; // User decides
+  isActivated; // User decides
   hasDataOnTmst; // Has data on selected timestamp
   isAnimated; // User decides
   pointVariable;

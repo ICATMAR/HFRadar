@@ -8,7 +8,7 @@
           <button class="accordion-button" :ref="'HFRadarHeader' + index" type="button" data-bs-toggle="collapse"
             @click="onHeaderClick($event, index)">
             HF Radar {{radar["Site"]}}
-            <onoffButton class="onoffRadar" @click="onoffRadar(radar, $event)"></onoffButton>
+            <onoffButton class="onoffRadar" @click="onoffRadar(radar, $event)" :checked="radar.isActivated"></onoffButton>
           </button>
         </h2>
         <div :ref="'HFRadar' + index" :id="'bodySectionOne' + index" class="accordion-collapse collapse show"
@@ -186,8 +186,9 @@ export default {
     },
     // On Off Radar
     onoffRadar(radar, e){
+      // TODO HERE?
       let isChecked = e.target.parentElement.children[0].checked;
-      radar.isVisible = isChecked;
+      radar.isActivated = isChecked;
       window.eventBus.emit('RadarVisibilityChange', radar);
     },
 

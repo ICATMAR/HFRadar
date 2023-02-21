@@ -29,7 +29,7 @@ export default {
         // Check if there is radar data on that tmst
         if (radar.data[tmst] != undefined){
           // Make all radars with data visible
-          radar.isVisible = true;
+          radar.isActivated = true;
           
           
           // Create animation for radar
@@ -62,7 +62,7 @@ export default {
         // If radar does not have data on that timestamp
         else {
           // Make it not visible
-          radar.isVisible = false;
+          //radar.isActivated = false;
           // Stop animation
           radar.animEngine.isStopped = true;
           // Clear canvas
@@ -82,7 +82,7 @@ export default {
       Object.keys(window.DataManager.HFRadars).forEach(key => {
         let radar = window.DataManager.HFRadars[key];
         // If it is visible and has data, update data and start animation
-        if (radar.data[tmst] != undefined && radar.isVisible && radar.animEngine){
+        if (radar.data[tmst] != undefined && radar.isActivated && radar.animEngine){
           // Update existing animation
           radar.animEngine.setHFRadarData(radar.data[tmst]);
           let wasStopped = radar.animEngine.isStopped;
@@ -92,7 +92,6 @@ export default {
         }
         // Otherwise, stop animation
         else {
-          radar.isVisible = false;
           if (radar.animEngine){
             radar.animEngine.isStopped = true;
             radar.animEngine.clearCanvas();
@@ -120,14 +119,14 @@ export default {
       
       if (radar.animEngine){
         // Animation re-starts
-        if (radar.animEngine.isStopped && radar.isVisible){
-          radar.animEngine.isStopped = !radar.isVisible;
+        if (radar.animEngine.isStopped && radar.isActivated){
+          radar.animEngine.isStopped = !radar.isActivated;
           radar.animEngine.update();
 
         } 
         // Animation stops
-        else if (!radar.animEngine.isStopped && !radar.isVisible){
-          radar.animEngine.isStopped = !radar.isVisible;
+        else if (!radar.animEngine.isStopped && !radar.isActivated){
+          radar.animEngine.isStopped = !radar.isActivated;
           radar.animEngine.clearCanvas();
         }
       }
