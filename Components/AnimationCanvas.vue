@@ -20,6 +20,91 @@ export default {
   },
   mounted() {
     // EVENT LISTENERS
+    // New HFRadar data
+    window.eventBus.on('HFRadarDataLoaded', (tmst) =>{
+      // Iterate all radars
+      Object.keys(window.DataManager.HFRadars).forEach(key => {
+        let radar = window.DataManager.HFRadars[key];
+        
+        // Check if there is radar data on that tmst
+        if (radar.data[tmst] != undefined){
+          // Make all radars with data visible
+          radar.isVisible = true;
+          
+          
+          // Create animation for radar
+          // If canvas does not have animation engine
+          if (radar.animEngine == undefined){
+            // Create canvas
+            let canvas = this.createCanvas("canvasHFRadarAnimation");
+            this.$refs["animationCanvas"].appendChild(canvas);
+            // Create animation
+            radar.animEngine = new AnimationEngine(canvas, this.$parent.map, {"HFRadarData": radar.data[tmst]}, this.legend);
+
+            // Bind events
+            // Map events for animation
+            this.$parent.map.on('moveend', radar.animEngine.onMapMoveEnd);
+            this.$parent.map.on('movestart', radar.animEngine.onMapMoveStart);
+                  
+            console.log("creating animation");
+          }
+          // Update animation
+          else {
+            // Update existing animation
+            radar.animEngine.setHFRadarData(radar.data[tmst]);
+            let wasStopped = radar.animEngine.isStopped;
+            radar.animEngine.isStopped = false;
+            // Restart animation if it was stopped
+            if (wasStopped)
+              radar.animEngine.update();
+            }
+        }
+        // If radar does not have data on that timestamp
+        else {
+          // Make it not visible
+          radar.isVisible = false;
+          // Stop animation
+          radar.animEngine.isStopped = true;
+          // Clear canvas
+          radar.animEngine.clearCanvas();
+        }
+      })
+    });
+
+
+
+
+
+    // Selected date changed (slider moves or drag and drop files)
+    window.eventBus.on('SelectedDateChanged', (tmst) =>{
+      // Keep the visibility of the radars that is set on the GUI
+      // Iterate all radars
+      Object.keys(window.DataManager.HFRadars).forEach(key => {
+        let radar = window.DataManager.HFRadars[key];
+        // If it is visible and has data, update data and start animation
+        if (radar.data[tmst] != undefined && radar.isVisible && radar.animEngine){
+          // Update existing animation
+          radar.animEngine.setHFRadarData(radar.data[tmst]);
+          let wasStopped = radar.animEngine.isStopped;
+          radar.animEngine.isStopped = false;
+          if (wasStopped)
+            radar.animEngine.update();
+        }
+        // Otherwise, stop animation
+        else {
+          radar.isVisible = false;
+          if (radar.animEngine){
+            radar.animEngine.isStopped = true;
+            radar.animEngine.clearCanvas();
+          }
+          
+        }
+      });
+      
+
+    });
+
+
     // When legend changes
     window.eventBus.on('legendChanged_LegendGUI', (legend)=> {
       this.legend = legend;
@@ -73,7 +158,7 @@ export default {
 
     // PUBLIC METHODS
     updateAnimation: function(radar, data, map){
-
+      debugger;
       // Update animation engine
       if (radar.animEngine == undefined){
         if (radar.hasDataOnTmst){

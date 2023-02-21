@@ -310,7 +310,8 @@ export default {
       // Make all radars inactive
       Object.keys(window.DataManager.HFRadars).forEach(key => {
         window.DataManager.HFRadars[key].hasDataOnTmst = false;
-      })
+      });
+
 
       // Get current active radars on that date
       let activeRadars = window.DataManager.getRadarsDataOn(tmst);
@@ -318,8 +319,6 @@ export default {
         for (let i = 0; i < activeRadars.length; i++){
           let HFRadar = activeRadars[i];
           HFRadar.hasDataOnTmst = true;
-
-
 
           // WARNING: createImage might be useful to create HFRadar previews.
           // TODO: HFRadar.data.timestamp {dataPoints: [X], imgData: ...}
@@ -330,22 +329,11 @@ export default {
           }
           this.updateHFRadarData(HFRadar, tmst, HFRadar.images[tmst]);
         }
-      }
 
-      // Update animations
-      Object.keys(window.DataManager.HFRadars).forEach(key => {
-        let HFRadar = window.DataManager.HFRadars[key];
-        // Update animation canvas
-        // TODO: SHOULD CHECK HOW MANY ACTIVE. RIGHT NOW ONLY ONE ACTIVE.
-        // TODO: SHOULD MOVE SOMEWHERE ELSE? OR SHOULD IT BE CALLED FROM MAP? --> NO MAP NO ANIMATION
-        if (this.$refs.animationCanvas){
-          this.$refs.animationCanvas.updateAnimation(HFRadar, HFRadar.data[tmst], this.map)
         }
-      })
 
-                  
-
-      
+      // Vector - HFRadar Icons
+      this.updateHFRadarIcons();
     },
 
     // Remove HFRadar layers HFData, HFIcon, HFPoints
@@ -449,12 +437,6 @@ export default {
       this.centerOnCoord(location);
 
       
-      
-      // Vector - HFRadar Icons
-      this.updateHFRadarIcons();
-
-
-
       // Vector - Features layer
       // Show radar points
       // TODO: is this optimal?

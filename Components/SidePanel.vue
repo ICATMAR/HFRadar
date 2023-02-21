@@ -206,7 +206,6 @@ export default {
           this.visibleRadars.push(HFRadar);
         }
       }
-      console.log(this.visibleRadars);
     }
   },
   components: {
