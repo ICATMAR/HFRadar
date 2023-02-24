@@ -24,7 +24,7 @@ class DataManager {
 
     // TODO: HARDCORE FIX FOR COMBINED DATA FILES. --> should do a different processing for combined files
     if (HFRadarData.header.PatternUUID == undefined){
-      HFRadarData.header.PatternUUID = 'Fake UUID';
+      HFRadarData.header.PatternUUID = 'noUUID' + HFRadarData.header.Site;
     }
 
 
