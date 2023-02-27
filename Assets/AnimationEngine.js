@@ -834,6 +834,11 @@ class ParticleSystem {
   }
 
 
+  updateSource(source){
+    this.source = source;
+  }
+
+
   // Functions
   // Set num particles according to the number of pixels and source
   resizeNumParticles(){
