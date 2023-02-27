@@ -39,14 +39,19 @@ export default {
             let canvas = this.createCanvas("canvasHFRadarAnimation");
             this.$refs["animationCanvas"].appendChild(canvas);
             // Create animation
-            radar.animEngine = new AnimationEngine(canvas, this.$parent.map, {"HFRadarData": radar.data[tmst]}, this.legend);
+            if (radar.dataGrid) // Combined Radar (tots)
+              radar.animEngine = new AnimationEngine(canvas, this.$parent.map, {"CombinedRadarData": radar.dataGrid[tmst]}, this.legend);
+            else
+              radar.animEngine = new AnimationEngine(canvas, this.$parent.map, {"HFRadarData": radar.data[tmst]}, this.legend);
+           
+
 
             // Bind events
             // Map events for animation
             this.$parent.map.on('moveend', radar.animEngine.onMapMoveEnd);
             this.$parent.map.on('movestart', radar.animEngine.onMapMoveStart);
                   
-            console.log("creating animation");
+            console.log("Creating animation");
           }
           // Update animation
           else {

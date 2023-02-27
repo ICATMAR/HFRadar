@@ -182,7 +182,6 @@ export default {
     window.eventBus.on('SidePanelSizechanged', (isSidePanelOpen) => {
       setTimeout(()=> this.map.updateSize(), 100);
       this.map.updateSize();
-      console.log("helloadsofasdofi");
     })
     
 
