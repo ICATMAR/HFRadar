@@ -183,6 +183,18 @@ export default {
       setTimeout(()=> this.map.updateSize(), 100);
       this.map.updateSize();
     })
+    // When radar is activated / deactivated
+    window.eventBus.on('SidePanelRadarActiveChange', (HFRadar) => {
+      // Hide / show HF points
+      let radarPointsLayerName = 'HFPoints' + HFRadar.UUID;
+      if (!HFRadar.isActivated){
+        // Remove layer
+        if (this.getMapLayer(radarPointsLayerName)) this.map.removeLayer(this.getMapLayer(radarPointsLayerName));
+      } else{
+        // Add layer
+        this.map.addLayer(this.layers[radarPointsLayerName]);
+      }
+    });
     
 
   },
@@ -419,7 +431,7 @@ export default {
     // Update HFRadar data
     updateHFRadarData: function(HFRadar, tmst, imgData) {
       // ID of the radar
-      let radarID = HFRadar.header.PatternUUID;
+      let radarID = HFRadar.UUID;
       // let radarImgLayerName = 'HFData' + radarID;
       // // Image-Static data layer
       // // Add image layer with HF Radar data
@@ -470,7 +482,10 @@ export default {
         })
       })
       if (this.getMapLayer(radarPointsLayerName)) this.map.removeLayer(this.getMapLayer(radarPointsLayerName));
-      this.map.addLayer(this.layers[radarPointsLayerName]);
+      // Add if radar is active
+      if (HFRadar.isActivated)
+        this.map.addLayer(this.layers[radarPointsLayerName]);
+
 
 
     },

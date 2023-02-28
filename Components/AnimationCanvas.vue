@@ -120,7 +120,7 @@ export default {
       });
     });
     // When animation starts/stops
-    window.eventBus.on('RadarVisibilityChange', (radar) => {
+    window.eventBus.on('SidePanelRadarActiveChange', (radar) => {
       
       if (radar.animEngine){
         // Animation re-starts
