@@ -192,7 +192,9 @@ export default {
         if (this.getMapLayer(radarPointsLayerName)) this.map.removeLayer(this.getMapLayer(radarPointsLayerName));
       } else{
         // Add layer
-        this.map.addLayer(this.layers[radarPointsLayerName]);
+        if (this.getMapLayer(radarPointsLayerName)){} 
+        else
+          this.map.addLayer(this.layers[radarPointsLayerName]);
       }
     });
     
@@ -391,36 +393,39 @@ export default {
       // debugger;
       // Update features (one per HFRadar)
       Object.keys(radars).forEach(key => {
+        // Only for radars, not for tots (combined)
         let radar = radars[key];
-
-        // Create feature style
-        let featStyle = new ol.style.Style({
-          image: new ol.style.Icon({
-            src: 'Assets/antenna.png',
-            width: 10,
-            height: 10,
-            scale: [0.5, 0.5],
-            opacity: radar.hasDataOnTmst ? 1 : 0.3,
-          })
-        });
-
-        let feature = layerIcons.getSource().getFeatureById(key);
-        // Create feature if it does not exist
-        if (feature == null){
-          // let locationStr = radar.header.Origin;
-          // let location = locationStr.replace(/\s\s+/g, ',').replace(',', '').replace('\r', '').split(',');
-          // location = location.reverse();
-          let location = radar.getRadarOrigin();
-          feature = new ol.Feature({
-            name: 'HFRadarIcon' + key,
-            geometry: new ol.geom.Point(ol.proj.fromLonLat(location)),
+        if (!radar.dataGrid) {
+        
+          // Create feature style
+          let featStyle = new ol.style.Style({
+            image: new ol.style.Icon({
+              src: 'Assets/antenna.png',
+              width: 10,
+              height: 10,
+              scale: [0.5, 0.5],
+              opacity: radar.hasDataOnTmst ? 1 : 0.3,
+            })
           });
-          // Set feature id
-          feature.setId(key);
-          feature.setStyle(featStyle);
-          layerIcons.getSource().addFeature(feature);
-        } else
-          feature.setStyle(featStyle);
+
+          let feature = layerIcons.getSource().getFeatureById(key);
+          // Create feature if it does not exist
+          if (feature == null){
+            // let locationStr = radar.header.Origin;
+            // let location = locationStr.replace(/\s\s+/g, ',').replace(',', '').replace('\r', '').split(',');
+            // location = location.reverse();
+            let location = radar.getRadarOrigin();
+            feature = new ol.Feature({
+              name: 'HFRadarIcon' + key,
+              geometry: new ol.geom.Point(ol.proj.fromLonLat(location)),
+            });
+            // Set feature id
+            feature.setId(key);
+            feature.setStyle(featStyle);
+            layerIcons.getSource().addFeature(feature);
+          } else
+            feature.setStyle(featStyle);
+        }
 
       }); // End of HFRadars iteration
       
@@ -524,10 +529,8 @@ export default {
         // Iterate radar points and radars
         Object.keys(radars).forEach(key => {
           let radar = radars[key];
-          // Radar distance
-          let location = radar.getRadarOrigin();
           // If radar has data, then check the proximity
-          if (radar.hasDataOnTmst){ // AND IS SELECTED? TWO RADARS TOGETHER, HOW TO SELECT ONE OR THE OTHER DATAPOINT?
+          if (radar.hasDataOnTmst && radar.isActivated){ // AND IS SELECTED? TWO RADARS TOGETHER, HOW TO SELECT ONE OR THE OTHER DATAPOINT?
             for (let j = 0; j < radar.currentData.length; j++){
               let dataPoint = radar.currentData[j]; 
               // Calculate distance (could do it in km with the right formula, but this is interaction and it does not matter that much)
@@ -540,7 +543,12 @@ export default {
               }
             }
           }
-          // Check if the radar is closest than a datapoint
+        });
+        // Check if the radar is closest than a datapoint
+        Object.keys(radars).forEach(key => {
+          let radar = radars[key];
+          // Radar distance
+          let location = radar.getRadarOrigin();
           // Find if a radar is the closest
           let dist = this.getDistance(location, coord);
           if (dist < distMin && radar.hasDataOnTmst){
@@ -552,6 +560,8 @@ export default {
         if (closestRadar !== undefined){
           window.eventBus.emit('ClickedHFRadar', closestRadar);
         }
+        
+        
         // If point is closest, emit only if click is close to point in pixels
         // Limit by distance in pixels
         else if (closestDataPoint){
