@@ -315,6 +315,7 @@ class CombinedRadars extends HFRadar {
         
       }
       // Interpolate
+      // TODO: use only values that are close
       let UValue = 0;
       let VValue = 0;
       for (let ll = 0; ll < dataPointIndices.length; ll++){
@@ -325,8 +326,8 @@ class CombinedRadars extends HFRadar {
 
       // TODO WARNING HARDCODED FIX
       if (totalDist > 0.2){
-        UValue = 0;
-        VValue = 0;
+        UValue = undefined;
+        VValue = undefined;
       }
 
 
