@@ -50,10 +50,12 @@ export default {
     // When mouse clicks a data point
     window.eventBus.on('ClickedDataPoint', e => {
       let dataPoint = e.dataPoint;
-
-      this.currentValue = dataPoint['Velocity (cm/s)'].toFixed(1);
-      this.$refs.tooltipLegend.style.left = (100 * (this.currentValue - this.HFRADARRANGE[0]) / (this.HFRADARRANGE[1] - this.HFRADARRANGE[0])) + '%';
-      this.$refs.tooltipLegendBar.style.left = (100 * (this.currentValue - this.HFRADARRANGE[0]) / (this.HFRADARRANGE[1] - this.HFRADARRANGE[0])) + '%';
+      if (dataPoint['Velocity (cm/s)']){
+        this.currentValue = dataPoint['Velocity (cm/s)'].toFixed(1);
+        this.$refs.tooltipLegend.style.left = (100 * (this.currentValue - this.HFRADARRANGE[0]) / (this.HFRADARRANGE[1] - this.HFRADARRANGE[0])) + '%';
+        this.$refs.tooltipLegendBar.style.left = (100 * (this.currentValue - this.HFRADARRANGE[0]) / (this.HFRADARRANGE[1] - this.HFRADARRANGE[0])) + '%';
+      } else
+        this.currentValue = '';
     })
     // When map deselects a data point
     window.eventBus.on('DeselectedDataPoint', () => {
