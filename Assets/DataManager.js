@@ -7,7 +7,6 @@ const lastDate = new Date('2023-02-02T06:00Z');
 class DataManager {
 
   HFRadars = {};
-  CombinedRadars = {};
 
   constructor(){
     // EVENT LISTENERS
@@ -241,7 +240,7 @@ class CombinedRadars extends HFRadar {
   constructor (CombinedRadarData){
     super(CombinedRadarData);
 
-    this.createDataGrid(CombinedRadarData, 50, 100); // Consider using power of two numbers to create image and upsample later
+    this.createDataGrid(CombinedRadarData, 100, 200); // Consider using power of two numbers to create image and upsample later
   }
 
 
@@ -288,47 +287,58 @@ class CombinedRadars extends HFRadar {
 
       // Bilinear interpolation
       // Find four closest points
-      let dataPointIndices = [0, 0, 0, 0];
-      let dataPointDistances = [999, 999, 999, 999];
+      let dataPointDistances = [];
+      let distanceLimit = 0.03;
+      // Iterate through all data points
       for (let kk = 0; kk< data.length; kk++){
         // Calculate distance
         let dd = this.calcDistance(long, lat, data[kk]['Longitude (deg)'], data[kk]['Latitude (deg)']);
-        // Find closest points
-        for (let ll = 0; ll < dataPointIndices.length; ll++){
-          if (dd < dataPointDistances[ll]){
-            dataPointDistances[ll] = dd; // Store distance
-            dataPointIndices[ll] = kk; // Store data point index
-            ll = dataPointIndices.length; // Break from for
-          }
+        // If distance is inside range
+        if (dd < distanceLimit){
+          dataPointDistances.push([dd, kk]);
         }
-      }
-
-      // Define final values
-      // TODO: remove values that are too far away
-      // Find distance sumatory to normalize weights
-      let totalDist = 0;
-      let totalDistInv = 0;
-      for (let ll = 0; ll < dataPointIndices.length; ll++){
-        totalDist += dataPointDistances[ll]; 
-        dataPointDistances[ll] = 1/dataPointDistances[ll]; // Invert distance values (closer should have more weight)
-        totalDistInv += dataPointDistances[ll];
         
       }
-      // Interpolate
-      // TODO: use only values that are close
-      let UValue = 0;
-      let VValue = 0;
-      for (let ll = 0; ll < dataPointIndices.length; ll++){
-        let dataPoint = data[dataPointIndices[ll]];
-        UValue += dataPoint['U-comp (cm/s)'] * (dataPointDistances[ll] / totalDistInv);
-        VValue += dataPoint['V-comp (cm/s)'] * (dataPointDistances[ll] / totalDistInv);
-      }
 
-      // TODO WARNING HARDCODED FIX
-      if (totalDist > 0.2){
-        UValue = undefined;
-        VValue = undefined;
+
+
+      // Interpolate
+      // TODO: something wrong with the distance calculation?
+      let UValue = undefined;
+      let VValue = undefined;
+      if (dataPointDistances.length != 0){
+        dataPointDistances.sort( (a,b) => a[0] - b[0] );
+        let dataPoint = data[dataPointDistances[0][1]];
+        // Nearest neighbour
+        if (dataPointDistances.length == 1){
+          UValue = dataPoint['U-comp (cm/s)'];
+          VValue = dataPoint['V-comp (cm/s)'];
+        }
+        // Linear interpolation
+        else {
+          let d1 = dataPointDistances[0][0];
+          let d2 = dataPointDistances[1][0];
+          let totD = d1 + d2;
+          let dataPoint1 = data[dataPointDistances[0][1]];
+          let dataPoint2 = data[dataPointDistances[1][1]];
+
+          UValue = dataPoint1['U-comp (cm/s)'] * (1 - d1/totD) + dataPoint2['U-comp (cm/s)'] * (d1 / totD);
+          VValue = dataPoint1['V-comp (cm/s)'] * (1 - d1/totD) + dataPoint2['V-comp (cm/s)'] * (d1 / totD);
+        }
+
       }
+      
+      // for (let ll = 0; ll < dataPointIndices.length; ll++){
+      //   let dataPoint = data[dataPointIndices[ll]];
+      //   UValue += dataPoint['U-comp (cm/s)'] * (dataPointDistancesInv[ll] / totalDistInv);
+      //   VValue += dataPoint['V-comp (cm/s)'] * (dataPointDistancesInv[ll] / totalDistInv);
+      // }
+
+      // // TODO WARNING HARDCODED FIX
+      // if (totalDist > 0.2){
+      //   UValue = undefined;
+      //   VValue = undefined;
+      // }
 
 
 
