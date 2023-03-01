@@ -22,15 +22,31 @@ class DataManager {
   // INTERNAL METHODS
   addHFRadarData(HFRadarData){
 
-    // TODO: HARDCORE FIX FOR COMBINED DATA FILES. --> should do a different processing for combined files
+    
+    // Combined files do not have PatternUUID. Some radials do not have PatternUUID
     if (HFRadarData.header.PatternUUID == undefined){
       HFRadarData.header.PatternUUID = 'noUUID' + HFRadarData.header.Site;
     }
-
-
-
     // Find UUID
     let UUID = HFRadarData.header.PatternUUID.replaceAll(" ", "");
+
+
+
+    // Check if it is combined radar data (tots)
+    if (HFRadarData.header.FileType.includes('tots')){
+      if (this.HFRadars[UUID] != undefined){
+        this.HFRadars[UUID].addRadarData(HFRadarData);
+      } else {
+        console.log("New combined currents! Site: " + HFRadarData.header.Site);
+        // Create combined
+        let tots = new CombinedRadars(HFRadarData);
+        this.HFRadars[UUID] = tots;
+      }
+      return this.HFRadars[UUID];
+    }
+
+
+    
     // HFRadar exists
     if (this.HFRadars[UUID] != undefined){
       this.HFRadars[UUID].addRadarData(HFRadarData);
@@ -180,14 +196,7 @@ class HFRadar {
   // Could use the HFRadarData.header.UUID to identify the files. Timestamp works better for accessibility.
   addRadarData(HFRadarData){
     // Get timestamp
-    let tmst = HFRadarData.header.TimeStamp;
-    let ttRaw = tmst.split(" ");
-    let tt = [];
-    for (let i = 0; i < ttRaw.length; i++){
-      if (ttRaw[i].length != 0) tt.push(ttRaw[i]);
-    }
-    let dd = new Date(tt[0] +"-"+ tt[1]+"-"+ tt[2]+"T"+ tt[3]+":"+ tt[4]+ 'Z');
-    let timestamp = dd.toISOString();
+    let timestamp = this.getTimestamp(HFRadarData)
 
     // Check if timestamp already exists
     if (this.data[timestamp] != undefined) 
@@ -207,6 +216,162 @@ class HFRadar {
     let location = locationStr.replace(/\s\s+/g, ',').replace(',', '').replace('\r', '').split(',');
     location = location.reverse();
     return location;
+  }
+
+  getTimestamp(HFRadarData){
+    // Get timestamp
+    let tmst = HFRadarData.header.TimeStamp;
+    let ttRaw = tmst.split(" ");
+    let tt = [];
+    for (let i = 0; i < ttRaw.length; i++){
+      if (ttRaw[i].length != 0) tt.push(ttRaw[i]);
+    }
+    let dd = new Date(tt[0] +"-"+ tt[1]+"-"+ tt[2]+"T"+ tt[3]+":"+ tt[4]+ 'Z');
+    return dd.toISOString();
+  }
+}
+
+
+
+class CombinedRadars extends HFRadar {
+
+  dataGrid = {};
+
+  constructor (CombinedRadarData){
+    super(CombinedRadarData);
+
+    this.createDataGrid(CombinedRadarData, 100, 200); // Consider using power of two numbers to create image and upsample later
+  }
+
+
+  createDataGrid(CombinedRadarData, resolutionLong, resolutionLat){
+    let data = CombinedRadarData.data;
+    
+    // Calculate range
+    let minLat = 999;
+    let minLong = 999;
+    let maxLat = -999;
+    let maxLong = -999;
+  
+    for (let i = 0; i< data.length; i++){
+      if (data[i]['Longitude (deg)'] > maxLong) maxLong = data[i]['Longitude (deg)'];
+      if (data[i]['Longitude (deg)'] < minLong) minLong = data[i]['Longitude (deg)'];
+      if (data[i]['Latitude (deg)'] > maxLat) maxLat = data[i]['Latitude (deg)'];
+      if (data[i]['Latitude (deg)'] < minLat) minLat = data[i]['Latitude (deg)'];
+    }
+  
+    // Margins
+    maxLat += 0.013;
+    minLat -= 0.013;
+    maxLong += 0.017;
+    minLong -= 0.017;
+  
+    let rangeLat = maxLat - minLat;
+    let rangeLong = maxLong - minLong;
+
+    let resLat = resolutionLat || 4000;
+    let resLong = resolutionLong || 2000;
+    let stepLat = rangeLat / resLat;
+    let stepLong = rangeLong / resLong;
+  
+    // Create typed array
+    let dataGrid = new Float32Array(resLat * resLong * 2);
+
+    for (let ii = 0; ii < dataGrid.length / 2; ii++){
+
+      let i = Math.floor( ii / resLong); // Lat index
+      let j = ii % resLong; // Long index
+      
+      let long = minLong + j * stepLong;
+      let lat = minLat + i * stepLat;
+
+      // Bilinear interpolation
+      // Find four closest points
+      let dataPointDistances = [];
+      let distanceLimit = 0.03;
+      // Iterate through all data points
+      for (let kk = 0; kk< data.length; kk++){
+        // Calculate distance
+        let dd = this.calcDistance(long, lat, data[kk]['Longitude (deg)'], data[kk]['Latitude (deg)']);
+        // If distance is inside range
+        if (dd < distanceLimit){
+          dataPointDistances.push([dd, kk]);
+        }
+        
+      }
+
+
+
+      // Interpolate
+      // TODO: something wrong with the distance calculation?
+      let UValue = undefined;
+      let VValue = undefined;
+      if (dataPointDistances.length != 0){
+        dataPointDistances.sort( (a,b) => a[0] - b[0] );
+        let dataPoint = data[dataPointDistances[0][1]];
+        // Nearest neighbour
+        if (dataPointDistances.length == 1){
+          UValue = dataPoint['U-comp (cm/s)'];
+          VValue = dataPoint['V-comp (cm/s)'];
+        }
+        // Linear interpolation
+        else {
+          let d1 = dataPointDistances[0][0];
+          let d2 = dataPointDistances[1][0];
+          let totD = d1 + d2;
+          let dataPoint1 = data[dataPointDistances[0][1]];
+          let dataPoint2 = data[dataPointDistances[1][1]];
+
+          UValue = dataPoint1['U-comp (cm/s)'] * (1 - d1/totD) + dataPoint2['U-comp (cm/s)'] * (d1 / totD);
+          VValue = dataPoint1['V-comp (cm/s)'] * (1 - d1/totD) + dataPoint2['V-comp (cm/s)'] * (d1 / totD);
+        }
+
+      }
+      
+      // for (let ll = 0; ll < dataPointIndices.length; ll++){
+      //   let dataPoint = data[dataPointIndices[ll]];
+      //   UValue += dataPoint['U-comp (cm/s)'] * (dataPointDistancesInv[ll] / totalDistInv);
+      //   VValue += dataPoint['V-comp (cm/s)'] * (dataPointDistancesInv[ll] / totalDistInv);
+      // }
+
+      // // TODO WARNING HARDCODED FIX
+      // if (totalDist > 0.2){
+      //   UValue = undefined;
+      //   VValue = undefined;
+      // }
+
+
+
+      // Assign
+      dataGrid[ii * 2] = UValue;
+      dataGrid[ii * 2 + 1] = VValue;
+    }
+
+    // Get timestamp
+    let timestamp = this.getTimestamp(CombinedRadarData);
+    // Store data grid
+    if (this.dataGrid[timestamp]){
+      console.log("Overwritting data grid");
+    }
+    this.dataGrid[timestamp] = {
+      dataGrid,
+      minLat,
+      maxLat,
+      minLong,
+      maxLong,
+      stepLong,
+      stepLat,
+      rangeLong,
+      rangeLat,
+      "numLongPoints": resLong,
+      "numLatPoints": resLat
+    }
+  }
+
+
+  // Calculate distance
+  calcDistance(x, y, a, b){
+    return Math.sqrt((x-a)*(x-a) + (y-b)*(y-b));
   }
 }
 

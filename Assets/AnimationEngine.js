@@ -89,6 +89,16 @@ class AnimationEngine {
       this.update();
     }
 
+    // Create CombinedRadar source
+    if (animInfo.CombinedRadarData){
+      this.source = new SourceCombinedRadar(animInfo.CombinedRadarData);
+      // Create particle system
+      this.particles = new ParticleSystem(this.canvasParticles, this.source, this.map);
+      this.particles.clear();
+      // Start drawing loop (only once)
+      this.update();
+    }
+
     // Load color legends if it was not passed as a constructor
     // TODO: THIS SHOULD NOT BE NECESSARY
     if (!legend){
@@ -208,6 +218,8 @@ class AnimationEngine {
         this.particles.repositionParticles();
       }
     }
+    if (this.legend)
+      this.updateLegend(this.legend);
   }
   onMapMoveStart() {
     if (this.particles)
@@ -470,6 +482,50 @@ class SourceHFRadar {
 
   updateData(HFRadarData){
     this.data = HFRadarData;
+  }
+}
+
+
+// Combined Radar data source
+class SourceCombinedRadar {
+
+  constructor (CombinedRadarData){
+    this.dataGrid = CombinedRadarData;
+    this.isReady = true;
+    this.animation = {
+      type: 'velocity'
+    };
+  }
+
+  updateData(CombinedRadarData) {
+    this.data = CombinedRadarData;
+    // SOMETHING ELSE HERE?
+  }
+
+
+  getValueAtLongLat(long, lat, value){
+    
+    let grid = this.dataGrid; 
+
+    let longIndex = Math.floor(grid.numLongPoints * (long - grid.minLong) / grid.rangeLong);
+    let latIndex = Math.floor(grid.numLatPoints * (lat - grid.minLat) / grid.rangeLat);
+    longIndex = longIndex == -1 ? 0 : longIndex;
+    latIndex = latIndex == -1 ? 0 : latIndex;
+
+    // Indices are outside the data grid
+    if (longIndex < 0 || latIndex < 0 || longIndex >= grid.numLongPoints || latIndex >= grid.numLatPoints){
+      //console.log("Index out of bounds. longIndex: " + longIndex + ", latIndex: " + latIndex + ", Resolution: " + grid.numLongPoints + "x" + grid.numLatPoints);
+      value[0] = undefined;
+      value[1] = undefined;
+      return value;
+    }
+
+    // Find value
+    let index = latIndex * grid.numLongPoints + longIndex;
+    value[0] = grid.dataGrid[ index * 2];
+    value[1] = grid.dataGrid[ index * 2 + 1];
+
+    return value;
   }
 }
 
@@ -772,25 +828,33 @@ class ParticleSystem {
     
     // Create particles
     this.particles = [];
-    for (let i = 0; i < this.fullScreenNumParticles; i++)
-      this.particles[i] = new Particle(this);
+    for (let i = 0; i < this.fullScreenNumParticles; i++){
+      if (this.source.constructor.name == 'SourceCombinedRadar'){
+        this.particles[i] = new ParticleCombinedRadar(this);
+      }
+      else
+        this.particles[i] = new Particle(this);
+    }
+  }
+
+
+  updateSource(source){
+    this.source = source;
   }
 
 
   // Functions
   // Set num particles according to the number of pixels and source
   resizeNumParticles(){
-    if (this.source.constructor.name == 'SourceWMS'){
+    //if (this.source.constructor.name == 'SourceWMS'){
       let numPixels = this.canvas.width * this.canvas.height;
       let numParticlesFactor = numPixels / this.fullScreenPixels;
       // Active number of animations
       numParticlesFactor /= AnimationEngine.getNumActiveAnimations();
       // Define number of particles
       this.numParticles = Math.min(Math.round(numParticlesFactor * this.fullScreenNumParticles), this.fullScreenNumParticles);
-    } else if (this.source.constructor.name == 'SourceHFRadar'){
-      // Create one particle per data point
-      this.numParticles = this.source.data.length;
-    }
+    //} else if (this.source.constructor.name == 'SourceHFRadar'){
+    //}
   }
   // Reposition particles
   repositionParticles(){
@@ -823,6 +887,13 @@ class ParticleSystem {
     this.ctx.stroke();
   }
 
+
+  updateLegend(legend){
+    this.legend = legend;
+    for (let i = 0; i < this.numParticles; i++)
+      this.particles[i].updateLegend(legend);
+  }
+
 }
 
 
@@ -848,6 +919,9 @@ class Particle {
     // Variables for drawing
     this.prevPos = [0,0];
     this.currentPos = [0,0];
+
+    // Define color with legend (if present)
+    this.defineColorWithLegend();
 
     // Drawing function
     if (particleSystem.source.animation.type == 'velocity'){
@@ -973,6 +1047,15 @@ class Particle {
 
     // Draw in canvas
     let ctx = this.particleSystem.ctx;
+
+    // Change color
+      ctx.stroke();
+      ctx.beginPath();
+      //ctx.lineWidth = Math.max(value*15, 4);
+      //ctx.fillStyle = 'rgba(0, 0, 0, ', alphaFactor*0.0, ')';
+      let colorStr = 'rgba(' + this.color[0] + ',' + this.color[1] + ',' + this.color[2] + ', ' + 0.7 + ')'
+      ctx.strokeStyle = colorStr; // Makes the app go slow, consider something different
+
     ctx.moveTo(this.prevPos[0], this.prevPos[1])
     ctx.lineTo(this.currentPos[0], this.currentPos[1]);
 
@@ -1034,7 +1117,233 @@ class Particle {
     this.prevPos[0] = this.currentPos[0];
     this.prevPos[1] = this.currentPos[1];
   }
+
+
+
+  updateLegend(legend){
+    this.legend = legend;
+    this.defineColorWithLegend();
+  }
+  // These values depend on the variable range defined at the beginning of the file
+  defineColorWithLegend(legend){
+    return;
+    legend = legend || this.legend;
+    if(legend == undefined)
+      return;
+
+    let steps = legend.colorsStr.length;
+    let range = HFRADARRANGE; // HACK, THE SOURCE SHOULD HAVE THE RANGE: this.particleSystem.source.dataRange;
+    let unitStep = (range[1] - range[0])/steps;
+    let mag = this.signedMagnitude;
+    // Find color according to magnitude and legend
+    // Top bottom limits
+    if (mag < range[0])
+      this.color = legend.colorsStr[0];
+    else
+      this.color = legend.colorsStr[steps -1];
+    for (let i = 0; i < steps-1; i++){
+      let lowLim = range[0] + i*unitStep;
+      let highLim = range[0] + (i+1)*unitStep;
+      if (mag > lowLim && mag < highLim){
+        this.color = legend.colorsStr[i];
+        i = steps;
+      }
+    }
+  }
+
+
 }
+
+
+
+
+
+
+
+
+
+
+
+// Particle extension for CombinedRadar particle
+class ParticleCombinedRadar extends Particle {
+
+  constructor(particleSystem){
+    super(particleSystem);
+
+    particleSystem.speedFactor = 0.01;
+    this.stepInPixels = 0.1;
+    this.color = [255,255,255];
+  }
+
+  // Overwrite
+  repositionParticle(){
+    // Reset previous position for painting path
+    this.prevPos[0] = undefined;
+    this.prevPos[1] = undefined;
+    // Generate starting vertex with initial value
+    this.generatePoint(this.pointVec2, this.valueVec2);
+
+    // Assign initial position
+    this.vertices[0] = this.pointVec2[0];
+    this.vertices[1] = this.pointVec2[1];
+
+    // Create vertices path
+    // There is an advantge of storing pixel location: when painting we dont need to transform from lat-long to screen space
+    for (var i = 1; i < this.numVerticesPath; i++){
+      // Make step
+      // North is inverted because of pixels (less pixels, more north)
+      this.pointVec2[0] += this.valueVec2[0] * this.stepInPixels || 0; // 0 if there is no data
+      this.pointVec2[1] -= this.valueVec2[1] * this.stepInPixels || 0; // 0 if there is no data
+      // Assign positions to vertices array
+      this.vertices[i*2] = this.pointVec2[0];
+      this.vertices[i*2 + 1] = this.pointVec2[1];
+
+      // Transform pixel to long lat
+      let coord = this.particleSystem.map.getCoordinateFromPixel(this.pointVec2);
+      coord = ol.proj.transform(coord, 'EPSG:3857', 'EPSG:4326');
+      // Get new value according to longitude and latitude
+      this.valueVec2 = this.particleSystem.source.getValueAtLongLat(coord[0], coord[1], this.valueVec2);
+      // Assign values
+      if (this.valueVec2[0] !== undefined)
+        this.verticesValue[i] = Math.sqrt(this.valueVec2[0]*this.valueVec2[0] + this.valueVec2[1]*this.valueVec2[1]);
+    }
+  }
+
+
+
+  // Overwrite
+  generatePoint(point, value, callStackNum){
+    callStackNum = callStackNum || 1;
+    // TODO: MOVE THIS OUTSIDE THIS RECURSIVE FUNCTION
+    // Generate coordinates according to grid and map
+    // Get grid
+    let grid = this.particleSystem.source.dataGrid; 
+    // Get map range
+    let extent = this.particleSystem.map.getView().calculateExtent();
+    let mapExtentMin = ol.proj.transform([extent[0], extent[1]], 'EPSG:3857', 'EPSG:4326');
+    let mapExtentMax = ol.proj.transform([extent[2], extent[3]], 'EPSG:3857', 'EPSG:4326');
+    let mapMinLong = mapExtentMin[0];
+    let mapMinLat = mapExtentMin[1];
+    let mapMaxLong = mapExtentMax[0];
+    let mapMaxLat = mapExtentMax[1];
+    // Find the area visible and covered by the data grid
+    let minLong = Math.max(grid.minLong, mapMinLong);
+    let maxLong = Math.min(grid.maxLong, mapMaxLong);
+    let minLat = Math.max(grid.minLat, mapMinLat);
+    let maxLat = Math.min(grid.maxLat, mapMaxLat);
+    let rangeLong = maxLong - minLong;
+    let rangeLat = maxLat - minLat;
+
+    let longPoint = Math.random() * rangeLong + minLong;
+    let latPoint = Math.random() * rangeLat + minLat;
+
+    // Get value
+    value = this.particleSystem.source.getValueAtLongLat(longPoint, latPoint, value);
+    // If pixel does not contain data, throw it again at least 20 times
+    if (value[0] == undefined && callStackNum < 20){
+      this.generatePoint(point, value, callStackNum + 1); // Recursive function
+    }
+
+    // Transform point to screen space
+    let coord = ol.proj.transform([longPoint, latPoint], 'EPSG:4326', 'EPSG:3857');
+    let pixelCoord = this.particleSystem.map.getPixelFromCoordinate(coord);
+    // Assign to point
+    point[0] = pixelCoord[0];
+    point[1] = pixelCoord[1];    
+  }
+
+  // Draw / Update
+  drawVelocity(dt){
+
+    // Current value
+    let value = this.verticesValue[Math.round(this.life * this.numVerticesPath)];
+
+    // Update life
+    this.life += 0.005 + this.particleSystem.speedFactor * 0.1 * this.verticesValue[Math.round(this.life * this.numVerticesPath)];
+    // Reset life
+    if (this.life > 1 || isNaN(this.life)) {
+      this.life = Math.random();
+      // Start of vertices path
+      this.prevPos[0] = undefined;
+      this.prevPos[1] = undefined;
+    }
+
+    // Get exact position
+    let prevVertPath = Math.floor(this.life * (this.numVerticesPath-1)); // From 0 to numVerticesPath
+    let nextVertPath = Math.ceil(this.life * (this.numVerticesPath-1)); // From 0 to numVerticesPath
+
+    // Interpolation value
+    let interpCoeff = (nextVertPath - this.life * (this.numVerticesPath-1));
+    this.currentPos[0] = interpCoeff * this.vertices[prevVertPath*2]  +
+                (1-interpCoeff) * this.vertices[nextVertPath*2];
+    this.currentPos[1] = interpCoeff * this.vertices[prevVertPath*2 + 1]  +
+                (1-interpCoeff) * this.vertices[nextVertPath*2 + 1];
+
+    // When prevPos is not valid (map moved, source changed, etc)
+    if (this.prevPos[0] == undefined){
+      this.prevPos[0] = this.currentPos[0];
+      this.prevPos[1] = this.currentPos[1];
+      return;
+    }
+      
+    this.getColorFromLegend(this.color, value);
+
+    // Draw in canvas
+    let ctx = this.particleSystem.ctx;
+
+    // Change color
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.lineWidth = 2.5;
+      //ctx.fillStyle = 'rgba(0, 0, 0, ', alphaFactor*0.0, ')';
+      let colorStr = 'rgba(' + this.color[0] + ',' + this.color[1] + ',' + this.color[2] + ', ' + 0.7 + ')'
+      ctx.strokeStyle = colorStr; // Makes the app go slow, consider something different
+
+    ctx.moveTo(this.prevPos[0], this.prevPos[1])
+    ctx.lineTo(this.currentPos[0], this.currentPos[1]);
+
+    // Assign prevPos
+    this.prevPos[0] = this.currentPos[0];
+    this.prevPos[1] = this.currentPos[1];
+
+  }
+
+  getColorFromLegend(color, value){
+    let legend = this.legend;
+    if(legend == undefined)
+      return;
+    
+
+    let steps = legend.colorsStr.length;
+    let range = HFRADARRANGE; // HACK, THE SOURCE SHOULD HAVE THE RANGE: this.particleSystem.source.dataRange;
+    let unitStep = (range[1] - range[0])/steps;
+    
+    // Find color according to magnitude and legend
+    // Top bottom limits
+    //debugger;
+    // if (value < range[0])
+    //   this.color = legend.colorsStr[0];
+    // else
+    //   this.color = legend.colorsStr[steps -1];
+
+    for (let i = 0; i < steps-1; i++){
+      let lowLim = range[0] + i*unitStep;
+      let highLim = range[0] + (i+1)*unitStep;
+      if (value > lowLim && value < highLim){
+        color[0] = legend.colorsRGB[i][0];
+        color[1] = legend.colorsRGB[i][1];
+        color[2] = legend.colorsRGB[i][2];
+        i = steps;
+      }
+    }
+  }
+
+}
+
+
+
+
+
 
 export default AnimationEngine;
 

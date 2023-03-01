@@ -189,7 +189,7 @@ export default {
       // TODO HERE?
       let isChecked = e.target.parentElement.children[0].checked;
       radar.isActivated = isChecked;
-      window.eventBus.emit('RadarVisibilityChange', radar);
+      window.eventBus.emit('SidePanelRadarActiveChange', radar);
     },
     // On hide/show panel
     onSideArrowClick(){

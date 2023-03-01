@@ -32,8 +32,9 @@ const parseText = function(rawText){
   tableUnits.shift();
 
   // Combined radar data file fix
-  if (tableHeaders[15] == 'Site'){ // Hardcoded index
-    for (let i = 15; i<numCols; i++)
+  let siteIndex = tableHeaders.indexOf('Site');
+  if (siteIndex != -1){
+    for (let i = siteIndex; i < numCols; i++)
       tableHeaders[i] = 'Site Contri';
   }
 
