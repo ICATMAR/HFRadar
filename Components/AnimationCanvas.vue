@@ -56,7 +56,10 @@ export default {
           // Update animation
           else {
             // Update existing animation
-            radar.animEngine.setHFRadarData(radar.data[tmst]);
+            if (radar.dataGrid)
+              radar.animEngine.setCombinedRadarData(radar.dataGrid[tmst]);
+            else
+              radar.animEngine.setHFRadarData(radar.data[tmst]);
             let wasStopped = radar.animEngine.isStopped;
             radar.animEngine.isStopped = false;
             // Restart animation if it was stopped
@@ -65,7 +68,7 @@ export default {
             }
         }
         // If radar does not have data on that timestamp
-        else {
+        else if (radar.animEngine != undefined) {
           // Make it not visible
           //radar.isActivated = false;
           // Stop animation
@@ -89,7 +92,13 @@ export default {
         // If it is visible and has data, update data and start animation
         if (radar.data[tmst] != undefined && radar.isActivated && radar.animEngine){
           // Update existing animation
-          radar.animEngine.setHFRadarData(radar.data[tmst]);
+          // For HFRadar
+          if (radar.dataGrid == undefined)
+            radar.animEngine.setHFRadarData(radar.data[tmst]);
+          // For combined
+          else
+            radar.animEngine.setCombinedRadarData(radar.dataGrid[tmst])
+
           let wasStopped = radar.animEngine.isStopped;
           radar.animEngine.isStopped = false;
           if (wasStopped)
@@ -163,6 +172,7 @@ export default {
     // PUBLIC METHODS
     updateAnimation: function(radar, data, map){
       debugger;
+      // NEVER CALLED?
       // Update animation engine
       if (radar.animEngine == undefined){
         if (radar.hasDataOnTmst){
@@ -170,7 +180,11 @@ export default {
           let canvas = this.createCanvas("canvasHFRadarAnimation");
           this.$refs["animationCanvas"].appendChild(canvas);
           // Create animation
-          radar.animEngine = new AnimationEngine(canvas, map, {"HFRadarData": data}, this.legend);
+          if (radar.dataGrid) // Combined Radar (tots)
+              radar.animEngine = new AnimationEngine(canvas, map, {"CombinedRadarData": data}, this.legend);
+            else
+              radar.animEngine = new AnimationEngine(canvas, map, {"HFRadarData": data}, this.legend);
+          
           // Test
           // let ctx = canvas.getContext("2d");
           // ctx.fillStyle="blue";

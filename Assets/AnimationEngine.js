@@ -142,6 +142,13 @@ class AnimationEngine {
     this.particles.clear();
   }
 
+  setCombinedRadarData (CombinedRadarData){
+    this.source.updateData(CombinedRadarData);
+    this.particles.updateSource(this.source);
+    this.particles.clear();
+    this.particles.repositionParticles();
+  }
+
 
   // Update legend colors
   updateLegend(legend){
@@ -498,7 +505,7 @@ class SourceCombinedRadar {
   }
 
   updateData(CombinedRadarData) {
-    this.data = CombinedRadarData;
+    this.dataGrid = CombinedRadarData;
     // SOMETHING ELSE HERE?
   }
 

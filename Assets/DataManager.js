@@ -238,13 +238,32 @@ class CombinedRadars extends HFRadar {
   dataGrid = {};
 
   constructor (CombinedRadarData){
+    
     super(CombinedRadarData);
 
-    this.createDataGrid(CombinedRadarData, 100, 200); // Consider using power of two numbers to create image and upsample later
+    this.addRadarData(CombinedRadarData, 100, 200); // Consider using power of two numbers to create image and upsample later
   }
 
 
-  createDataGrid(CombinedRadarData, resolutionLong, resolutionLat){
+  addRadarData(CombinedRadarData, resolutionLong, resolutionLat){
+    if (this.dataGrid == undefined)
+     this.dataGrid = {};
+
+
+    // Get timestamp
+    let timestamp = this.getTimestamp(CombinedRadarData);
+
+    // Store data grid
+    if (this.dataGrid[timestamp]){
+      console.log("Overwritting data grid");
+    }
+    this.data[timestamp] = CombinedRadarData.data;
+    // Store header too
+    this.headers[timestamp] = CombinedRadarData.header;
+
+
+
+
     let data = CombinedRadarData.data;
     
     // Calculate range
@@ -269,8 +288,8 @@ class CombinedRadars extends HFRadar {
     let rangeLat = maxLat - minLat;
     let rangeLong = maxLong - minLong;
 
-    let resLat = resolutionLat || 4000;
-    let resLong = resolutionLong || 2000;
+    let resLat = resolutionLat || 200;
+    let resLong = resolutionLong || 100;
     let stepLat = rangeLat / resLat;
     let stepLong = rangeLong / resLong;
   
@@ -328,17 +347,6 @@ class CombinedRadars extends HFRadar {
 
       }
       
-      // for (let ll = 0; ll < dataPointIndices.length; ll++){
-      //   let dataPoint = data[dataPointIndices[ll]];
-      //   UValue += dataPoint['U-comp (cm/s)'] * (dataPointDistancesInv[ll] / totalDistInv);
-      //   VValue += dataPoint['V-comp (cm/s)'] * (dataPointDistancesInv[ll] / totalDistInv);
-      // }
-
-      // // TODO WARNING HARDCODED FIX
-      // if (totalDist > 0.2){
-      //   UValue = undefined;
-      //   VValue = undefined;
-      // }
 
 
 
@@ -347,12 +355,7 @@ class CombinedRadars extends HFRadar {
       dataGrid[ii * 2 + 1] = VValue;
     }
 
-    // Get timestamp
-    let timestamp = this.getTimestamp(CombinedRadarData);
-    // Store data grid
-    if (this.dataGrid[timestamp]){
-      console.log("Overwritting data grid");
-    }
+    
     this.dataGrid[timestamp] = {
       dataGrid,
       minLat,
@@ -366,6 +369,9 @@ class CombinedRadars extends HFRadar {
       "numLongPoints": resLong,
       "numLatPoints": resLat
     }
+
+    this.lastLoadedTimestamp = timestamp;
+
   }
 
 
