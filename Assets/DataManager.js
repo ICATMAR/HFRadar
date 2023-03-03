@@ -133,6 +133,12 @@ class DataManager {
             if (promiseResult.status == 'fulfilled'){
               
               lastHFRadar = this.addHFRadarData(promiseResult.value);
+              // Make it inactive it is radial?
+              if (lastHFRadar.dataGrid == undefined)
+                lastHFRadar.isActivated = false;
+              else
+                lastHFRadar.isActivated = true;
+              
             }
           }
         }
@@ -182,6 +188,7 @@ class DataManager {
       let lastHFRadar;
       for (let i = 0; i < values.length; i++){
         lastHFRadar = this.addHFRadarData(values[i]);
+        lastHFRadar.isActivated = true;
       }
       window.eventBus.emit('HFRadarDataLoaded', lastHFRadar.lastLoadedTimestamp);
     })

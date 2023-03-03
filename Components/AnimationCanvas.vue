@@ -29,7 +29,7 @@ export default {
         // Check if there is radar data on that tmst
         if (radar.data[tmst] != undefined){
           // Make all radars with data visible
-          radar.isActivated = true;
+          //radar.isActivated = true;
           
           
           // Create animation for radar
@@ -44,7 +44,9 @@ export default {
             else
               radar.animEngine = new AnimationEngine(canvas, this.$parent.map, {"HFRadarData": radar.data[tmst]}, this.legend);
            
-
+            // Stop animation if radar is not activated
+            radar.animEngine.isStopped = !radar.isActivated;
+            radar.animEngine.clearCanvas();
 
             // Bind events
             // Map events for animation
