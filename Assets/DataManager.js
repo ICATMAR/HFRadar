@@ -110,7 +110,7 @@ class DataManager {
     now = new Date(nowISODate);
 
     let movingDate = new Date(nowISODate);
-    movingDate.setDate(movingDate.getDate() - 1); // One day before
+    movingDate.setDate(movingDate.getDate() - 3); // Three day before
 
     // Array of promises
     let promises = [];
