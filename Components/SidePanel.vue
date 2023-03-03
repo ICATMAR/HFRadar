@@ -10,7 +10,7 @@
           <h2 class="accordion-header" >
             <button class="accordion-button" :ref="'HFRadarHeader' + index" type="button" data-bs-toggle="collapse"
               @click="onHeaderClick($event, index)">
-              HF Radar {{radar["Site"]}}
+              {{radar["FileType"].includes('tots') ? 'Combined Currents ' + radar["Site"] : 'HF Radar ' + radar["Site"]}}
               <onoffButton class="onoffRadar" @click="onoffRadar(radar, $event)" :checked="radar.isActivated"></onoffButton>
             </button>
           </h2>
