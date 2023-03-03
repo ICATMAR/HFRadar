@@ -3,6 +3,7 @@
 
 // Parse text
 const parseText = function(rawText){
+  
   // Index header
   let tableStartIndex = rawText.indexOf('TableStart:') + 12;
   let tableEndIndex = rawText.indexOf('%TableEnd:');
@@ -80,8 +81,6 @@ const parseText = function(rawText){
   }
 
   // TODO: COMBINED RADAR DATA DOES NOT HAVE PATTERNUUID. IT HAS AN EXTRA TABLE WITH THE LOCATION OF THE RADARS. SHOULD ADD..
-
-
   return {header, 'data': out};
 }
 
@@ -96,6 +95,55 @@ const getParamFromTable = function(rawText, param, tableType){
   return cols[0].replaceAll(':', '').replaceAll(' ', '');
 
 }
+
+
+
+
+const loadDataFromRepository = function(timestamp){
+
+  let baseURL = 'https://icatmar.github.io/HFRadarData/'
+
+  let date = new Date(timestamp);
+  //date = firstDate; // HACK
+  let dateISO = date.toISOString();
+  dateISO = dateISO.substring(0, 14) + '00:00.000Z'; // Hourly
+  let year = dateISO.substring(0,4);
+  let month = dateISO.substring(5,7);
+  let day = dateISO.substring(8,10);
+  let hour = dateISO.substring(11,13);
+
+
+  let promises = [];
+  let urls = [
+    // Begur
+    baseURL + 'BEGU/RDLi_BEGU_' + year + '_' + month + '_' + day + '_' + hour + '00.ruv',
+    //  Creus
+    baseURL + 'CREU/RDLm_CREU_' + year + '_' + month + '_' + day + '_' + hour + '00.ruv',
+    // Totals Roses
+    baseURL + 'ROSE/TOTL_ROSE_' + year + '_' + month + '_' + day + '_' + hour + '00.tuv'
+  ];
+
+  for (let i = 0; i < urls.length; i++){
+    promises.push(
+      fetch(urls[i])
+        .then( r => r.text())
+        .then (res => {
+          if (res[0] == '<')
+            throw new Error('File not found: ' + urls[i])
+          
+          return parseText(res);
+        })
+      );
+  }
+
+
+
+  return Promise.allSettled(promises)
+    //.then(values => console.log(values))
+
+
+}
+
 
 
 
@@ -152,4 +200,4 @@ const readFile = function(file){
 
 
 
-export { loadRawHFData, readFile };
+export { loadRawHFData, loadDataFromRepository, readFile };

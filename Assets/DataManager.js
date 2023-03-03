@@ -102,6 +102,48 @@ class DataManager {
   }
 
 
+  loadStaticFilesRepository(){
+    // Find dates
+    let now = new Date();
+    let str = now.toISOString();
+    let nowISODate = str.substring(0, 14) + '00:00.000Z';
+    now = new Date(nowISODate);
+
+    let movingDate = new Date(nowISODate);
+    movingDate.setDate(movingDate.getDate() - 1); // One day before
+
+    // Array of promises
+    let promises = [];
+    while(movingDate <= now){
+      promises.push(window.loadDataFromRepository(movingDate.toISOString()));
+      // Add 1h
+      movingDate.setUTCHours(movingDate.getUTCHours() + 1);
+    }
+
+    let lastHFRadar;
+    // Resolve promises
+    Promise.allSettled(promises).then(values => {
+      for (let i = 0; i < values.length; i++){
+        let filesOnDatePromiseResult = values[i];
+        // If promise was fullfiled (I think always)
+        if (filesOnDatePromiseResult.status == 'fulfilled'){
+          
+          for (let j = 0; j < filesOnDatePromiseResult.value.length; j++){
+            let promiseResult = filesOnDatePromiseResult.value[j];
+            if (promiseResult.status == 'fulfilled'){
+              
+              lastHFRadar = this.addHFRadarData(promiseResult.value);
+            }
+          }
+        }
+      }
+
+      window.eventBus.emit('HFRadarDataLoaded', lastHFRadar.lastLoadedTimestamp);
+    })
+
+  }
+
+
   // Load static files
   loadStaticFiles(){
     // Create promises array

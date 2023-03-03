@@ -95,6 +95,7 @@ class AnimationEngine {
       // Create particle system
       this.particles = new ParticleSystem(this.canvasParticles, this.source, this.map);
       this.particles.clear();
+      this.particles.repositionParticles();
       // Start drawing loop (only once)
       this.update();
     }
