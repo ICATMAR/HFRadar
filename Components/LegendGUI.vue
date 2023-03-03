@@ -65,7 +65,7 @@ export default {
   data (){
     return {
       legends: [],
-      legendIndex: 0,
+      legendIndex: 2,
       legendSrc: '',
       isMouseOver: false,
       // Tooltip
