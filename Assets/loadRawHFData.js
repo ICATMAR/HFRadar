@@ -101,7 +101,8 @@ const getParamFromTable = function(rawText, param, tableType){
 
 const loadDataFromRepository = function(timestamp){
 
-  let baseURL = 'https://icatmar.github.io/HFRadarData/'
+  //let baseURL = 'https://icatmar.github.io/HFRadarData/'
+  let baseURL = '/HFRadarData/'
 
   let date = new Date(timestamp);
   //date = firstDate; // HACK
