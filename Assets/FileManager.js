@@ -294,17 +294,22 @@ class FileManager {
         steps = steps || 10;
         let colorsStr = [];
         let colorsRGB = [];
+        let colorsFloat32 = new Float32Array(steps*3);
         for (let i = 0; i< steps; i++){
           let tmp = i * canvas.width / steps;
           let pixelPosition = Math.floor((canvas.width / steps) / 2 + tmp); // Pixel index + Half step (take the middle of the area, not the start)
           // RGB as string
           colorsStr[i] = 'rgb(' + pixels[pixelPosition*4] + ',' + pixels[pixelPosition*4 + 1] + ',' + pixels[pixelPosition*4+2] + ')';
           // RBG as array
-          colorsRGB[i] = [pixels[pixelPosition*4], pixels[pixelPosition*4+1], pixels[pixelPosition*4+2]]
+          colorsRGB[i] = [pixels[pixelPosition*4], pixels[pixelPosition*4+1], pixels[pixelPosition*4+2]];
+          // RGB as typed array (runs 5x faster in Animation.js)
+          colorsFloat32[i*3] = pixels[pixelPosition*4];
+          colorsFloat32[i*3 + 1] = pixels[pixelPosition*4 + 1];
+          colorsFloat32[i*3 + 2] = pixels[pixelPosition*4 + 2];
         }
 
 
-        resolve({colorsStr, colorsRGB, img});
+        resolve({colorsStr, colorsRGB, colorsFloat32, img});
       }
       img.onerror = () => reject();
       

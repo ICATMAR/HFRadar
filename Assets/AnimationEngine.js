@@ -888,7 +888,7 @@ class ParticleSystem {
 
     // Line style
     this.ctx.strokeStyle = 'rgba(0, 0, 0, 0.7)';
-    this.ctx.lineWidth = 1.5;
+    this.ctx.lineWidth = 1;
     this.ctx.beginPath();
     for (let i = 0; i < this.numParticles; i++)
       this.particles[i].draw(dt);
@@ -1302,7 +1302,7 @@ class ParticleCombinedRadar extends Particle {
     // Change color
       ctx.stroke();
       ctx.beginPath();
-      ctx.lineWidth = 2.5;
+      ctx.lineWidth = 1.5;
       //ctx.fillStyle = 'rgba(0, 0, 0, ', alphaFactor*0.0, ')';
       let colorStr = 'rgba(' + this.color[0] + ',' + this.color[1] + ',' + this.color[2] + ', ' + 0.7 + ')'
       ctx.strokeStyle = colorStr; // Makes the app go slow, consider something different
@@ -1317,33 +1317,25 @@ class ParticleCombinedRadar extends Particle {
   }
 
   getColorFromLegend(color, value){
-    let legend = this.legend;
-    if(legend == undefined)
+    //let legend = this.legend;
+    if(this.legend == undefined)
       return;
     
 
-    let steps = legend.colorsStr.length;
+    let steps = this.legend.colorsStr.length;
     let range = HFRADARRANGE; // HACK, THE SOURCE SHOULD HAVE THE RANGE: this.particleSystem.source.dataRange;
-    let unitStep = (range[1] - range[0])/steps;
+    //let unitStep = (range[1] - range[0])/steps;
     
     // Find color according to magnitude and legend
-    // Top bottom limits
-    //debugger;
-    // if (value < range[0])
-    //   this.color = legend.colorsStr[0];
-    // else
-    //   this.color = legend.colorsStr[steps -1];
+    let normValue = Math.min(1 , Math.max(0,(value - range[0]) / (range[1] - range[0])));
 
-    for (let i = 0; i < steps-1; i++){
-      let lowLim = range[0] + i*unitStep;
-      let highLim = range[0] + (i+1)*unitStep;
-      if (value > lowLim && value < highLim){
-        color[0] = legend.colorsRGB[i][0];
-        color[1] = legend.colorsRGB[i][1];
-        color[2] = legend.colorsRGB[i][2];
-        i = steps;
-      }
-    }
+    let indexColor = Math.floor(normValue * steps);
+
+    color[0] = this.legend.colorsFloat32[indexColor*3];
+    color[1] = this.legend.colorsFloat32[indexColor*3 + 1];
+    color[2] = this.legend.colorsFloat32[indexColor*3 + 2];
+
+    return color;
   }
 
 }
