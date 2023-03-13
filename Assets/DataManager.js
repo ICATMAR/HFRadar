@@ -10,10 +10,10 @@ class DataManager {
 
   constructor(){
     // EVENT LISTENERS
-    window.eventBus.on('LoadedHFRadarData', (HFRadarData) => { // From loadRawHFData.js
+    window.eventBus.on('LoadedHFRadarData', (HFRadarData) => { // From FileManager.js
       this.addHFRadarData(HFRadarData);
     });
-    window.eventBus.on('LoadedDropedHFRadarData', (HFRadarData) => { // From loadRawHFData.js
+    window.eventBus.on('LoadedDropedHFRadarData', (HFRadarData) => { // From FileManager.js
       this.addHFRadarData(HFRadarData);
     });
   }
@@ -115,7 +115,7 @@ class DataManager {
     // Array of promises
     let promises = [];
     while(movingDate <= now){
-      promises.push(window.loadDataFromRepository(movingDate.toISOString()));
+      promises.push(window.FileManager.loadDataFromRepository(movingDate.toISOString()));
       // Add 1h
       movingDate.setUTCHours(movingDate.getUTCHours() + 1);
     }
@@ -156,7 +156,7 @@ class DataManager {
     let movingDate = new Date(firstDate.toISOString());
     let promises = [];
     while (movingDate <= lastDate){
-      promises.push(window.loadData(movingDate.toISOString()));
+      promises.push(window.FileManager.loadData(movingDate.toISOString()));
       // Add 1h
       movingDate.setUTCHours(movingDate.getUTCHours() + 1);
     }
@@ -181,7 +181,7 @@ class DataManager {
     for (let i = 0; i < files.length; i++) {
         let file = files[i];
         // Read files
-        promises.push(window.readFile(file));
+        promises.push(window.FileManager.readFile(file));
     }
 
     Promise.all(promises).then(values => {

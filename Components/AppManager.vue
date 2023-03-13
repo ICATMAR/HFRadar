@@ -46,8 +46,8 @@ export default {
     //window.DataManager.loadStaticFiles();
     window.DataManager.loadStaticFilesRepository();
     // Load legends
-    window.loadLegends().then (values => {
-      window.eventBus.emit('legendsLoaded', values);
+    window.FileManager.loadLegends().then (values => {
+      window.eventBus.emit('AppManagerLegendsLoaded', values);
     });
   },
   data (){

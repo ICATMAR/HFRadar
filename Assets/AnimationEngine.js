@@ -103,7 +103,7 @@ class AnimationEngine {
     // Load color legends if it was not passed as a constructor
     // TODO: THIS SHOULD NOT BE NECESSARY
     if (!legend){
-      window.getLegend(LEGENDURLS[0], 20)
+      window.FileManager.getLegend(LEGENDURLS[0], 20)
         .then(legend => {
           this.legend = legend;
           this.particles.updateLegend(legend);
