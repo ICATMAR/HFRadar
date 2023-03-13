@@ -133,6 +133,7 @@ export default {
     // When animation starts/stops
     window.eventBus.on('SidePanelRadarActiveChange', (radar) => {
       
+      
       if (radar.animEngine){
         // Animation re-starts
         if (radar.animEngine.isStopped && radar.isActivated){

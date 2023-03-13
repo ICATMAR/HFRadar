@@ -177,8 +177,40 @@ class AnimationEngine {
     // Update timer
     let timeNow = performance.now();
     let dt = (timeNow - this.prevTime) / 1000; // in seconds;
+    
     this.frameTime = dt;
     this.prevTime = timeNow;
+
+
+    // DEBUGGER FRAME RATE
+    //***********************************************
+    if (this.timeCounter == undefined){
+      this.timeCounter = 0;
+      this.fpsArray = [];
+      this.particles.drawCalls = 0;
+    }
+    this.timeCounter += dt;
+    this.fpsArray.push(dt);
+    if (this.timeCounter > 1){
+      let sum = 0;
+      this.fpsArray.forEach(el => sum+= el);
+      let avg = sum/this.fpsArray.length;
+
+      // Debug message
+      console.log("Average FPS from last second: " + this.fpsArray.length/this.timeCounter + ". Average time: " + avg);
+      console.log("Framerate: " + this.FRAMERATE);
+      console.log("Num particles: " + this.particles.numParticles);
+      console.log("Num draw calls / nºparticles: " + this.particles.drawCalls/this.particles.numParticles);
+      console.log("Num draw calls: " + this.particles.drawCalls); 
+
+      // Reset
+      this.timeCounter = 0;
+      this.fpsArray = [];
+      this.particles.drawCalls = 0;
+
+    }
+    // **********************************************
+    
 
     // If data is loaded and layer is visible
     if (this.source){
@@ -189,9 +221,7 @@ class AnimationEngine {
     }
 
     // Loop
-    //var that = this;
-    //setTimeout(function() {that.update()}, that.FRAMERATE); // Frame rate in milliseconds
-    setTimeout(() => this.update() , this.FRAMERATE);
+    setTimeout(() => this.update() , this.FRAMERATE); // Frame rate in milliseconds
   }
 
 
@@ -1263,6 +1293,8 @@ class ParticleCombinedRadar extends Particle {
   // Draw / Update
   drawVelocity(dt){
 
+    this.particleSystem.drawCalls++;
+
     // Current value
     let value = this.verticesValue[Math.round(this.life * this.numVerticesPath)];
 
@@ -1321,7 +1353,6 @@ class ParticleCombinedRadar extends Particle {
     if(this.legend == undefined)
       return;
     
-
     let steps = this.legend.colorsStr.length;
     let range = HFRADARRANGE; // HACK, THE SOURCE SHOULD HAVE THE RANGE: this.particleSystem.source.dataRange;
     //let unitStep = (range[1] - range[0])/steps;

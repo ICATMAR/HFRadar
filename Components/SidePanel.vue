@@ -186,7 +186,11 @@ export default {
     },
     // On Off Radar
     onoffRadar(radar, e){
+      e.preventDefault();// TODO
+      e.stopPropagation();
       // TODO HERE?
+      console.log("EMIT TWICE??");
+      console.log(e);
       let isChecked = e.target.parentElement.children[0].checked;
       radar.isActivated = isChecked;
       window.eventBus.emit('SidePanelRadarActiveChange', radar);
