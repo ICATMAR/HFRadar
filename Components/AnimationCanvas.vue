@@ -38,11 +38,12 @@ export default {
             // Create canvas
             let canvas = this.createCanvas("canvasHFRadarAnimation");
             this.$refs["animationCanvas"].appendChild(canvas);
+            let legend = this.legend == undefined ? undefined : JSON.parse(JSON.stringify(this.legend));
             // Create animation
             if (radar.dataGrid) // Combined Radar (tots)
-              radar.animEngine = new AnimationEngine(canvas, this.$parent.map, {"CombinedRadarData": radar.dataGrid[tmst]}, JSON.parse(JSON.stringify(this.legend)));
+              radar.animEngine = new AnimationEngine(canvas, this.$parent.map, {"CombinedRadarData": radar.dataGrid[tmst]}, legend);
             else
-              radar.animEngine = new AnimationEngine(canvas, this.$parent.map, {"HFRadarData": radar.data[tmst]}, JSON.parse(JSON.stringify(this.legend)));
+              radar.animEngine = new AnimationEngine(canvas, this.$parent.map, {"HFRadarData": radar.data[tmst]}, legend);
            
             // Stop animation if radar is not activated
             radar.animEngine.isStopped = !radar.isActivated;
