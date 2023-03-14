@@ -121,7 +121,7 @@ export default {
 
 
     // When legend changes
-    window.eventBus.on('legendChanged_LegendGUI', (legend)=> {
+    window.eventBus.on('LegendGUI_legendChanged', (legend)=> {
       this.legend = legend;
       // Iterate radars
       Object.keys(window.DataManager.HFRadars).forEach(key => {
@@ -131,8 +131,10 @@ export default {
       });
     });
     // When animation starts/stops
-    window.eventBus.on('SidePanelRadarActiveChange', (radar) => {
-      
+    window.eventBus.on('SidePanelRadarActiveChange', (inRadar) => {
+
+      // Gotta be careful with .vue, as it tracks objects and its properties.
+      let radar = window.DataManager.HFRadars[inRadar.UUID];
       
       if (radar.animEngine){
         // Animation re-starts

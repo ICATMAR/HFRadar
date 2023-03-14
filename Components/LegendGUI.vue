@@ -92,7 +92,7 @@ export default {
 
     // EVENT EMITTER
     emitLegendChanged(legend){
-      window.eventBus.emit('legendChanged_LegendGUI', legend);
+      window.eventBus.emit('LegendGUI_legendChanged', legend);
     },
   },
   components: {
