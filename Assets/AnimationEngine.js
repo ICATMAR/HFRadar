@@ -184,30 +184,32 @@ class AnimationEngine {
 
     // DEBUGGER FRAME RATE
     //***********************************************
-    if (this.timeCounter == undefined){
-      this.timeCounter = 0;
-      this.fpsArray = [];
-      this.particles.drawCalls = 0;
-    }
-    this.timeCounter += dt;
-    this.fpsArray.push(dt);
-    if (this.timeCounter > 1){
-      let sum = 0;
-      this.fpsArray.forEach(el => sum+= el);
-      let avg = sum/this.fpsArray.length;
+    if (false) {
+      if (this.timeCounter == undefined){
+        this.timeCounter = 0;
+        this.fpsArray = [];
+        this.particles.drawCalls = 0;
+      }
+      this.timeCounter += dt;
+      this.fpsArray.push(dt);
+      if (this.timeCounter > 1){
+        let sum = 0;
+        this.fpsArray.forEach(el => sum+= el);
+        let avg = sum/this.fpsArray.length;
 
-      // Debug message
-      console.log("Average FPS from last second: " + this.fpsArray.length/this.timeCounter + ". Average time: " + avg);
-      console.log("Framerate: " + this.FRAMERATE);
-      console.log("Num particles: " + this.particles.numParticles);
-      console.log("Num draw calls / nºparticles: " + this.particles.drawCalls/this.particles.numParticles);
-      console.log("Num draw calls: " + this.particles.drawCalls); 
+        // Debug message
+        console.log("Average FPS from last second: " + this.fpsArray.length/this.timeCounter + ". Average time: " + avg);
+        console.log("Framerate: " + this.FRAMERATE);
+        console.log("Num particles: " + this.particles.numParticles);
+        console.log("Num draw calls / nºparticles: " + this.particles.drawCalls/this.particles.numParticles);
+        console.log("Num draw calls: " + this.particles.drawCalls); 
 
-      // Reset
-      this.timeCounter = 0;
-      this.fpsArray = [];
-      this.particles.drawCalls = 0;
+        // Reset
+        this.timeCounter = 0;
+        this.fpsArray = [];
+        this.particles.drawCalls = 0;
 
+      }
     }
     // **********************************************
     
