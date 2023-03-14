@@ -103,7 +103,7 @@ class AnimationEngine {
     // Load color legends if it was not passed as a constructor
     // TODO: THIS SHOULD NOT BE NECESSARY
     if (!legend){
-      window.getLegend(LEGENDURLS[0], 20)
+      window.FileManager.getLegend(LEGENDURLS[0], 20)
         .then(legend => {
           this.legend = legend;
           this.particles.updateLegend(legend);
@@ -177,8 +177,40 @@ class AnimationEngine {
     // Update timer
     let timeNow = performance.now();
     let dt = (timeNow - this.prevTime) / 1000; // in seconds;
+    
     this.frameTime = dt;
     this.prevTime = timeNow;
+
+
+    // DEBUGGER FRAME RATE
+    //***********************************************
+    if (this.timeCounter == undefined){
+      this.timeCounter = 0;
+      this.fpsArray = [];
+      this.particles.drawCalls = 0;
+    }
+    this.timeCounter += dt;
+    this.fpsArray.push(dt);
+    if (this.timeCounter > 1){
+      let sum = 0;
+      this.fpsArray.forEach(el => sum+= el);
+      let avg = sum/this.fpsArray.length;
+
+      // Debug message
+      console.log("Average FPS from last second: " + this.fpsArray.length/this.timeCounter + ". Average time: " + avg);
+      console.log("Framerate: " + this.FRAMERATE);
+      console.log("Num particles: " + this.particles.numParticles);
+      console.log("Num draw calls / nºparticles: " + this.particles.drawCalls/this.particles.numParticles);
+      console.log("Num draw calls: " + this.particles.drawCalls); 
+
+      // Reset
+      this.timeCounter = 0;
+      this.fpsArray = [];
+      this.particles.drawCalls = 0;
+
+    }
+    // **********************************************
+    
 
     // If data is loaded and layer is visible
     if (this.source){
@@ -189,9 +221,7 @@ class AnimationEngine {
     }
 
     // Loop
-    //var that = this;
-    //setTimeout(function() {that.update()}, that.FRAMERATE); // Frame rate in milliseconds
-    setTimeout(() => this.update() , this.FRAMERATE);
+    setTimeout(() => this.update() , this.FRAMERATE); // Frame rate in milliseconds
   }
 
 
@@ -818,7 +848,7 @@ class ParticleHF {
 // Class that manages the particle system
 class ParticleSystem {
   // Variables
-  fullScreenNumParticles = 10000;
+  fullScreenNumParticles = 30000;
   speedFactor = 0.7;
   fullScreenPixels = 1920 * 1080;
 
@@ -888,7 +918,7 @@ class ParticleSystem {
 
     // Line style
     this.ctx.strokeStyle = 'rgba(0, 0, 0, 0.7)';
-    this.ctx.lineWidth = 1.5;
+    this.ctx.lineWidth = 1;
     this.ctx.beginPath();
     for (let i = 0; i < this.numParticles; i++)
       this.particles[i].draw(dt);
@@ -1263,6 +1293,8 @@ class ParticleCombinedRadar extends Particle {
   // Draw / Update
   drawVelocity(dt){
 
+    this.particleSystem.drawCalls++;
+
     // Current value
     let value = this.verticesValue[Math.round(this.life * this.numVerticesPath)];
 
@@ -1302,7 +1334,7 @@ class ParticleCombinedRadar extends Particle {
     // Change color
       ctx.stroke();
       ctx.beginPath();
-      ctx.lineWidth = 2.5;
+      ctx.lineWidth = 1.5;
       //ctx.fillStyle = 'rgba(0, 0, 0, ', alphaFactor*0.0, ')';
       let colorStr = 'rgba(' + this.color[0] + ',' + this.color[1] + ',' + this.color[2] + ', ' + 0.7 + ')'
       ctx.strokeStyle = colorStr; // Makes the app go slow, consider something different
@@ -1317,33 +1349,24 @@ class ParticleCombinedRadar extends Particle {
   }
 
   getColorFromLegend(color, value){
-    let legend = this.legend;
-    if(legend == undefined)
+    //let legend = this.legend;
+    if(this.legend == undefined)
       return;
     
-
-    let steps = legend.colorsStr.length;
+    let steps = this.legend.colorsStr.length;
     let range = HFRADARRANGE; // HACK, THE SOURCE SHOULD HAVE THE RANGE: this.particleSystem.source.dataRange;
-    let unitStep = (range[1] - range[0])/steps;
+    //let unitStep = (range[1] - range[0])/steps;
     
     // Find color according to magnitude and legend
-    // Top bottom limits
-    //debugger;
-    // if (value < range[0])
-    //   this.color = legend.colorsStr[0];
-    // else
-    //   this.color = legend.colorsStr[steps -1];
+    let normValue = Math.min(1 , Math.max(0,(value - range[0]) / (range[1] - range[0])));
 
-    for (let i = 0; i < steps-1; i++){
-      let lowLim = range[0] + i*unitStep;
-      let highLim = range[0] + (i+1)*unitStep;
-      if (value > lowLim && value < highLim){
-        color[0] = legend.colorsRGB[i][0];
-        color[1] = legend.colorsRGB[i][1];
-        color[2] = legend.colorsRGB[i][2];
-        i = steps;
-      }
-    }
+    let indexColor = Math.floor(normValue * steps);
+
+    color[0] = this.legend.colorsFloat32[indexColor*3];
+    color[1] = this.legend.colorsFloat32[indexColor*3 + 1];
+    color[2] = this.legend.colorsFloat32[indexColor*3 + 2];
+
+    return color;
   }
 
 }

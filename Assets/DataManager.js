@@ -10,10 +10,10 @@ class DataManager {
 
   constructor(){
     // EVENT LISTENERS
-    window.eventBus.on('LoadedHFRadarData', (HFRadarData) => { // From loadRawHFData.js
+    window.eventBus.on('LoadedHFRadarData', (HFRadarData) => { // From FileManager.js
       this.addHFRadarData(HFRadarData);
     });
-    window.eventBus.on('LoadedDropedHFRadarData', (HFRadarData) => { // From loadRawHFData.js
+    window.eventBus.on('LoadedDropedHFRadarData', (HFRadarData) => { // From FileManager.js
       this.addHFRadarData(HFRadarData);
     });
   }
@@ -102,20 +102,35 @@ class DataManager {
   }
 
 
-  loadStaticFilesRepository(){
+  loadStaticFilesRepository(startDate, endDate){
+    
     // Find dates
     let now = new Date();
     let str = now.toISOString();
     let nowISODate = str.substring(0, 14) + '00:00.000Z';
     now = new Date(nowISODate);
 
-    let movingDate = new Date(nowISODate);
-    movingDate.setDate(movingDate.getDate() - DAYSTOLOAD); // Three day before
+    let movingDate;
+    if (startDate == undefined){
+      movingDate = new Date(nowISODate);
+      movingDate.setDate(movingDate.getDate() - DAYSTOLOAD); // Days before
+    } 
+    // If a period is specified
+    else {
+      movingDate = new Date(startDate);
+    }
+    // If a period is specified
+    if (endDate != undefined){
+      now = new Date(endDate);
+    }
+
+
+
 
     // Array of promises
     let promises = [];
     while(movingDate <= now){
-      promises.push(window.loadDataFromRepository(movingDate.toISOString()));
+      promises.push(window.FileManager.loadDataFromRepository(movingDate.toISOString()));
       // Add 1h
       movingDate.setUTCHours(movingDate.getUTCHours() + 1);
     }
@@ -156,7 +171,7 @@ class DataManager {
     let movingDate = new Date(firstDate.toISOString());
     let promises = [];
     while (movingDate <= lastDate){
-      promises.push(window.loadData(movingDate.toISOString()));
+      promises.push(window.FileManager.loadData(movingDate.toISOString()));
       // Add 1h
       movingDate.setUTCHours(movingDate.getUTCHours() + 1);
     }
@@ -181,7 +196,7 @@ class DataManager {
     for (let i = 0; i < files.length; i++) {
         let file = files[i];
         // Read files
-        promises.push(window.readFile(file));
+        promises.push(window.FileManager.readFile(file));
     }
 
     Promise.all(promises).then(values => {

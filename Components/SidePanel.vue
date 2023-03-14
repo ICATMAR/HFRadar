@@ -186,9 +186,10 @@ export default {
     },
     // On Off Radar
     onoffRadar(radar, e){
-      // TODO HERE?
+      e.preventDefault();
+      e.stopPropagation();
       let isChecked = e.target.parentElement.children[0].checked;
-      radar.isActivated = isChecked;
+      radar.isActivated = !isChecked; // isChecked gets updated after this event
       window.eventBus.emit('SidePanelRadarActiveChange', radar);
     },
     // On hide/show panel

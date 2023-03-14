@@ -41,10 +41,16 @@ export default {
   },
   mounted() {
     // When legends are loaded
-    window.eventBus.on('legendsLoaded', (legends) => {
-      this.legends = legends;
+    window.eventBus.on('AppManagerLegendsLoaded', (legends) => {
+      // Store legends when successfully loaded
+      this.legends = [];
+      legends.forEach(ll => {
+        if (ll.status == 'fulfilled'){
+          this.legends.push(ll.value);
+        }
+      })
       this.legendsLoaded = true;
-      this.legendSrc = legends[this.legendIndex].img.src;
+      this.legendSrc = this.legends[this.legendIndex].img.src;
       this.emitLegendChanged(this.legends[this.legendIndex]);
     });
     // When mouse clicks a data point
@@ -65,6 +71,7 @@ export default {
   data (){
     return {
       legends: [],
+      legendsLoaded: false,
       legendIndex: 2,
       legendSrc: '',
       isMouseOver: false,
@@ -85,7 +92,7 @@ export default {
 
     // EVENT EMITTER
     emitLegendChanged(legend){
-      window.eventBus.emit('legendChanged_LegendGUI', legend);
+      window.eventBus.emit('LegendGUI_legendChanged', legend);
     },
   },
   components: {
