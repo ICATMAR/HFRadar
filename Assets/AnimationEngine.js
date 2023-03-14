@@ -848,7 +848,7 @@ class ParticleHF {
 // Class that manages the particle system
 class ParticleSystem {
   // Variables
-  fullScreenNumParticles = 10000;
+  fullScreenNumParticles = 30000;
   speedFactor = 0.7;
   fullScreenPixels = 1920 * 1080;
 
