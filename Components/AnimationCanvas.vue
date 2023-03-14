@@ -40,9 +40,9 @@ export default {
             this.$refs["animationCanvas"].appendChild(canvas);
             // Create animation
             if (radar.dataGrid) // Combined Radar (tots)
-              radar.animEngine = new AnimationEngine(canvas, this.$parent.map, {"CombinedRadarData": radar.dataGrid[tmst]}, this.legend);
+              radar.animEngine = new AnimationEngine(canvas, this.$parent.map, {"CombinedRadarData": radar.dataGrid[tmst]}, JSON.parse(JSON.stringify(this.legend)));
             else
-              radar.animEngine = new AnimationEngine(canvas, this.$parent.map, {"HFRadarData": radar.data[tmst]}, this.legend);
+              radar.animEngine = new AnimationEngine(canvas, this.$parent.map, {"HFRadarData": radar.data[tmst]}, JSON.parse(JSON.stringify(this.legend)));
            
             // Stop animation if radar is not activated
             radar.animEngine.isStopped = !radar.isActivated;
@@ -123,11 +123,13 @@ export default {
     // When legend changes
     window.eventBus.on('LegendGUI_legendChanged', (legend)=> {
       this.legend = legend;
+      
       // Iterate radars
       Object.keys(window.DataManager.HFRadars).forEach(key => {
         let radar = window.DataManager.HFRadars[key];
         if (radar.animEngine)
-          radar.animEngine.updateLegend(legend);
+          //radar.animEngine.updateLegend(legend); // Creates get/set vue functions and slows down the update
+          radar.animEngine.updateLegend(JSON.parse(JSON.stringify(legend)));
       });
     });
     // When animation starts/stops
@@ -186,9 +188,9 @@ export default {
           this.$refs["animationCanvas"].appendChild(canvas);
           // Create animation
           if (radar.dataGrid) // Combined Radar (tots)
-              radar.animEngine = new AnimationEngine(canvas, map, {"CombinedRadarData": data}, this.legend);
+              radar.animEngine = new AnimationEngine(canvas, map, {"CombinedRadarData": data}, JSON.parse(JSON.stringify(this.legend)));
             else
-              radar.animEngine = new AnimationEngine(canvas, map, {"HFRadarData": data}, this.legend);
+              radar.animEngine = new AnimationEngine(canvas, map, {"HFRadarData": data}, JSON.parse(JSON.stringify(this.legend)));
           
           // Test
           // let ctx = canvas.getContext("2d");
