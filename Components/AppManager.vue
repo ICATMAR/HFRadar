@@ -44,8 +44,8 @@ export default {
 
     // Load data
     //window.DataManager.loadStaticFiles();
-    //window.DataManager.loadStaticFilesRepository();
-    window.DataManager.loadStaticFilesRepository('2023-03-02T11:00Z', '2023-03-07T16:00Z');
+    window.DataManager.loadStaticFilesRepository(); // Real-time data
+    //window.DataManager.loadStaticFilesRepository('2023-03-02T11:00Z', '2023-03-07T16:00Z'); // Specific dates with data
 
     // Load legends
     window.FileManager.loadLegends().then (values => {
