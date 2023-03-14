@@ -195,7 +195,7 @@ class FileManager {
 
     return fetch(url)
       .then (r => r.text())
-      .then (res => parseText(res))
+      .then (res => this.parseText(res))
       .catch(e => { throw e });
 
     
@@ -213,7 +213,7 @@ class FileManager {
       // On load file
       reader.addEventListener('load', e => {
         // Store in Data Manager
-        resolve(parseText(reader.result));
+        resolve(this.parseText(reader.result));
       });
       reader.addEventListener('error', e => {
         console.error('Could not read file ' + reader.file.name);
