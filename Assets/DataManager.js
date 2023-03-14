@@ -102,15 +102,30 @@ class DataManager {
   }
 
 
-  loadStaticFilesRepository(){
+  loadStaticFilesRepository(startDate, endDate){
+    
     // Find dates
     let now = new Date();
     let str = now.toISOString();
     let nowISODate = str.substring(0, 14) + '00:00.000Z';
     now = new Date(nowISODate);
 
-    let movingDate = new Date(nowISODate);
-    movingDate.setDate(movingDate.getDate() - DAYSTOLOAD); // Three day before
+    let movingDate;
+    if (startDate == undefined){
+      movingDate = new Date(nowISODate);
+      movingDate.setDate(movingDate.getDate() - DAYSTOLOAD); // Days before
+    } 
+    // If a period is specified
+    else {
+      movingDate = new Date(startDate);
+    }
+    // If a period is specified
+    if (endDate != undefined){
+      now = new Date(endDate);
+    }
+
+
+
 
     // Array of promises
     let promises = [];
