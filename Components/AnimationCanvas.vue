@@ -35,26 +35,7 @@ export default {
           // Create animation for radar
           // If canvas does not have animation engine
           if (radar.animEngine == undefined){
-            // Create canvas
-            let canvas = this.createCanvas("canvasHFRadarAnimation");
-            this.$refs["animationCanvas"].appendChild(canvas);
-            let legend = this.legend == undefined ? undefined : JSON.parse(JSON.stringify(this.legend));
-            // Create animation
-            if (radar.dataGrid) // Combined Radar (tots)
-              radar.animEngine = new AnimationEngine(canvas, this.$parent.map, {"CombinedRadarData": radar.dataGrid[tmst]}, legend);
-            else
-              radar.animEngine = new AnimationEngine(canvas, this.$parent.map, {"HFRadarData": radar.data[tmst]}, legend);
-           
-            // Stop animation if radar is not activated
-            radar.animEngine.isStopped = !radar.isActivated;
-            radar.animEngine.clearCanvas();
-
-            // Bind events
-            // Map events for animation
-            this.$parent.map.on('moveend', radar.animEngine.onMapMoveEnd);
-            this.$parent.map.on('movestart', radar.animEngine.onMapMoveStart);
-                  
-            console.log("Creating animation");
+            this.createAnimationEngine(radar, tmst);
           }
           // Update animation
           else {
@@ -112,6 +93,10 @@ export default {
           if (radar.animEngine){
             radar.animEngine.isStopped = true;
             radar.animEngine.clearCanvas();
+          } 
+          // Create animation engine
+          else if (radar.data[tmst] != undefined) {
+            this.createAnimationEngine(radar, tmst);
           }
           
         }
@@ -176,6 +161,34 @@ export default {
     updateAnimations(tmst){
 
     },
+
+
+
+    // Create animation engine
+    createAnimationEngine(radar, tmst){
+      // Create canvas
+      let canvas = this.createCanvas("canvasHFRadarAnimation");
+      this.$refs["animationCanvas"].appendChild(canvas);
+      let legend = this.legend == undefined ? undefined : JSON.parse(JSON.stringify(this.legend));
+      // Create animation
+      if (radar.dataGrid) // Combined Radar (tots)
+        radar.animEngine = new AnimationEngine(canvas, this.$parent.map, {"CombinedRadarData": radar.dataGrid[tmst]}, legend);
+      else
+        radar.animEngine = new AnimationEngine(canvas, this.$parent.map, {"HFRadarData": radar.data[tmst]}, legend);
+      
+      // Stop animation if radar is not activated
+      radar.animEngine.isStopped = !radar.isActivated;
+      radar.animEngine.clearCanvas();
+
+      // Bind events
+      // Map events for animation
+      this.$parent.map.on('moveend', radar.animEngine.onMapMoveEnd);
+      this.$parent.map.on('movestart', radar.animEngine.onMapMoveStart);
+            
+      console.log("Creating animation");
+    },
+
+
 
     // PUBLIC METHODS
     updateAnimation: function(radar, data, map){
