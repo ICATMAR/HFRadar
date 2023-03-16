@@ -1,7 +1,7 @@
 // Static files sample
 const firstDate = new Date('2023-01-26T06:00Z');
 const lastDate = new Date('2023-02-02T06:00Z');
-const DAYSTOLOAD = 7;
+const DAYSTOLOAD = 3;
 
 // Data manager class
 class DataManager {
