@@ -50,7 +50,12 @@ export default {
       this.$refs.slider.value = currentDate.getTime()/(1000*60*60);
 
       this.timeStr = currentDate.toISOString();
-
+      // Add time difference from now
+      let now = new Date();
+      let timeDiff = currentDate.getTime() - now.getTime();
+      let hoursDiff = Math.floor(timeDiff/(60*60*1000));
+      let minDiff = 60 - Math.floor(timeDiff/(60*1000) - hoursDiff*60);
+      this.timeStr += " (" + (hoursDiff+1) + "h " + minDiff + "min)";
       
       this.updateDataAvailability(sDate, eDate);
     })
@@ -82,6 +87,12 @@ export default {
       // Update self tooltip
       let dd = new Date(e.target.value*1000*60*60);
       this.timeStr = dd.toISOString();
+      // Add time difference from now
+      let now = new Date();
+      let timeDiff = dd.getTime() - now.getTime();
+      let hoursDiff = Math.floor(timeDiff/(60*60*1000));
+      let minDiff = 60 - Math.floor(timeDiff/(60*1000) - hoursDiff*60);
+      this.timeStr += " (" + (hoursDiff+1) + "h " + minDiff + "min)";
     },
 
     // Time arrows clicked
