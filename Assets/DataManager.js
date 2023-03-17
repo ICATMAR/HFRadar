@@ -377,16 +377,17 @@ class CombinedRadars extends HFRadar {
     const MAXLONG = 4.5;
     const MINLAT = 41.0;
     const MAXLAT = 43.5;
-    let numCols = Math.round((MAXLONG - MINLONG) * 10);
-    let numRows = Math.round((MAXLAT - MINLAT) * 10);
+    const GRIDRESOLUTION = Math.max(resLat, resLong)/10;
+    let numCols = Math.round((MAXLONG - MINLONG) * GRIDRESOLUTION);
+    let numRows = Math.round((MAXLAT - MINLAT) * GRIDRESOLUTION);
     let numGridCells = numCols * numRows;
     let grid = new Array(numGridCells); // TODO: PREALLOCATE MEMORY?
     // Fill grid with point indices
     for (let i = 0; i < data.length; i++){
       let long =  data[i]['Longitude (deg)'];
       let lat = data[i]['Latitude (deg)'];
-      let colIndex = Math.floor((long - MINLONG) * 10);
-      let rowIndex = Math.floor((lat - MINLAT) * 10);
+      let colIndex = Math.floor((long - MINLONG) * GRIDRESOLUTION);
+      let rowIndex = Math.floor((lat - MINLAT) * GRIDRESOLUTION);
       // Store grid indices of cells
       let gridCellIndex = rowIndex * numCols + colIndex; 
       if (grid[gridCellIndex] == undefined)
@@ -415,8 +416,8 @@ class CombinedRadars extends HFRadar {
       // Interpolation
       // Find four closest points using the grid
       let dataPointDistances = []; // TODO OPTIMIZE MEMORY
-      let colIndex = Math.floor((long - MINLONG) * 10);
-      let rowIndex = Math.floor((lat - MINLAT) * 10);
+      let colIndex = Math.floor((long - MINLONG) * GRIDRESOLUTION);
+      let rowIndex = Math.floor((lat - MINLAT) * GRIDRESOLUTION);
       let gridCellIndex = rowIndex * numCols + colIndex;
       
 
