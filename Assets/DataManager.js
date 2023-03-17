@@ -372,8 +372,29 @@ class CombinedRadars extends HFRadar {
 
     // Create grid for fast look-up
     // TODO: make it regular for temporal animation?
-     
-
+    //console.log("min long-lat: " + minLong + ", " + minLat + "-- max long-lat: " + maxLong + ", " + maxLat);
+    const MINLONG = 3.0;
+    const MAXLONG = 4.5;
+    const MINLAT = 41.0;
+    const MAXLAT = 43.5;
+    let numCols = Math.round((MAXLONG - MINLONG) * 10);
+    let numRows = Math.round((MAXLAT - MINLAT) * 10);
+    let numGridCells = numCols * numRows;
+    let grid = new Array(numGridCells); // TODO: PREALLOCATE MEMORY?
+    // Fill grid with point indices
+    for (let i = 0; i < data.length; i++){
+      let long =  data[i]['Longitude (deg)'];
+      let lat = data[i]['Latitude (deg)'];
+      let colIndex = Math.floor((long - MINLONG) * 10);
+      let rowIndex = Math.floor((lat - MINLAT) * 10);
+      // Store grid indices of cells
+      let gridCellIndex = rowIndex * numCols + colIndex; 
+      if (grid[gridCellIndex] == undefined)
+        grid[gridCellIndex] = [i];
+      else
+        grid[gridCellIndex].push(i);
+    }
+    
 
   
     // Create typed array
@@ -387,22 +408,48 @@ class CombinedRadars extends HFRadar {
       let long = minLong + j * stepLong;
       let lat = minLat + i * stepLat;
 
-      // Bilinear interpolation
-      // Find four closest points
-      let dataPointDistances = [];
-      // Iterate through all data points
-      for (let kk = 0; kk< data.length; kk++){
-        // Calculate distance
-        let dd = this.calcDistance(long, lat, data[kk]['Longitude (deg)'], data[kk]['Latitude (deg)']);
-        // If distance is inside range
-        if (dd < distanceLimit){
-          dataPointDistances.push([dd, kk]);
-        }
-        // Exit loop if four points are found
-        if (dataPointDistances.length >= 4)
-          kk = data.length;
-        
-      }
+
+
+
+
+      // Interpolation
+      // Find four closest points using the grid
+      let dataPointDistances = []; // TODO OPTIMIZE MEMORY
+      let colIndex = Math.floor((long - MINLONG) * 10);
+      let rowIndex = Math.floor((lat - MINLAT) * 10);
+      let gridCellIndex = rowIndex * numCols + colIndex;
+      
+
+      // Iterate surrounding 9 cells
+      colIndex--;
+      rowIndex--;
+      for (let cc = 0; cc < 9; cc++){ // Iterate surrounding cells
+        let tmpR = rowIndex + Math.floor(cc/3); // Row
+        let tmpC = colIndex + cc%3 // Col
+        gridCellIndex = tmpR * numCols + tmpC;
+
+        // First test, use only the ones inside the cell
+        let gridCell = grid[gridCellIndex];
+        if (gridCell !== undefined){
+          
+          for (let kk = 0; kk < gridCell.length; kk++){
+            let indexData = gridCell[kk];
+            // Calculate distance
+            let dd = this.calcDistance(long, lat, data[indexData]['Longitude (deg)'], data[indexData]['Latitude (deg)']);
+            if (dd < distanceLimit){
+              dataPointDistances.push([dd, indexData]);
+            }
+            // Exit loop if four points are found
+            if (dataPointDistances.length >= 4)
+              kk = gridCell.length;
+          }
+
+        } // End if girdCell
+
+      }// End cc for
+
+
+
 
 
 
