@@ -335,13 +335,25 @@ class CombinedRadars extends HFRadar {
     let minLong = 999;
     let maxLat = -999;
     let maxLong = -999;
+
+    let distances = [];
   
     for (let i = 0; i< data.length; i++){
       if (data[i]['Longitude (deg)'] > maxLong) maxLong = data[i]['Longitude (deg)'];
       if (data[i]['Longitude (deg)'] < minLong) minLong = data[i]['Longitude (deg)'];
       if (data[i]['Latitude (deg)'] > maxLat) maxLat = data[i]['Latitude (deg)'];
       if (data[i]['Latitude (deg)'] < minLat) minLat = data[i]['Latitude (deg)'];
+      // Store distances (assuming that points are adjacent!)
+      if (i< data.length -1) {
+        distances.push( this.calcDistance( data[i]['Longitude (deg)'], data[i]['Latitude (deg)'],
+                                         data[i+1]['Longitude (deg)'], data[i+1]['Latitude (deg)'] ));
+      }
     }
+    // Calculate distance between two adjacent points
+    distances.sort();
+    let distanceLimit = distances[Math.floor(distances.length/2)];
+
+  
   
     // Margins
     maxLat += 0.013;
@@ -356,6 +368,13 @@ class CombinedRadars extends HFRadar {
     let resLong = resolutionLong || 100;
     let stepLat = rangeLat / resLat;
     let stepLong = rangeLong / resLong;
+
+
+    // Create grid for fast look-up
+    // TODO: make it regular for temporal animation?
+     
+
+
   
     // Create typed array
     let dataGrid = new Float32Array(resLat * resLong * 2);
@@ -371,7 +390,6 @@ class CombinedRadars extends HFRadar {
       // Bilinear interpolation
       // Find four closest points
       let dataPointDistances = [];
-      let distanceLimit = 0.03;
       // Iterate through all data points
       for (let kk = 0; kk< data.length; kk++){
         // Calculate distance
@@ -380,6 +398,9 @@ class CombinedRadars extends HFRadar {
         if (dd < distanceLimit){
           dataPointDistances.push([dd, kk]);
         }
+        // Exit loop if four points are found
+        if (dataPointDistances.length >= 4)
+          kk = data.length;
         
       }
 
