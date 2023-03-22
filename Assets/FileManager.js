@@ -14,9 +14,10 @@ class FileManager {
     './Assets/Legends/GreenBlueWhiteOrangeRed.png',
     './Assets/Legends/BlueWhiteRed.png',
     './Assets/Legends/ModifiedOccam.png',
-    './Assets/Legends/GrayScale.png',
-    './Assets/Legends/GrayScaleReverse.png',
-    './Assets/Legends/DarkScaleColors.png'
+    './Assets/Legends/absGrayScale.png',
+    './Assets/Legends/absGrayScaleReverse.png',
+    './Assets/Legends/DarkScaleColors.png',
+    './Assets/Legends/absModifiedOccam.png',
   ];
 
   constructor(){
