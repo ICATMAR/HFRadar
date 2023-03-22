@@ -5,7 +5,7 @@
     <div v-show="legendsLoaded">
       <!-- Tooltip -->
       <div v-show="!isMouseOver && currentValue !=''">
-        <div class="tooltipLegend" ref="tooltipLegend">{{currentValue}} cm/s</div>
+        <div class="tooltipLegend" ref="tooltipLegend">{{currentValue}} {{units}}</div>
         <div class="tooltipLegendBar" ref="tooltipLegendBar">|</div>
       </div>
 
@@ -70,8 +70,7 @@ export default {
       this.emitLegendChanged(this.legends[this.legendIndex]);
     });
     // When mouse clicks a data point
-    // TODO: legendRange should be for each data displayed
-    // TODO: this event should have information about the data type. It is possible that it should be received in AnimationCanvas.vue
+    // TODO: move this event to widget
     window.eventBus.on('ClickedDataPoint', e => {
       let dataPoint = e.dataPoint;
       
