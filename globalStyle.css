@@ -1,12 +1,67 @@
 :root {
-    --blue: rgb(20, 120, 167);
-    --blueRGB: 20, 120, 167;
-    --darkBlue: rgb(15, 48, 98);
-    --darkBlueRGB: 15, 48, 98;
-    --lightBlue: rgb(82, 181, 217);
-    --lightBlueRGB: 82, 181, 217;
-    --red: rgb(255, 115, 105);
-    --redRGB: 255, 115, 105;
+  --blue: rgb(20, 120, 167);
+  --blueRGB: 20, 120, 167;
+  --darkBlue: rgb(15, 48, 98);
+  --darkBlueRGB: 15, 48, 98;
+  --lightBlue: rgb(82, 181, 217);
+  --lightBlueRGB: 82, 181, 217;
+  --red: rgb(255, 115, 105);
+  --redRGB: 255, 115, 105;
+}
+
+
+
+
+
+/* Limit SVG size */
+.icon-svg {
+  width: 45px;
+  height: 45px;
+}
+
+.icon-svg:hover {
+  border-width: 2px;
+  border-color: black;
+  border-style: solid;
+  border-radius: 50%;
+  background-color: rgb(176, 176, 176);
+}
+
+.roundButton {
+  border-style: none;
+  padding: 0;
+  margin-bottom: 10px;
+  border-radius: 50%;
+}
+
+
+
+
+/* SCROLLBAR */
+/* Works on Firefox */
+* {
+  scrollbar-width: auto;
+  scrollbar-color:  lightblue var(--blue);
+}
+
+/* Works on Chrome, Edge, and Safari */
+*::-webkit-scrollbar {
+  width: 10px;
+}
+*::-webkit-scrollbar-track {
+  background: lightblue
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: var(--lightBlue);
+  border-radius: 5px;
+  border: 1px solid var(--darkBlue);
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background-color: var(--blue);
+  border-radius: 5px;
+  border: 1px solid var(--darkBlue);
 }
 
 
@@ -25,13 +80,13 @@ input[type='range']::-webkit-slider-thumb {
 } */
 
 .accordion-button {
-    color:white;
-    background: var(--darkBlue);
+  color:white;
+  background: var(--darkBlue);
 }
 
 .accordion-button:not(.collapsed){
-    background: var(--blue);
-    color:white;
+  background: var(--blue);
+  color:white;
 }
 
 

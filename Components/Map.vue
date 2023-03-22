@@ -867,13 +867,13 @@ export default {
 
 #app-map {
   width: 100%;
-  height: 100vh;
+  height: 100%;
   position: relative;
 }
 
 #map {
   width: 100%;
-  height: 100vh;
+  height: 100%;
   /* background-color: rgb(255, 138, 138); */
   background-color: var(--darkBlue);
   z-index: 0; 

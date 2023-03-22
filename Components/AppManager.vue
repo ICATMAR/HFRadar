@@ -2,7 +2,7 @@
   <!-- Container -->
   <div id="app-manager" ref="appManager">
 
-    <div style="display:flex;flex-direction: row;">
+    <div id="map-container" >
       <!-- Map -->
       <mapOL></mapOL>
 
@@ -74,6 +74,14 @@ export default {
     width: 100vw;
     height: 100vh;
     position: fixed;
+  }
+
+  #map-container {
+    display:flex;
+    flex-direction: row;
+    width: 100%;
+    height: 100%;
+    position:fixed;
   }
 
   .Banner {
