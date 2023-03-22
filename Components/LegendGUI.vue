@@ -13,7 +13,7 @@
       <img class="selLegend" :src="legendSrc">
       <div class="rangeValuesBox">
         <div class="leftRange">{{legendRange[0]}}</div>
-        <div class="middleRange">cm/s</div>
+        <div class="middleRange">{{ units }}</div>
         <div class="rightRange">{{legendRange[1]}}</div>
       </div>
     </div>
@@ -36,11 +36,17 @@
 
 export default {
   name: 'legendGUI', // Caps, no -
+  props: [
+    'legendName',
+    'legendRange',
+    'units'
+  ],
   created() {
     
   },
   mounted() {
     // When legends are loaded
+    // TODO: default legend index? shoud be set when data is loaded?
     window.eventBus.on('AppManagerLegendsLoaded', (legends) => {
       // Store legends when successfully loaded
       this.legends = [];
@@ -48,13 +54,24 @@ export default {
         if (ll.status == 'fulfilled'){
           this.legends.push(ll.value);
         }
-      })
+      });
       this.legendsLoaded = true;
+
+
+      // Find index according to default legend name     
+      for (let i = 0; i < this.legends.length; i++){
+        if (this.legends[i].img.src.includes('/' + this.legendName)){
+          this.legendIndex = i;
+          i = this.legends.length; // Exit loop
+        }
+      }
+
       this.legendSrc = this.legends[this.legendIndex].img.src;
       this.emitLegendChanged(this.legends[this.legendIndex]);
     });
     // When mouse clicks a data point
     // TODO: legendRange should be for each data displayed
+    // TODO: this event should have information about the data type. It is possible that it should be received in AnimationCanvas.vue
     window.eventBus.on('ClickedDataPoint', e => {
       let dataPoint = e.dataPoint;
       
@@ -75,11 +92,11 @@ export default {
     return {
       legends: [],
       legendsLoaded: false,
-      legendIndex: 6, // Manual default legend color
+      legendIndex: 6, // Is ovewritten by widget data type
       legendSrc: '',
       isMouseOver: false,
       // Tooltip
-      legendRange: [-100, 100], // Legend range is changed in AnimationCanvas.vue, when the animation is created
+      //legendRange: [-100, 100], // Legend range is changed in AnimationCanvas.vue, when the animation is created
       currentValue: '',
     }
   },
@@ -96,7 +113,8 @@ export default {
 
     // EVENT EMITTER
     emitLegendChanged(legend){
-      window.eventBus.emit('LegendGUI_legendChanged', legend);
+      // TODO: FIX DATA STRUCTURE: legend contains colors and img, range is dependent on the data type
+      window.eventBus.emit('LegendGUI_legendChanged', {legend, "legendRange": this.legendRange});
     },
   },
   components: {
@@ -172,10 +190,10 @@ img {
   -ms-transform: translateX(-50%);
 }
 
-.middleRange {
-  /* transform: translateX(-50%);
-  -ms-transform: translateX(-50%); */
-}
+/* .middleRange {
+  transform: translateX(-50%);
+  -ms-transform: translateX(-50%);
+} */
 
 .rightRange {
   transform: translateX(50%);
