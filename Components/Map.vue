@@ -27,8 +27,6 @@
       <!-- Animation Canvas -->
       <animationCanvas ref="animationCanvas"></animationCanvas>
 
-      <!-- Legends -->
-      <legendGUI ref="legendGUI"></legendGUI>
 
       <!-- Tracks on the timeline -->
       <!-- <tracks-timeline ref="tracksTimeLine" @clickTrackMark="setSelectedTrack" style="bottom: 120px; position: relative; z-index: 2"></tracks-timeline> -->
@@ -58,7 +56,6 @@
 <script>
 import AnimationCanvas from "./AnimationCanvas.vue";
 import TimeSlider from "./TimeSlider.vue";
-import LegendGUI from "./LegendGUI.vue";
 // import TimeRangeBar from "TimeRangeBar.vue";
 // import TracksTimeLine from "TracksTimeLine.vue";
 //import WMSLegend from "WMSLegend.vue";
@@ -845,7 +842,6 @@ export default {
   components: {
     "time-slider": TimeSlider,
     "animationCanvas": AnimationCanvas,
-    "legendGUI": LegendGUI,
 },
   computed: {
       //foo: function () {}

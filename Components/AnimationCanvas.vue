@@ -4,6 +4,10 @@
 
       <!-- Animation Canvas will be appended by code -->
 
+      <!-- Animation legend -->
+      <!-- todo v:for for different data types? -->
+      <legendGUI ref="legendGUI"></legendGUI>
+
   </div>
 </template>
 
@@ -12,6 +16,7 @@
 
 // Import components
 //import Map from 'Components/Map.vue'
+import LegendGUI from "./LegendGUI.vue";
 
 export default {
   name: 'animationCanvas', // Caps, no -
@@ -115,6 +120,7 @@ export default {
         let radar = window.DataManager.HFRadars[key];
         if (radar.animEngine)
           //radar.animEngine.updateLegend(legend); // Creates get/set vue functions and slows down the update
+          legend.legendRange = radar.getLegendRange();
           radar.animEngine.updateLegend(JSON.parse(JSON.stringify(legend)));
       });
     });
@@ -141,7 +147,7 @@ export default {
   },
   data (){
     return {
-      
+      dataTypes: []
     }
   },
   methods: {
@@ -166,9 +172,26 @@ export default {
 
     // Create animation engine
     createAnimationEngine(radar, tmst){
+      // Get datatype
+      let dataType = radar.constructor.name;
+      // Add data type to array for legends
+      // TODO: could create something like active data types?
+      // TODO: each data type would have a legend + range + possible combinations and configurations
+      if (!this.dataTypes.includes(dataType))
+        this.dataTypes.push(dataType);
+
+      console.log(this.dataTypes);
+
+
       // Create canvas
       let canvas = this.createCanvas("canvasHFRadarAnimation");
       this.$refs["animationCanvas"].appendChild(canvas);
+
+      
+      this.$refs.legendGUI.legendRange = radar.getLegendRange();
+      this.legend.legendRange = radar.getLegendRange();
+      
+
       let legend = this.legend == undefined ? undefined : JSON.parse(JSON.stringify(this.legend));
       // Create animation
       if (radar.dataGrid) // Combined Radar (tots)
@@ -233,7 +256,7 @@ export default {
 
   },
   components: {
-    //'map': Map,
+    "legendGUI": LegendGUI,
   }
 }
 </script>
@@ -250,4 +273,6 @@ export default {
   top: 0px;
   pointer-events: none;
 }
+
+
 </style>

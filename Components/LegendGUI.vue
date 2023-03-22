@@ -12,9 +12,9 @@
       <!-- Legend -->
       <img class="selLegend" :src="legendSrc">
       <div class="rangeValuesBox">
-        <div class="leftRange">-100 cm/s</div>
-        <div class="middleRange">0</div>
-        <div class="rightRange">100 cm/s</div>
+        <div class="leftRange">{{legendRange[0]}}</div>
+        <div class="middleRange">cm/s</div>
+        <div class="rightRange">{{legendRange[1]}}</div>
       </div>
     </div>
 
@@ -54,29 +54,32 @@ export default {
       this.emitLegendChanged(this.legends[this.legendIndex]);
     });
     // When mouse clicks a data point
+    // TODO: legendRange should be for each data displayed
     window.eventBus.on('ClickedDataPoint', e => {
       let dataPoint = e.dataPoint;
+      
       if (dataPoint['Velocity (cm/s)']){
         this.currentValue = dataPoint['Velocity (cm/s)'].toFixed(1);
-        this.$refs.tooltipLegend.style.left = (100 * (this.currentValue - this.HFRADARRANGE[0]) / (this.HFRADARRANGE[1] - this.HFRADARRANGE[0])) + '%';
-        this.$refs.tooltipLegendBar.style.left = (100 * (this.currentValue - this.HFRADARRANGE[0]) / (this.HFRADARRANGE[1] - this.HFRADARRANGE[0])) + '%';
+        this.$refs.tooltipLegend.style.left = (100 * (this.currentValue - this.legendRange[0]) / (this.legendRange[1] - this.legendRange[0])) + '%';
+        this.$refs.tooltipLegendBar.style.left = (100 * (this.currentValue - this.legendRange[0]) / (this.legendRange[1] - this.legendRange[0])) + '%';
       } else
         this.currentValue = '';
     })
     // When map deselects a data point
     window.eventBus.on('DeselectedDataPoint', () => {
       this.currentValue = '';
-    })
+    });
+
   },
   data (){
     return {
       legends: [],
       legendsLoaded: false,
-      legendIndex: 2,
+      legendIndex: 6, // Manual default legend color
       legendSrc: '',
       isMouseOver: false,
       // Tooltip
-      HFRADARRANGE: [-100, 100],
+      legendRange: [-100, 100], // Legend range is changed in AnimationCanvas.vue, when the animation is created
       currentValue: '',
     }
   },
@@ -86,6 +89,7 @@ export default {
     legendClicked: function(e, index){
       this.legendIndex = index;
       this.legendSrc = this.legends[index].img.src;
+      this.legends[index].legendRange = this.legendRange; // TODO: CHANGE RANGE OPTION
       // Emit
       this.emitLegendChanged(this.legends[index]);
     },
@@ -111,6 +115,7 @@ export default {
   bottom: 90px;
   right: 10%;
   z-index: 10;
+  pointer-events: all;
 
   align-items: flex-end;
   display: flex;
@@ -168,8 +173,8 @@ img {
 }
 
 .middleRange {
-  transform: translateX(-50%);
-  -ms-transform: translateX(-50%);
+  /* transform: translateX(-50%);
+  -ms-transform: translateX(-50%); */
 }
 
 .rightRange {
