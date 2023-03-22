@@ -13,6 +13,8 @@
       :legendName="defaultLegendName" 
       :legendRange="defaultLegendRange"
       :units="defaultUnits"
+      @rangeClicked="rangeClicked()"
+      @unitsClicked="unitsClicked()"
       ></legendGUI>
   </div>
 </template>
@@ -44,6 +46,12 @@ export default {
         })
         .catch(e => console.error("something went wrong here: " + e));
     }
+
+
+
+    // Default values
+    this.currentRange = this.defaultLegendRange;
+    this.currentUnits = this.defaultUnits;
     
 
     // EVENTS
@@ -91,11 +99,23 @@ export default {
     }
   },
   methods: {
-    //onclick: function(e){},
+    // LEGEND EMITS
+    rangeClicked: function(e){
+      
+      // 50, 100, 150, 200
+      let it = 4*(this.currentRange[1])/200;
 
-    // TODO: LEGEND RANGE CHANGE
+      let farRange = Math.round((it % 4)*50 + 50);
 
-    // TODO: LEGEND UNITS CHANGE
+      this.currentRange[1] = farRange;
+
+      this.$refs.legendGUI.setRange(this.currentRange);
+    },
+
+    unitsClicked: function(e){
+
+    }
+
   },
   components: {
     "legendGUI": LegendGUI,

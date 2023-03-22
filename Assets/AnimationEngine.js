@@ -1362,6 +1362,9 @@ class ParticleCombinedRadar extends Particle {
     let normValue = Math.min(1 , Math.max(0,(value - range[0]) / (range[1] - range[0])));
 
     let indexColor = Math.floor(normValue * steps);
+    if (indexColor >= this.legend.colorsStr.length)
+      indexColor = this.legend.colorsStr.length - 1;
+    
 
     color[0] = this.legend.colorsFloat32[indexColor*3];
     color[1] = this.legend.colorsFloat32[indexColor*3 + 1];

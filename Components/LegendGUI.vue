@@ -1,6 +1,6 @@
 <template>
   <!-- Container -->
-  <div id='legendGUI' ref='legendGUI' @click="isMouseOver = true" @mouseleave="isMouseOver = false">
+  <div id='legendGUI' ref='legendGUI' @mouseleave="isMouseOver = false">
 
     <div v-show="legendsLoaded">
       <!-- Tooltip -->
@@ -10,11 +10,11 @@
       </div>
 
       <!-- Legend -->
-      <img class="selLegend" :src="legendSrc">
+      <img class="selLegend" :src="legendSrc" @click="isMouseOver = true">
       <div class="rangeValuesBox">
-        <div class="leftRange">{{legendRange[0]}}</div>
-        <div class="middleRange">{{ units }}</div>
-        <div class="rightRange">{{legendRange[1]}}</div>
+        <div class="leftRange" @click=rangeClicked()>{{legendRange[0]}}</div>
+        <div class="middleRange" @click=unitsClicked()>{{ units }}</div>
+        <div class="rightRange" @click=rangeClicked()>{{legendRange[1]}}</div>
       </div>
     </div>
 
@@ -110,11 +110,30 @@ export default {
       this.emitLegendChanged(this.legends[index]);
     },
 
+
+    unitsClicked: function(e){
+      this.$emit('unitsClicked');
+    },
+    rangeClicked: function(e){
+      this.$emit('rangeClicked');
+    },
+
+
+
     // EVENT EMITTER
     emitLegendChanged(legend){
       // TODO: FIX DATA STRUCTURE: legend contains colors and img, range is dependent on the data type
       window.eventBus.emit('LegendGUI_legendChanged', {legend, "legendRange": this.legendRange});
     },
+
+
+    // PUBLIC FUNCTIONS
+    setRange: function(range){
+      this.legendRange[0] = range[0];
+      this.legendRange[1] = range[1];
+      
+      this.emitLegendChanged(this.legends[this.legendIndex]);
+    }
   },
   components: {
     //'map': Map,
@@ -184,6 +203,12 @@ img {
   font-size: small;
 }
 
+.rangeValuesBox > * {
+  padding-left: 10px;
+  padding-right: 10px;
+  cursor: pointer;
+}
+
 .leftRange {
   transform: translateX(-50%);
   -ms-transform: translateX(-50%);
@@ -196,5 +221,6 @@ img {
 
 .rightRange {
   transform: translateX(50%);
+  -ms-transform: translateX(50%);
 }
 </style>
