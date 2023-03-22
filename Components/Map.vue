@@ -463,8 +463,10 @@ export default {
       // Show radar points
       // TODO: is this optimal?
       // Check if there is dataPoint feature defined
-      HFRadar.pointFeature = 'SNR (dB)'; // TODO HACK
-      let pointFeature = HFRadar.pointFeature;
+      let pointFeature;
+      //HFRadar.pointFeature = 'SNR (dB)'; // TODO HACK
+      //pointFeature = HFRadar.pointFeature;
+      
       let featPoints = [];
       for (let i = 0; i<HFRadar.data[tmst].length; i++){
         let dataPoint = HFRadar.data[tmst][i];
