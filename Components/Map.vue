@@ -462,17 +462,32 @@ export default {
       // Vector - Features layer
       // Show radar points
       // TODO: is this optimal?
+      // Check if there is dataPoint feature defined
+      HFRadar.pointFeature = 'SNR (dB)'; // TODO HACK
+      let pointFeature = HFRadar.pointFeature;
       let featPoints = [];
       for (let i = 0; i<HFRadar.data[tmst].length; i++){
         let dataPoint = HFRadar.data[tmst][i];
         let featPoint = new ol.Feature({
           geometry: new ol.geom.Point(ol.proj.fromLonLat([dataPoint['Longitude (deg)'], dataPoint['Latitude (deg)']])),
         });
+        // Define radius / color according to data point feature
+        let pointRadius = 2;
+        let pointColor = [255, 255, 255, 0.2];
+        if (pointFeature !== undefined){
+          let value = dataPoint[pointFeature];
+          let featMax = HFRadar.dataPointFeatures[pointFeature].max;
+          let featMin = HFRadar.dataPointFeatures[pointFeature].min;
+          let normValue = (value - featMin)/(featMax - featMin);
+          pointRadius *= normValue * 10;
+        }
+
+
         featPoint.setStyle( new ol.style.Style({
           image: new ol.style.Circle({
-            radius: 2,
+            radius: pointRadius,
             fill: new ol.style.Fill({
-              color: [255, 255, 255, 0.2],
+              color: pointColor,
               opacity: 0.5,
             })
           })

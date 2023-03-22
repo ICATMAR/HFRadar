@@ -232,7 +232,8 @@ class HFRadar {
   isActivated; // User decides
   hasDataOnTmst; // Has data on selected timestamp
   isAnimated; // User decides
-  pointVariable;
+  pointFeature; // Dots are reactive
+
 
   constructor(HFRadarData){
 
@@ -273,7 +274,46 @@ class HFRadar {
 
     // Store latest data timestamp
     this.lastLoadedTimestamp = timestamp;
+
+    // Create data features
+    this.updateDataPointFeatures(HFRadarData.data);
   }
+
+
+  // Update and create data features
+  updateDataPointFeatures(dataPoints){
+    
+    // Create data point features
+    if (this.dataPointFeatures == undefined){
+      this.dataPointFeatures = {};
+    }
+    
+    // Iterate data points
+    for (let i = 0; i < dataPoints.length; i++){
+      let dataPoint = dataPoints[i];
+      // Iterate features
+      Object.keys(dataPoint).forEach(key => {
+        let value = dataPoint[key];
+        // Create feature if it does not exist
+        if (this.dataPointFeatures[key] == undefined){
+          this.dataPointFeatures[key] = {
+            "max": value,
+            "min": value,
+            // TODO: HERE COULD BE CUSTOM VISUALIZATION OPTIONS SPECIFIC FOR EACH FEATURE
+          }
+        }
+        // Calculate range (max min)
+        if (value > this.dataPointFeatures[key].max)
+          this.dataPointFeatures[key].max = value;
+        if (value < this.dataPointFeatures[key].min)
+          this.dataPointFeatures[key].min = value;
+
+      });
+    }
+
+  }
+
+
 
   getRadarOrigin(){
     let locationStr = this.header.Origin;
