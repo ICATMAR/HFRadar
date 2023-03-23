@@ -20,9 +20,10 @@ export default {
   name: 'onoffButton', // Caps, no -
   props: {
     checked: Boolean,
+    inSize: String,
   },
   created() {
-    
+    this.size = this.inSize || '26px';
   },
   mounted() {
 
@@ -54,8 +55,8 @@ export default {
 .switch {
   position: relative;
   display: inline-block;
-  width: 60px;
-  height: 34px;
+  width: calc(v-bind(size) * 2.3);
+  height: calc(v-bind(size) * 1.3);
 }
 
 /* Hide default HTML checkbox */
@@ -81,10 +82,10 @@ export default {
 .slider:before {
   position: absolute;
   content: "";
-  height: 26px;
-  width: 26px;
-  left: 4px;
-  bottom: 4px;
+  height: v-bind(size);
+  width: v-bind(size);
+  left: calc(v-bind(size) * 0.15);
+  bottom: calc(v-bind(size) * 0.15);
   background-color: white;
   -webkit-transition: .4s;
   transition: .4s;
@@ -100,14 +101,14 @@ input:focus + .slider {
 }
 
 input:checked + .slider:before {
-  -webkit-transform: translateX(26px);
-  -ms-transform: translateX(26px);
-  transform: translateX(26px);
+  -webkit-transform: translateX(v-bind(size));
+  -ms-transform: translateX(v-bind(size));
+  transform: translateX(v-bind(size));
 }
 
 /* Rounded sliders */
 .slider.round {
-  border-radius: 34px;
+  border-radius: calc(v-bind(size) * 1.3);
 }
 
 .slider.round:before {
