@@ -6,7 +6,7 @@
 
       <!-- Animation legend -->
       <!-- todo v:for for different data types? -->
-      <widgetCombinedRadars ref="widgetCombinedRadars"></widgetCombinedRadars>
+      <widgetCombinedRadars ref="widgetCombinedRadars" v-show="combinedRadarsExist"></widgetCombinedRadars>
 
   </div>
 </template>
@@ -35,7 +35,9 @@ export default {
         if (radar.data[tmst] != undefined){
           // Make all radars with data visible
           //radar.isActivated = true;
-          
+          // Activate widget
+          if (radar.constructor.name == "CombinedRadars")
+            this.combinedRadarsExist = true;
           
           // Create animation for radar
           // If canvas does not have animation engine
@@ -107,6 +109,13 @@ export default {
           }
           
         }
+
+
+        // Show widget
+        if (radar.data[tmst] != undefined && radar.isActivated)
+          this.combinedRadarsExist = true;
+        else
+          this.combinedRadarsExist = false;
       });
       
 
@@ -145,6 +154,10 @@ export default {
 
       // Gotta be careful with .vue, as it tracks objects and its properties.
       let radar = window.DataManager.HFRadars[inRadar.UUID];
+
+      // Hide/show widget?
+      if (radar.constructor.name == "CombinedRadars")
+        this.combinedRadarsExist = radar.isActivated;
       
       this.updateRadarAnimationState(radar);
 
@@ -152,7 +165,8 @@ export default {
   },
   data (){
     return {
-      dataTypes: []
+      dataTypes: [],
+      combinedRadarsExist: false,
     }
   },
   methods: {
