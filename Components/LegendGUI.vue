@@ -5,23 +5,23 @@
     <div v-show="legendsLoaded">
       <!-- Tooltip -->
       <div v-show="!isMouseOver && currentValue !=''">
-        <div class="tooltipLegend" ref="tooltipLegend">{{currentValue}} {{units}}</div>
+        <div class="tooltipLegend" ref="tooltipLegend">{{transformFunc(currentValue)}} {{units}}</div>
         <div class="tooltipLegendBar" ref="tooltipLegendBar">|</div>
       </div>
 
       <!-- Legend -->
       <img class="selLegend" :src="legendSrc" @click="isMouseOver = true">
       <div class="rangeValuesBox">
-        <div class="leftRange" @click=rangeClicked()>{{legendRange[0]}}</div>
+        <div class="leftRange" @click=rangeClicked()>{{transformFunc(legendRange[0])}}</div>
         <div class="middleRange" @click=unitsClicked()>{{ units }}</div>
-        <div class="rightRange" @click=rangeClicked()>{{legendRange[1]}}</div>
+        <div class="rightRange" @click=rangeClicked()>{{transformFunc(legendRange[1])}}</div>
       </div>
     </div>
 
     <!-- Drop-down with other legends -->
     <span v-show="isMouseOver">
-      <div v-for="legend, index, in legends" @click="legendClicked($event, index)">
-        <img :src="legend.img.src">
+      <div v-for="legend, index, in legends" >
+        <img v-if="selectedLegends.includes(legend.legendName)" :src="legend.img.src" @click="legendClicked($event, index)">
       </div>
     </span>
   </div>
@@ -39,10 +39,11 @@ export default {
   props: [
     'legendName',
     'legendRange',
-    'units'
+    'defaultUnits',
+    'selectedLegends',
   ],
   created() {
-    
+    this.units = this.defaultUnits;
   },
   mounted() {
     // When legends are loaded
@@ -75,9 +76,7 @@ export default {
       let dataPoint = e.dataPoint;
       
       if (dataPoint['Velocity (cm/s)']){
-        this.currentValue = dataPoint['Velocity (cm/s)'].toFixed(1);
-        this.$refs.tooltipLegend.style.left = (100 * (this.currentValue - this.legendRange[0]) / (this.legendRange[1] - this.legendRange[0])) + '%';
-        this.$refs.tooltipLegendBar.style.left = (100 * (this.currentValue - this.legendRange[0]) / (this.legendRange[1] - this.legendRange[0])) + '%';
+        this.showCurrentValue(dataPoint['Velocity (cm/s)']);
       } else
         this.currentValue = '';
     })
@@ -97,6 +96,7 @@ export default {
       // Tooltip
       //legendRange: [-100, 100], // Legend range is changed in AnimationCanvas.vue, when the animation is created
       currentValue: '',
+      transformFunc: (value) => {return value},
     }
   },
   methods: {
@@ -128,11 +128,23 @@ export default {
 
 
     // PUBLIC FUNCTIONS
+    // Set range
     setRange: function(range){
       this.legendRange[0] = range[0];
       this.legendRange[1] = range[1];
       
       this.emitLegendChanged(this.legends[this.legendIndex]);
+    },
+    // Set units and transformation function
+    setUnits: function(units, transformFunc){
+      this.units = units;
+      this.transformFunc = transformFunc;
+    },
+    // Show current value
+    showCurrentValue: function(value){
+      this.currentValue = value.toFixed(1);
+      this.$refs.tooltipLegend.style.left = (100 * (this.currentValue - this.legendRange[0]) / (this.legendRange[1] - this.legendRange[0])) + '%';
+      this.$refs.tooltipLegendBar.style.left = (100 * (this.currentValue - this.legendRange[0]) / (this.legendRange[1] - this.legendRange[0])) + '%';
     }
   },
   components: {
@@ -201,6 +213,7 @@ img {
   justify-content: space-between;
   color: white;
   font-size: small;
+  margin-top: -10px;
 }
 
 .rangeValuesBox > * {

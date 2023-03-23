@@ -18,6 +18,7 @@ class FileManager {
     './Assets/Legends/absGrayScaleReverse.png',
     './Assets/Legends/DarkScaleColors.png',
     './Assets/Legends/absModifiedOccam.png',
+    './Assets/Legends/absColdOccam.png',
   ];
 
   constructor(){
@@ -273,6 +274,7 @@ class FileManager {
 
       let img = new Image();
       img.src = url;
+      
 
       img.onload = () => {
         console.log('Legend loaded')
@@ -309,8 +311,11 @@ class FileManager {
           colorsFloat32[i*3 + 2] = pixels[pixelPosition*4 + 2];
         }
 
+        // Legend name
+        let str = url.split('/');
+        let legendName = str[str.length-1];
 
-        resolve({colorsStr, colorsRGB, colorsFloat32, img});
+        resolve({colorsStr, colorsRGB, colorsFloat32, img, legendName});
       }
       img.onerror = () => reject();
       

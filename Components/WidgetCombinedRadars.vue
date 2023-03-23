@@ -12,7 +12,9 @@
     <legendGUI ref="legendGUI"
       :legendName="defaultLegendName" 
       :legendRange="defaultLegendRange"
-      :units="defaultUnits"
+      :defaultUnits="defaultUnits"
+      :selectedLegends="selectedLegends"
+
       @rangeClicked="rangeClicked()"
       @unitsClicked="unitsClicked()"
       ></legendGUI>
@@ -95,7 +97,8 @@ export default {
     return {
       defaultLegendName: 'absModifiedOccam',
       defaultLegendRange: [0, 100], // TODO: this is defined in the data manager, or it should be in DataTypes somewhere?
-      defaultUnits: 'cm/s'
+      defaultUnits: 'cm/s',
+      selectedLegends: ['absModifiedOccam.png', 'absColdOccam.png', 'absGrayScale.png', 'absGrayScaleReverse.png' ]
     }
   },
   methods: {
@@ -113,7 +116,19 @@ export default {
     },
 
     unitsClicked: function(e){
+      let units = ['cm/s', 'm/s', 'mph', 'km/h'];
+      let transformFunc = [
+        (value) => {return value}, // cm/s
+        (value) => {return (value/100).toFixed(2)}, // m/s
+        (value) => {return (2.2369*value/100).toFixed(2)}, // mph
+        (value) => {return (3.6*value/100).toFixed(2)} // km/h
+      ];
 
+      // Find current units
+      let currentIndex = units.indexOf(this.currentUnits);
+      let nextIndex = (currentIndex+1) % units.length;
+      this.currentUnits = units[nextIndex];
+      this.$refs.legendGUI.setUnits(this.currentUnits, transformFunc[nextIndex]);
     }
 
   },
@@ -129,5 +144,6 @@ export default {
 <style scoped>
 #widgetCombinedRadars {
   background-color: red;
+  user-select: none;
 }
 </style>
