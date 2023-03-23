@@ -7,9 +7,12 @@
       <!-- Animation legend -->
       <!-- todo v:for for different data types? -->
       <div class="widgetContainer">
-        <widgetCombinedRadars ref="widgetCombinedRadars" v-show="combinedRadarsExist"></widgetCombinedRadars>
-
-        <widgetHFRadars ref="widgetHFRadars"></widgetHFRadars>
+        <Transition>
+          <widgetCombinedRadars ref="widgetCombinedRadars" v-show="combinedRadarsExist"></widgetCombinedRadars>
+        </Transition>
+        <Transition>
+          <widgetHFRadars ref="widgetHFRadars" v-show="radarsExist"></widgetHFRadars>
+        </Transition>
       </div>
 
   </div>
@@ -43,6 +46,8 @@ export default {
           // Activate widget
           if (radar.constructor.name == "CombinedRadars")
             this.combinedRadarsExist = true;
+          else if (radar.constructor.name == "HFRadar" && radar.isActivated)
+            this.radarsExist = true;
           
           // Create animation for radar
           // If canvas does not have animation engine
@@ -117,53 +122,46 @@ export default {
 
 
         // Show widget
-        if (radar.data[tmst] != undefined && radar.isActivated)
-          this.combinedRadarsExist = true;
-        else
+        if (radar.data[tmst] != undefined && radar.isActivated){
+          if (radar.constructor.name == "CombinedRadars")
+            this.combinedRadarsExist = true;
+          else if (radar.constructor.name == "HFRadar")
+            this.radarsExist = true;
+        } else {
           this.combinedRadarsExist = false;
+          this.radarsExist = false;
+        }
       });
       
 
     });
 
-
-    // When legend changes
-    window.eventBus.on('LegendGUI_legendChanged', (legendObj)=> {
-      this.legend = legendObj.legend;
-      this.legend.legendRange = legendObj.legendRange; // TODO: FIX DATA STRUCTURE
-      
-      // Iterate radars
-      Object.keys(window.DataManager.HFRadars).forEach(key => {
-        let radar = window.DataManager.HFRadars[key];
-        if (radar.animEngine)
-          radar.animEngine.updateLegend(JSON.parse(JSON.stringify(this.legend)));
-      });
-    });
 
 
     // Legend changes
     // TODO: UNIFY COMBINEDRADARS AND HFRADARS EVENT
     window.eventBus.on('WidgetCombinedRadars_LegendChanged', (legendObj)=> {
-      debugger;
-      this.legend = legendObj.legend;
-      this.legend.legendRange = legendObj.legendRange; // TODO: FIX DATA STRUCTURE
-      
+      this.legendCombinedRadars = legendObj.legend;
+      this.legendCombinedRadars.legendRange = legendObj.legendRange; // TODO: FIX DATA STRUCTURE
       // Iterate radars
       Object.keys(window.DataManager.HFRadars).forEach(key => {
         let radar = window.DataManager.HFRadars[key];
-        if (radar.animEngine && radar.constructor.name == "CombinedRadars")
-          radar.animEngine.updateLegend(JSON.parse(JSON.stringify(this.legend)));
+        if (radar.constructor.name == "CombinedRadars"){
+          if (radar.animEngine)
+            radar.animEngine.updateLegend(JSON.parse(JSON.stringify(this.legendCombinedRadars)));
+        }
       });
     });
     window.eventBus.on('WidgetHFRadars_LegendChanged', (legendObj)=> {
-      this.legend = legendObj.legend;
-      this.legend.legendRange = legendObj.legendRange; // TODO: FIX DATA STRUCTURE
-      
+      this.legendHFRadar = legendObj.legend;
+      this.legendHFRadar.legendRange = legendObj.legendRange; // TODO: FIX DATA STRUCTURE
       // Iterate radars
       Object.keys(window.DataManager.HFRadars).forEach(key => {
         let radar = window.DataManager.HFRadars[key];
-        if (radar.animEngine && radar.constructor.name == "HFRadars")
-          radar.animEngine.updateLegend(JSON.parse(JSON.stringify(this.legend)));
+        if (radar.constructor.name == "HFRadar"){
+          if (radar.animEngine)
+            radar.animEngine.updateLegend(JSON.parse(JSON.stringify(this.legendHFRadar)));
+        }
       });
     });
 
@@ -190,6 +188,14 @@ export default {
       // Hide/show widget?
       if (radar.constructor.name == "CombinedRadars")
         this.combinedRadarsExist = radar.isActivated;
+      else if (radar.constructor.name == "HFRadar"){
+        this.radarsExist = false;
+        Object.keys(window.DataManager.HFRadars).forEach(key => {
+          let rr = window.DataManager.HFRadars[key];
+          if (rr.constructor.name == "HFRadar" && rr.isActivated)
+            this.radarsExist = true;
+        });
+      }
       
       this.updateRadarAnimationState(radar);
 
@@ -199,6 +205,9 @@ export default {
     return {
       dataTypes: [],
       combinedRadarsExist: false,
+      radarsExist: false,
+      legendCombinedRadars: undefined,
+      legendHFRadar: undefined,
     }
   },
   methods: {
@@ -241,12 +250,15 @@ export default {
 
       
 
-      let legend = this.legend == undefined ? undefined : JSON.parse(JSON.stringify(this.legend));
+      //let legend = radar.legend;// == undefined ? undefined : JSON.parse(JSON.stringify(this.legend));
       // Create animation
-      if (radar.dataGrid) // Combined Radar (tots)
+      if (radar.constructor.name == "CombinedRadars"){ // Combined Radar (tots)
+        let legend = this.legendCombinedRadars == undefined ? undefined : JSON.parse(JSON.stringify(this.legendCombinedRadars));
         radar.animEngine = new AnimationEngine(canvas, this.$parent.map, {"CombinedRadarData": radar.dataGrid[tmst]}, legend);
-      else
+      } else{
+        let legend = this.legendHFRadar == undefined ? undefined : JSON.parse(JSON.stringify(this.legendHFRadar));
         radar.animEngine = new AnimationEngine(canvas, this.$parent.map, {"HFRadarData": radar.data[tmst]}, legend);
+      }
       
       // Stop animation if radar is not activated
       radar.animEngine.isStopped = !radar.isActivated;
@@ -263,45 +275,45 @@ export default {
 
 
     // PUBLIC METHODS
-    updateAnimation: function(radar, data, map){
-      debugger;
-      // NEVER CALLED?
-      // Update animation engine
-      if (radar.animEngine == undefined){
-        if (radar.hasDataOnTmst){
-          // Create canvas
-          let canvas = this.createCanvas("canvasHFRadarAnimation");
-          this.$refs["animationCanvas"].appendChild(canvas);
-          // Create animation
-          if (radar.dataGrid) // Combined Radar (tots)
-              radar.animEngine = new AnimationEngine(canvas, map, {"CombinedRadarData": data}, JSON.parse(JSON.stringify(this.legend)));
-            else
-              radar.animEngine = new AnimationEngine(canvas, map, {"HFRadarData": data}, JSON.parse(JSON.stringify(this.legend)));
+    // updateAnimation: function(radar, data, map){
+    //   debugger;
+    //   // NEVER CALLED?
+    //   // Update animation engine
+    //   if (radar.animEngine == undefined){
+    //     if (radar.hasDataOnTmst){
+    //       // Create canvas
+    //       let canvas = this.createCanvas("canvasHFRadarAnimation");
+    //       this.$refs["animationCanvas"].appendChild(canvas);
+    //       // Create animation
+    //       if (radar.dataGrid) // Combined Radar (tots)
+    //           radar.animEngine = new AnimationEngine(canvas, map, {"CombinedRadarData": data}, JSON.parse(JSON.stringify(this.legend)));
+    //         else
+    //           radar.animEngine = new AnimationEngine(canvas, map, {"HFRadarData": data}, JSON.parse(JSON.stringify(this.legend)));
           
-          // Test
-          // let ctx = canvas.getContext("2d");
-          // ctx.fillStyle="blue";
-          // ctx.fillRect(0,0, canvas.width, canvas.height);
-        }
+    //       // Test
+    //       // let ctx = canvas.getContext("2d");
+    //       // ctx.fillStyle="blue";
+    //       // ctx.fillRect(0,0, canvas.width, canvas.height);
+    //     }
 
-      } else {
-        if (radar.hasDataOnTmst){
-          debugger;
-          // Update existing animation
-          radar.animEngine.setHFRadarData(data);
-          let wasStopped = radar.animEngine.isStopped;
-          radar.animEngine.isStopped = false;
-          if (wasStopped)
-            radar.animEngine.update();
+    //   } else {
+    //     if (radar.hasDataOnTmst){
+    //       debugger;
+    //       // Update existing animation
+    //       radar.animEngine.setHFRadarData(data);
+    //       let wasStopped = radar.animEngine.isStopped;
+    //       radar.animEngine.isStopped = false;
+    //       if (wasStopped)
+    //         radar.animEngine.update();
           
-        } else
-          radar.animEngine.isStopped = true;
-          radar.animEngine.clearCanvas();
-      }
-      // Map events for animation
-      map.on('moveend', radar.animEngine.onMapMoveEnd);
-      map.on('movestart', radar.animEngine.onMapMoveStart);
-    },
+    //     } else
+    //       radar.animEngine.isStopped = true;
+    //       radar.animEngine.clearCanvas();
+    //   }
+    //   // Map events for animation
+    //   map.on('moveend', radar.animEngine.onMapMoveEnd);
+    //   map.on('movestart', radar.animEngine.onMapMoveStart);
+    // },
 
   },
   components: {
@@ -326,7 +338,7 @@ export default {
 
 .widgetContainer {
   position: absolute;
-  bottom: 130px;
+  bottom: 100px;
   right: 123px;
   width: 264px;
   display: flex;
@@ -336,6 +348,17 @@ export default {
 .widgetContainer > * {
   padding-bottom: 30px;
   padding-top: 30px;
+}
+
+
+.v-enter-active,
+.v-leave-active {
+  transition: opacity 0.5s ease;
+}
+
+.v-enter-from,
+.v-leave-to {
+  opacity: 0;
 }
 
 </style>

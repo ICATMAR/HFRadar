@@ -2,6 +2,9 @@
   <!-- Container -->
   <div id='widgetHFRadars' ref='widgetHFRadars'>
 
+    <!-- Title -->
+    <h4>High-Freq. Radars</h4>
+
     <!-- Buttons animation and points -->
     <div id="buttonsContainer">
 
@@ -29,7 +32,7 @@
       @legendChanged="legendChanged"
       @rangeClicked="rangeClicked()"
       @unitsClicked="unitsClicked()"
-      ></legendGUI>
+    ></legendGUI>
   </div>
 </template>
 
@@ -56,7 +59,7 @@ export default {
           this.legend = legend;
           // Update animation canvas
           // TODO HOW TO RELATE WIDGET WITH ANIMATION PARAMETERS?
-          window.eventBus.emit('widgetHFRadars_updateLegend', this.legend);
+          window.eventBus.emit('WidgetHFRadars_updateLegend', this.legend);
         })
         .catch(e => console.error("something went wrong here: " + e));
     }
@@ -214,6 +217,14 @@ span {
   color: white;
   text-shadow: 0px 0px 4px black;
   font-size: small;
+  padding-left: 3px;
+  padding-right: 3px;
+}
+
+h4 {
+  color: white;
+  text-shadow: 0px 0px 4px black;
+  font-size: medium;
   padding-left: 3px;
   padding-right: 3px;
 }

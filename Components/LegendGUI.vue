@@ -126,7 +126,6 @@ export default {
       //window.eventBus.emit('LegendGUI_legendChanged', {legend, "legendRange": this.legendRange});
       // TODO: EMIT ON WIDGET, NOT ON LEGEND
       let legendObj =  {legend, "legendRange": this.legendRange};
-      debugger;
       this.$emit('legendChanged', legendObj);
     },
 

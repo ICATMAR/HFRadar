@@ -2,6 +2,9 @@
   <!-- Container -->
   <div id='widgetCombinedRadars' ref='widgetCombinedRadars'>
 
+    <!-- Title -->
+    <h4>Currents</h4>
+
     <!-- Buttons animation and points -->
     <div id="buttonsContainer">
 
@@ -117,7 +120,6 @@ export default {
   methods: {
     // LEGEND EMITS
     legendChanged: function(legendObj){
-      debugger;
       window.eventBus.emit('WidgetCombinedRadars_LegendChanged', legendObj);
     },
 
@@ -215,6 +217,14 @@ span {
   color: white;
   text-shadow: 0px 0px 4px black;
   font-size: small;
+  padding-left: 3px;
+  padding-right: 3px;
+}
+
+h4 {
+  color: white;
+  text-shadow: 0px 0px 4px black;
+  font-size: medium;
   padding-left: 3px;
   padding-right: 3px;
 }
