@@ -122,15 +122,21 @@ export default {
 
 
         // Show widget
-        if (radar.data[tmst] != undefined && radar.isActivated){
+        if (radar.data[tmst] != undefined && radar.isActivated && radar.constructor.name == "CombinedRadars"){
           if (radar.constructor.name == "CombinedRadars")
             this.combinedRadarsExist = true;
-          else if (radar.constructor.name == "HFRadar")
-            this.radarsExist = true;
         } else {
           this.combinedRadarsExist = false;
-          this.radarsExist = false;
         }
+        // HF Radars widget
+        this.radarsExist = false; // TODO: PUT IN A FUNCTION (USED TWICE IN THIS COMPONENT)
+        Object.keys(window.DataManager.HFRadars).forEach(key => {
+          let rr = window.DataManager.HFRadars[key];
+          if (rr.constructor.name == "HFRadar" && rr.isActivated && rr.data[tmst] != undefined)
+            this.radarsExist = true;
+        });
+
+
       });
       
 
@@ -165,6 +171,8 @@ export default {
       });
     });
 
+
+    // TODO: COMBINE FUNCTIONS
     // Animation for combined radars stopped
     window.eventBus.on('WidgetCombinedRadars_AnimationActiveChanged', (active) => {
       
@@ -178,6 +186,20 @@ export default {
         }
       });
     });
+    // Animation for combined radars stopped
+    window.eventBus.on('WidgetHFRadars_AnimationActiveChanged', (active) => {
+      
+      // Iterate radars and stop animations for combined radars
+      Object.keys(window.DataManager.HFRadars).forEach(key => {
+        let radar = window.DataManager.HFRadars[key];
+        if (radar.constructor.name == "HFRadar"){
+          radar.animationVisible = active;
+          // Update animation engine
+          this.updateRadarAnimationState(radar);
+        }
+      });
+    });
+
 
     // When animation starts/stops
     window.eventBus.on('SidePanelRadarActiveChange', (inRadar) => {

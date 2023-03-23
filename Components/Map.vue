@@ -175,12 +175,13 @@ export default {
     window.eventBus.on('SelectedDateChanged', (tmst) =>{
       this.selectedDateChanged(tmst);
     });
+    // TODO: COMBINE TWO NEXT EVENTS
     // Show/Hide points of a radar
     window.eventBus.on('WidgetCombinedRadars_PointsActiveChanged', (active)=> {
       // Iterate radars and stop animations for combined radars
       Object.keys(window.DataManager.HFRadars).forEach(key => {
         let radar = window.DataManager.HFRadars[key];
-        if (radar.constructor.name == "CombinedRadars"){
+        if (radar.constructor.name == "CombinedRadars"  && radar.isActivated){
           radar.pointsVisible = active;
           // Update map layers
           let radarPointsLayerName = 'HFPoints' + radar.UUID;
@@ -196,6 +197,28 @@ export default {
         }
       });
     })
+    // Show/hide points of HF Radar
+    window.eventBus.on('WidgetHFRadars_PointsActiveChanged', (active)=> {
+      // Iterate radars and stop animations for combined radars
+      Object.keys(window.DataManager.HFRadars).forEach(key => {
+        let radar = window.DataManager.HFRadars[key];
+        if (radar.constructor.name == "HFRadar" && radar.isActivated){
+          radar.pointsVisible = active;
+          // Update map layers
+          let radarPointsLayerName = 'HFPoints' + radar.UUID;
+          if (!radar.pointsVisible){
+            // Remove layer
+            if (this.getMapLayer(radarPointsLayerName)) this.map.removeLayer(this.getMapLayer(radarPointsLayerName));
+          } else{
+            // Add layer
+            if (this.getMapLayer(radarPointsLayerName)){} 
+            else
+              this.map.addLayer(this.layers[radarPointsLayerName]);
+          }
+        }
+      });
+    })
+
 
     // When the side panel is hiden
     window.eventBus.on('SidePanelSizechanged', (isSidePanelOpen) => {
