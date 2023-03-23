@@ -6,7 +6,11 @@
 
       <!-- Animation legend -->
       <!-- todo v:for for different data types? -->
-      <widgetCombinedRadars ref="widgetCombinedRadars" v-show="combinedRadarsExist"></widgetCombinedRadars>
+      <div class="widgetContainer">
+        <widgetCombinedRadars ref="widgetCombinedRadars" v-show="combinedRadarsExist"></widgetCombinedRadars>
+
+        <widgetHFRadars ref="widgetHFRadars"></widgetHFRadars>
+      </div>
 
   </div>
 </template>
@@ -17,6 +21,7 @@
 // Import components
 //import Map from 'Components/Map.vue'
 import WidgetCombinedRadars from "./WidgetCombinedRadars.vue";
+import WidgetHFRadars from "./WidgetHFRadars.vue";
 
 export default {
   name: 'animationCanvas', // Caps, no -
@@ -131,6 +136,33 @@ export default {
       Object.keys(window.DataManager.HFRadars).forEach(key => {
         let radar = window.DataManager.HFRadars[key];
         if (radar.animEngine)
+          radar.animEngine.updateLegend(JSON.parse(JSON.stringify(this.legend)));
+      });
+    });
+
+
+    // Legend changes
+    // TODO: UNIFY COMBINEDRADARS AND HFRADARS EVENT
+    window.eventBus.on('WidgetCombinedRadars_LegendChanged', (legendObj)=> {
+      debugger;
+      this.legend = legendObj.legend;
+      this.legend.legendRange = legendObj.legendRange; // TODO: FIX DATA STRUCTURE
+      
+      // Iterate radars
+      Object.keys(window.DataManager.HFRadars).forEach(key => {
+        let radar = window.DataManager.HFRadars[key];
+        if (radar.animEngine && radar.constructor.name == "CombinedRadars")
+          radar.animEngine.updateLegend(JSON.parse(JSON.stringify(this.legend)));
+      });
+    });
+    window.eventBus.on('WidgetHFRadars_LegendChanged', (legendObj)=> {
+      this.legend = legendObj.legend;
+      this.legend.legendRange = legendObj.legendRange; // TODO: FIX DATA STRUCTURE
+      
+      // Iterate radars
+      Object.keys(window.DataManager.HFRadars).forEach(key => {
+        let radar = window.DataManager.HFRadars[key];
+        if (radar.animEngine && radar.constructor.name == "HFRadars")
           radar.animEngine.updateLegend(JSON.parse(JSON.stringify(this.legend)));
       });
     });
@@ -274,6 +306,7 @@ export default {
   },
   components: {
     "widgetCombinedRadars": WidgetCombinedRadars,
+    "widgetHFRadars": WidgetHFRadars,
   }
 }
 </script>
@@ -291,5 +324,18 @@ export default {
   pointer-events: none;
 }
 
+.widgetContainer {
+  position: absolute;
+  bottom: 130px;
+  right: 123px;
+  width: 264px;
+  display: flex;
+  flex-direction: column;
+}
+
+.widgetContainer > * {
+  padding-bottom: 30px;
+  padding-top: 30px;
+}
 
 </style>

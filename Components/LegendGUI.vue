@@ -123,7 +123,11 @@ export default {
     // EVENT EMITTER
     emitLegendChanged(legend){
       // TODO: FIX DATA STRUCTURE: legend contains colors and img, range is dependent on the data type
-      window.eventBus.emit('LegendGUI_legendChanged', {legend, "legendRange": this.legendRange});
+      //window.eventBus.emit('LegendGUI_legendChanged', {legend, "legendRange": this.legendRange});
+      // TODO: EMIT ON WIDGET, NOT ON LEGEND
+      let legendObj =  {legend, "legendRange": this.legendRange};
+      debugger;
+      this.$emit('legendChanged', legendObj);
     },
 
 

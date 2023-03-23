@@ -1,6 +1,6 @@
 <template>
   <!-- Container -->
-  <div id='widgetCombinedRadars' ref='widgetCombinedRadars'>
+  <div id='widgetHFRadars' ref='widgetHFRadars'>
 
     <!-- Buttons animation and points -->
     <div id="buttonsContainer">
@@ -29,7 +29,6 @@
       @legendChanged="legendChanged"
       @rangeClicked="rangeClicked()"
       @unitsClicked="unitsClicked()"
-
       ></legendGUI>
   </div>
 </template>
@@ -42,7 +41,7 @@ import LegendGUI from "./LegendGUI.vue";
 import OnOffButton from "./OnOffButton.vue";
 
 export default {
-  name: 'widgetCombinedRadars', // Caps, no -
+  name: 'widgetHFRadars', // Caps, no -
   created() {
 
   },
@@ -57,7 +56,7 @@ export default {
           this.legend = legend;
           // Update animation canvas
           // TODO HOW TO RELATE WIDGET WITH ANIMATION PARAMETERS?
-          window.eventBus.emit('WidgetCombinedRadars_updateLegend', this.legend);
+          window.eventBus.emit('widgetHFRadars_updateLegend', this.legend);
         })
         .catch(e => console.error("something went wrong here: " + e));
     }
@@ -108,17 +107,16 @@ export default {
   },
   data (){
     return {
-      defaultLegendName: 'absModifiedOccam',
-      defaultLegendRange: [0, 100], // TODO: this is defined in the data manager, or it should be in DataTypes somewhere?
+      defaultLegendName: 'BlueWhiteRed',
+      defaultLegendRange: [-100, 100], // TODO: this is defined in the data manager, or it should be in DataTypes somewhere?
       defaultUnits: 'cm/s',
-      selectedLegends: ['absModifiedOccam.png', 'absColdOccam.png', 'absGrayScale.png', 'absGrayScaleReverse.png' ]
+      selectedLegends: ['BlueWhiteRed.png', 'GreenBlueWhiteOrangeRed.png', 'ModifiedOccam.png', 'DarkScaleColors.png' ]
     }
   },
   methods: {
     // LEGEND EMITS
     legendChanged: function(legendObj){
-      debugger;
-      window.eventBus.emit('WidgetCombinedRadars_LegendChanged', legendObj);
+      window.eventBus.emit('WidgetHFRadars_LegendChanged', legendObj);
     },
 
 
@@ -130,6 +128,7 @@ export default {
       let farRange = Math.round((it % 4)*50 + 50);
 
       this.currentRange[1] = farRange;
+      this.currentRange[0] = -farRange;
 
       this.$refs.legendGUI.setRange(this.currentRange);
     },
@@ -154,10 +153,10 @@ export default {
 
     // USER INTERACTION
     particlesButtonClicked: function(e){
-      window.eventBus.emit('WidgetCombinedRadars_AnimationActiveChanged', e.target.checked);
+      window.eventBus.emit('WidgetHFRadars_AnimationActiveChanged', e.target.checked);
     },
     pointsButtonClicked: function(e){
-      window.eventBus.emit('WidgetCombinedRadars_PointsActiveChanged', e.target.checked);
+      window.eventBus.emit('WidgetHFRadars_PointsActiveChanged', e.target.checked);
     }
 
   },
@@ -172,7 +171,7 @@ export default {
 
 
 <style scoped>
-#widgetCombinedRadars {
+#widgetHFRadars {
   /* background-color: red; */
   user-select: none;
 
