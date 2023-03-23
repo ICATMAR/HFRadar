@@ -4,7 +4,7 @@
 
     <div v-show="legendsLoaded">
       <!-- Tooltip -->
-      <div v-show="!isMouseOver && currentValue !=''">
+      <div id="toolTipContainer" v-show="!isMouseOver && currentValue !=''">
         <div class="tooltipLegend" ref="tooltipLegend">{{transformFunc(currentValue)}} {{units}}</div>
         <div class="tooltipLegendBar" ref="tooltipLegendBar">|</div>
       </div>
@@ -178,19 +178,24 @@ img {
 }
 
 
+#toolTipContainer {
+  position:relative;
+}
 .tooltipLegend {
   position:absolute;
-  top: -20px;
+  top: -8px;
   color:white;
+  font-size: small;
+  text-shadow: 0px 0px 4px black;
   transform: translateX(-50%);
   -ms-transform: translateX(-50%);
   white-space: nowrap;
 }
 .tooltipLegendBar {
   position:absolute;
-  top: 5px;
+  top: 6px;
   font-size:large;
-  text-shadow: 0px 0px 5px rgb(0, 0, 0);
+  text-shadow: 0px 0px 5px black;
   color:white;
   transform: translateX(-50%);
   -ms-transform: translateX(-50%);

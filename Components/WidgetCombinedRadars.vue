@@ -3,17 +3,17 @@
   <div id='widgetCombinedRadars' ref='widgetCombinedRadars'>
 
     <!-- Buttons animation and points -->
-    <div id="buttonsWidget">
+    <div id="buttonsContainer">
 
       <!-- On/Off particle animation -->
-      <div>
-        <onOffButton :checked="true" :inSize="'18px'"></onOffButton>
+      <div class='buttonContainer'>
+        <onOffButton :checked="true" :inSize="'18px'" @change="particlesButtonClicked($event)"></onOffButton>
         <span>particles</span>
       </div>
 
       <!-- On/Off points -->
-      <div>
-        <onOffButton :checked="true" :inSize="'18px'"></onOffButton>
+      <div class='buttonContainer'>
+        <onOffButton :checked="true" :inSize="'18px'" @change="pointsButtonClicked($event)"></onOffButton>
         <span>points</span>
       </div>
       <!-- Maybe point variable too here? -->
@@ -140,6 +140,16 @@ export default {
       let nextIndex = (currentIndex+1) % units.length;
       this.currentUnits = units[nextIndex];
       this.$refs.legendGUI.setUnits(this.currentUnits, transformFunc[nextIndex]);
+    },
+
+
+
+    // USER INTERACTION
+    particlesButtonClicked: function(e){
+      window.eventBus.emit('WidgetCombinedRadars_AnimationActiveChanged', e.target.checked);
+    },
+    pointsButtonClicked: function(e){
+      window.eventBus.emit('WidgetCombinedRadars_PointsActiveChanged', e.target.checked);
     }
 
   },
@@ -155,13 +165,13 @@ export default {
 
 <style scoped>
 #widgetCombinedRadars {
-  background-color: red;
+  /* background-color: red; */
   user-select: none;
 
   position: absolute;
   bottom: 130px;
   right: 123px;
-  height: 100px;
+  /* height: 100px; */
   width: 264px;
 
   display: flex;
@@ -169,13 +179,21 @@ export default {
   align-items: center;
   flex-wrap: nowrap;
   justify-content: flex-end;
+
+  z-index: 11;
 }
 
-#buttonsWidget {
+#buttonsContainer {
   display: flex;
   flex-direction: row;
   width: 100%;
-  justify-content: space-between;
+  justify-content: center;
+}
+
+.buttonContainer {
+  display:flex;
+  flex-wrap: nowrap;
+  padding: 10px;
 }
 
 #buttonsWidget > div {

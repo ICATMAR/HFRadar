@@ -48,6 +48,7 @@ export default {
 <style scoped>
 #onoffButton {
   display:flex;
+  pointer-events: all;
 }
 
 
