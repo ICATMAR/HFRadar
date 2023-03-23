@@ -158,7 +158,7 @@ export default {
 
 <style scoped>
 #legendGUI {
-  position: absolute;
+  /* position: absolute; */
   /* width: 80%; */
   bottom: 90px;
   right: 10%;
@@ -212,6 +212,7 @@ img {
   display: flex;
   justify-content: space-between;
   color: white;
+  text-shadow: 0px 0px 4px black;
   font-size: small;
   margin-top: -10px;
 }

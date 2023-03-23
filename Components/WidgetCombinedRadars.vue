@@ -2,13 +2,24 @@
   <!-- Container -->
   <div id='widgetCombinedRadars' ref='widgetCombinedRadars'>
 
-    <!-- On/Off particle animation -->
+    <!-- Buttons animation and points -->
+    <div id="buttonsWidget">
 
-    <!-- On/Off points -->
-    <!-- Maybe point variable too here? -->
+      <!-- On/Off particle animation -->
+      <div>
+        <onOffButton :checked="true" :inSize="'18px'"></onOffButton>
+        <span>particles</span>
+      </div>
+
+      <!-- On/Off points -->
+      <div>
+        <onOffButton :checked="true" :inSize="'18px'"></onOffButton>
+        <span>points</span>
+      </div>
+      <!-- Maybe point variable too here? -->
+    </div>
 
     <!-- Animation legend -->
-    <!-- Todo: add unit? -->
     <legendGUI ref="legendGUI"
       :legendName="defaultLegendName" 
       :legendRange="defaultLegendRange"
@@ -26,7 +37,7 @@
 
 // Import components
 import LegendGUI from "./LegendGUI.vue";
-
+import OnOffButton from "./OnOffButton.vue";
 
 export default {
   name: 'widgetCombinedRadars', // Caps, no -
@@ -134,6 +145,7 @@ export default {
   },
   components: {
     "legendGUI": LegendGUI,
+    "onOffButton": OnOffButton,
   }
 }
 </script>
@@ -145,5 +157,39 @@ export default {
 #widgetCombinedRadars {
   background-color: red;
   user-select: none;
+
+  position: absolute;
+  bottom: 130px;
+  right: 123px;
+  height: 100px;
+  width: 264px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-wrap: nowrap;
+  justify-content: flex-end;
+}
+
+#buttonsWidget {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  justify-content: space-between;
+}
+
+#buttonsWidget > div {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
+}
+
+span {
+  color: white;
+  text-shadow: 0px 0px 4px black;
+  font-size: small;
+  padding-left: 3px;
+  padding-right: 3px;
 }
 </style>
