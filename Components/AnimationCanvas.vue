@@ -89,9 +89,11 @@ export default {
             radar.animEngine.setCombinedRadarData(radar.dataGrid[tmst])
 
           let wasStopped = radar.animEngine.isStopped;
-          radar.animEngine.isStopped = false;
-          if (wasStopped)
+          // Only activate animation if animation is visible.
+          if (wasStopped && radar.animationVisible){
+            radar.animEngine.isStopped = false;
             radar.animEngine.update();
+          }
         }
         // Otherwise, stop animation
         else {
@@ -123,25 +125,29 @@ export default {
           radar.animEngine.updateLegend(JSON.parse(JSON.stringify(this.legend)));
       });
     });
+
+    // Animation for combined radars stopped
+    window.eventBus.on('WidgetCombinedRadars_AnimationActiveChanged', (active) => {
+      
+      // Iterate radars and stop animations for combined radars
+      Object.keys(window.DataManager.HFRadars).forEach(key => {
+        let radar = window.DataManager.HFRadars[key];
+        if (radar.constructor.name == "CombinedRadars"){
+          radar.animationVisible = active;
+          // Update animation engine
+          this.updateRadarAnimationState(radar);
+        }
+      });
+    });
+
     // When animation starts/stops
     window.eventBus.on('SidePanelRadarActiveChange', (inRadar) => {
 
       // Gotta be careful with .vue, as it tracks objects and its properties.
       let radar = window.DataManager.HFRadars[inRadar.UUID];
       
-      if (radar.animEngine){
-        // Animation re-starts
-        if (radar.animEngine.isStopped && radar.isActivated){
-          radar.animEngine.isStopped = !radar.isActivated;
-          radar.animEngine.update();
+      this.updateRadarAnimationState(radar);
 
-        } 
-        // Animation stops
-        else if (!radar.animEngine.isStopped && !radar.isActivated){
-          radar.animEngine.isStopped = !radar.isActivated;
-          radar.animEngine.clearCanvas();
-        }
-      }
     })
   },
   data (){
@@ -163,8 +169,19 @@ export default {
     },
 
     // Updates animations
-    updateAnimations(tmst){
-
+    updateRadarAnimationState(radar){
+      if (radar.animEngine){
+        // Animation re-starts
+        if (radar.animEngine.isStopped && radar.isActivated && radar.animationVisible){
+          radar.animEngine.isStopped = false;
+          radar.animEngine.update();
+        } 
+        // Animation stops
+        else if ((!radar.animEngine.isStopped && !radar.isActivated) || !radar.animationVisible){
+          radar.animEngine.isStopped = true;
+          radar.animEngine.clearCanvas();
+        }
+      }
     },
 
 

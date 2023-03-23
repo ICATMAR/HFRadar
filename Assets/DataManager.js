@@ -230,6 +230,8 @@ class HFRadar {
   images = {};
   // GUI state variables
   isActivated; // User decides
+  pointsVisible = true; // User decides
+  animationVisible = true; // User decides
   hasDataOnTmst; // Has data on selected timestamp
   isAnimated; // User decides
   pointFeature; // Dots are reactive
