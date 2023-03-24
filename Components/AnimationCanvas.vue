@@ -380,10 +380,6 @@ export default {
   flex-direction: column;
 }
 
-.widgetContainer > * {
-  padding-bottom: 30px;
-  padding-top: 30px;
-}
 
 
 .v-enter-active,
