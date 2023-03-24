@@ -3,7 +3,7 @@
   <div id='widgetCombinedRadars' class="widget" ref='widgetCombinedRadars'>
 
     <!-- Title -->
-    <div class="titleWidget">
+    <div class="titleWidget" :class="{'titleWidget-closed': !isVisible}">
       <h4>Currents</h4>
       <div class="icon-str" @click="infoClicked()">i</div>
       <div class="icon-str icon-str-close" v-show="isVisible" @click="crossClicked()"></div>
@@ -160,7 +160,7 @@ export default {
 
     // USER INTERACTION
     infoClicked: function(e){
-      window.eventBus.emit("WidgetCombinedRadars_InfoClicked");
+      window.eventBus.emit("Widget_InfoClicked");
     },
     crossClicked: function(e){
       // Deactivate all CombinedRadars
