@@ -8,7 +8,6 @@
 
 // Constants
 const earthRadius = 6378;
-const HFRADARRANGE = [-100, 100];
 const LEGENDURLS = [
   './Assets/Legends/GreenBlueWhiteOrangeRed.png',
   './Assets/Legends/BlueWhiteRed.png',
@@ -83,7 +82,7 @@ class AnimationEngine {
     if (animInfo.HFRadarData){
       this.source = new SourceHFRadar(animInfo.HFRadarData);
       // Create particle system
-      this.particles = new ParticleSystemHF(this.canvasParticles, this.source, this.map, this.legend);
+      this.particles = new ParticleSystemHF(this.canvasParticles, this.source, this.map, legend);
       this.particles.clear();
       // Start drawing loop (must call it only once)
       this.update();
@@ -755,7 +754,7 @@ class ParticleHF {
       return;
 
     let steps = legend.colorsStr.length;
-    let range = HFRADARRANGE;
+    let range = legend.legendRange;
     let unitStep = (range[1] - range[0])/steps;
     let mag = this.signedMagnitude;
     // Find color according to magnitude and legend
@@ -1172,7 +1171,7 @@ class Particle {
       return;
 
     let steps = legend.colorsStr.length;
-    let range = HFRADARRANGE; // HACK, THE SOURCE SHOULD HAVE THE RANGE: this.particleSystem.source.dataRange;
+    let range = legend.legendRange; // HACK, THE SOURCE SHOULD HAVE THE RANGE: this.particleSystem.source.dataRange;
     let unitStep = (range[1] - range[0])/steps;
     let mag = this.signedMagnitude;
     // Find color according to magnitude and legend
@@ -1356,13 +1355,16 @@ class ParticleCombinedRadar extends Particle {
       return;
     
     let steps = this.legend.colorsStr.length;
-    let range = HFRADARRANGE; // HACK, THE SOURCE SHOULD HAVE THE RANGE: this.particleSystem.source.dataRange;
+    let range = this.legend.legendRange; // Source could also contain the legendRange. but user can modify legend and legend rage. Source maybe should have the default
     //let unitStep = (range[1] - range[0])/steps;
     
     // Find color according to magnitude and legend
     let normValue = Math.min(1 , Math.max(0,(value - range[0]) / (range[1] - range[0])));
 
     let indexColor = Math.floor(normValue * steps);
+    if (indexColor >= this.legend.colorsStr.length)
+      indexColor = this.legend.colorsStr.length - 1;
+    
 
     color[0] = this.legend.colorsFloat32[indexColor*3];
     color[1] = this.legend.colorsFloat32[indexColor*3 + 1];

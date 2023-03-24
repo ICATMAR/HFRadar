@@ -230,9 +230,13 @@ class HFRadar {
   images = {};
   // GUI state variables
   isActivated; // User decides
+  pointsVisible = true; // User decides
+  animationVisible = true; // User decides
   hasDataOnTmst; // Has data on selected timestamp
   isAnimated; // User decides
   pointFeature; // Dots are reactive
+  // Legend
+  legendRange = [-100, 100];
 
 
   constructor(HFRadarData){
@@ -333,6 +337,11 @@ class HFRadar {
     let dd = new Date(tt[0] +"-"+ tt[1]+"-"+ tt[2]+"T"+ tt[3]+":"+ tt[4]+ 'Z');
     return dd.toISOString();
   }
+
+
+  getLegendRange(){
+    return this.legendRange;
+  }
 }
 
 
@@ -340,6 +349,7 @@ class HFRadar {
 class CombinedRadars extends HFRadar {
 
   dataGrid = {};
+  legendRange = [0, 100];
 
   constructor (CombinedRadarData){
     

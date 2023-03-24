@@ -58,7 +58,10 @@ export default {
       this.timeStr += " (" + (hoursDiff+1) + "h " + minDiff + "min)";
       
       this.updateDataAvailability(sDate, eDate);
-    })
+    });
+
+    // Automatic minute update
+    this.updateTimeString();
     
   },
   data (){
@@ -131,6 +134,19 @@ export default {
 
       }
     },
+    // Update time string to display
+    updateTimeString: function(){
+      if (this.numHours > 1) {
+        let tempValue = parseInt(this.$refs.slider.value);
+        this.$refs.slider.value = parseInt(Math.min(tempValue, this.$refs.slider.max)).toString();
+        this.onInput({target: this.$refs.slider});
+      }
+
+      // Loop
+      setTimeout(() => {
+        this.updateTimeString();
+      }, 30*1000); // Every 30 seconds
+    }
   },
   components: {
     //'map': Map,

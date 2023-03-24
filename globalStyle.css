@@ -34,6 +34,110 @@
   border-radius: 50%;
 }
 
+.icon-str {
+  width: 25px;
+  height: 25px;
+  color: white;
+  text-shadow: 0px 0px 4px black;
+  font-weight: bold;
+
+  background: var(--lightBlue);
+  border-radius: 50%;
+  box-shadow: 0px 0px 5px black;
+  margin-left: 3px;
+  margin-right: 3px;
+
+  display:flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: all;
+  cursor: pointer;
+}
+
+.icon-str:hover {
+  background-color: var(--blue);
+}
+/* Close icon */
+.icon-str-close {
+  /* background-color: var(--red); */
+  background-color: gray;
+}
+.icon-str-close::after {
+  content: "\2715";
+}
+.icon-str-close:hover{
+  background-color: lightgray;
+}
+/* Open icon */
+.icon-str-open {
+  background-color: var(--lightBlue);
+}
+.icon-str-open::after {
+  font-family: initial;
+  content: "\1F441";
+}
+.icon-str-open:hover{
+  background-color: green;
+}
+
+
+
+
+/* WIDGET */
+.widget {
+  user-select: none;
+  width: 264px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-wrap: nowrap;
+  justify-content: flex-end;
+
+  z-index: 11;
+}
+.titleWidget {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
+}
+.titleWidget-closed {
+  width: 100%;
+  justify-content: flex-end;
+}
+h4 {
+  color: white;
+  text-shadow: 0px 0px 4px black;
+  font-size: medium;
+  padding-left: 10px;
+  padding-right: 10px;
+  margin: 0px;
+}
+.widgetButtonHFRadar {
+  color: white;
+  background-color: darkgray;
+  border-radius: 5px;
+  border: 2px solid gray;
+
+  margin-top: 5px;
+
+  font-size: small;
+  text-align: center;
+  text-decoration: none;
+
+  pointer-events: all;
+  cursor: pointer;
+}
+.widgetButtonHFRadar-active {
+  background-color: var(--red);
+  border: 2px solid rgb(255, 90, 90);
+}
+.widgetButtonHFRadar-unavailable {
+  background-color: rgb(136, 136, 136);
+  border: 2px solid gray;
+  pointer-events: none;
+}
 
 
 

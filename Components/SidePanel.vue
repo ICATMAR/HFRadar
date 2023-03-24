@@ -11,7 +11,7 @@
             <button class="accordion-button" :ref="'HFRadarHeader' + index" type="button" data-bs-toggle="collapse"
               @click="onHeaderClick($event, index)">
               {{radar["FileType"].includes('tots') ? 'Combined Currents ' + radar["Site"] : 'HF Radar ' + radar["Site"]}}
-              <onoffButton class="onoffRadar" @click="onoffRadar(radar, $event)" :checked="radar.isActivated"></onoffButton>
+              <!-- <onoffButton class="onoffRadar" @click="onoffRadar(radar, $event)" :checked="radar.isActivated"></onoffButton> -->
             </button>
           </h2>
           <div :ref="'HFRadar' + index" :id="'bodySectionOne' + index" class="accordion-collapse collapse show"
@@ -109,6 +109,11 @@ export default {
       this.updateInformation(tmst);
     });
 
+    window.eventBus.on('Widget_InfoClicked', () => {
+      this.showPanel = this.showPanel ? false : true;
+      window.eventBus.emit('SidePanelSizechanged', this.showPanel);
+    });
+
     // Selected date changes
     window.eventBus.on('SelectedDateChanged', (tmst) => {
       this.updateInformation(tmst);
@@ -126,7 +131,7 @@ export default {
     // On DataPoint click on Map.vue
     window.eventBus.on('ClickedDataPoint', e => {
       let dataPoint = e.dataPoint;
-      let HFRadar = e.HFRadar;
+      let HFRadar = e.radar;
 
       // Create HTML content
       let str = '';
@@ -168,7 +173,7 @@ export default {
         isDataPointVisible: false,
         visibleRadars: [],
         radarNameOfDatapoint: '',
-        showPanel: true,
+        showPanel: false,
     }
   },
   methods: {
@@ -185,13 +190,13 @@ export default {
 
     },
     // On Off Radar
-    onoffRadar(radar, e){
-      e.preventDefault();
-      e.stopPropagation();
-      let isChecked = e.target.parentElement.children[0].checked;
-      radar.isActivated = !isChecked; // isChecked gets updated after this event
-      window.eventBus.emit('SidePanelRadarActiveChange', radar);
-    },
+    // onoffRadar(radar, e){
+    //   e.preventDefault();
+    //   e.stopPropagation();
+    //   let isChecked = e.target.parentElement.children[0].checked;
+    //   radar.isActivated = !isChecked; // isChecked gets updated after this event
+    //   window.eventBus.emit('WidgetHFRadars_RadarActiveChange', radar);
+    // },
     // On hide/show panel
     onSideArrowClick(){
       this.showPanel = this.showPanel ? false : true;
