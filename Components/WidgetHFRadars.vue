@@ -1,12 +1,18 @@
 <template>
   <!-- Container -->
-  <div id='widgetHFRadars' ref='widgetHFRadars'>
+  <div id='widgetHFRadars' class="widget" ref='widgetHFRadars'>
 
     <!-- Title -->
-    <h4>High-Freq. Radars</h4>
+    <div class="titleWidget">
+      <h4>High-Freq. Radars</h4>
+      <div class="icon-str" @click="infoClicked()">i</div>
+      <div class="icon-str icon-str-close" v-show="isVisible" @click="crossClicked()"></div>
+      <div class="icon-str icon-str-open" v-show="!isVisible" @click="openClicked()"></div>
+      <!-- TODO GRAPH ICON - REPRESENTATION -->
+    </div>
 
     <!-- Buttons animation and points -->
-    <div id="buttonsContainer">
+    <div id="buttonsContainer" v-show="isVisible">
 
       <!-- On/Off particle animation -->
       <div class='buttonContainer'>
@@ -23,7 +29,7 @@
     </div>
 
     <!-- Animation legend -->
-    <legendGUI ref="legendGUI"
+    <legendGUI ref="legendGUI" v-show="isVisible"
       :legendName="defaultLegendName" 
       :legendRange="defaultLegendRange"
       :defaultUnits="defaultUnits"
@@ -113,7 +119,8 @@ export default {
       defaultLegendName: 'BlueWhiteRed',
       defaultLegendRange: [-100, 100], // TODO: this is defined in the data manager, or it should be in DataTypes somewhere?
       defaultUnits: 'cm/s',
-      selectedLegends: ['BlueWhiteRed.png', 'GreenBlueWhiteOrangeRed.png', 'ModifiedOccam.png', 'DarkScaleColors.png' ]
+      selectedLegends: ['BlueWhiteRed.png', 'GreenBlueWhiteOrangeRed.png', 'ModifiedOccam.png', 'DarkScaleColors.png' ],
+      isVisible: false,
     }
   },
   methods: {
@@ -155,6 +162,18 @@ export default {
 
 
     // USER INTERACTION
+    infoClicked: function(e){
+      window.eventBus.emit("WidgetHFRadars_InfoClicked");
+    },
+    crossClicked: function(e){
+      // Deactivate all CombinedRadars
+      window.eventBus.emit("WidgetHFRadars_VisibilityChanged", false);
+      this.isVisible = false;
+    },
+    openClicked: function(){
+      window.eventBus.emit("WidgetHFRadars_VisibilityChanged", true);
+      this.isVisible = true;
+    },
     particlesButtonClicked: function(e){
       window.eventBus.emit('WidgetHFRadars_AnimationActiveChanged', e.target.checked);
     },
@@ -175,21 +194,6 @@ export default {
 
 <style scoped>
 #widgetHFRadars {
-  /* background-color: red; */
-  user-select: none;
-
-  /* position: absolute;
-  bottom: 130px;
-  right: 123px; */
-  /* height: 100px; */
-  width: 264px;
-
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  flex-wrap: nowrap;
-  justify-content: flex-end;
-
   z-index: 11;
 }
 
@@ -221,11 +225,4 @@ span {
   padding-right: 3px;
 }
 
-h4 {
-  color: white;
-  text-shadow: 0px 0px 4px black;
-  font-size: medium;
-  padding-left: 3px;
-  padding-right: 3px;
-}
 </style>

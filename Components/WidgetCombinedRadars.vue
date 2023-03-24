@@ -1,12 +1,18 @@
 <template>
   <!-- Container -->
-  <div id='widgetCombinedRadars' ref='widgetCombinedRadars'>
+  <div id='widgetCombinedRadars' class="widget" ref='widgetCombinedRadars'>
 
     <!-- Title -->
-    <h4>Currents</h4>
+    <div class="titleWidget">
+      <h4>Currents</h4>
+      <div class="icon-str" @click="infoClicked()">i</div>
+      <div class="icon-str icon-str-close" v-show="isVisible" @click="crossClicked()"></div>
+      <div class="icon-str icon-str-open" v-show="!isVisible" @click="openClicked()"></div>
+      <!-- TODO GRAPH ICON -->
+    </div>
 
     <!-- Buttons animation and points -->
-    <div id="buttonsContainer">
+    <div id="buttonsContainer" v-show="isVisible">
 
       <!-- On/Off particle animation -->
       <div class='buttonContainer'>
@@ -23,7 +29,7 @@
     </div>
 
     <!-- Animation legend -->
-    <legendGUI ref="legendGUI"
+    <legendGUI ref="legendGUI" v-show="isVisible"
       :legendName="defaultLegendName" 
       :legendRange="defaultLegendRange"
       :defaultUnits="defaultUnits"
@@ -114,7 +120,8 @@ export default {
       defaultLegendName: 'absModifiedOccam',
       defaultLegendRange: [0, 100], // TODO: this is defined in the data manager, or it should be in DataTypes somewhere?
       defaultUnits: 'cm/s',
-      selectedLegends: ['absModifiedOccam.png', 'absColdOccam.png', 'absGrayScale.png', 'absGrayScaleReverse.png' ]
+      selectedLegends: ['absModifiedOccam.png', 'absColdOccam.png', 'absGrayScale.png', 'absGrayScaleReverse.png' ],
+      isVisible: true,
     }
   },
   methods: {
@@ -155,6 +162,18 @@ export default {
 
 
     // USER INTERACTION
+    infoClicked: function(e){
+      window.eventBus.emit("WidgetCombinedRadars_InfoClicked");
+    },
+    crossClicked: function(e){
+      // Deactivate all CombinedRadars
+      window.eventBus.emit("WidgetCombinedRadars_VisibilityChanged", false);
+      this.isVisible = false;
+    },
+    openClicked: function(){
+      window.eventBus.emit("WidgetCombinedRadars_VisibilityChanged", true);
+      this.isVisible = true;
+    },
     particlesButtonClicked: function(e){
       window.eventBus.emit('WidgetCombinedRadars_AnimationActiveChanged', e.target.checked);
     },
@@ -175,21 +194,6 @@ export default {
 
 <style scoped>
 #widgetCombinedRadars {
-  /* background-color: red; */
-  user-select: none;
-
-  /* position: absolute;
-  bottom: 130px;
-  right: 123px; */
-  /* height: 100px; */
-  width: 264px;
-
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  flex-wrap: nowrap;
-  justify-content: flex-end;
-
   z-index: 11;
 }
 
@@ -217,14 +221,6 @@ span {
   color: white;
   text-shadow: 0px 0px 4px black;
   font-size: small;
-  padding-left: 3px;
-  padding-right: 3px;
-}
-
-h4 {
-  color: white;
-  text-shadow: 0px 0px 4px black;
-  font-size: medium;
   padding-left: 3px;
   padding-right: 3px;
 }

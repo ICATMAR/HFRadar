@@ -11,7 +11,7 @@
           <widgetCombinedRadars ref="widgetCombinedRadars" v-show="combinedRadarsExist"></widgetCombinedRadars>
         </Transition>
         <Transition>
-          <widgetHFRadars ref="widgetHFRadars" v-show="radarsExist"></widgetHFRadars>
+          <widgetHFRadars ref="widgetHFRadars" v-show="true"></widgetHFRadars>
         </Transition>
       </div>
 
@@ -145,59 +145,27 @@ export default {
 
 
     // Legend changes
-    // TODO: UNIFY COMBINEDRADARS AND HFRADARS EVENT
     window.eventBus.on('WidgetCombinedRadars_LegendChanged', (legendObj)=> {
-      this.legendCombinedRadars = legendObj.legend;
-      this.legendCombinedRadars.legendRange = legendObj.legendRange; // TODO: FIX DATA STRUCTURE
-      // Iterate radars
-      Object.keys(window.DataManager.HFRadars).forEach(key => {
-        let radar = window.DataManager.HFRadars[key];
-        if (radar.constructor.name == "CombinedRadars"){
-          if (radar.animEngine)
-            radar.animEngine.updateLegend(JSON.parse(JSON.stringify(this.legendCombinedRadars)));
-        }
-      });
+      this.radarTypeLegendChanged("CombinedRadars", legendObj);
     });
     window.eventBus.on('WidgetHFRadars_LegendChanged', (legendObj)=> {
-      this.legendHFRadar = legendObj.legend;
-      this.legendHFRadar.legendRange = legendObj.legendRange; // TODO: FIX DATA STRUCTURE
-      // Iterate radars
-      Object.keys(window.DataManager.HFRadars).forEach(key => {
-        let radar = window.DataManager.HFRadars[key];
-        if (radar.constructor.name == "HFRadar"){
-          if (radar.animEngine)
-            radar.animEngine.updateLegend(JSON.parse(JSON.stringify(this.legendHFRadar)));
-        }
-      });
+      this.radarTypeLegendChanged("HFRadar", legendObj);
     });
 
-
-    // TODO: COMBINE FUNCTIONS
-    // Animation for combined radars stopped
+    // Animation for radars stopped
     window.eventBus.on('WidgetCombinedRadars_AnimationActiveChanged', (active) => {
-      
-      // Iterate radars and stop animations for combined radars
-      Object.keys(window.DataManager.HFRadars).forEach(key => {
-        let radar = window.DataManager.HFRadars[key];
-        if (radar.constructor.name == "CombinedRadars"){
-          radar.animationVisible = active;
-          // Update animation engine
-          this.updateRadarAnimationState(radar);
-        }
-      });
+      this.radarTypeAnimationActiveChanged("CombinedRadars", active);
     });
-    // Animation for combined radars stopped
     window.eventBus.on('WidgetHFRadars_AnimationActiveChanged', (active) => {
-      
-      // Iterate radars and stop animations for combined radars
-      Object.keys(window.DataManager.HFRadars).forEach(key => {
-        let radar = window.DataManager.HFRadars[key];
-        if (radar.constructor.name == "HFRadar"){
-          radar.animationVisible = active;
-          // Update animation engine
-          this.updateRadarAnimationState(radar);
-        }
-      });
+      this.radarTypeAnimationActiveChanged("HFRadar", active);
+    });
+
+    // Activate / Deactivate all radars and update animation
+    window.eventBus.on('WidgetCombinedRadars_VisibilityChanged', (areVisible) => {
+      this.radarTypeVisibilityChanged("CombinedRadars", areVisible);
+    });
+    window.eventBus.on('WidgetHFRadars_VisibilityChanged', (areVisible) => {
+      this.radarTypeVisibilityChanged("HFRadar", areVisible);
     });
 
 
@@ -221,7 +189,9 @@ export default {
       
       this.updateRadarAnimationState(radar);
 
-    })
+    });
+
+    
   },
   data (){
     return {
@@ -233,8 +203,51 @@ export default {
     }
   },
   methods: {
-    //onclick: function(e){},
+    // EXTERNAL EVENTS
+    // Events common to CombinedRadars and HFRadar
+    // Legend changed
+    radarTypeLegendChanged: function(radarType, legendObj){
+      let legend = legendObj.legend;
+      legend.legendRange = legendObj.legendRange; // TODO: FIX DATA STRUCTURE
+      if (radarType == "CombinedRadars"){
+        this.legendCombinedRadars = legend;
+      } else if (radarType == "HFRadar"){
+        this.legendHFRadar = legend;
+      }
+      // Iterate radars
+      Object.keys(window.DataManager.HFRadars).forEach(key => {
+        let radar = window.DataManager.HFRadars[key];
+        if (radar.constructor.name == radarType){
+          if (radar.animEngine)
+            radar.animEngine.updateLegend(JSON.parse(JSON.stringify(legend)));
+        }
+      });
+    },
+    // Animation on off
+    radarTypeAnimationActiveChanged: function(radarType, active){
+      // Iterate radars and stop animations for combined radars
+      Object.keys(window.DataManager.HFRadars).forEach(key => {
+        let radar = window.DataManager.HFRadars[key];
+        if (radar.constructor.name == radarType){
+          radar.animationVisible = active;
+          // Update animation engine
+          this.updateRadarAnimationState(radar);
+        }
+      });
+    },
+    // Overall visibility on off
+    radarTypeVisibilityChanged: function(radarType, areVisible){
+      Object.keys(window.DataManager.HFRadars).forEach(key => {
+        let radar = window.DataManager.HFRadars[key];
+        if (radar.constructor.name == radarType){
+          radar.isActivated = areVisible;
+          this.updateRadarAnimationState(radar);
+        }
+      });
+    },
+    
 
+    // INTERNAL METHODS
     // Create canvas
     createCanvas: function(canvasID){
       let canvas = document.createElement("canvas");
