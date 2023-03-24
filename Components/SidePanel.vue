@@ -126,7 +126,7 @@ export default {
     // On DataPoint click on Map.vue
     window.eventBus.on('ClickedDataPoint', e => {
       let dataPoint = e.dataPoint;
-      let HFRadar = e.HFRadar;
+      let HFRadar = e.radar;
 
       // Create HTML content
       let str = '';

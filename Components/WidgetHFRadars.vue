@@ -94,22 +94,15 @@ export default {
 
 
     // When mouse clicks a data point
-    // TODO: legendRange should be for each data displayed
-    // TODO: this event should have information about the data type. It is possible that it should be received in AnimationCanvas.vue
-    // window.eventBus.on('ClickedDataPoint', e => {
-    //   let dataPoint = e.dataPoint;
-      
-    //   if (dataPoint['Velocity (cm/s)']){
-    //     this.currentValue = dataPoint['Velocity (cm/s)'].toFixed(1);
-    //     this.$refs.tooltipLegend.style.left = (100 * (this.currentValue - this.legendRange[0]) / (this.legendRange[1] - this.legendRange[0])) + '%';
-    //     this.$refs.tooltipLegendBar.style.left = (100 * (this.currentValue - this.legendRange[0]) / (this.legendRange[1] - this.legendRange[0])) + '%';
-    //   } else
-    //     this.currentValue = '';
-    // })
-    // // When map deselects a data point
-    // window.eventBus.on('DeselectedDataPoint', () => {
-    //   this.currentValue = '';
-    // });
+    window.eventBus.on('ClickedDataPoint', e => {
+      let dataPoint = e.dataPoint;
+      let radar = e.radar;
+      let currentValue = '';
+      if (dataPoint['Velocity (cm/s)'] && radar.constructor.name == "HFRadar"){
+        currentValue = dataPoint['Velocity (cm/s)'].toFixed(1);
+      }
+      this.$refs.legendGUI.setCurrentValue(currentValue);
+    })
 
 
     

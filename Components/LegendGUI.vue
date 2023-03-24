@@ -70,16 +70,7 @@ export default {
       this.legendSrc = this.legends[this.legendIndex].img.src;
       this.emitLegendChanged(this.legends[this.legendIndex]);
     });
-    // When mouse clicks a data point
-    // TODO: move this event to widget
-    window.eventBus.on('ClickedDataPoint', e => {
-      let dataPoint = e.dataPoint;
-      
-      if (dataPoint['Velocity (cm/s)']){
-        this.showCurrentValue(dataPoint['Velocity (cm/s)']);
-      } else
-        this.currentValue = '';
-    })
+
     // When map deselects a data point
     window.eventBus.on('DeselectedDataPoint', () => {
       this.currentValue = '';
@@ -144,8 +135,8 @@ export default {
       this.transformFunc = transformFunc;
     },
     // Show current value
-    showCurrentValue: function(value){
-      this.currentValue = value.toFixed(1);
+    setCurrentValue: function(value){
+      this.currentValue = value;
       this.$refs.tooltipLegend.style.left = (100 * (this.currentValue - this.legendRange[0]) / (this.legendRange[1] - this.legendRange[0])) + '%';
       this.$refs.tooltipLegendBar.style.left = (100 * (this.currentValue - this.legendRange[0]) / (this.legendRange[1] - this.legendRange[0])) + '%';
     }
