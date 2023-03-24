@@ -3,13 +3,26 @@
   <div id='widgetHFRadars' class="widget" ref='widgetHFRadars'>
 
     <!-- Title -->
-    <div class="titleWidget">
+    <div class="titleWidget" :class="{'titleWidget-closed': !isVisible}">
       <h4>High-Freq. Radars</h4>
       <div class="icon-str" @click="infoClicked()">i</div>
       <div class="icon-str icon-str-close" v-show="isVisible" @click="crossClicked()"></div>
       <div class="icon-str icon-str-open" v-show="!isVisible" @click="openClicked()"></div>
       <!-- TODO GRAPH ICON - REPRESENTATION -->
     </div>
+
+
+    <!-- Existing radars -->
+    <div id="existingRadarsContainer" v-show="isVisible">
+      <div v-for="radar in radars">
+        <button class="widgetButtonHFRadar" 
+          :class="{'widgetButtonHFRadar-active': radar.isActivated, 'widgetButtonHFRadar-unavailable': radar.hasDataOnTimestamp}" 
+          @click="radarActivatedChanged(radar)">
+            {{ radar.Site }}
+        </button>
+      </div>
+    </div>
+
 
     <!-- Buttons animation and points -->
     <div id="buttonsContainer" v-show="isVisible">
@@ -78,21 +91,24 @@ export default {
     
 
     // EVENTS
-    // When legends are loaded
-    // window.eventBus.on('AppManagerLegendsLoaded', (legends) => {
-      // Store legends when successfully loaded
-      // this.legends = [];
-      // legends.forEach(ll => {
-      //   if (ll.status == 'fulfilled'){
-      //     this.legends.push(ll.value);
-      //   }
-      // })
-      // this.legendsLoaded = true;
-      // this.legendSrc = this.legends[this.legendIndex].img.src;
-      // this.emitLegendChanged(this.legends[this.legendIndex]);
-    // });
-
-
+    // On radars load
+    // Store a version of the radar here
+    window.eventBus.on('HFRadarDataLoaded', (tmst)=>{
+      Object.keys(window.DataManager.HFRadars).forEach(key => {
+        let radar = window.DataManager.HFRadars[key];
+        if (radar.constructor.name == "HFRadar"){
+          let availableTimestamps = Object.keys(radar.data);
+            if (this.radars[key] == undefined){
+              this.radars[key] = {
+              UUID: key, 
+              Site: radar.Site.replace(' ""', ''), // TODO: prettify
+              isActivated: radar.isActivated,
+              availableTimestamps,
+            }
+          }
+        }
+      });
+    });
     // When mouse clicks a data point
     window.eventBus.on('ClickedDataPoint', e => {
       let dataPoint = e.dataPoint;
@@ -114,6 +130,7 @@ export default {
       defaultUnits: 'cm/s',
       selectedLegends: ['BlueWhiteRed.png', 'GreenBlueWhiteOrangeRed.png', 'ModifiedOccam.png', 'DarkScaleColors.png' ],
       isVisible: false,
+      radars: {},
     }
   },
   methods: {
@@ -156,23 +173,45 @@ export default {
 
     // USER INTERACTION
     infoClicked: function(e){
-      window.eventBus.emit("WidgetHFRadars_InfoClicked");
+      window.eventBus.emit("Widget_InfoClicked");
     },
     crossClicked: function(e){
-      // Deactivate all CombinedRadars
+      // Deactivate all radars
       window.eventBus.emit("WidgetHFRadars_VisibilityChanged", false);
       this.isVisible = false;
     },
     openClicked: function(){
       window.eventBus.emit("WidgetHFRadars_VisibilityChanged", true);
       this.isVisible = true;
+      // Get activated states (assumes that the emit is executed faster?) // WARN WATCH
+      Object.keys(window.DataManager.HFRadars).forEach(key => {
+        let radar = window.DataManager.HFRadars[key];
+        if (radar.constructor.name == "HFRadar"){
+          if (this.radars[key] == undefined){
+            // Create new radar
+            // should never happen
+            debugger;
+          } else {
+            this.radars[key].isActivated = radar.isActivated;
+          }
+        }
+      })
     },
     particlesButtonClicked: function(e){
       window.eventBus.emit('WidgetHFRadars_AnimationActiveChanged', e.target.checked);
     },
     pointsButtonClicked: function(e){
       window.eventBus.emit('WidgetHFRadars_PointsActiveChanged', e.target.checked);
-    }
+    },
+    // HF Radars
+    radarActivatedChanged: function(rr){
+      rr.isActivated = !rr.isActivated;
+      let radar = window.DataManager.HFRadars[rr.UUID];
+      radar.isActivated = rr.isActivated;
+      
+      
+      window.eventBus.emit('SidePanelRadarActiveChange', window.DataManager.HFRadars[radar.UUID]);
+    },
 
   },
   components: {
@@ -216,6 +255,13 @@ span {
   font-size: small;
   padding-left: 3px;
   padding-right: 3px;
+}
+
+
+#existingRadarsContainer {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
 }
 
 </style>
