@@ -6,13 +6,13 @@
       <button class="closing-cross roundButton icon-svg" @click="closePanelClicked">X</button>
 
       <!-- Info panel -->
-      <info-panel v-show="panelName == 'infoPanel'"></info-panel>
+      <!-- <info-panel v-show="panelName == 'infoPanel'"></info-panel> -->
 
       <!-- Sea panel -->
-      <sea-panel v-show="panelName == 'seaPanel'"></sea-panel>
+      <!-- <sea-panel v-show="panelName == 'seaPanel'"></sea-panel> -->
 
       <!-- Wind panel -->
-      <wind-panel v-show="panelName == 'windPanel'"></wind-panel>
+      <!-- <wind-panel v-show="panelName == 'windPanel'"></wind-panel> -->
 
     </div>
   </div>
@@ -24,9 +24,9 @@
 
 
 <script>
-import InfoPanel from '/OBSEA/Components//Panels/InfoPanel.vue';
-import SeaPanel from "/OBSEA/Components/Panels/SeaPanel.vue"
-import WindPanel from "/OBSEA/Components/Panels/WindPanel.vue"
+// import InfoPanel from '/OBSEA/Components//Panels/InfoPanel.vue';
+// import SeaPanel from "/OBSEA/Components/Panels/SeaPanel.vue"
+// import WindPanel from "/OBSEA/Components/Panels/WindPanel.vue"
 
 export default {
   name: "CentralPanel",
@@ -66,9 +66,9 @@ export default {
     },
   },
   components: {
-    "sea-panel": SeaPanel,
-    "wind-panel": WindPanel,
-    "info-panel": InfoPanel,
+    // "sea-panel": SeaPanel,
+    // "wind-panel": WindPanel,
+    // "info-panel": InfoPanel,
   }
 }
 </script>
