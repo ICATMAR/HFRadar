@@ -173,7 +173,7 @@ export default {
         isDataPointVisible: false,
         visibleRadars: [],
         radarNameOfDatapoint: '',
-        showPanel: true,
+        showPanel: false,
     }
   },
   methods: {
