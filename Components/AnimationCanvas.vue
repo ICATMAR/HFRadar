@@ -11,7 +11,7 @@
           <widgetCombinedRadars ref="widgetCombinedRadars" v-show="combinedRadarsExist"></widgetCombinedRadars>
         </Transition>
         <Transition>
-          <widgetHFRadars ref="widgetHFRadars" v-show="true"></widgetHFRadars>
+          <widgetHFRadars ref="widgetHFRadars" v-show="radarsExist"></widgetHFRadars>
         </Transition>
       </div>
 
@@ -46,7 +46,7 @@ export default {
           // Activate widget
           if (radar.constructor.name == "CombinedRadars")
             this.combinedRadarsExist = true;
-          else if (radar.constructor.name == "HFRadar" && radar.isActivated)
+          else if (radar.constructor.name == "HFRadar")
             this.radarsExist = true;
           
           // Create animation for radar
@@ -87,6 +87,7 @@ export default {
     // Selected date changed (slider moves or drag and drop files)
     window.eventBus.on('SelectedDateChanged', (tmst) =>{
       // Keep the visibility of the radars that is set on the GUI
+      this.radarsExist = false; // Reset and redefine if HF Radar exists on time stamp
       // Iterate all radars
       Object.keys(window.DataManager.HFRadars).forEach(key => {
         let radar = window.DataManager.HFRadars[key];
@@ -122,20 +123,15 @@ export default {
 
 
         // Show widget
-        if (radar.data[tmst] != undefined && radar.isActivated && radar.constructor.name == "CombinedRadars"){
-          if (radar.constructor.name == "CombinedRadars")
-            this.combinedRadarsExist = true;
+        if (radar.data[tmst] != undefined && radar.constructor.name == "CombinedRadars"){
+          this.combinedRadarsExist = true;
         } else {
           this.combinedRadarsExist = false;
         }
         // HF Radars widget
-        this.radarsExist = false; // TODO: PUT IN A FUNCTION (USED TWICE IN THIS COMPONENT)
-        Object.keys(window.DataManager.HFRadars).forEach(key => {
-          let rr = window.DataManager.HFRadars[key];
-          if (rr.constructor.name == "HFRadar" && rr.isActivated && rr.data[tmst] != undefined)
-            this.radarsExist = true;
-        });
-
+        if (radar.data[tmst] != undefined && radar.constructor.name == "HFRadar"){
+          this.radarsExist = true;
+        }
 
       });
       
@@ -171,7 +167,7 @@ export default {
 
     // When animation starts/stops
     window.eventBus.on('SidePanelRadarActiveChange', (inRadar) => {
-
+      // TODO: CHANGE NAME BECAUSE THIS IS CALLED FROM WIDGET
       // Gotta be careful with .vue, as it tracks objects and its properties.
       let radar = window.DataManager.HFRadars[inRadar.UUID];
 
@@ -182,7 +178,7 @@ export default {
         this.radarsExist = false;
         Object.keys(window.DataManager.HFRadars).forEach(key => {
           let rr = window.DataManager.HFRadars[key];
-          if (rr.constructor.name == "HFRadar" && rr.isActivated)
+          if (rr.constructor.name == "HFRadar")
             this.radarsExist = true;
         });
       }
