@@ -197,13 +197,12 @@ img {
 .selLegend {
   margin-top: 10px;
   margin-bottom: 10px;
+  border: 2px solid rgba(255, 255, 255, 0.185);
 }
 
 .selLegend:hover, img:hover {
   border-radius: 5px;
   border: 2px solid var(--lightBlue);
-  height: 22px;
-  width: 202px;
   cursor:pointer;
 }
 
@@ -214,6 +213,11 @@ img {
   text-shadow: 0px 0px 4px black;
   font-size: clamp(0.6rem, 1.2vw, 0.8rem);
   margin-top: -10px;
+}
+
+.rangeValuesBox > *:hover {
+  background-color: rgba(255, 255, 255, 0.281);
+  border-radius: 10px;
 }
 
 .rangeValuesBox > * {
