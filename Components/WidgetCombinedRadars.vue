@@ -15,15 +15,15 @@
     <div id="buttonsContainer" v-show="isVisible">
 
       <!-- On/Off particle animation -->
-      <div class='buttonContainer'>
+      <div class='widgetButtonContainer'>
         <onOffButton :checked="true" :inSize="'18px'" @change="particlesButtonClicked($event)"></onOffButton>
-        <span>particles</span>
+        <span class='widgetSpan'>particles</span>
       </div>
 
       <!-- On/Off points -->
-      <div class='buttonContainer'>
+      <div class='widgetButtonContainer'>
         <onOffButton :checked="true" :inSize="'18px'" @change="pointsButtonClicked($event)"></onOffButton>
-        <span>points</span>
+        <span class='widgetSpan'>points</span>
       </div>
       <!-- Maybe point variable too here? -->
     </div>
@@ -201,11 +201,6 @@ export default {
   justify-content: center;
 }
 
-.buttonContainer {
-  display:flex;
-  flex-wrap: nowrap;
-  padding: 10px;
-}
 
 #buttonsWidget > div {
   display: flex;
@@ -214,11 +209,4 @@ export default {
   align-items: center;
 }
 
-span {
-  color: white;
-  text-shadow: 0px 0px 4px black;
-  font-size: small;
-  padding-left: 3px;
-  padding-right: 3px;
-}
 </style>

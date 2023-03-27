@@ -199,6 +199,8 @@ export default {
   border-radius: 5px;
   margin-bottom: 5px;
 
+  font-size: clamp(0.6rem, 1.5vw, 1rem);
+
   display: flex;
   justify-content: center;
   align-items: center;

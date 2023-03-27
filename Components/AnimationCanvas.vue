@@ -370,7 +370,7 @@ export default {
 .widgetContainer {
   position: absolute;
   bottom: 100px;
-  right: 123px;
+  right: clamp(10px, 10%, 100px);
   width: 264px;
   display: flex;
   flex-direction: column;

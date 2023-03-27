@@ -212,7 +212,7 @@ img {
   justify-content: space-between;
   color: white;
   text-shadow: 0px 0px 4px black;
-  font-size: small;
+  font-size: clamp(0.6rem, 1.2vw, 0.8rem);
   margin-top: -10px;
 }
 
