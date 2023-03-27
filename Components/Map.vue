@@ -28,6 +28,10 @@
       <animationCanvas ref="animationCanvas"></animationCanvas>
 
 
+      <!-- Widget base layer options-->
+      <widgetMapOptions></widgetMapOptions>
+
+
       <!-- Tracks on the timeline -->
       <!-- <tracks-timeline ref="tracksTimeLine" @clickTrackMark="setSelectedTrack" style="bottom: 120px; position: relative; z-index: 2"></tracks-timeline> -->
 
@@ -56,6 +60,7 @@
 <script>
 import AnimationCanvas from "./AnimationCanvas.vue";
 import TimeSlider from "./TimeSlider.vue";
+import WidgetMapOptions from "./WidgetMapOptions.vue";
 // import TimeRangeBar from "TimeRangeBar.vue";
 // import TracksTimeLine from "TracksTimeLine.vue";
 //import WMSLegend from "WMSLegend.vue";
@@ -195,6 +200,17 @@ export default {
       // Remove HF points
       this.radarTypeVisibilityChanged("HFRadar", areVisible);
     });
+
+    // WidgetMapOptions
+    // Change base layer
+    window.eventBus.on('WidgetMapOptions_BaseLayerClicked', (baseLayerName) => {
+      this.setBaseLayer(baseLayerName);
+    });
+    // Change isobaths
+    window.eventBus.on('WidgetMapOptions_IsobathsVisibilityChange', (isVisible) => {
+      //
+    });
+    
 
 
     // When the side panel is hiden
@@ -892,6 +908,7 @@ export default {
   components: {
     "time-slider": TimeSlider,
     "animationCanvas": AnimationCanvas,
+    "widgetMapOptions": WidgetMapOptions,
 },
   computed: {
       //foo: function () {}

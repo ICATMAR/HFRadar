@@ -14,7 +14,7 @@
     <!-- <central-panel></central-panel> -->
 
     <!-- Banner -->
-    <img class="Banner" src="Assets/Banner.png">
+    <!-- <img class="Banner" src="Assets/Banner.png"> -->
   </div>
 </template>
 
@@ -51,6 +51,9 @@ export default {
     window.FileManager.loadLegends().then (values => {
       window.eventBus.emit('AppManagerLegendsLoaded', values);
     });
+    window.FileManager.loadBaseLayerIcons().then(values => {
+      window.eventBus.emit('AppManager_BaseLayerIconsLoaded', values);
+    })
   },
   data (){
     return {

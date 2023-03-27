@@ -21,6 +21,13 @@ class FileManager {
     './Assets/Legends/absColdOccam.png',
   ];
 
+  BASELAYERURLS = [
+    './Assets/BaseLayer/Imagery.png',
+    './Assets/BaseLayer/Bathymetry.png',
+    './Assets/BaseLayer/Ocean.png',
+    './Assets/BaseLayer/OSM.png'
+  ];
+
   constructor(){
 
   }
@@ -319,6 +326,37 @@ class FileManager {
       }
       img.onerror = () => reject();
       
+    });
+
+  }
+
+
+
+
+
+  // Base layer
+  loadBaseLayerIcons = function(){
+    let promises = [];
+
+    for (let i = 0; i < this.BASELAYERURLS.length; i++){
+      promises.push(this.loadImage(this.BASELAYERURLS[i]));
+    }
+
+    return new Promise(resolve => resolve(Promise.allSettled(promises)));
+  }
+  // Load image
+  loadImage = function(url){
+
+    return new Promise ((resolve, reject) => {
+      let img = new Image();
+      img.src = url;
+      let name = url.split('/').reverse()[0].replace('.png', '');
+        
+      img.onload = () => {
+        
+        resolve({name, img});
+      }
+      img.onerror = (e) => console.error(e);
     });
 
   }
