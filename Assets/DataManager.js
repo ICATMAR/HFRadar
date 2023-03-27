@@ -322,7 +322,7 @@ class HFRadar {
   getRadarOrigin(){
     let locationStr = this.header.Origin;
     let location = locationStr.replace(/\s\s+/g, ',').replace(',', '').replace('\r', '').split(',');
-    location = location.reverse();
+    location = location.slice(0,2).reverse();
     return location;
   }
 
