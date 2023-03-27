@@ -110,6 +110,12 @@ input:checked + .slider:before {
 /* Rounded sliders */
 .slider.round {
   border-radius: calc(v-bind(size) * 1.3);
+  box-shadow: 0px 0px 4px black;
+}
+
+.slider.round:hover {
+  box-shadow: 0px 0px 4px var(--lightBlue);
+  transition:none;
 }
 
 .slider.round:before {
