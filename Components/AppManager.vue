@@ -14,7 +14,7 @@
     <!-- <central-panel></central-panel> -->
 
     <!-- Banner -->
-    <!-- <img class="Banner" src="Assets/Banner.png"> -->
+    <img class="Banner" src="Assets/Banner.png">
   </div>
 </template>
 
