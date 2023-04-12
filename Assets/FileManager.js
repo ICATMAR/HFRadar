@@ -24,8 +24,8 @@ class FileManager {
   BASELAYERURLS = [
     './Assets/BaseLayer/Imagery.png',
     './Assets/BaseLayer/Bathymetry.png',
-    './Assets/BaseLayer/Ocean.png',
-    './Assets/BaseLayer/OSM.png'
+    // './Assets/BaseLayer/Ocean.png',
+    // './Assets/BaseLayer/OSM.png'
   ];
 
   constructor(){

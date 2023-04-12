@@ -77,10 +77,14 @@
   #widgetMapOptions {
     z-index: 11;
     position: absolute;
-    top: 70px;
+    top: 150px;
     left: 2px;
+  }
 
-    
+  @media screen and (max-width: 770px) {
+    #widgetMapOptions {
+      top: 120px;
+    }
   }
   
   #baseLayerSelection {
