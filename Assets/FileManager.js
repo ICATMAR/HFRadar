@@ -154,7 +154,7 @@ class FileManager {
     let promises = [];
     let urls = [
       // Begur
-      baseURL + 'BEGU/RDLi_BEGU_' + year + '_' + month + '_' + day + '_' + hour + '00.ruv',
+      baseURL + 'BEGU/RDLm_BEGU_' + year + '_' + month + '_' + day + '_' + hour + '00.ruv',
       //  Creus
       baseURL + 'CREU/RDLm_CREU_' + year + '_' + month + '_' + day + '_' + hour + '00.ruv',
       // Totals Roses
