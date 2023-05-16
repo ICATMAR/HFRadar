@@ -449,7 +449,7 @@ export default {
           // Create feature style
           let featStyle = new ol.style.Style({
             image: new ol.style.Icon({
-              src: 'Assets/antenna.png',
+              src: 'Assets/Images/antenna.png',
               width: 10,
               height: 10,
               scale: [0.5, 0.5],

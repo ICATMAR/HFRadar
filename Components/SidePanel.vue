@@ -261,7 +261,7 @@ export default {
 
 
 .sidePanelFiller {
-  background-image: url('Assets/TramaCorp.png');
+  background-image: url('Assets/Images/TramaCorp.png');
   background-size: 100% 100%;
   width: 100%;
   height: 100%;

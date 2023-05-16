@@ -16,10 +16,10 @@ window.eventBus = window.mitt();
 
 
 // Load scripts
-import CreateImage from './Assets/createImage.js';
-import FileManager from './Assets/FileManager.js';
-import DataManager from './Assets/DataManager.js';
-import AnimationEngine from './Assets/AnimationEngine.js';
+import CreateImage from './Assets/Scripts/createImage.js';
+import FileManager from './Assets/Scripts/FileManager.js';
+import DataManager from './Assets/Scripts/DataManager.js';
+import AnimationEngine from './Assets/Scripts/AnimationEngine.js';
 
 
 window.createImage = CreateImage;

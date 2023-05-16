@@ -13,8 +13,13 @@
     <!-- Central Panel -->
     <!-- <central-panel></central-panel> -->
 
-    <!-- Banner -->
-    <img class="Banner" src="Assets/Banner.png">
+    <!-- ICONS -->
+    <a href="https://icatmar.cat/">
+      <img class="logo clickable icatmar-logo" src="Assets/Images/icatmar-mini-logo.svg">
+    </a>
+    <a href="https://icatmar.cat/visors/xarxa-observacional/">
+      <img class="logo clickable obs-logo" src="Assets/Images/ocea-mini-1.svg">
+    </a>
   </div>
 </template>
 
@@ -87,15 +92,21 @@ export default {
     position:fixed;
   }
 
-  .Banner {
-    width: 100px;
-    position:absolute;
-    top: 20px;
-    left: 60px;
-  }
-  @media screen and (max-width: 1000px) {
-    .Banner {
-      width: 60px;
-    }
-  }
+.logo {
+  width: clamp(70px, 7vw, 100px);
+  height: clamp(70px, 7vw, 100px);
+  position: fixed;
+  top: 10px;
+  padding: 0px;
+  margin: 0px;
+  z-index: 10;
+}
+
+.icatmar-logo {
+  left: 50px;
+}
+
+.obs-logo {
+  left: clamp(110px, 9vw, 140px);
+}
 </style>
