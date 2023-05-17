@@ -101,6 +101,26 @@ class DataManager {
     }
   }
 
+  loadLatestStaticFilesRepository(){
+    let now = new Date();
+    now.setUTCHours(now.getUTCHours() - 1); // Most recent data is from 1h ago. Currents are calculated with +1h, 0h, -1h files, thus there is a delay of 1h always.
+    let lastDate = now.toISOString();
+    now.setUTCHours(now.getUTCHours() - 2); // 2 hours earlier
+    let earliestDate = now.toISOString();
+
+    this.loadStaticFilesRepository(earliestDate, lastDate).then((lastHFRadar) => {
+      let tmst = lastHFRadar.lastLoadedTimestamp;
+      // Emit event to update interface
+      window.eventBus.emit('HFRadarDataLoaded', tmst);
+      // Now load the rest of the  afeter some time
+      this.loadStaticFilesRepository(undefined, earliestDate).then(() => {
+        window.eventBus.emit('HFRadarDataLoaded', tmst);
+      });
+    }).catch(()=>{
+      debugger;
+    });
+  }
+
 
   loadStaticFilesRepository(startDate, endDate){
     
@@ -124,7 +144,8 @@ class DataManager {
       now = new Date(endDate);
     }
 
-
+    console.log(movingDate);
+    console.log(now);
 
 
     // Array of promises
@@ -137,7 +158,7 @@ class DataManager {
 
     let lastHFRadar;
     // Resolve promises
-    Promise.allSettled(promises).then(values => {
+    return Promise.allSettled(promises).then(values => {
       for (let i = 0; i < values.length; i++){
         let filesOnDatePromiseResult = values[i];
         // If promise was fullfiled (I think always)
@@ -149,7 +170,7 @@ class DataManager {
               
               lastHFRadar = this.addHFRadarData(promiseResult.value);
               // Make it inactive it is radial?
-              if (lastHFRadar.dataGrid == undefined)
+              if (lastHFRadar.constructor.name == "HFRadar")
                 lastHFRadar.isActivated = false;
               else
                 lastHFRadar.isActivated = true;
@@ -159,7 +180,7 @@ class DataManager {
         }
       }
 
-      window.eventBus.emit('HFRadarDataLoaded', lastHFRadar.lastLoadedTimestamp);
+      return lastHFRadar;
     })
 
   }

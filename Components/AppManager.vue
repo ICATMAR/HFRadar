@@ -49,7 +49,14 @@ export default {
 
     // Load data
     //window.DataManager.loadStaticFiles();
-    window.DataManager.loadStaticFilesRepository(); // Real-time data
+    // First files of real-time data --> load them first to show something on the website
+    window.DataManager.loadLatestStaticFilesRepository();
+    // Real-time data
+    //window.DataManager.loadStaticFilesRepository().then((lastHFRadar) => {
+      //window.eventBus.emit('HFRadarDataLoaded', lastHFRadar.lastLoadedTimestamp);
+    //});
+
+    
     //window.DataManager.loadStaticFilesRepository('2023-03-02T11:00Z', '2023-03-07T16:00Z'); // Specific dates with data
 
     // Load legends

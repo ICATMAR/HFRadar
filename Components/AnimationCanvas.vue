@@ -57,16 +57,18 @@ export default {
           // Update animation
           else {
             // Update existing animation
-            if (radar.dataGrid)
+            if (radar.constructor.name == "CombinedRadars"){
               radar.animEngine.setCombinedRadarData(radar.dataGrid[tmst]);
-            else
+              // Start combined radars animation (TODO: and activate widget?)
+              let wasStopped = radar.animEngine.isStopped;
+              radar.animEngine.isStopped = false;
+              // Restart animation if it was stopped
+              if (wasStopped)
+                radar.animEngine.update();
+            } else{
               radar.animEngine.setHFRadarData(radar.data[tmst]);
-            let wasStopped = radar.animEngine.isStopped;
-            radar.animEngine.isStopped = false;
-            // Restart animation if it was stopped
-            if (wasStopped)
-              radar.animEngine.update();
             }
+          }
         }
         // If radar does not have data on that timestamp
         else if (radar.animEngine != undefined) {
