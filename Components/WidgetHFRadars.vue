@@ -98,8 +98,8 @@ export default {
         let radar = window.DataManager.HFRadars[key];
         if (radar.constructor.name == "HFRadar"){
           let availableTimestamps = Object.keys(radar.data);
-            if (this.radars[key] == undefined){
-              this.radars[key] = {
+          if (this.radars[key] == undefined){
+            this.radars[key] = {
               UUID: key, 
               Site: radar.Site.replace(' ""', ''), // TODO: prettify
               isActivated: radar.isActivated,
