@@ -35,10 +35,12 @@ export default {
     // EVENT LISTENERS
     // New HFRadar data
     window.eventBus.on('HFRadarDataLoaded', (tmst) =>{
+      // If there is no timestamp, do not update animation
+      if (tmst == undefined)
+        return;
       // Iterate all radars
       Object.keys(window.DataManager.HFRadars).forEach(key => {
         let radar = window.DataManager.HFRadars[key];
-        
         // Check if there is radar data on that tmst
         if (radar.data[tmst] != undefined){
           // Make all radars with data visible

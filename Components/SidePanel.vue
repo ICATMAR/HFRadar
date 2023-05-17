@@ -106,7 +106,8 @@ export default {
   mounted() {
     // EVENT LISTENERS
     window.eventBus.on('HFRadarDataLoaded', (tmst) => {
-      this.updateInformation(tmst);
+      if (tmst != undefined)
+        this.updateInformation(tmst);
     });
 
     window.eventBus.on('Widget_InfoClicked', () => {

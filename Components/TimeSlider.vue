@@ -39,10 +39,13 @@ export default {
   mounted() {
     window.eventBus.on('HFRadarDataLoaded', (tmst) => {
       let startEndDates = window.DataManager.getStartEndDates();
+      // If tmst is not defined, set it to latest
+      tmst = tmst || startEndDates.endDate;
+
       // Calculate number of hours in between
       let sDate = new Date(startEndDates.startDate);
       let eDate = new Date(startEndDates.endDate);
-
+      // Time range
       this.$refs.slider.min = sDate.getTime()/(1000*60*60);
       this.$refs.slider.max = eDate.getTime()/(1000*60*60);
 

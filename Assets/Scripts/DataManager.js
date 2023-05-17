@@ -101,24 +101,36 @@ class DataManager {
     }
   }
 
-  loadLatestStaticFilesRepository(){
+  async loadLatestStaticFilesRepository(){
+    // Hourly
     let now = new Date();
+    let str = now.toISOString();
+    let nowISODate = str.substring(0, 14) + '00:00.000Z';
+    now = new Date(nowISODate);
+    // Reduce 1 hour
     now.setUTCHours(now.getUTCHours() - 1); // Most recent data is from 1h ago. Currents are calculated with +1h, 0h, -1h files, thus there is a delay of 1h always.
     let lastDate = now.toISOString();
-    now.setUTCHours(now.getUTCHours() - 2); // 2 hours earlier
-    let earliestDate = now.toISOString();
+    // Petition latest dataset
+    let hfRadar = await this.loadStaticFilesRepository(lastDate, lastDate);
 
-    this.loadStaticFilesRepository(earliestDate, lastDate).then((lastHFRadar) => {
-      let tmst = lastHFRadar.lastLoadedTimestamp;
-      // Emit event to update interface
-      window.eventBus.emit('HFRadarDataLoaded', tmst);
-      // Now load the rest of the  afeter some time
-      this.loadStaticFilesRepository(undefined, earliestDate).then(() => {
-        window.eventBus.emit('HFRadarDataLoaded', tmst);
-      });
-    }).catch(()=>{
-      debugger;
-    });
+    if (hfRadar != undefined)
+      return hfRadar;
+
+    // If current does not exist, try one hour before repeateadly
+    let counter = 0;
+    while (hfRadar == undefined && counter <= 24) {
+      // Reduce time one hour
+      now.setUTCHours(now.getUTCHours() - 1);
+      counter++;
+      hfRadar = await this.loadStaticFilesRepository(now.toISOString(), now.toISOString());
+    }
+
+    if (hfRadar != undefined)
+      console.log('Data is delayed by ' + counter + ' hours.');
+    else
+      console.log('Data is delayed by more than 25 hours.');
+
+    return hfRadar;
   }
 
 
@@ -143,10 +155,6 @@ class DataManager {
     if (endDate != undefined){
       now = new Date(endDate);
     }
-
-    console.log(movingDate);
-    console.log(now);
-
 
     // Array of promises
     let promises = [];

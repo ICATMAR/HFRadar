@@ -50,8 +50,27 @@ export default {
     // Load data
     //window.DataManager.loadStaticFiles();
     // First files of real-time data --> load them first to show something on the website
-    window.DataManager.loadLatestStaticFilesRepository();
-    // Real-time data
+    window.DataManager.loadLatestStaticFilesRepository().then(hfRadar => {
+      let tmst;
+      if (hfRadar != undefined){
+        tmst = hfRadar.lastLoadedTimestamp;
+        window.eventBus.emit('HFRadarDataLoaded', hfRadar.lastLoadedTimestamp);
+      }
+      return tmst;
+    }).then((tmst) =>{
+      // Reduce tmst by 1h
+      if (tmst != undefined){
+        let tmp = new Date(tmst);
+        tmp.setUTCHours(tmp.getUTCHours() - 1);
+        tmst = tmp.toISOString();
+      }
+      // Real-time data
+      return window.DataManager.loadStaticFilesRepository(undefined, tmst)
+    }).then((hfRadar) => {
+      if (hfRadar != undefined)
+        window.eventBus.emit('HFRadarDataLoaded');
+    });
+    
     //window.DataManager.loadStaticFilesRepository().then((lastHFRadar) => {
       //window.eventBus.emit('HFRadarDataLoaded', lastHFRadar.lastLoadedTimestamp);
     //});

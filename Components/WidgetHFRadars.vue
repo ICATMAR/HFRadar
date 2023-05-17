@@ -93,7 +93,7 @@ export default {
     // EVENTS
     // On radars load
     // Store a version of the radar here
-    window.eventBus.on('HFRadarDataLoaded', (tmst)=>{
+    window.eventBus.on('HFRadarDataLoaded', ()=>{
       Object.keys(window.DataManager.HFRadars).forEach(key => {
         let radar = window.DataManager.HFRadars[key];
         if (radar.constructor.name == "HFRadar"){

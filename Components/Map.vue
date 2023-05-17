@@ -174,7 +174,8 @@ export default {
     // EVENT LISTENERS
     // New HFRadar data
     window.eventBus.on('HFRadarDataLoaded', (tmst) =>{
-      this.selectedDateChanged(tmst);
+      if (tmst != undefined)
+        this.selectedDateChanged(tmst);
     });
     // Selected date changed (slider moves or drag and drop files)
     window.eventBus.on('SelectedDateChanged', (tmst) =>{
