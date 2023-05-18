@@ -22,11 +22,19 @@ import DataManager from './Assets/Scripts/DataManager.js';
 import AnimationEngine from './Assets/Scripts/AnimationEngine.js';
 
 
+// Web worker
+if (window.Worker)
+  window.DataWorker = new Worker('./Assets/Scripts/worker.js');
+else {
+  console.warn('Workers not supported.');
+}
+
 window.createImage = CreateImage;
 
 window.FileManager = new FileManager();
 window.DataManager = new DataManager();
 window.AnimationEngine = AnimationEngine;
+
 
 
 

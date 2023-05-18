@@ -29,17 +29,37 @@ class FileManager {
   ];
 
   constructor(){
-
+    // WEB WORKER
+    // Capture web worker messages
+    if (window.DataWorker){
+      window.DataWorker.onmessage = (e) => {
+        let result = e.data;
+        console.log(result);
+      }
+    }
   }
 
 
 
 
 
+  // Parse text web worker
+  parseTextWorker = function(rawText, callback){
+    if (window.DataWorker){
+      window.DataWorker.postMessage(['parseText', rawText]);
+      window.DataWorker.onmessage = (e) => {
+        callback(e.data);
+      }
+    } else
+      callback(window.workerFunctions.parseText(rawText));
+    
+  }
 
 
   // Parse text
   parseText = function(rawText){
+    if (window.DataWorker)
+      window.DataWorker.postMessage(['parseText', rawText]);
     
     // Index header
     let tableStartIndex = rawText.indexOf('TableStart:') + 12;
