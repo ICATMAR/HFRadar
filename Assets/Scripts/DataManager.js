@@ -239,12 +239,6 @@ class DataManager {
   }
 
 
-  // Resolve promises
-  store(promises){
-
-  }
-
-
 // End of class
 }
 
