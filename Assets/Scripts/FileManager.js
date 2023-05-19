@@ -41,21 +41,6 @@ class FileManager {
 
 
 
-
-
-  // Parse text web worker
-  parseTextWorker = function(rawText, callback){
-    if (window.DataWorker){
-      window.DataWorker.postMessage(['parseText', rawText]);
-      window.DataWorker.onmessage = (e) => {
-        callback(e.data);
-      }
-    } else
-      callback(window.workerFunctions.parseText(rawText));
-    
-  }
-
-
   // Parse text
   parseText = function(rawText){
     if (window.DataWorker)
