@@ -57,19 +57,30 @@ export default {
         window.eventBus.emit('HFRadarDataLoaded', hfRadar.lastLoadedTimestamp);
       }
       return tmst;
-    }).then((tmst) =>{
-      // Reduce tmst by 1h
+    })
+    // Load the rest of the files
+    .then((tmst) =>{
+      // Reduce tmst by 1h, as this timestamp is already loaded.
       if (tmst != undefined){
         let tmp = new Date(tmst);
         tmp.setUTCHours(tmp.getUTCHours() - 1);
         tmst = tmp.toISOString();
       }
-      // Real-time data
-      return window.DataManager.loadStaticFilesRepository(undefined, tmst)
-    }).then((hfRadar) => {
-      if (hfRadar != undefined)
-        window.eventBus.emit('HFRadarDataLoaded');
-    });
+      // Load data
+      let useWorker = true;
+      // Use web worker to load the rest of the files
+      if (window.DataWorker && useWorker){
+        window.DataWorker.postMessage(['loadStaticFilesRepository', [undefined, tmst]]);
+      } 
+      // Fallback option
+      else {
+        window.DataManager.loadStaticFilesRepository(undefined, tmst).then((hfRadar) => {
+        if (hfRadar != undefined)
+          window.eventBus.emit('HFRadarDataLoaded');
+        });
+      }
+      
+    })
     
     //window.DataManager.loadStaticFilesRepository().then((lastHFRadar) => {
       //window.eventBus.emit('HFRadarDataLoaded', lastHFRadar.lastLoadedTimestamp);

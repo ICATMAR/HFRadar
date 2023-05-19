@@ -28,23 +28,34 @@ class FileManager {
     // './Assets/BaseLayer/OSM.png'
   ];
 
+
+
   constructor(){
     // WEB WORKER
     // Capture web worker messages
     if (window.DataWorker){
       window.DataWorker.onmessage = (e) => {
+        // Interaction with main thread and web worker can be slow, avoid doing postmessage repeatedly
         let result = e.data;
-        console.log(result);
+        // Loaded data from worker
+        if (result[0] == 'loadDataFromRepository'){
+          this.petitionsSolved++;
+        } else if (result[0] == 'loadStaticFilesRepository'){
+          let data = result[1];
+          for (let i = 0; i < data.length; i++){
+            window.DataManager.addHFRadarData(data[i]);
+          }
+          window.eventBus.emit('HFRadarDataLoaded');
+        }
       }
     }
   }
 
 
 
+
   // Parse text
   parseText = function(rawText){
-    if (window.DataWorker)
-      window.DataWorker.postMessage(['parseText', rawText]);
     
     // Index header
     let tableStartIndex = rawText.indexOf('TableStart:') + 12;
@@ -182,8 +193,6 @@ class FileManager {
 
     return Promise.allSettled(promises)
       //.then(values => console.log(values))
-
-
   }
 
 

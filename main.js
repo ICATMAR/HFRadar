@@ -24,7 +24,7 @@ import AnimationEngine from './Assets/Scripts/AnimationEngine.js';
 
 // Web worker
 if (window.Worker)
-  window.DataWorker = new Worker('./Assets/Scripts/worker.js');
+  window.DataWorker = new Worker('./Assets/Scripts/worker.js'); // undefined for testing without web worker
 else {
   console.warn('Workers not supported.');
 }
