@@ -110,7 +110,7 @@ export default {
       });
     });
     // When mouse clicks a data point
-    window.eventBus.on('ClickedDataPoint', e => {
+    window.eventBus.on('Map_ClickedDataPoint', e => {
       let dataPoint = e.dataPoint;
       let radar = e.radar;
       let currentValue = '';

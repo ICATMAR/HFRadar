@@ -99,7 +99,7 @@ export default {
     // When mouse clicks a data point
     // TODO: legendRange should be for each data displayed
     // TODO: this event should have information about the data type. It is possible that it should be received in AnimationCanvas.vue
-    window.eventBus.on('ClickedDataPoint', e => {
+    window.eventBus.on('Map_ClickedDataPoint', e => {
       let dataPoint = e.dataPoint;
       let radar = e.radar;
       let currentValue = '';

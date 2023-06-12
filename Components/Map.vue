@@ -639,7 +639,7 @@ export default {
         });
         // If a radar is closest
         if (closestRadar !== undefined){
-          window.eventBus.emit('ClickedHFRadar', closestRadar);
+          window.eventBus.emit('Map_ClickedHFRadar', closestRadar);
         }
         
         
@@ -652,7 +652,7 @@ export default {
           let pixelDistance = Math.sqrt(Math.pow(evt.originalEvent.clientX - pixelCoord[0],2) + Math.pow(evt.originalEvent.clientY - pixelCoord[1],2));
           // Click distance to point
           if (pixelDistance < 60){
-            window.eventBus.emit('ClickedDataPoint', {"dataPoint": closestDataPoint, "radar": selRadar});
+            window.eventBus.emit('Map_ClickedDataPoint', {"dataPoint": closestDataPoint, "radar": selRadar});
             // Create map layer with styled point
               let featPoint = new ol.Feature({
                 geometry: new ol.geom.Point(epsg3857coord),

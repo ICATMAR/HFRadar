@@ -123,14 +123,16 @@ export default {
     });
 
     // On HF Radar clikc on Map.vue
-    window.eventBus.on('ClickedHFRadar', radar => {
+    window.eventBus.on('Map_ClickedHFRadar', radar => {
       console.log(radar);
       console.log("Clicked HF Radar")
       //TODO: ACTIVATE RADAR
+      this.showPanel = true;
+      window.eventBus.emit('SidePanelSizechanged', this.showPanel);
     });
 
     // On DataPoint click on Map.vue
-    window.eventBus.on('ClickedDataPoint', e => {
+    window.eventBus.on('Map_ClickedDataPoint', e => {
       let dataPoint = e.dataPoint;
       let HFRadar = e.radar;
 
