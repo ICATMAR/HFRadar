@@ -611,7 +611,7 @@ export default {
         Object.keys(radars).forEach(key => {
           let radar = radars[key];
           // If radar has data, then check the proximity
-          if (radar.hasDataOnTmst && radar.isActivated){ // AND IS SELECTED? TWO RADARS TOGETHER, HOW TO SELECT ONE OR THE OTHER DATAPOINT?
+          if (radar.hasDataOnTmst && radar.isActivated && radar.pointsVisible){ // AND IS SELECTED? TWO RADARS TOGETHER, HOW TO SELECT ONE OR THE OTHER DATAPOINT?
             for (let j = 0; j < radar.currentData.length; j++){
               let dataPoint = radar.currentData[j]; 
               // Calculate distance (could do it in km with the right formula, but this is interaction and it does not matter that much)
@@ -639,7 +639,12 @@ export default {
         });
         // If a radar is closest
         if (closestRadar !== undefined){
-          window.eventBus.emit('Map_ClickedHFRadar', closestRadar);
+          // Limit by pixel distance
+          let epsg3857coord = ol.proj.fromLonLat(closestRadar.getRadarOrigin());
+          let pixelCoord = this.map.getPixelFromCoordinate(epsg3857coord);
+          let pixelDistance = Math.sqrt(Math.pow(evt.originalEvent.clientX - pixelCoord[0],2) + Math.pow(evt.originalEvent.clientY - pixelCoord[1],2));
+          if (pixelDistance < 20)
+            window.eventBus.emit('Map_ClickedHFRadar', closestRadar);
         }
         
         
@@ -700,6 +705,13 @@ export default {
       coord = ol.proj.transform(coord, 'EPSG:3857', 'EPSG:4326');
       // Emit
       this.$emit('mouseMove', coord);
+      // LEGEND TOOLTIPS
+      // Change currents tooltip
+      // Check if HFRadar layer is visible
+      // Check if a point is not selected
+      // Check pixel's lat long
+      // Display value according to pixel's lat long
+
       // Change legend tooltip value
       if (this.$refs.legendWMS){
         if (this.isLayerDataReady){
