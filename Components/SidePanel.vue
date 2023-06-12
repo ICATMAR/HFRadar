@@ -158,6 +158,10 @@ export default {
         
         this.$refs['HFRadarHeader' + i].classList.add("collapsed");
       }
+
+      // Show side panel
+      this.showPanel = true;
+      window.eventBus.emit('SidePanelSizechanged', this.showPanel);
          
     });
     // On DataPoint deselected on Map.vue
