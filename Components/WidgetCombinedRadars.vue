@@ -108,7 +108,10 @@ export default {
       }
       this.$refs.legendGUI.setCurrentValue(currentValue);
     })
-
+    // Mouse move in map
+    window.eventBus.on('Map_MouseMoveAtValue', magnitude => {
+      this.$refs.legendGUI.setCurrentValue(magnitude);
+    })
 
     
   },

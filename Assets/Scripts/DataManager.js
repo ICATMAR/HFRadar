@@ -585,6 +585,34 @@ class CombinedRadars extends HFRadar {
   calcDistance(x, y, a, b){
     return Math.sqrt((x-a)*(x-a) + (y-b)*(y-b));
   }
+
+
+  // Get value at Lon-Lat
+  // THIS FUNCTION IS DUPLICATED IN AnimationEngine.js --> REFACTOR, BUT HOW? AnimationEngine only gets data, not whole Radar class
+  getValueAtTmstLongLat(tmst, long, lat, value){
+    
+    let grid = this.dataGrid[tmst]; 
+
+    let longIndex = Math.floor(grid.numLongPoints * (long - grid.minLong) / grid.rangeLong);
+    let latIndex = Math.floor(grid.numLatPoints * (lat - grid.minLat) / grid.rangeLat);
+    longIndex = longIndex == -1 ? 0 : longIndex;
+    latIndex = latIndex == -1 ? 0 : latIndex;
+
+    // Indices are outside the data grid
+    if (longIndex < 0 || latIndex < 0 || longIndex >= grid.numLongPoints || latIndex >= grid.numLatPoints){
+      //console.log("Index out of bounds. longIndex: " + longIndex + ", latIndex: " + latIndex + ", Resolution: " + grid.numLongPoints + "x" + grid.numLatPoints);
+      value[0] = undefined;
+      value[1] = undefined;
+      return value;
+    }
+
+    // Find value
+    let index = latIndex * grid.numLongPoints + longIndex;
+    value[0] = grid.dataGrid[ index * 2];
+    value[1] = grid.dataGrid[ index * 2 + 1];
+
+    return value;
+  }
 }
 
 export default DataManager

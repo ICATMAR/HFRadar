@@ -241,6 +241,9 @@ export default {
       isLayerDataReady: false,
       WMSLegendURL: '',
       visibleHFRadars: [],
+      // Mouse move value
+      tmst: undefined,
+      value: [undefined, undefined],
     }
   },
   methods: {
@@ -374,6 +377,8 @@ export default {
     // HFRADAR
     // Selected date change, thus upate radar data
     selectedDateChanged: function(tmst){
+      // Keep track of the current timestamp
+      this.tmst = tmst;
       // Remove layers
       this.removeHFlayers();
       // Make all radars inactive
@@ -570,6 +575,7 @@ export default {
       if (!radar.isActivated || !radar.pointsVisible){
         // Remove layer
         if (this.getMapLayer(radarPointsLayerName)) this.map.removeLayer(this.getMapLayer(radarPointsLayerName));
+        if (this.getMapLayer('HFSelPoint')) this.map.removeLayer(this.getMapLayer('HFSelPoint'));
       } else if (radar.isActivated && radar.pointsVisible){
         // Add layer
         this.map.addLayer(this.layers[radarPointsLayerName]);
@@ -708,9 +714,31 @@ export default {
       // LEGEND TOOLTIPS
       // Change currents tooltip
       // Check if HFRadar layer is visible
-      // Check if a point is not selected
-      // Check pixel's lat long
-      // Display value according to pixel's lat long
+      // TODO: WHAT ABOUT ANIMATION? IS IT ACCESSIBLE FROM HERE?
+      if (this.tmst && !this.getMapLayer('HFSelPoint')){
+        let radars = window.DataManager.getRadarsDataOn(this.tmst);
+        let combinedRadar;
+        if (radars.length != 0 ){
+          for (let i = 0; i < radars.length; i++){
+            let HFRadar = radars[i];
+            if (HFRadar.constructor.name == 'CombinedRadars' && HFRadar.isActivated){
+              combinedRadar = HFRadar;
+            }
+          }
+        }
+        // Get value from radar
+        if (combinedRadar !== undefined){
+          let value = this.value;
+          combinedRadar.getValueAtTmstLongLat(this.tmst, coord[0], coord[1], value);
+          let magnitude = '';
+          if (!(value[0] == undefined || isNaN(value[0]))) // Inside negated
+            magnitude = (Math.sqrt(value[0]*value[0] + value[1]*value[1])).toFixed(1);
+          window.eventBus.emit('Map_MouseMoveAtValue', magnitude);
+          
+        }
+      }
+      
+
 
       // Change legend tooltip value
       if (this.$refs.legendWMS){
