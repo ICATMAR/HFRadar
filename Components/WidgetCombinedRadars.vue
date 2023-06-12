@@ -22,7 +22,7 @@
 
       <!-- On/Off points -->
       <div class='widgetButtonContainer'>
-        <onOffButton :checked="true" :inSize="'18px'" @change="pointsButtonClicked($event)"></onOffButton>
+        <onOffButton :checked="false" :inSize="'18px'" @change="pointsButtonClicked($event)"></onOffButton>
         <span class='widgetSpan'>points</span>
       </div>
       <!-- Maybe point variable too here? -->
