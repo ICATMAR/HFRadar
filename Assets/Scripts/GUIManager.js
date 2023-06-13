@@ -14,6 +14,7 @@ class GUIManager {
 
   // Current timestamp
   currentTmst = undefined;
+  currentRadars = [];
 
   // Memory allocation
   tempArray = [undefined, undefined];
