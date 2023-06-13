@@ -253,7 +253,7 @@ class HFRadar {
   images = {};
   // GUI state variables
   isActivated; // User decides
-  pointsVisible = false; // User decides
+  pointsVisible = true; // User decides // Different for CombinedRadars
   animationVisible = true; // User decides
   hasDataOnTmst; // Has data on selected timestamp
   isAnimated; // User decides
@@ -377,7 +377,7 @@ class CombinedRadars extends HFRadar {
   constructor (CombinedRadarData){
     
     super(CombinedRadarData);
-
+    this.pointsVisible = false; 
     this.addRadarData(CombinedRadarData, 100, 200); // Consider using power of two numbers to create image and upsample later
   }
 
