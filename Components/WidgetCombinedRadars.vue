@@ -16,13 +16,13 @@
 
       <!-- On/Off particle animation -->
       <div class='widgetButtonContainer'>
-        <onOffButton :checked="true" :inSize="'18px'" @change="particlesButtonClicked($event)"></onOffButton>
+        <onOffButton :checked="areParticlesVisible" :inSize="'18px'" @change="particlesButtonClicked($event)"></onOffButton>
         <span class='widgetSpan'>particles</span>
       </div>
 
       <!-- On/Off points -->
       <div class='widgetButtonContainer'>
-        <onOffButton :checked="false" :inSize="'18px'" @change="pointsButtonClicked($event)"></onOffButton>
+        <onOffButton :checked="arePointsVisible" :inSize="'18px'" @change="pointsButtonClicked($event)"></onOffButton>
         <span class='widgetSpan'>points</span>
       </div>
       <!-- Maybe point variable too here? -->
@@ -108,8 +108,9 @@ export default {
       }
       this.$refs.legendGUI.setCurrentValue(currentValue);
     })
-    // Mouse move in map
-    window.eventBus.on('Map_MouseMoveAtValue', magnitude => {
+
+
+    window.eventBus.on('GUIManager_MouseMovingCurrentsValue', magnitude => {
       this.$refs.legendGUI.setCurrentValue(magnitude);
     })
 
@@ -122,6 +123,8 @@ export default {
       defaultUnits: 'cm/s',
       selectedLegends: ['absModifiedOccam.png', 'absColdOccam.png', 'absGrayScale.png', 'absGrayScaleReverse.png' ],
       isVisible: true,
+      areParticlesVisible: true,
+      arePointsVisible: false,
     }
   },
   methods: {
