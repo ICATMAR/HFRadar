@@ -174,7 +174,8 @@ export default {
     // EVENT LISTENERS
     // New HFRadar data
     window.eventBus.on('HFRadarDataLoaded', (tmst) =>{
-      this.selectedDateChanged(tmst);
+      if (tmst != undefined)
+        this.selectedDateChanged(tmst);
     });
     // Selected date changed (slider moves or drag and drop files)
     window.eventBus.on('SelectedDateChanged', (tmst) =>{
@@ -449,7 +450,7 @@ export default {
           // Create feature style
           let featStyle = new ol.style.Style({
             image: new ol.style.Icon({
-              src: 'Assets/antenna.png',
+              src: 'Assets/Images/antenna.png',
               width: 10,
               height: 10,
               scale: [0.5, 0.5],
@@ -569,6 +570,7 @@ export default {
       if (!radar.isActivated || !radar.pointsVisible){
         // Remove layer
         if (this.getMapLayer(radarPointsLayerName)) this.map.removeLayer(this.getMapLayer(radarPointsLayerName));
+        if (this.getMapLayer('HFSelPoint')) this.map.removeLayer(this.getMapLayer('HFSelPoint'));
       } else if (radar.isActivated && radar.pointsVisible){
         // Add layer
         this.map.addLayer(this.layers[radarPointsLayerName]);
@@ -610,7 +612,7 @@ export default {
         Object.keys(radars).forEach(key => {
           let radar = radars[key];
           // If radar has data, then check the proximity
-          if (radar.hasDataOnTmst && radar.isActivated){ // AND IS SELECTED? TWO RADARS TOGETHER, HOW TO SELECT ONE OR THE OTHER DATAPOINT?
+          if (radar.hasDataOnTmst && radar.isActivated && radar.pointsVisible){ // AND IS SELECTED? TWO RADARS TOGETHER, HOW TO SELECT ONE OR THE OTHER DATAPOINT?
             for (let j = 0; j < radar.currentData.length; j++){
               let dataPoint = radar.currentData[j]; 
               // Calculate distance (could do it in km with the right formula, but this is interaction and it does not matter that much)
@@ -638,7 +640,12 @@ export default {
         });
         // If a radar is closest
         if (closestRadar !== undefined){
-          window.eventBus.emit('ClickedHFRadar', closestRadar);
+          // Limit by pixel distance
+          let epsg3857coord = ol.proj.fromLonLat(closestRadar.getRadarOrigin());
+          let pixelCoord = this.map.getPixelFromCoordinate(epsg3857coord);
+          let pixelDistance = Math.sqrt(Math.pow(evt.originalEvent.clientX - pixelCoord[0],2) + Math.pow(evt.originalEvent.clientY - pixelCoord[1],2));
+          if (pixelDistance < 20)
+            window.eventBus.emit('Map_ClickedHFRadar', closestRadar);
         }
         
         
@@ -651,7 +658,7 @@ export default {
           let pixelDistance = Math.sqrt(Math.pow(evt.originalEvent.clientX - pixelCoord[0],2) + Math.pow(evt.originalEvent.clientY - pixelCoord[1],2));
           // Click distance to point
           if (pixelDistance < 60){
-            window.eventBus.emit('ClickedDataPoint', {"dataPoint": closestDataPoint, "radar": selRadar});
+            window.eventBus.emit('Map_ClickedDataPoint', {"dataPoint": closestDataPoint, "radar": selRadar});
             // Create map layer with styled point
               let featPoint = new ol.Feature({
                 geometry: new ol.geom.Point(epsg3857coord),
@@ -699,6 +706,11 @@ export default {
       coord = ol.proj.transform(coord, 'EPSG:3857', 'EPSG:4326');
       // Emit
       this.$emit('mouseMove', coord);
+      // LEGEND TOOLTIPS
+      // Change currents tooltip
+      window.eventBus.emit('Map_MouseMove', [event.clientX, event.clientY, coord[0], coord[1]]);
+
+
       // Change legend tooltip value
       if (this.$refs.legendWMS){
         if (this.isLayerDataReady){

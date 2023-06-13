@@ -13,8 +13,13 @@
     <!-- Central Panel -->
     <!-- <central-panel></central-panel> -->
 
-    <!-- Banner -->
-    <img class="Banner" src="Assets/Banner.png">
+    <!-- ICONS -->
+    <a href="https://icatmar.cat/">
+      <img class="logo clickable icatmar-logo" src="Assets/Images/icatmar-mini-logo.svg">
+    </a>
+    <a href="https://icatmar.cat/visors/xarxa-observacional/">
+      <img class="logo clickable obs-logo" src="Assets/Images/ocea-mini-1.svg">
+    </a>
   </div>
 </template>
 
@@ -44,7 +49,44 @@ export default {
 
     // Load data
     //window.DataManager.loadStaticFiles();
-    window.DataManager.loadStaticFilesRepository(); // Real-time data
+    // First files of real-time data --> load them first to show something on the website
+    window.DataManager.loadLatestStaticFilesRepository().then(hfRadar => {
+      let tmst;
+      if (hfRadar != undefined){
+        tmst = hfRadar.lastLoadedTimestamp;
+        window.eventBus.emit('HFRadarDataLoaded', hfRadar.lastLoadedTimestamp);
+      }
+      return tmst;
+    })
+    // Load the rest of the files
+    .then((tmst) =>{
+      // Reduce tmst by 1h, as this timestamp is already loaded.
+      if (tmst != undefined){
+        let tmp = new Date(tmst);
+        tmp.setUTCHours(tmp.getUTCHours() - 1);
+        tmst = tmp.toISOString();
+      }
+      // Load data
+      let useWorker = true;
+      // Use web worker to load the rest of the files
+      if (window.DataWorker && useWorker){
+        window.DataWorker.postMessage(['loadStaticFilesRepository', [undefined, tmst]]);
+      } 
+      // Fallback option
+      else {
+        window.DataManager.loadStaticFilesRepository(undefined, tmst).then((hfRadar) => {
+        if (hfRadar != undefined)
+          window.eventBus.emit('HFRadarDataLoaded');
+        });
+      }
+      
+    })
+    
+    //window.DataManager.loadStaticFilesRepository().then((lastHFRadar) => {
+      //window.eventBus.emit('HFRadarDataLoaded', lastHFRadar.lastLoadedTimestamp);
+    //});
+
+    
     //window.DataManager.loadStaticFilesRepository('2023-03-02T11:00Z', '2023-03-07T16:00Z'); // Specific dates with data
 
     // Load legends
@@ -87,15 +129,21 @@ export default {
     position:fixed;
   }
 
-  .Banner {
-    width: 100px;
-    position:absolute;
-    top: 20px;
-    left: 60px;
-  }
-  @media screen and (max-width: 1000px) {
-    .Banner {
-      width: 60px;
-    }
-  }
+.logo {
+  width: clamp(70px, 7vw, 100px);
+  height: clamp(70px, 7vw, 100px);
+  position: fixed;
+  top: 10px;
+  padding: 0px;
+  margin: 0px;
+  z-index: 10;
+}
+
+.icatmar-logo {
+  left: 50px;
+}
+
+.obs-logo {
+  left: clamp(110px, 9vw, 140px);
+}
 </style>

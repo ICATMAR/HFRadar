@@ -106,7 +106,8 @@ export default {
   mounted() {
     // EVENT LISTENERS
     window.eventBus.on('HFRadarDataLoaded', (tmst) => {
-      this.updateInformation(tmst);
+      if (tmst != undefined)
+        this.updateInformation(tmst);
     });
 
     window.eventBus.on('Widget_InfoClicked', () => {
@@ -122,14 +123,16 @@ export default {
     });
 
     // On HF Radar clikc on Map.vue
-    window.eventBus.on('ClickedHFRadar', radar => {
+    window.eventBus.on('Map_ClickedHFRadar', radar => {
       console.log(radar);
       console.log("Clicked HF Radar")
       //TODO: ACTIVATE RADAR
+      this.showPanel = true;
+      window.eventBus.emit('SidePanelSizechanged', this.showPanel);
     });
 
     // On DataPoint click on Map.vue
-    window.eventBus.on('ClickedDataPoint', e => {
+    window.eventBus.on('Map_ClickedDataPoint', e => {
       let dataPoint = e.dataPoint;
       let HFRadar = e.radar;
 
@@ -155,6 +158,10 @@ export default {
         
         this.$refs['HFRadarHeader' + i].classList.add("collapsed");
       }
+
+      // Show side panel
+      this.showPanel = true;
+      window.eventBus.emit('SidePanelSizechanged', this.showPanel);
          
     });
     // On DataPoint deselected on Map.vue
@@ -261,7 +268,7 @@ export default {
 
 
 .sidePanelFiller {
-  background-image: url('Assets/TramaCorp.png');
+  background-image: url('Assets/Images/TramaCorp.png');
   background-size: 100% 100%;
   width: 100%;
   height: 100%;

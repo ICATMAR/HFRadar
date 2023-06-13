@@ -16,17 +16,28 @@ window.eventBus = window.mitt();
 
 
 // Load scripts
-import CreateImage from './Assets/createImage.js';
-import FileManager from './Assets/FileManager.js';
-import DataManager from './Assets/DataManager.js';
-import AnimationEngine from './Assets/AnimationEngine.js';
+import CreateImage from './Assets/Scripts/createImage.js';
+import FileManager from './Assets/Scripts/FileManager.js';
+import DataManager from './Assets/Scripts/DataManager.js';
+import GUIManager from './Assets/Scripts/GUIManager.js';
+import AnimationEngine from './Assets/Scripts/AnimationEngine.js';
 
+
+// Web worker
+if (window.Worker)
+  window.DataWorker = new Worker('./Assets/Scripts/worker.js'); // undefined for testing without web worker
+else {
+  console.warn('Workers not supported.');
+  alert('Web Workers not supported. Loading experience might be slower than usual.');
+}
 
 window.createImage = CreateImage;
 
 window.FileManager = new FileManager();
 window.DataManager = new DataManager();
+window.GUIManager = new GUIManager();
 window.AnimationEngine = AnimationEngine;
+
 
 
 

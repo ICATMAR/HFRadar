@@ -101,6 +101,38 @@ class DataManager {
     }
   }
 
+  async loadLatestStaticFilesRepository(){
+    // Hourly
+    let now = new Date();
+    let str = now.toISOString();
+    let nowISODate = str.substring(0, 14) + '00:00.000Z';
+    now = new Date(nowISODate);
+    // Reduce 1 hour
+    now.setUTCHours(now.getUTCHours() - 1); // Most recent data is from 1h ago. Currents are calculated with +1h, 0h, -1h files, thus there is a delay of 1h always.
+    let lastDate = now.toISOString();
+    // Petition latest dataset
+    let hfRadar = await this.loadStaticFilesRepository(lastDate, lastDate);
+
+    if (hfRadar != undefined)
+      return hfRadar;
+
+    // If current does not exist, try one hour before repeateadly
+    let counter = 0;
+    while (hfRadar == undefined && counter <= 24) {
+      // Reduce time one hour
+      now.setUTCHours(now.getUTCHours() - 1);
+      counter++;
+      hfRadar = await this.loadStaticFilesRepository(now.toISOString(), now.toISOString());
+    }
+
+    if (hfRadar != undefined)
+      console.log('Data is delayed by ' + counter + ' hours.');
+    else
+      console.log('Data is delayed by more than 25 hours.');
+
+    return hfRadar;
+  }
+
 
   loadStaticFilesRepository(startDate, endDate){
     
@@ -124,9 +156,6 @@ class DataManager {
       now = new Date(endDate);
     }
 
-
-
-
     // Array of promises
     let promises = [];
     while(movingDate <= now){
@@ -137,7 +166,7 @@ class DataManager {
 
     let lastHFRadar;
     // Resolve promises
-    Promise.allSettled(promises).then(values => {
+    return Promise.allSettled(promises).then(values => {
       for (let i = 0; i < values.length; i++){
         let filesOnDatePromiseResult = values[i];
         // If promise was fullfiled (I think always)
@@ -149,7 +178,7 @@ class DataManager {
               
               lastHFRadar = this.addHFRadarData(promiseResult.value);
               // Make it inactive it is radial?
-              if (lastHFRadar.dataGrid == undefined)
+              if (lastHFRadar.constructor.name == "HFRadar")
                 lastHFRadar.isActivated = false;
               else
                 lastHFRadar.isActivated = true;
@@ -159,7 +188,7 @@ class DataManager {
         }
       }
 
-      window.eventBus.emit('HFRadarDataLoaded', lastHFRadar.lastLoadedTimestamp);
+      return lastHFRadar;
     })
 
   }
@@ -210,12 +239,6 @@ class DataManager {
   }
 
 
-  // Resolve promises
-  store(promises){
-
-  }
-
-
 // End of class
 }
 
@@ -230,7 +253,7 @@ class HFRadar {
   images = {};
   // GUI state variables
   isActivated; // User decides
-  pointsVisible = true; // User decides
+  pointsVisible = true; // User decides // Different for CombinedRadars
   animationVisible = true; // User decides
   hasDataOnTmst; // Has data on selected timestamp
   isAnimated; // User decides
@@ -354,7 +377,7 @@ class CombinedRadars extends HFRadar {
   constructor (CombinedRadarData){
     
     super(CombinedRadarData);
-
+    this.pointsVisible = false; 
     this.addRadarData(CombinedRadarData, 100, 200); // Consider using power of two numbers to create image and upsample later
   }
 
@@ -561,6 +584,34 @@ class CombinedRadars extends HFRadar {
   // Calculate distance
   calcDistance(x, y, a, b){
     return Math.sqrt((x-a)*(x-a) + (y-b)*(y-b));
+  }
+
+
+  // Get value at Lon-Lat
+  // THIS FUNCTION IS DUPLICATED IN AnimationEngine.js --> REFACTOR, BUT HOW? AnimationEngine only gets data, not whole Radar class
+  getValueAtTmstLongLat(tmst, long, lat, value){
+    
+    let grid = this.dataGrid[tmst]; 
+
+    let longIndex = Math.floor(grid.numLongPoints * (long - grid.minLong) / grid.rangeLong);
+    let latIndex = Math.floor(grid.numLatPoints * (lat - grid.minLat) / grid.rangeLat);
+    longIndex = longIndex == -1 ? 0 : longIndex;
+    latIndex = latIndex == -1 ? 0 : latIndex;
+
+    // Indices are outside the data grid
+    if (longIndex < 0 || latIndex < 0 || longIndex >= grid.numLongPoints || latIndex >= grid.numLatPoints){
+      //console.log("Index out of bounds. longIndex: " + longIndex + ", latIndex: " + latIndex + ", Resolution: " + grid.numLongPoints + "x" + grid.numLatPoints);
+      value[0] = undefined;
+      value[1] = undefined;
+      return value;
+    }
+
+    // Find value
+    let index = latIndex * grid.numLongPoints + longIndex;
+    value[0] = grid.dataGrid[ index * 2];
+    value[1] = grid.dataGrid[ index * 2 + 1];
+
+    return value;
   }
 }
 

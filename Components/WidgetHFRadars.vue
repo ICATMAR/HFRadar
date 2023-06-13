@@ -93,13 +93,13 @@ export default {
     // EVENTS
     // On radars load
     // Store a version of the radar here
-    window.eventBus.on('HFRadarDataLoaded', (tmst)=>{
+    window.eventBus.on('HFRadarDataLoaded', ()=>{
       Object.keys(window.DataManager.HFRadars).forEach(key => {
         let radar = window.DataManager.HFRadars[key];
         if (radar.constructor.name == "HFRadar"){
           let availableTimestamps = Object.keys(radar.data);
-            if (this.radars[key] == undefined){
-              this.radars[key] = {
+          if (this.radars[key] == undefined){
+            this.radars[key] = {
               UUID: key, 
               Site: radar.Site.replace(' ""', ''), // TODO: prettify
               isActivated: radar.isActivated,
@@ -110,7 +110,7 @@ export default {
       });
     });
     // When mouse clicks a data point
-    window.eventBus.on('ClickedDataPoint', e => {
+    window.eventBus.on('Map_ClickedDataPoint', e => {
       let dataPoint = e.dataPoint;
       let radar = e.radar;
       let currentValue = '';
