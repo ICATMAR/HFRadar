@@ -96,20 +96,24 @@ export default {
       Object.keys(window.DataManager.HFRadars).forEach(key => {
         let radar = window.DataManager.HFRadars[key];
         // If it is visible and has data, update data and start animation
-        if (radar.data[tmst] != undefined && radar.isActivated && radar.animEngine){
-          // Update existing animation
+        if (radar.data[tmst] != undefined && radar.animEngine){
+          // Update radar data
           // For HFRadar
-          if (radar.dataGrid == undefined)
-            radar.animEngine.setHFRadarData(radar.data[tmst]);
+          if (radar.constructor.name == "HFRadar")
+          radar.animEngine.setHFRadarData(radar.data[tmst]);
           // For combined
-          else
-            radar.animEngine.setCombinedRadarData(radar.dataGrid[tmst])
-
-          let wasStopped = radar.animEngine.isStopped;
-          // Only activate animation if animation is visible.
-          if (wasStopped && radar.animationVisible){
-            radar.animEngine.isStopped = false;
-            radar.animEngine.update();
+          else if (radar.constructor.name == "CombinedRadars")
+            radar.animEngine.setCombinedRadarData(radar.dataGrid[tmst]);
+          
+          // Activate radar
+          if (radar.isActivated){
+            // Update existing animation
+            let wasStopped = radar.animEngine.isStopped;
+            // Only activate animation if animation is visible.
+            if (wasStopped && radar.animationVisible){
+              radar.animEngine.isStopped = false;
+              radar.animEngine.update();
+            }
           }
         }
         // Otherwise, stop animation
