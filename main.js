@@ -28,6 +28,7 @@ if (window.Worker)
   window.DataWorker = new Worker('./Assets/Scripts/worker.js'); // undefined for testing without web worker
 else {
   console.warn('Workers not supported.');
+  alert('Web Workers not supported. Loading experience might be slower than usual.');
 }
 
 window.createImage = CreateImage;
