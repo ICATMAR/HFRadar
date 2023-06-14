@@ -22,14 +22,17 @@
         </div>
       </div>
 
+      <!-- Progress bar load WMS tiles -->
+      <div v-show="!wmsProgress.isLoaded" class="position-absolute m-0 btn-dark" style="background: var(--blue); width: 100%; height: 5px; opacity: 0.8; top:0px" :style="{'max-width': wmsProgress.progressPercent + '%'}">
+        <div class="spinner-border" style="position: relative; margin-top: 20px; margin-left: 40px; color:var(--blue)" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+      </div>
+
       <time-slider></time-slider>
 
       <!-- Animation Canvas -->
       <animationCanvas ref="animationCanvas"></animationCanvas>
-
-
-      <!-- Widget base layer options-->
-      <widgetMapOptions></widgetMapOptions>
 
 
       <!-- Tracks on the timeline -->
@@ -60,7 +63,6 @@
 <script>
 import AnimationCanvas from "./AnimationCanvas.vue";
 import TimeSlider from "./TimeSlider.vue";
-import WidgetMapOptions from "./WidgetMapOptions.vue";
 // import TimeRangeBar from "TimeRangeBar.vue";
 // import TracksTimeLine from "TracksTimeLine.vue";
 //import WMSLegend from "WMSLegend.vue";
@@ -149,6 +151,12 @@ export default {
             })
           }),
         }),
+
+        // Clima data (weather and sea)
+        data: new ol.layer.Tile({
+          name: 'data',
+          zIndex: -2,
+        }),
         // rawHFData: new ol.layer.Image({
         //   //: new ol.source.ImageStatic({
         //     //url: 'data/SeaHabitats_0_39.8_5_43.png',
@@ -224,6 +232,16 @@ export default {
       // Hide / show HF points
       this.updateHFRadarPointsVisibility(HFRadar);
     });
+
+
+    // Clima layer
+    window.eventBus.on('WidgetWeatherLayers_ClimaLayerChange', infoWMS => {
+      this.setClimaLayer(infoWMS);
+    });
+    // Change clima layer style
+    window.eventBus.on('WMSLegend_LegendClicked', style => {
+      this.changeStyle(style);
+    });
     
 
   },
@@ -237,6 +255,12 @@ export default {
       progress: {
         loading: 0,
         loaded: 1
+      },
+      // WMS Data layer
+      wmsProgress: {
+        loading: 0,
+        loaded: 1,
+        isLoaded: true,
       },
       isLayerDataReady: false,
       WMSLegendURL: '',
@@ -289,7 +313,7 @@ export default {
       this.map = new ol.Map({
         layers : [
           // Data layer
-          //this.layers.data,
+          this.layers.data,
           // Base layer
           this.layers.baseLayer,
           //this.layers.bathymetry,
@@ -696,6 +720,24 @@ export default {
     },
 
     // INTERNAL EVENTS
+    // Change the styles (WMSLegend.vue emit)
+    changeStyle: function(newStyle){
+      // Get params
+      let params = this.getMapLayer('data').getSource().getParams();
+      // Check if the new style is the current
+      if (params.STYLES == newStyle)
+        return;
+      // If style is different, update source
+      params.STYLES = newStyle;
+      // Set params
+      this.getMapLayer('data').getSource().updateParams(params);
+      // Source needs to reload
+      this.isLayerDataReady = false;
+      // Update ForecastBar if it exists
+      // this.$emit('changeWMSStyle', newStyle);
+    },
+
+    
     // Mouse move on map
     onMouseMove: function(event){
       // Return if map is moving
@@ -725,8 +767,15 @@ export default {
       this.isMapMoving = false;
       // If data is loaded, update the pixel information once the map move finishes
       // TODO: this could be optimized --> get a canvas with all data and relate lat-long to that canvas
-      if (this.isLayerDataReady)
-        this.updateSourceData();
+      if (this.isLayerDataReady && this.isMapMoving){
+        this.isMapMoving = false;
+        if (this.getMapLayer('data') == undefined)
+          return;
+        if (this.getMapLayer('data').getOpacity() != 0){          
+          this.updateSourceData();
+        }
+      }
+      this.isMapMoving = false;
     },
     onMapMoveStart: function(){
       this.isMapMoving = true;
@@ -768,21 +817,101 @@ export default {
 
 
     // Store pixel information once tiles are loaded
-    onTilesLoaded: function(){   
-      //this.isLayerDataReady = true;
-      //this.updateSourceData();
+    onTilesLoaded: function(e){   
+      if (e.target.name == 'wmsSource'){
+        this.isLayerDataReady = true;
+        this.updateSourceData();
+      }
     },
 
-    // Update the data pixels
-    updateSourceData: function(){
+        // Update the data pixels
+    // This function can be called consecutively and as it is async, it can happen that all the layers are hidden.
+    // To solve it, we need to keep the state when it is being rendered.
+    updateSourceData: async function(){
+      
+      let map = this.map;
+
+      // Reset array if it was rendered and store visible layers
+      if (!this.isRendering){
+        this.isRendering = true;
+
+        this.visibilityArray = [];
+        // Store visible layers state
+        map.getLayers().forEach(ll => {
+          this.visibilityArray.push(ll.getVisible());
+        });
+      }
+
+      // Wait 800 ms
+      await new Promise(res => setTimeout(res, 200));
+
+      this.isRendering = true;
+
+      // Hide all layers but the data layer
+      map.getLayers().forEach(ll => {
+          if (ll.C.name != "data")
+            ll.setVisible(false);
+        });
+      
+      // Force map render
+      map.renderSync();
+
       // Get ol layer
       let layer = this.getMapLayer('data');
+      // If layer was hidden by the user during the delay
+      if (layer == undefined){
+        this.isRendering = false;
+        this.isLayerDataReady = false;
+        // Restore map
+        map.getLayers().forEach((ll, i) => {
+          ll.setVisible(this.visibilityArray[i]);
+        });
+        return;
+      }
       // Get canvas
       let tmpCnv = layer.getRenderer().getImage();
+      // Set to willReadFrequently, as suggested by a warning when doing readbacks.
+      let ctx = tmpCnv.getContext("2d", { willReadFrequently: true });
+  
+      
       // Get data
-      this.layerData = tmpCnv.getContext("2d").getImageData(0,0,tmpCnv.width,tmpCnv.height);
-      // Store width to access pixels
-      this.layerDataWidth = tmpCnv.width;
+      this.layerData = ctx.getImageData(0,0,tmpCnv.width,tmpCnv.height);
+      // For mobile versions, the canvas is scaled through a style. Openlayers does not have build in function 
+      // to provide this scaling factor.
+      // Get the width of the map container
+      let mapEl = map.getTargetElement();
+      if (this.layerData == undefined)
+        debugger;
+      this.layerData.scaleFactorX = mapEl.offsetWidth / tmpCnv.width;
+      this.layerData.scaleFactorY = mapEl.offsetHeight / tmpCnv.height;
+
+      // Debug data layer for mobile
+      // for (let i = 0; i< this.layerData.width*this.layerData.height; i++ ){
+      //   let alpha = this.layerData.data[i*4 + 3];
+      //   if (alpha == 0){
+      //     this.layerData.data[i*4] = 0;
+      //     this.layerData.data[i*4 + 1] = 0;
+      //     this.layerData.data[i*4 + 2] = 0;
+      //     this.layerData.data[i*4 + 3] = 255;
+      //   } else {
+      //     this.layerData.data[i*4] = 255;
+      //     this.layerData.data[i*4 + 1] = 0;
+      //     this.layerData.data[i*4 + 2] = 0;
+      //     this.layerData.data[i*4 + 3] = 255;
+      //   }
+      // }
+      // ctx.putImageData(this.layerData, 0,0);
+      //document.body.appendChild(tmpCnv); // Debug, Test the data
+
+
+      // Restore map
+      map.getLayers().forEach((ll, i) => {
+        ll.setVisible(this.visibilityArray[i]);
+      });
+      map.renderSync();
+      
+      this.isRendering = false;
+
     },
 
 
@@ -832,19 +961,6 @@ export default {
     },
 
 
-    // The time range has changed. Update the track lines
-    onTimeRangeChange: function(dates){
-      // Set starting and ending dates in fishing tracks
-      this.fishingTracks.setStartEndDates(dates[0], dates[1]);
-    },
-     // The timeline has changed. Update the track lines
-    onTimeRangeChangeLimits: function(dates){
-      // Set starting and ending dates of tracks-timeline
-      if (this.$refs.tracksTimeLine)
-        this.$refs.tracksTimeLine.setStartEndDates(dates[0], dates[1]);
-    },
-    
-
 
 
 
@@ -866,6 +982,37 @@ export default {
     },
 
 
+
+    // Update WMS data source. This function is called from AppManager.vue
+    updateSourceWMS: function (infoWMS){
+      // Create tile grid for faster rendering for low resolution WMS
+      let extent = ol.proj.get('EPSG:3857').getExtent();
+      let tileSize = 512;
+      let maxResolution = ol.extent.getWidth(extent) / tileSize;
+      let resolutions = new Array(6);
+      for (let i = 0; i < resolutions.length; i++){
+        resolutions[i] = maxResolution / Math.pow(2,i);
+      }
+      // Assign to openlayers WMS tile source
+      infoWMS.tileGrid = new ol.tilegrid.TileGrid({
+        extent: extent,
+        resolutions: resolutions,
+        tileSize: tileSize
+      });
+      
+      // Avoid cross origin problems when getting pixel data (The canvas has been tainted by cross-origin data.)
+      infoWMS.crossOrigin='anonymous';
+      infoWMS.cacheSize = 500;
+
+      // Create OL source from ForecastBar.vue object
+      let source = new ol.source.TileWMS(infoWMS);
+      source.name="wmsSource";
+      this.getMapLayer('data').setSource(source);
+      // Tracking the load progress
+      this.isLayerDataReady = false;
+      this.registerLoadTilesEvents(source, this.wmsProgress);
+      
+    },
     
 
 
@@ -920,7 +1067,6 @@ export default {
   components: {
     "time-slider": TimeSlider,
     "animationCanvas": AnimationCanvas,
-    "widgetMapOptions": WidgetMapOptions,
 },
   computed: {
       //foo: function () {}

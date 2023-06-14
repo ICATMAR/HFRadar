@@ -8,6 +8,9 @@
 
       <!-- Side planel -->
       <side-panel></side-panel>
+
+      <!-- Menu Left -->
+      <menu-left></menu-left>
     </div>
 
     <!-- Central Panel -->
@@ -31,6 +34,7 @@
 // Import components
 import Map from "./Map.vue"
 import SidePanel from "./SidePanel.vue"
+import MenuLeft from "./MenuLeft.vue";
 // import CentralPanel from "./CentralPanel.vue"
 
 
@@ -108,6 +112,7 @@ export default {
   components: {
     "mapOL": Map,
     "side-panel": SidePanel,
+    "menu-left": MenuLeft,
     // "central-panel": CentralPanel,
   }
 }
