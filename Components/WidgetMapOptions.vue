@@ -85,8 +85,6 @@
           this.isWeatherMenuVisible = e.target.checked;
           // Activate weather layer
           this.$refs.widgetWeatherLayers.setVisible(this.isWeatherMenuVisible);
-          // Hide other layer
-          if (this.isWeatherMenuVisible) this.$refs.habitatsOnOffButton.setChecked(false);
         } 
         // Text was clicked --> Invoke click on the element, which calls again this function
         else {

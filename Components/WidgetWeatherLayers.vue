@@ -45,8 +45,6 @@
     <!-- <img v-if="WMSLegendURL != ''" id='wmsLegend' :src="WMSLegendURL"> -->
     <wms-legend ref="wmsLegend"></wms-legend>
 
-    <!-- Current date -->
-    <span>{{$t('Date')}}: {{ currentDate }}</span>
 
     <!-- Data source attribution -->
     <span class="wrapText">{{$t('Data from')}}: <a title="Weather data source" :href="sourceDoi" target="_blank">E.U.
@@ -78,17 +76,15 @@
     },
     data (){
       return {
-        climaLayers: ['Sea Surface Temperature', 'Sea Temperature Anomaly', 'Sea Bottom Temperature', 'Chlorophyll', 'Salinity', 'Wind', 'Wave Significant Height', 'Current'],
+        climaLayers: ['Sea Surface Temperature', 'Sea Temperature Anomaly', 'Sea Bottom Temperature', 'Chlorophyll', 'Salinity', 'Wave Significant Height', 'Current'],
         // https://origin.fontawesome.com/search?o=r&m=free&f=classic
-        climaIcons: ['&#xf2c9;<sub>~</sub>', '&#x2206; &#xf2c9;', '&#xf2c9;<sup>~</sup>', 'C<sub>hl</sub>', '‰', '&#xf72e;', '&#xe515;', '&#xf773;'],
+        climaIcons: ['&#xf2c9;<sub>~</sub>', '&#x2206; &#xf2c9;', '&#xf2c9;<sup>~</sup>', 'C<sub>hl</sub>', '‰', '&#xe515;', '&#xf773;'],
         selClimaLayer: '',
         isClimaLayerVisible: false,
         climaOpacity: 1,
         // Defaults
         WMSLegendURL: '',
         sourceDoi: '',
-        currentDate: '',
-
       }
     },
     methods: {
@@ -106,17 +102,16 @@
           return
         if (!this.isClimaLayerVisible)
           return
+        debugger;
         // Get date
-        let ff = FishingTracks.getFeatureById(FishingTracks.getSelectedTrack());
-        if (ff == undefined){
+        let date = window.GUIManager.currentTmst;
+        if (date == undefined){
           setTimeout(this.updateClimaLayer, 1000);
-          console.log("Fishing track not found. Trying again in 1s.");
+          console.log("Current date not found. Trying to update clima layer in 1s.");
           return;
         }
-        this.currentDate = ff.properties.info.Data;
-        let date = ff.properties.info.Data + 'T12:00:00.000Z';
         // Get clima URL
-        let infoWMS = this.dataRetriever.getDataTypeURL(this.selClimaLayer, date, 'd');
+        let infoWMS = this.dataRetriever.getDataTypeURL(this.selClimaLayer, date, 'h');
         this.sourceDoi = infoWMS == undefined ? 'https://resources.marine.copernicus.eu/products' : infoWMS.doi;
         // If source is not found, it will send undefined
         window.eventBus.emit('WidgetWeatherLayers_ClimaLayerChange', infoWMS);

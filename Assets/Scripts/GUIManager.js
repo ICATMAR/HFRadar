@@ -62,6 +62,7 @@ class GUIManager {
 
   // Selected date changes
   selectedDateChanged(tmst){
+    console.log('++++++++++++++' + tmst);
     // Set current timestamp
     this.currentTmst = tmst;
     // Get radars on that date

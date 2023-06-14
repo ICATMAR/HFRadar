@@ -1041,6 +1041,7 @@ export default {
       layer.setOpacity(parseFloat(opacity));
     },
     setClimaLayer: function(urlParams){
+      debugger;
       let climaLayer = this.getMapLayer('data');
       if (urlParams == undefined){
         // Remove clima layer
