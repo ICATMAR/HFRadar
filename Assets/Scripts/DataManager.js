@@ -118,7 +118,7 @@ class DataManager {
 
     // If current does not exist, try one hour before repeateadly
     let counter = 0;
-    while (hfRadar == undefined && counter <= 24) {
+    while (hfRadar == undefined && counter <= 48) {
       // Reduce time one hour
       now.setUTCHours(now.getUTCHours() - 1);
       counter++;
