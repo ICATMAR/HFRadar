@@ -382,8 +382,6 @@ export default {
         let blSource = this.baseLayerSources[key];
         this.registerLoadTilesEvents(blSource);
       });
-      //this.registerLoadTilesEvents(this.layers.seaHabitats);
-
     },
 
 
@@ -731,7 +729,7 @@ export default {
       params.STYLES = newStyle;
       // Set params
       this.getMapLayer('data').getSource().updateParams(params);
-      // Source needs to reload
+      // Source needs to reload (previous line triggers onTilesLoad)
       this.isLayerDataReady = false;
       // Update ForecastBar if it exists
       // this.$emit('changeWMSStyle', newStyle);
@@ -754,12 +752,11 @@ export default {
 
 
       // Change legend tooltip value
-      if (this.$refs.legendWMS){
-        if (this.isLayerDataReady){
-          let color = this.getDataAtPixel(event.clientX, event.clientY);
-          this.$refs.legendWMS.showValueAtColor(color);
-        }
+      if (this.isLayerDataReady){
+        let color = this.getDataAtPixel(event.clientX, event.clientY);
+        window.eventBus.emit('Map_MouseOnData_WMSColor', color);
       }
+      
     },
 
     // Map moves
@@ -785,14 +782,14 @@ export default {
 
 
     // Declare loading tile events
-    registerLoadTilesEvents: function(source){
+    registerLoadTilesEvents: function(source, progress){
       // Source is a ol.source
-      let progress = this.progress;
+      progress = progress || this.progress;
       progress.loading = 0;
       progress.loaded = 0;
       progress.isLoaded = false;
       progress.progressPercent = 0;
-      this.isLayerDataReady = false;
+
       source.on('tileloadstart',() => {
         progress.loading += 1;
         progress.isLoaded = false;
@@ -818,17 +815,18 @@ export default {
 
     // Store pixel information once tiles are loaded
     onTilesLoaded: function(e){   
+      console.log('TILES LOADED ' + e.target.name)
       if (e.target.name == 'wmsSource'){
         this.isLayerDataReady = true;
         this.updateSourceData();
       }
     },
 
-        // Update the data pixels
+    // Update the data pixels
     // This function can be called consecutively and as it is async, it can happen that all the layers are hidden.
     // To solve it, we need to keep the state when it is being rendered.
     updateSourceData: async function(){
-      
+      debugger;
       let map = this.map;
 
       // Reset array if it was rendered and store visible layers
@@ -1041,7 +1039,6 @@ export default {
       layer.setOpacity(parseFloat(opacity));
     },
     setClimaLayer: function(urlParams){
-      debugger;
       let climaLayer = this.getMapLayer('data');
       if (urlParams == undefined){
         // Remove clima layer
