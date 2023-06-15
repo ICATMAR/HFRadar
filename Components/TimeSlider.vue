@@ -61,6 +61,8 @@ export default {
       this.timeStr += " (" + (hoursDiff+1) + "h " + minDiff + "min)";
       
       this.updateDataAvailability(sDate, eDate);
+      // Date change event
+      window.eventBus.emit('TimeSlider_SelectedDateChanged', tmst);
     });
 
     // Automatic minute update
@@ -85,7 +87,7 @@ export default {
     onChange: function(e){
       let timestamp = new Date(e.target.value*1000*60*60).toISOString();
       // Date change event
-      window.eventBus.emit('SelectedDateChanged', timestamp);
+      window.eventBus.emit('TimeSlider_SelectedDateChanged', timestamp);
     },
 
     // When element is dragged
