@@ -70,8 +70,7 @@
     mounted() {
       // EVENTS
       // Fishing track clicked
-      window.eventBus.on('TracksTimeLine_trackClicked', this.updateClimaLayer);
-      window.eventBus.on('Map_trackClicked', this.updateClimaLayer);
+      window.eventBus.on('TimeSlider_SelectedDateChanged', this.updateClimaLayer);
       
     },
     data (){
@@ -102,7 +101,7 @@
           return
         if (!this.isClimaLayerVisible)
           return
-        debugger;
+        
         // Get date
         let date = window.GUIManager.currentTmst;
         if (date == undefined){
