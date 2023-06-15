@@ -61,6 +61,8 @@ export default {
       this.timeStr += " (" + (hoursDiff+1) + "h " + minDiff + "min)";
       
       this.updateDataAvailability(sDate, eDate);
+      // Date change event
+      window.eventBus.emit('SelectedDateChanged', tmst);
     });
 
     // Automatic minute update

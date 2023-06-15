@@ -2,6 +2,7 @@
 const firstDate = new Date('2023-01-26T06:00Z');
 const lastDate = new Date('2023-02-02T06:00Z');
 const DAYSTOLOAD = 3;
+const SEARCHHOURS = 24*7;
 
 // Data manager class
 class DataManager {
@@ -30,7 +31,11 @@ class DataManager {
     // Find UUID
     let UUID = HFRadarData.header.PatternUUID.replaceAll(" ", "");
 
-
+    // Empty data
+    if (HFRadarData.data.length == 0){
+      console.log("Radar " + HFRadarData.header.Site + " does not contain data.");
+      return;
+    }
 
     // Check if it is combined radar data (tots)
     if (HFRadarData.header.FileType.includes('tots')){
@@ -118,7 +123,7 @@ class DataManager {
 
     // If current does not exist, try one hour before repeateadly
     let counter = 0;
-    while (hfRadar == undefined && counter <= 48) {
+    while (hfRadar == undefined && counter <= SEARCHHOURS) {
       // Reduce time one hour
       now.setUTCHours(now.getUTCHours() - 1);
       counter++;
@@ -178,10 +183,12 @@ class DataManager {
               
               lastHFRadar = this.addHFRadarData(promiseResult.value);
               // Make it inactive it is radial?
-              if (lastHFRadar.constructor.name == "HFRadar")
-                lastHFRadar.isActivated = false;
-              else
-                lastHFRadar.isActivated = true;
+              if (lastHFRadar != undefined){
+                if (lastHFRadar.constructor.name == "HFRadar")
+                  lastHFRadar.isActivated = false;
+                else
+                  lastHFRadar.isActivated = true;
+              }
               
             }
           }
