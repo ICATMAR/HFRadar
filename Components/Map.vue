@@ -186,7 +186,7 @@ export default {
         this.selectedDateChanged(tmst);
     });
     // Selected date changed (slider moves or drag and drop files)
-    window.eventBus.on('SelectedDateChanged', (tmst) =>{
+    window.eventBus.on('TimeSlider_SelectedDateChanged', (tmst) =>{
       this.selectedDateChanged(tmst);
     });
     // TODO: COMBINE TWO NEXT EVENTS
@@ -752,7 +752,7 @@ export default {
 
 
       // Change legend tooltip value
-      if (this.isLayerDataReady){
+      if (this.isLayerDataReady && !this.isRendering){
         let color = this.getDataAtPixel(event.clientX, event.clientY);
         window.eventBus.emit('Map_MouseOnData_WMSColor', color);
       }
@@ -794,19 +794,19 @@ export default {
         progress.loading += 1;
         progress.isLoaded = false;
       });
-      source.on('tileloadend', () => {
+      source.on('tileloadend', (e) => {
         progress.loaded += 1;
         progress.progressPercent = 100*progress.loaded/progress.loading;
         if (progress.loading == progress.loaded){
-          this.onTilesLoaded(); // TODO: could reference the isLayerDataReady to source, so we control if a source is ready
+          this.onTilesLoaded(e); // TODO: could reference the isLayerDataReady to source, so we control if a source is ready
           progress.isLoaded = true;
         }
       });
-      source.on('tileloaderror', () => {
+      source.on('tileloaderror', (e) => {
         progress.loaded += 1;
         progress.progressPercent = 100*progress.loaded/progress.loading;
         if (progress.loading == progress.loaded){
-          this.onTilesLoaded(); // TODO: could reference the isLayerDataReady to source, so we control if a source is ready
+          this.onTilesLoaded(e); // TODO: could reference the isLayerDataReady to source, so we control if a source is ready
           progress.isLoaded = true;
         }
       });
@@ -815,7 +815,6 @@ export default {
 
     // Store pixel information once tiles are loaded
     onTilesLoaded: function(e){   
-      console.log('TILES LOADED ' + e.target.name)
       if (e.target.name == 'wmsSource'){
         this.isLayerDataReady = true;
         this.updateSourceData();
@@ -826,7 +825,6 @@ export default {
     // This function can be called consecutively and as it is async, it can happen that all the layers are hidden.
     // To solve it, we need to keep the state when it is being rendered.
     updateSourceData: async function(){
-      debugger;
       let map = this.map;
 
       // Reset array if it was rendered and store visible layers
@@ -870,6 +868,8 @@ export default {
       let tmpCnv = layer.getRenderer().getImage();
       // Set to willReadFrequently, as suggested by a warning when doing readbacks.
       let ctx = tmpCnv.getContext("2d", { willReadFrequently: true });
+      // Store width to access pixels
+      this.layerDataWidth = tmpCnv.width;
   
       
       // Get data
