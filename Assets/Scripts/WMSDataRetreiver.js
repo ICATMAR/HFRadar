@@ -78,6 +78,15 @@ dataTypes = {
     range: [-5, 5],
     units: 'ºC',
     style: "boxfill/redblue",
+    forecast: {
+      url: 'SST_MED_SSTA_L4_NRT_OBSERVATIONS_010_004_d', 
+      timeScales: ['d'],
+      domainURL: 'https://nrt.cmems-du.eu/thredds/wms/',
+      version: '1.3.0',
+      doi: "https://doi.org/10.48670/moi-00172",
+      timeScaleCorrection:
+        {d: {min: 0, h: 12}},
+    }
   },
   "Sea bottom temperature": {
     // Reanalysis comes from a different base URL. Only monthly and daily
