@@ -764,15 +764,15 @@ export default {
       this.isMapMoving = false;
       // If data is loaded, update the pixel information once the map move finishes
       // TODO: this could be optimized --> get a canvas with all data and relate lat-long to that canvas
-      if (this.isLayerDataReady && this.isMapMoving){
-        this.isMapMoving = false;
+      if (this.isLayerDataReady){
+
         if (this.getMapLayer('data') == undefined)
           return;
-        if (this.getMapLayer('data').getOpacity() != 0){          
+        if (this.getMapLayer('data').getOpacity() != 0){  
           this.updateSourceData();
         }
       }
-      this.isMapMoving = false;
+
     },
     onMapMoveStart: function(){
       this.isMapMoving = true;
@@ -899,7 +899,14 @@ export default {
       //   }
       // }
       // ctx.putImageData(this.layerData, 0,0);
-      //document.body.appendChild(tmpCnv); // Debug, Test the data
+
+      // Debug, Test the data
+      // tmpCnv.style['pointer-events'] = 'none';
+      // tmpCnv.id = 'tmpCnv';
+      // let el = document.getElementById('tmpCnv');
+      // if (el)
+      //   el.remove();
+      // document.body.appendChild(tmpCnv); 
 
 
       // Restore map
