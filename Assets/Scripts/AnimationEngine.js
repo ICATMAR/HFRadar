@@ -1246,6 +1246,9 @@ class ParticleCombinedRadar extends Particle {
       if (this.valueVec2[0] !== undefined)
         this.verticesValue[i] = Math.sqrt(this.valueVec2[0]*this.valueVec2[0] + this.valueVec2[1]*this.valueVec2[1]);
     }
+
+    // Assign first value (avoids white dots in animation)
+    this.verticesValue[0] = this.verticesValue[1];
   }
 
 
