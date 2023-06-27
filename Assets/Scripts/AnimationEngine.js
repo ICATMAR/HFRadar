@@ -145,7 +145,7 @@ class AnimationEngine {
   setCombinedRadarData (CombinedRadarData){
     this.source.updateData(CombinedRadarData);
     this.particles.updateSource(this.source);
-    this.particles.clear();
+    //this.particles.clear();
     this.particles.repositionParticles();
   }
 
