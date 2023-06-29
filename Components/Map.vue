@@ -4,14 +4,8 @@
       <!-- OL map -->
       <div id="map" ref="OLMap" v-on:drop="onDropFile($event)" v-on:dragover="onDragOver($event)"></div>
 
-      <!-- Time Range Bar
-      <time-range-bar ref="timeRangeBar" id="time-range-bar" 
-        @changeSelDates="onTimeRangeChange($event)" 
-        @changeLimits="onTimeRangeChangeLimits($event)">
-      </time-range-bar>
-       -->
-
       
+
 
 
       <!-- OVERLAYS -->
@@ -30,6 +24,10 @@
       </div>
 
       <time-slider></time-slider>
+
+      <!-- Bottom Section -->
+      <bottom-section ref="timeRangeBar" id="time-range-bar"></bottom-section>
+       
 
       <!-- Animation Canvas -->
       <animationCanvas ref="animationCanvas"></animationCanvas>
@@ -63,7 +61,7 @@
 <script>
 import AnimationCanvas from "./AnimationCanvas.vue";
 import TimeSlider from "./TimeSlider.vue";
-// import TimeRangeBar from "TimeRangeBar.vue";
+import BottomSection from "./BottomSection/BottomSection.vue";
 // import TracksTimeLine from "TracksTimeLine.vue";
 //import WMSLegend from "WMSLegend.vue";
 
@@ -1072,6 +1070,7 @@ export default {
   components: {
     "time-slider": TimeSlider,
     "animationCanvas": AnimationCanvas,
+    "bottom-section": BottomSection,
 },
   computed: {
       //foo: function () {}
