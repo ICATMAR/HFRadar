@@ -3,13 +3,7 @@
 import ca from './lang/ca.js';
 import en from './lang/en.js';
 import es from './lang/es.js';
-// Load classes
-// SceneManager
-// import SceneManager from "/OBSEA/Components/SceneManager.js"
-// window.SceneManager = SceneManager;
-// // DataManager
-// import DataManager from "/OBSEA/data/DataManager.js"
-// window.DataManager = DataManager;
+
 // Declare event emitter
 // https://github.com/developit/mitt
 window.eventBus = window.mitt();
