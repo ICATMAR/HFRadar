@@ -260,7 +260,14 @@ class FileManager {
 
 
 
-
+// Data availability (generated from python script)
+loadDataAvailability = function(){
+  let baseURL = window.location.href.replace('index.html', '');
+  let url = baseURL + 'data/hfRadarDataAvailability.json'
+  return fetch(url)
+    .then(r => r.json())
+    .catch(e => {throw e})
+}
 
 
 

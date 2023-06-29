@@ -26,9 +26,9 @@ export default {
   mounted() {
     // Data manager
     this.DataManager = DataManager;
-    this.dailyData = this.DataManager.getDailyData();
-    // Half-hourly data is on demand
-    this.halfHourlyData = {};
+    this.dailyData = this.DataManager.getDailyDataAvailability();
+    // Hourly data is on demand
+    this.hourlyData = {};
 
     // Zoom level
     this.isDailyVisible = true;
@@ -48,7 +48,7 @@ export default {
 
     // Event for showing daily max when is loaded from API
     window.eventBus.on('DataManager_intialAPILoad', (res) => {
-      this.setHalfHourlyData(res); // Store hourly data
+      this.sethourlyData(res); // Store hourly data
       this.updateCanvas();
     });
 
@@ -85,6 +85,7 @@ export default {
     // INTERNAL METHODS
     // Paint data streams on canvas
     updateCanvas: function(){
+      return;
       if (this.dailyData == undefined)
         return;
 
@@ -94,7 +95,7 @@ export default {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       
       // For daily maximum representation
-      if (this.timeSpanInHours > this.maxHalfHourlyPoints || this.DataManager.OBSEADataRetriever.isLoading){ // Use daily data
+      if (this.timeSpanInHours > this.maxHalfHourlyPoints){ // Use daily data
         this.isDailyVisible = true;
         // Calculate number of days
         let numDays = (this.endDate.getTime() - this.startDate.getTime()) / (1000 * 3600 * 24);
@@ -173,8 +174,8 @@ export default {
         
       } else { // Use hourly data
         this.isDailyVisible = false;
-        if (Object.keys(this.halfHourlyData).length == 0){
-          console.log("Half hourly data is empty but it was loaded?");
+        if (Object.keys(this.hourlyData).length == 0){
+          console.log("Hourly data is empty but it was loaded?");
           debugger;
           return;
         }
@@ -199,7 +200,7 @@ export default {
           let key = movingDate.toISOString();
           key = this.setISOStringToHalfHourly(key);
           
-          let hhData = this.halfHourlyData[key];
+          let hhData = this.hourlyData[key];
           if (hhData != undefined) {
 
             // Paint
@@ -241,10 +242,10 @@ export default {
 
           } else {
             // console.log(key);
-            // console.log(Object.keys(this.halfHourlyData));
-            // console.log(Object.keys(this.DataManager.OBSEADataRetriever.halfHourlyData));
+            // console.log(Object.keys(this.hourlyData));
+            // console.log(Object.keys(this.DataManager.OBSEADataRetriever.hourlyData));
             
-            // console.error("Half hourly data was not loaded??" + this.halfHourlyData);
+            // console.error("Half hourly data was not loaded??" + this.hourlyData);
           }
 
 
@@ -273,8 +274,8 @@ export default {
     setDailyData: function(data){
       this.dailyData = data;
     },
-    setHalfHourlyData: function(data){
-      this.halfHourlyData = data;
+    sethourlyData: function(data){
+      this.hourlyData = data;
     },
     // Set start and end dates
     setStartEndDates: function (sDate, eDate) {
@@ -287,18 +288,18 @@ export default {
       // Number of points should be smaller or equal than the number of pixels available, but
       // from daily points to 24*2 points per day is quite a big jump. So we set a minimum for showing the half-hourly data
       // TODO: Consider using the minimum radius of the circles here (default is 1, thus diameter is 2 pixels)
-      if (this.timeSpanInHours <= Math.max(this.$refs.dataStreamsCanvas.width, this.maxHalfHourlyPoints)){ 
+      if (this.timeSpanInHours <= Math.max(this.$refs.dataStreamsCanvas.width, this.maxHalfHourlyPoints) && false){ // TODO REMOVE FALSE
         // Load data (DataManager loads the file if it was not loaded already, taking into account the start and end dates).
         // TODO: in our case, the start-end date is always less than 6 months and the static files are divided into 6 months periods,
         // thus providing the start and end dates should be enough. If static files are to be partitioned into smaller parts, please revise here
         let onLoad = (res) => {
-          this.setHalfHourlyData(res); // Store hourly data
-          this.setDailyData(this.DataManager.getDailyData()); // Store daily maximum data (gets updated when API is used)
-        if (!this.DataManager.OBSEADataRetriever.isLoading) // Update canvas once all files are loaded
+          this.sethourlyData(res); // Store hourly data
+          this.setDailyData(this.DataManager.getDataAvailability()); // Store daily maximum data (gets updated when API is used)
+          if (!this.DataManager.OBSEADataRetriever.isLoading) // Update canvas once all files are loaded
             this.updateCanvas();
         }
-        // Load data (half hourly)
-        this.DataManager.getHalfHourlyData(this.startDate, this.endDate)
+        // Load data (hourly)
+        this.DataManager.getHourlyData(this.startDate, this.endDate)
           .then(res => onLoad(res)).catch(e => console.error('DataStreamsBar.vue\n' + e));
       }
 
@@ -312,7 +313,7 @@ export default {
       // Use daily data when zoom level is close and nothing is loading
       if (!this.isDailyVisible) { 
         isoString = this.setISOStringToHalfHourly(isoString);
-        let hhData = this.halfHourlyData[isoString];
+        let hhData = this.hourlyData[isoString];
         if (hhData != undefined){
           window.eventBus.emit('DataStreamsBar_dataHalfHourlyUpdate', hhData);
         }

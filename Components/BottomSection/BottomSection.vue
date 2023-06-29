@@ -50,7 +50,8 @@ export default {
 #bottom-section {
   position: absolute;
   bottom: 0px;
-  width: 100vw;
+  left: 0px;
+  right: 400px;
   pointer-events: none;
 }
 

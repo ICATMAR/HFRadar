@@ -23,10 +23,10 @@
         </div>
       </div>
 
-      <time-slider></time-slider>
+      <!-- <time-slider></time-slider> -->
 
       <!-- Bottom Section -->
-      <bottom-section ref="timeRangeBar" id="time-range-bar"></bottom-section>
+      <bottom-section></bottom-section>
        
 
       <!-- Animation Canvas -->

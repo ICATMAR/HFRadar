@@ -17,6 +17,16 @@ class DataManager {
     window.eventBus.on('LoadedDropedHFRadarData', (HFRadarData) => { // From FileManager.js
       this.addHFRadarData(HFRadarData);
     });
+
+    // Load data availability
+    if (window.FileManager){
+      window.FileManager.loadDataAvailability()
+        .then(r => {
+          this.hourlyDataAvailability = r;
+          this.generateDailyDataAvailability(r);
+        })
+        .catch(e => {throw e})
+    }
   }
 
 
@@ -64,10 +74,55 @@ class DataManager {
     return this.HFRadars[UUID];
   }
 
+  // Calculate if there is data on a day
+  generateDailyDataAvailability(hourlyDataAvailability){
+    // Iterate hourly data
+    this.dailyDataAvailability = {};
+    Object.keys(hourlyDataAvailability).forEach(tmst => {
+      // Current availability for that hour
+      let hourlyAvail = hourlyDataAvailability[tmst];
+      // Use the date without time
+      let date = tmst.substring(0,10);
+      // If it does not exist, create
+      if (!this.dailyDataAvailability[date]){
+        this.dailyDataAvailability[date] = hourlyAvail; // TODO: if hourly has more info (now has only CREU: 'true', BEGU: 'true'...), this could be more complex
+      }
+      // If it exist, check that all are present
+      else {
+        // Compare keys in daily and hourly
+        // Iterate daily
+        Object.keys(hourlyAvail).forEach(radarName => {
+          if (Object.keys(this.dailyDataAvailability[date]).includes(radarName) == false){
+            // Assign unregistered radar to dailyData
+            this.dailyDataAvailability[date][radarName] = hourlyAvail[radarname];
+          }
+        })
+      }
+    }) // end of forEach
+  }
+
 
 
 
   // PUBLIC METHODS
+  // Get data availability
+  getDataAvailability(){
+    // Load data
+    if (!this.hourlyDataAvailability){
+      debugger;
+    }
+    
+    return this.hourlyDataAvailability;   
+  }
+
+  getDailyDataAvailability(){
+    if (!this.dailyDataAvailability){
+      debugger;
+    }
+
+    return this.dailyDataAvailability;
+  }
+
   // Returns and array with radar data available on a specific date
   getRadarsDataOn(timestamp){
     let radarsData = [];
@@ -248,6 +303,17 @@ class DataManager {
 
 // End of class
 }
+
+
+
+
+
+
+
+
+
+
+
 
 
 

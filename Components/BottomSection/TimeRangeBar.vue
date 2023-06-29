@@ -30,12 +30,12 @@
           <!-- Three rows -->
           <div class="container-rows" style="width:100%">
             <!-- Time slider -->
-            <range-slider ref="rangeSlider" 
+            <!-- <range-slider ref="rangeSlider" 
               @isChanging="onRangeSliderChange($event)" 
               @mouseIsDown="onRangeSliderMouseDown($event)"
               @mouseIsUp="onRangeSliderMouseUp($event)" 
               @isDragging="onRangeSliderDrag($event)"
-            style="height: 50px; width: 100%"></range-slider>
+            style="height: 50px; width: 100%"></range-slider> -->
             
             
             <!-- Data availability -->
@@ -86,18 +86,19 @@
 
 
 <script>
-import DataStreamsBar from '/OBSEA/Components/Bottom/DataStreamsBar.vue';
+import DataStreamsBar from './DataStreamsBar.vue';
 // Import components
-import RangeSlider from '/OBSEA/Components/Bottom/RangeSlider.vue'
+// import RangeSlider from './RangeSlider.vue'
 
 export default {
     name: "time-range-bar",
     created (){
       // Non-reactive variables this.$options.
-      this.startDate = new Date(2011, 7, 21); // month + 1, e.g., 7 is August
+      //this.startDate = new Date(2023, 3, 1); // month + 1, e.g., 7 is August
       this.endDate = new Date();
+      this.startDate = new Date(this.endDate.getTime() - 1000*60*60*24*7);
       // Start and end dates if startDate and endDate are flexible
-      this.limStartDate = new Date(2011, 7, 21); 
+      this.limStartDate = new Date(2023, 3, 1); 
       this.limEndDate = new Date();
 
       // Month names
@@ -525,8 +526,10 @@ export default {
       createHTMLTimeline: function(){
         let startMonth = this.startDate.getUTCMonth();
         let startDay = this.startDate.getUTCDate();
+        let startHour = this.startDate.getUTCHours();
         let endMonth = this.endDate.getUTCMonth();
         let endDay = this.endDate.getUTCDate();
+        let endHour = this.endDate.getUTCHours();
         
         // Calculate how many years (and a percentage of the year too)
         // Calculate how many months are between end and start date
@@ -572,8 +575,54 @@ export default {
         // Start and end year are the same
         else {
           this.years = [{ num: startYear, wght: ((endMonth + endDay / daysInLastMonth) - (11 - startMonth + (daysInFirstMonth - startDay) / daysInFirstMonth)) / 12}];
+          // Fill months
+          let numMonths = endMonth - startMonth;
+          for (let i = startMonth; i <= endMonth; i++){
+            if (i != endMonth)
+              this.months.push({num: i, wght: 1, key: i + "-" + (endYear), year: endYear,  name: this.monthNum2Str(i)});
+            else
+              this.months.push({ num: i, wght: endDay / daysInLastMonth, key: i + "-" + (endYear), year: endYear, name: this.monthNum2Str(i)});
+          }
         }
 
+
+
+        // Iterate dates
+        for (let idxY = startYear; idxY <= endYear; idxY++) { // Year
+          let sM = 0;
+          let eM = 11;
+          if (idxY == startYear) // We are in the first year
+            sM = startMonth;
+          if (idxY == endYear) // We are in the first year
+            eM = endMonth;
+          for (let idxM = sM; idxM <= eM; idxM++) { // Month
+            let sD = 1;
+            let eD = this.getDaysInMonth(idxY, idxM + 1);
+            if(idxM == startMonth) // First month (WARN: because timespan is less than 5 months apart, months from different years are not confused now)
+              sD = startDay;
+            if (idxM == endMonth) // Last month (WARN: same as above)
+              eD = endDay;
+            for (let idxD = sD; idxD <= eD; idxD++){
+              let dayWght = 1;
+              if (idxD == sD && idxM == startMonth) // First day
+                dayWght = (24-startHour)/24;
+              else if (idxD == eD && idxM == endMonth){
+                dayWght = endHour / 24;
+              }
+              this.days.push({
+                num: idxD,
+                wght: dayWght,
+                key: idxD + "-" + idxM + "-" + idxY,
+                title: idxD + "-" + (idxM+1) + "-" + idxY,
+                year: idxY,
+                month: idxM+1,
+                name: idxD
+              })
+            }
+          }
+        }
+
+        
 
         // Set selected start and end dates
         this.selStartDate = new Date(startYear, startMonth + 1, startDay);
@@ -619,7 +668,7 @@ export default {
         // Find reactive array indexes
         let sIdxMonths;
         let sIdxYears;
-        
+
         this.months.forEach((mm, index) => {
           if (mm.key == startMonth + '-' + startYear)
             sIdxMonths = index;
@@ -920,9 +969,7 @@ export default {
         // Set handles in range slider
         this.setRangeSlider();
         this.updateHTMLTimeline();
-        // Emit selected dates. This updates the FishingTracks style
-        //this.$emit('changeSelDates', [this.selStartDate, this.selEndDate]);
-    
+
       },
 
 
@@ -932,7 +979,7 @@ export default {
 
     },
     components: {
-      'range-slider': RangeSlider,
+      // 'range-slider': RangeSlider,
       'data-streams-bar': DataStreamsBar,
     },
     computed: {
@@ -986,6 +1033,9 @@ export default {
   -khtml-user-select: none;
   user-select:none;
 
+  pointer-events: all;
+  text-shadow: 0 0 4px black;
+
   opacity: 1;
   transition: width 0.15s, opacity 0.5s;
 }
@@ -1003,14 +1053,31 @@ export default {
   user-select:none;
 }
 
+
+
+.container-columns {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-evenly;
+  align-items: center;
+}
+
+.container-rows {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  align-items: center;
+  flex-wrap: nowrap;
+}
+
 .playButtons {
   font-size: 20px;
   /*width: fit-content;*/
-  background: rgba(198, 239, 255, 0.8);
+  background: var(--lightBlue);
   border-top-right-radius: 0.2rem;
   border-top-left-radius: 0.2rem;
 
-  border-right: 2px solid #02488e33;
+  border-right: 2px solid var(--darkBlue);
   bottom: 0; /* Fix for mobile? */
 
   max-width: 80px;
