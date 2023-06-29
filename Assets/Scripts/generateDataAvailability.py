@@ -31,7 +31,7 @@ def generate_json(folders, output_path):
     with open(output_path, "w") as json_file:
         jsonData = json.dumps(data)
         # Prepend export default text
-        jsonData = 'let hfRadarDataAvailability;\nexport default hfRadarDataAvailability = ' + jsonData
+        #jsonData = 'let hfRadarDataAvailability;\nexport default hfRadarDataAvailability = ' + jsonData
         # Write to file
         json_file.write(jsonData)
 
