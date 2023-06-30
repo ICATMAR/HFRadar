@@ -3,7 +3,7 @@
 
       <div>
         <!-- Two cols -->
-        <div class="container-columns" style="align-items: end; justify-content: space-between;">
+        <div class="container-columns" style="align-items: end; justify-content: space-between; pointer-events: all;">
           
           <!-- Controls/Start stop -->
           <!-- Play Pause https://emojipedia.org/ -->
@@ -576,7 +576,6 @@ export default {
         else {
           this.years = [{ num: startYear, wght: ((endMonth + endDay / daysInLastMonth) - (11 - startMonth + (daysInFirstMonth - startDay) / daysInFirstMonth)) / 12}];
           // Fill months
-          let numMonths = endMonth - startMonth;
           for (let i = startMonth; i <= endMonth; i++){
             if (i != endMonth)
               this.months.push({num: i, wght: 1, key: i + "-" + (endYear), year: endYear,  name: this.monthNum2Str(i)});
@@ -663,8 +662,14 @@ export default {
         let endDay = this.endDate.getUTCDate();
         let endHour = this.endDate.getUTCHours();
 
-        
-        
+        // Initialize months
+        this.months = [];
+        for (let i = startMonth; i <= endMonth; i++){
+          if (i != endMonth)
+            this.months.push({num: i, wght: 0, key: i + "-" + (endYear), year: endYear,  name: this.monthNum2Str(i)});
+          else
+            this.months.push({ num: i, wght: 0, key: i + "-" + (endYear), year: endYear, name: this.monthNum2Str(i)});
+        }
         // Find reactive array indexes
         let sIdxMonths;
         let sIdxYears;
