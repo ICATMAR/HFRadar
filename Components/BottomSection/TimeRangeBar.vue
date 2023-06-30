@@ -137,6 +137,8 @@ export default {
       // Set start and end dates
       if (this.$refs.dataStreamsBar)
         this.$refs.dataStreamsBar.setStartEndDates(this.startDate, this.endDate);
+      
+      // EVENT LISTENERS
       // Create event listener
       window.addEventListener('resize', this.windowIsResizing);
     },

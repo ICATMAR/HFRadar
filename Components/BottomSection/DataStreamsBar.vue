@@ -31,24 +31,29 @@ export default {
     this.isDailyVisible = true;
 
     // TODO: ANOTHER OPTION IS TO USE PATH
-    // CREATE BALLS FOR EVENTS? MOVING WINDOW?
     this.canvas = this.$refs.dataStreamsCanvas;
     let parentEl = this.canvas.parentElement;
     this.canvas.height = 30; // TODO: DEPENDANT ON THE NUMBER OF STREAMS TO DISPLAY
     this.canvas.width = parentEl.offsetWidth;
+    this.ctx = this.canvas.getContext('2d');
 
+
+
+    // EVENTS
     window.addEventListener("resize", () =>{
       this.canvas.width = parentEl.offsetWidth;
       this.updateCanvas();
     });
-    this.ctx = this.canvas.getContext('2d');
-
-    // Event for showing daily max when is loaded from API
-    // TODO: USE HRRADAR LOAD TO SET IT? OR SHOULD DATA MANAGER CALL THIS AFTER BEING UPDATED?
-    window.eventBus.on('DataManager_intialAPILoad', (res) => {
-      this.setHourlyData(res); // Store hourly data
+    // When radar data is loaded, update data availability
+    window.eventBus.on('DataManager_DataAvailabilityUpdated', () => {
       this.updateCanvas();
     });
+
+
+
+
+
+
     
 
     // This number decides when to paint one point a day or 24 points a day
@@ -107,6 +112,8 @@ export default {
       let ctx = this.ctx;
 
       let measures = ['ROSE','CREU','BEGU'];
+      let loadedColor = 'darkBlue';
+      let existsColor = 'rgb(127, 127, 127)';
 
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -146,7 +153,7 @@ export default {
                 ctx.beginPath();
                 let radMod = Math.min(3, radius * factor * factor);
                 ctx.arc(posX, posY, radMod, 2 * Math.PI, 0, false);
-                ctx.fillStyle = 'darkblue';
+                ctx.fillStyle = existsColor;
                 ctx.fill();
               }
             }
@@ -226,7 +233,7 @@ export default {
                 ctx.beginPath();
                 let radMod = Math.min(3, radius * factor * factor);
                 ctx.arc(posX, posY, radMod, 2 * Math.PI, 0, false);
-                ctx.fillStyle = 'blue';
+                ctx.fillStyle = hhData[measures[j]] == 2 ? loadedColor : existsColor;
                 ctx.fill();
               }
             }

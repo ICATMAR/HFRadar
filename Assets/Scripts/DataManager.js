@@ -17,6 +17,12 @@ class DataManager {
     window.eventBus.on('LoadedDropedHFRadarData', (HFRadarData) => { // From FileManager.js
       this.addHFRadarData(HFRadarData);
     });
+    // This event can be called from this class, from FileManager.js or AppManager.vue
+    window.eventBus.on('HFRadarDataLoaded', () => {
+      // Update data availability
+      this.updateHourlyDataAvailability();
+      window.eventBus.emit('DataManager_DataAvailabilityUpdated');
+    })
 
     // Load data availability
     if (window.FileManager){
@@ -48,7 +54,7 @@ class DataManager {
       return;
     }
 
-    // Check if it is combined radar data (tots)
+    // Combined radar data (tots)
     if (HFRadarData.header.FileType.includes('tots')){
       if (this.HFRadars[UUID] != undefined){
         this.HFRadars[UUID].addRadarData(HFRadarData);
@@ -100,6 +106,28 @@ class DataManager {
         })
       }
     }) // end of forEach
+  }
+
+  // When new radar data is loaded, update the data availability
+  updateHourlyDataAvailability(){
+    // Iterate radars
+    Object.keys(this.HFRadars).forEach(key => {
+      let HFRadar = this.HFRadars[key];
+      let data = HFRadar.data;
+      let site = HFRadar.header.Site.replace(' ""', '').replaceAll(" ", "").replaceAll("\r", "");
+      // Iterate timestamps
+      Object.keys(data).forEach(tmst => {
+        tmst = tmst.substring(0,13) + 'Z';
+        // If it does not exist, create
+        if (this.hourlyDataAvailability[tmst] == undefined){
+          this.hourlyDataAvailability[tmst] = {};
+        }
+        // Add site
+        this.hourlyDataAvailability[tmst][site] = 2;
+      })
+    });
+    // TODO: optimize
+    this.generateDailyDataAvailability(this.hourlyDataAvailability);
   }
 
 
