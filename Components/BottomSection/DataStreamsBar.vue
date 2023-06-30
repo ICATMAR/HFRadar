@@ -2,11 +2,15 @@
   <div id="data-streams-bar">
     <!-- A div with the same width as TimeRange -->
     <div class="streamsContainer" ref="streamsContainer">
-      <canvas ref="dataStreamsCanvas" @click="streamsContainerClicked"></canvas>
+      <canvas style="cursor: pointer" @mousemove="onMouseMoveCanvas" @mouseleave="onMouseLeaveCanvas" ref="dataStreamsCanvas" @click="streamsContainerClicked"></canvas>
       <!-- <div class="trackMark" :class="{active: ff.selected}" @click="onTrackClicked" :id="ff.properties.id"
         :key="ff.properties.id" v-for="ff in features" :style="setFeatureStyle(ff)">
         &#11044;
       </div> -->
+    </div>
+
+    <div style="position:absolute; top: -30px; background: white; text-align: center; width: 100%">
+      {{ timeStr }}
     </div>
 
 
@@ -66,6 +70,7 @@ export default {
     if (this.DataManager.getHourlyDataAvailability()){
       this.dailyData = this.DataManager.getDailyDataAvailability();
       this.hourlyData = this.DataManager.getHourlyDataAvailability();
+      console.log(this.dailyData);
     }
     else {
       // HourlyDataAvailability is loaded before this vue component. But just in case, we keep this code (low internet connection?)
@@ -80,11 +85,11 @@ export default {
     return {
       startDate: new Date(2023, 3, 1),
       endDate: new Date(),
-      
+      timeStr: 'Loading dataset...'
     }
   },
   methods: {
-    // USER METHODS
+    // USER INTERACTION
     streamsContainerClicked: function(event) {
       // TODO: CHANGE RANGE SLIDER TIME
       let width = event.target.offsetWidth;
@@ -96,8 +101,50 @@ export default {
       else
         console.log("Something went wrong");
       
+      let perc = 100 * mouseX / width;
+
+      let totalTimeSpan = this.endDate.getTime() - this.startDate.getTime();
+      let clickedDate = new Date(this.startDate.getTime() + totalTimeSpan * perc / 100);
+      let minutes = clickedDate.getUTCMinutes();
+      let hours = clickedDate.getUTCHours() + Math.floor(minutes / 30);
+      clickedDate.setUTCHours(hours);
+      let formatedTmst = clickedDate.toISOString().substring(0, 14) + '00:00.000Z';
+
+      this.timeStr = formatedTmst;
+      
+      // Date change event
+      window.eventBus.emit('TimeSlider_SelectedDateChanged', formatedTmst);
+
+      this.$emit('clicked', perc);
+    },
+    // MOUSE MOVE
+    onMouseMoveCanvas: function(event) {
+      let width = event.target.offsetWidth;
+      let mouseX = 0;
+      if (event.offsetX)
+        mouseX = event.offsetX;
+      else if (event.touches)
+        mouseX = event.touches[0].offsetX;
+      else
+        console.log("Something went wrong");
+      
       let percLeft = 100 * mouseX / width;
-      this.$emit('clicked', percLeft);
+      // Paint canvas
+      this.updateCanvas();
+      // Paint line
+      let canvas = this.canvas;
+      let ctx = this.ctx;
+      let posX = canvas.width * percLeft / 100;
+
+      ctx.beginPath();
+      ctx.moveTo(posX, 0);
+      ctx.lineTo(posX, canvas.height);
+      ctx.strokeStyle = "red";
+      ctx.stroke();
+    },
+    // Clear canvas when leaving it
+    onMouseLeaveCanvas: function(){
+      this.updateCanvas();
     },
     
     
@@ -105,9 +152,11 @@ export default {
     // Paint data streams on canvas
     updateCanvas: function(){
       
+      this.dailyData = this.DataManager.getDailyDataAvailability();
+
       if (this.dailyData == undefined)
         return;
-
+      
       let canvas = this.canvas;
       let ctx = this.ctx;
 
@@ -153,7 +202,7 @@ export default {
                 ctx.beginPath();
                 let radMod = Math.min(3, radius * factor * factor);
                 ctx.arc(posX, posY, radMod, 2 * Math.PI, 0, false);
-                ctx.fillStyle = existsColor;
+                ctx.fillStyle = ddData[measures[j]] == 2 ? loadedColor : existsColor;
                 ctx.fill();
               }
             }
@@ -215,7 +264,6 @@ export default {
           
           let hhData = this.hourlyData[key];
           if (hhData != undefined) {
-
             // Paint
             for (let j = 0; j < measures.length; j++) {
               // If measure exists in dataset
@@ -238,17 +286,8 @@ export default {
               }
             }
 
-
-
-
-
-
           } else {
-            // console.log(key);
-            // console.log(Object.keys(this.hourlyData));
-            // console.log(Object.keys(this.DataManager.OBSEADataRetriever.hourlyData));
-            
-            // console.error("Half hourly data was not loaded??" + this.hourlyData);
+            //debugger; // Hourly data not defined
           }
 
 
@@ -257,6 +296,20 @@ export default {
           //console.log(movingDate.toISOString());
         }
 
+      }
+
+      // Paint selected date
+      let selTmst = window.GUIManager.currentTmst;
+      if (selTmst != undefined){
+        let currentDate = new Date(selTmst);
+        let timeSpan = this.endDate.getTime() - this.startDate.getTime();
+        let perc = (currentDate.getTime() - this.startDate.getTime()) / timeSpan;
+        let posX = perc * canvas.width;
+        ctx.beginPath();
+        ctx.moveTo(posX, 0);
+        ctx.lineTo(posX, canvas.height);
+        ctx.strokeStyle = 'red';
+        ctx.stroke()
       }
     },
 
@@ -323,7 +376,7 @@ export default {
         let key = isoString.substring(0,10);
         let ddData= this.dailyData[key];
         if (ddData != undefined){
-          ddData.timestamp = key;
+          //ddData.timestamp = key;
           window.eventBus.emit('DataStreamsBar_dataDailyUpdate', ddData);
         }
       }

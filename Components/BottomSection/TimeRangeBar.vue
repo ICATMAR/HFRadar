@@ -190,7 +190,10 @@ export default {
 
       // Data streams is clicked
       onDataStreamsClicked: function(perc){
-        
+
+
+
+        return
         this.rangeArray = [perc - 10, perc + 10];
         this.updateRangeSlider();
         
