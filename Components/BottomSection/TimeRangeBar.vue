@@ -3,7 +3,7 @@
 
       <div>
         <!-- Two cols -->
-        <div class="container-columns" style="align-items: end; justify-content: space-between; pointer-events: all;">
+        <div class="container-columns time-range-bar-container">
           
           <!-- Controls/Start stop -->
           <!-- Play Pause https://emojipedia.org/ -->
@@ -1012,6 +1012,14 @@ export default {
 
   background-color: rgb(149, 224, 255,0.9);
   
+}
+
+.time-range-bar-container{
+  align-items: end;
+  justify-content: space-between;
+  pointer-events: all;
+  z-index: 10;
+  position: relative;
 }
 
 .hiddenClass {

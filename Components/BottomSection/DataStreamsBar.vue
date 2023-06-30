@@ -26,9 +26,6 @@ export default {
   mounted() {
     // Data manager
     this.DataManager = DataManager;
-    this.dailyData = this.DataManager.getDailyDataAvailability();
-    // Hourly data is on demand
-    this.hourlyData = {};
 
     // Zoom level
     this.isDailyVisible = true;
@@ -47,19 +44,36 @@ export default {
     this.ctx = this.canvas.getContext('2d');
 
     // Event for showing daily max when is loaded from API
+    // TODO: USE HRRADAR LOAD TO SET IT? OR SHOULD DATA MANAGER CALL THIS AFTER BEING UPDATED?
     window.eventBus.on('DataManager_intialAPILoad', (res) => {
-      this.sethourlyData(res); // Store hourly data
+      this.setHourlyData(res); // Store hourly data
       this.updateCanvas();
     });
+    
 
-    // This number decides when to paint one point a day or 24*2 points a day
-    this.maxHalfHourlyPoints = 24 * 60;
+    // This number decides when to paint one point a day or 24 points a day
+    this.maxHourlyPoints = 24 * 30;
     // Memory allocation
     this.movingDate = new Date();
+
+
+    // If HourlyDataAvailability is already loaded
+    if (this.DataManager.getHourlyDataAvailability()){
+      this.dailyData = this.DataManager.getDailyDataAvailability();
+      this.hourlyData = this.DataManager.getHourlyDataAvailability();
+    }
+    else {
+      // HourlyDataAvailability is loaded before this vue component. But just in case, we keep this code (low internet connection?)
+      window.eventBus.on('DataManager_HourlyDataAvailabilityLoaded', () => {
+        this.hourlyData = this.DataManager.getHourlyDataAvailability();
+        this.dailyData = this.DataManager.getDailyDataAvailability();
+        this.updateCanvas();
+      })
+    }
   },
   data() {
     return {
-      startDate: new Date(2018, 7, 21),
+      startDate: new Date(2023, 3, 1),
       endDate: new Date(),
       
     }
@@ -85,17 +99,19 @@ export default {
     // INTERNAL METHODS
     // Paint data streams on canvas
     updateCanvas: function(){
-      return;
+      
       if (this.dailyData == undefined)
         return;
 
       let canvas = this.canvas;
       let ctx = this.ctx;
 
+      let measures = ['ROSE','CREU','BEGU'];
+
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      
+
       // For daily maximum representation
-      if (this.timeSpanInHours > this.maxHalfHourlyPoints){ // Use daily data
+      if (this.timeSpanInHours > this.maxHourlyPoints){ // Use daily data
         this.isDailyVisible = true;
         // Calculate number of days
         let numDays = (this.endDate.getTime() - this.startDate.getTime()) / (1000 * 3600 * 24);
@@ -111,11 +127,10 @@ export default {
         movingDate.setTime(this.startDate.getTime());
         
         for (let i = 0; i< Math.ceil(numDays); i++){
-          let key = movingDate.toISOString().substring(0, 10) + 'T00:00:00.000Z'; // Daily
+          let key = movingDate.toISOString().substring(0, 10); // Daily
           let ddData = this.dailyData[key];
           if (ddData != undefined){
-            // Paint
-            let measures = ['Hm0', 'WSPD', 'UCUR_1m'];
+            // Paint            
             for (let j = 0; j < measures.length; j++){
               // If measure exists in dataset
               if (ddData[measures[j]]){
@@ -126,20 +141,11 @@ export default {
                 // Calculate width?
                 // Calculate height (use datatypes max?)
                 let factor = 1;
-                let dataType = this.DataManager.OBSEADataRetriever.DataTypes[measures[j]];
-                if (measures[j].includes('CUR')){
-                  dataType = this.DataManager.OBSEADataRetriever.DataTypes['CUR'];
-                }
-                if (dataType){
-                  if (dataType.signValue){
-                    factor = Math.max(1,ddData[measures[j]]/dataType.signValue);
-                  }
-                }
+                let radius = j == 0 ? 2 : 1.3;
                 
                 ctx.beginPath();
-                let radius = 1;
                 let radMod = Math.min(3, radius * factor * factor);
-                ctx.arc(posX, posY, radMod, 1 * Math.PI, 0, false);
+                ctx.arc(posX, posY, radMod, 2 * Math.PI, 0, false);
                 ctx.fillStyle = 'darkblue';
                 ctx.fill();
               }
@@ -180,7 +186,7 @@ export default {
           return;
         }
         // Calculate number of half hours
-        let numHalfHours = (this.endDate.getTime() - this.startDate.getTime()) / (1000 * 3600 * 0.5);
+        let numHours = (this.endDate.getTime() - this.startDate.getTime()) / (1000 * 3600);
         
         // TODO
         // Here should be some time corrections maybe?
@@ -195,41 +201,31 @@ export default {
         movingDate.setTime(this.startDate.getTime());
         
         // Iterate halfhours
-        for (let i = 0; i < Math.ceil(numHalfHours); i++) {
+        for (let i = 0; i < Math.ceil(numHours); i++) {
           // Half hourly key
           let key = movingDate.toISOString();
-          key = this.setISOStringToHalfHourly(key);
+          key = key.substring(0,13) + 'Z';
           
           let hhData = this.hourlyData[key];
           if (hhData != undefined) {
 
             // Paint
-            let measures = ['Hm0', 'WSPD', 'UCUR_1m'];
             for (let j = 0; j < measures.length; j++) {
               // If measure exists in dataset
               if (hhData[measures[j]]) {
                 // Calculate position in canvas
                 //let posX = ((i + dayDiff - 0.5) / (numDays - 1)) * canvas.width; // Use the start day difference to position the points
-                let posX = canvas.width * i / numHalfHours; // Use the start day difference to position the points
+                let posX = canvas.width * i / numHours; // Use the start day difference to position the points
                 let padding = canvas.height * 0.2;
                 let posY = padding + j * (canvas.height - padding) / measures.length;
                 // Calculate width?
                 // Calculate height (use datatypes max?)
                 let factor = 1;
-                let dataType = this.DataManager.OBSEADataRetriever.DataTypes[measures[j]];
-                if (measures[j].includes('CUR')) {
-                  dataType = this.DataManager.OBSEADataRetriever.DataTypes['CUR'];
-                }
-                if (dataType) {
-                  if (dataType.signValue) {
-                    factor = Math.max(1, hhData[measures[j]] / dataType.signValue);
-                  }
-                }
+                let radius = j == 0 ? 2 : 1.3;
 
                 ctx.beginPath();
-                let radius = 1;
                 let radMod = Math.min(3, radius * factor * factor);
-                ctx.arc(posX, posY, radMod, Math.PI, 0, false);
+                ctx.arc(posX, posY, radMod, 2 * Math.PI, 0, false);
                 ctx.fillStyle = 'blue';
                 ctx.fill();
               }
@@ -250,19 +246,13 @@ export default {
 
 
           // Increase half hour
-          movingDate.setUTCMinutes(movingDate.getUTCMinutes() + 30);
+          movingDate.setUTCMinutes(movingDate.getUTCMinutes() + 60);
           //console.log(movingDate.toISOString());
         }
 
       }
     },
 
-    // Clean ISO string to have a half-hour step
-    setISOStringToHalfHourly: function(isoString){
-      let min = parseInt(isoString.substring(14, 16));
-      let normMin = parseInt(30 * Math.floor(min / 30));
-      return isoString.substring(0, 14) + String(normMin).padStart(2, '0') + ':00.000Z';
-    },
 
 
 
@@ -274,33 +264,37 @@ export default {
     setDailyData: function(data){
       this.dailyData = data;
     },
-    sethourlyData: function(data){
+    setHourlyData: function(data){
       this.hourlyData = data;
     },
     // Set start and end dates
     setStartEndDates: function (sDate, eDate) {
-      
+
       this.startDate.setTime(sDate.getTime());
       this.endDate.setTime(eDate.getTime());
       this.timeSpanInHours = (this.endDate.getTime() - this.startDate.getTime()) / 36e5;
 
-      // Load half-hourly data if timespan is smaller than X
+      // Load hourly data if timespan is smaller than X
       // Number of points should be smaller or equal than the number of pixels available, but
-      // from daily points to 24*2 points per day is quite a big jump. So we set a minimum for showing the half-hourly data
+      // from daily points to 24 points per day is quite a big jump. So we set a minimum for showing the hourly data
       // TODO: Consider using the minimum radius of the circles here (default is 1, thus diameter is 2 pixels)
-      if (this.timeSpanInHours <= Math.max(this.$refs.dataStreamsCanvas.width, this.maxHalfHourlyPoints) && false){ // TODO REMOVE FALSE
+      if (this.timeSpanInHours <= Math.max(this.$refs.dataStreamsCanvas.width, this.maxHourlyPoints)){
+        
+        // DATA IS ALWAYS LOADED FIRST?
         // Load data (DataManager loads the file if it was not loaded already, taking into account the start and end dates).
         // TODO: in our case, the start-end date is always less than 6 months and the static files are divided into 6 months periods,
         // thus providing the start and end dates should be enough. If static files are to be partitioned into smaller parts, please revise here
-        let onLoad = (res) => {
-          this.sethourlyData(res); // Store hourly data
-          this.setDailyData(this.DataManager.getDataAvailability()); // Store daily maximum data (gets updated when API is used)
-          if (!this.DataManager.OBSEADataRetriever.isLoading) // Update canvas once all files are loaded
-            this.updateCanvas();
-        }
-        // Load data (hourly)
-        this.DataManager.getHourlyData(this.startDate, this.endDate)
-          .then(res => onLoad(res)).catch(e => console.error('DataStreamsBar.vue\n' + e));
+        // let onLoad = (res) => {
+        //   this.sethourlyData(res); // Store hourly data
+        //   this.setDailyData(this.DataManager.getDataAvailability()); // Store daily maximum data (gets updated when API is used)
+        //   if (!this.DataManager.OBSEADataRetriever.isLoading) // Update canvas once all files are loaded
+        //     this.updateCanvas();
+        // }
+        // // Load data (hourly)
+        // this.DataManager.getHourlyData(this.startDate, this.endDate)
+        //   .then(res => onLoad(res)).catch(e => console.error('DataStreamsBar.vue\n' + e));
+
+
       }
 
       this.updateCanvas();
@@ -312,17 +306,17 @@ export default {
       // Check zoom level
       // Use daily data when zoom level is close and nothing is loading
       if (!this.isDailyVisible) { 
-        isoString = this.setISOStringToHalfHourly(isoString);
-        let hhData = this.hourlyData[isoString];
+        let key = isoString.substring(0,13) + 'Z';
+        let hhData = this.hourlyData[key];
         if (hhData != undefined){
-          window.eventBus.emit('DataStreamsBar_dataHalfHourlyUpdate', hhData);
+          window.eventBus.emit('DataStreamsBar_dataHourlyUpdate', hhData);
         }
       } else {
         // Daily value
-        isoString = isoString.substring(0,10) + 'T00:00:00.000Z';
-        let ddData= this.dailyData[isoString];
+        let key = isoString.substring(0,10);
+        let ddData= this.dailyData[key];
         if (ddData != undefined){
-          ddData.timestamp = isoString; // TODO: should remove this if OBSEA daily static data is regenerated
+          ddData.timestamp = key;
           window.eventBus.emit('DataStreamsBar_dataDailyUpdate', ddData);
         }
       }
@@ -355,11 +349,11 @@ export default {
 .streamsContainer {
   height: 100%;
   position: relative;
-  border-radius: 1rem;
+  border-radius: 1rem 0.3rem 0.3rem 1rem;
   pointer-events: all;
   cursor: pointer;
 
-  background: linear-gradient(90deg, rgba(160, 215, 242, 0) 0%, rgba(160, 215, 242, 0.8) 10%, rgba(160, 215, 242, 0.8) 90%, rgba(160, 215, 242, 0) 100%);
+  background: linear-gradient(90deg, rgba(160, 215, 242, 0) 0%, rgba(160, 215, 242, 0.8) 10%, rgba(160, 215, 242, 0.8) 90%, rgba(160, 215, 242, 0.8) 100%);
   box-shadow: 0 -1px 2px rgba(160, 215, 242, 0.8);
 }
 

@@ -24,6 +24,7 @@ class DataManager {
         .then(r => {
           this.hourlyDataAvailability = r;
           this.generateDailyDataAvailability(r);
+          window.eventBus.emit('DataManager_HourlyDataAvailabilityLoaded');
         })
         .catch(e => {throw e})
     }
@@ -106,10 +107,11 @@ class DataManager {
 
   // PUBLIC METHODS
   // Get data availability
-  getDataAvailability(){
+  getHourlyDataAvailability(){
     // Load data
     if (!this.hourlyDataAvailability){
       debugger;
+      return false;
     }
     
     return this.hourlyDataAvailability;   
@@ -118,6 +120,7 @@ class DataManager {
   getDailyDataAvailability(){
     if (!this.dailyDataAvailability){
       debugger;
+      return false;
     }
 
     return this.dailyDataAvailability;
