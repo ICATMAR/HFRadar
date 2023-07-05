@@ -184,7 +184,7 @@ export default {
         this.selectedDateChanged(tmst);
     });
     // Selected date changed (slider moves or drag and drop files)
-    window.eventBus.on('TimeSlider_SelectedDateChanged', (tmst) =>{
+    window.eventBus.on('DataStreamsBar_SelectedDateChanged', (tmst) =>{
       this.selectedDateChanged(tmst);
     });
     // TODO: COMBINE TWO NEXT EVENTS
