@@ -392,6 +392,8 @@ export default {
           window.eventBus.emit('DataStreamsBar_dataDailyUpdate', ddData);
         }
       }
+
+      this.updateCanvas();
     },
 
 
