@@ -28,7 +28,7 @@
 
 
           <!-- Three rows -->
-          <div class="container-rows" style="width:100%">
+          <div class="container-rows" style="width:100%" @wheel.prevent="onTimeBarWheel($event)">
             <!-- Time slider -->
             <!-- <range-slider ref="rangeSlider" 
               @isChanging="onRangeSliderChange($event)" 
@@ -41,14 +41,13 @@
             <!-- Data availability -->
             <data-streams-bar ref="dataStreamsBar" 
               @clicked="onDataStreamsClicked($event)"
-              @wheel.prevent="onTimeBarWheel($event)"
             style="width:100%"></data-streams-bar>
             
             
             
             <!-- Horizontal calendar -->
             <!-- Year calendar -->
-            <div class="timeline" @wheel.prevent="onTimeBarWheel($event)">
+            <div class="timeline">
               <button v-for="yy in years" class="m-0 p-0"
                 :class="[yy.wght == 0 ? 'hiddenClass' : yy.num % 2 == 0 ? 'yearButton' : 'yearButton even']"
                 @click="onYearClicked($event)" :key="yy.num" :id="yy.num" :title="yy.num"
@@ -56,7 +55,7 @@
             </div>
             
             <!-- Month calendar -->
-            <div class="timeline" ref="monthTimeline" @wheel.prevent="onTimeBarWheel($event)">
+            <div class="timeline" ref="monthTimeline">
               <button v-for="mm in months" class="m-0 p-0" :class="[mm.wght == 0 ? 'hiddenClass' : 'monthButton']"
                 @click="onMonthClicked($event)" :key="mm.key" :id="mm.key" :title="$i18n.t(mm.title) + ', ' + mm.year"
                 :style="{width: mm.wght + '%'}">{{$t(mm.name)}}</button>
@@ -64,7 +63,7 @@
             
             <!-- Days calendar -->
             <Transition> <!-- Vue transition -->
-              <div class="timeline" ref="dayTimeline" v-show="days.length!=0" @wheel.prevent="onTimeBarWheel($event)">
+              <div class="timeline" ref="dayTimeline" v-show="days.length!=0">
                 <button v-for="dd in days" class="m-0 p-0" :class="[dd.wght == 0 ? 'hiddenClass' : 'dayButton']"
                   @click="onDayClicked($event)" :key="dd.key" :id="dd.key" :title="dd.title"
                   :style="{width: dd.wght + '%'}">{{dd.name}}</button>
@@ -306,17 +305,26 @@ export default {
 
       // Zoom in / out on the date
       onTimeBarWheel: function(event){
+        event.preventDefault();
         
         let percZoom = 0.1;
         let timeInterval = this.endDate.getTime() - this.startDate.getTime();
 
         // Choose amount on the left and the right size
-        let totalWidth = event.target.offsetWidth;
-        let mouseX = event.offsetX;
+        let totalWidth = event.currentTarget.offsetWidth;
+        let bbox = event.currentTarget.getBoundingClientRect()
+        let mouseX = event.clientX - bbox.x;
         let leftPerc = mouseX/totalWidth;
         let rightPerc = 1 - leftPerc;
 
         let sign = Math.sign(event.deltaY);
+
+        // Displace zoom (panning, not only zoom)
+        let factor = 2;
+        leftPerc = sign < 0 ? (leftPerc - 0.5) * factor + 0.5 : (leftPerc - 0.5) / factor + 0.5;
+        rightPerc = sign < 0 ? (rightPerc - 0.5) * factor + 0.5 : (rightPerc - 0.5) / factor + 0.5;
+
+        
         this.endDate.setTime(this.endDate.getTime() + sign * timeInterval * percZoom * rightPerc);
         this.startDate.setTime(this.startDate.getTime() - sign * timeInterval * percZoom * leftPerc);
         // Limit starting and ending dates
@@ -325,6 +333,9 @@ export default {
         if (this.endDate > this.limEndDate)
           this.endDate.setTime(this.limEndDate.getTime());
 
+
+        this.updateHTMLTimeline();
+        return
         this.updateRangeSlider();
         this.updateSimulation();
       },
@@ -408,14 +419,15 @@ export default {
         this.startDate = sDate;
         this.endDate = eDate;
         // Change selected dates to cover the months
-        this.selStartDate = new Date(this.startDate.getTime());
-        this.selStartDate.setUTCDate(this.selStartDate.getUTCDate() + daysSides/2); // Add half a month
-        this.selEndDate = new Date(this.endDate.getTime());
-        this.selEndDate.setUTCDate(this.selEndDate.getUTCDate() - daysSides/2); // Remove half a month
+        // this.selStartDate = new Date(this.startDate.getTime());
+        // this.selStartDate.setUTCDate(this.selStartDate.getUTCDate() + daysSides/2); // Add half a month
+        // this.selEndDate = new Date(this.endDate.getTime());
+        // this.selEndDate.setUTCDate(this.selEndDate.getUTCDate() - daysSides/2); // Remove half a month
 
         // Set handles in range slider
-        this.setRangeSlider();
+        //this.setRangeSlider();
         this.updateHTMLTimeline();
+        return
         this.updateCenteredDate();
         this.updateSimulation();
       },
