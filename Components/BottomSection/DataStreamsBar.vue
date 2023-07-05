@@ -70,7 +70,6 @@ export default {
     if (this.DataManager.getHourlyDataAvailability()){
       this.dailyData = this.DataManager.getDailyDataAvailability();
       this.hourlyData = this.DataManager.getHourlyDataAvailability();
-      console.log(this.dailyData);
     }
     else {
       // HourlyDataAvailability is loaded before this vue component. But just in case, we keep this code (low internet connection?)
@@ -113,7 +112,7 @@ export default {
       this.timeStr = formatedTmst;
       
       // Date change event
-      window.eventBus.emit('TimeSlider_SelectedDateChanged', formatedTmst);
+      window.eventBus.emit('DataStreamsBar_SelectedDateChanged', formatedTmst);
 
       this.$emit('clicked', perc);
     },
