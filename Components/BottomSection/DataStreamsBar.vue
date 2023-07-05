@@ -48,6 +48,14 @@ export default {
       this.canvas.width = parentEl.offsetWidth;
       this.updateCanvas();
     });
+    // TODO: there is a bit of overkill here. HFRadarDataLoaded is useful to display the first loaded radar data.
+    // In principle, 'DataManager_DataAvailabilityUpdated', should be called after the trigger 'HFRadarDataLoaded', but
+    // it does not work on the first radar load. It works on the posterior loads, thus this.updateCanvas() is called twice.
+    // It probably does not affect performance, but it is an overkill.
+    // New HFRadar data
+    window.eventBus.on('HFRadarDataLoaded', (tmst) =>{
+      this.updateCanvas();
+    });
     // When radar data is loaded, update data availability
     window.eventBus.on('DataManager_DataAvailabilityUpdated', () => {
       this.updateCanvas();
@@ -308,7 +316,12 @@ export default {
         ctx.moveTo(posX, 0);
         ctx.lineTo(posX, canvas.height);
         ctx.strokeStyle = 'red';
-        ctx.stroke()
+        ctx.stroke();
+
+        // Show time string
+        let formatedTmst = selTmst.substring(0, 14) + '00:00.000Z';
+        this.timeStr = formatedTmst;
+      
       }
     },
 
