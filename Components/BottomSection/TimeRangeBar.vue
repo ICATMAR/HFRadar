@@ -306,9 +306,15 @@ export default {
       // Zoom in / out on the date
       onTimeBarWheel: function(event){
         event.preventDefault();
+        // Zoom in or out
+        let sign = Math.sign(event.deltaY);
         
         let percZoom = 0.1;
         let timeInterval = this.endDate.getTime() - this.startDate.getTime();
+        
+        // If time interval is small, do not change
+        if (timeInterval / (1000*60*60) < 4 && sign == -1)
+          return;
 
         // Choose amount on the left and the right size
         let totalWidth = event.currentTarget.offsetWidth;
@@ -317,13 +323,13 @@ export default {
         let leftPerc = mouseX/totalWidth;
         let rightPerc = 1 - leftPerc;
 
-        let sign = Math.sign(event.deltaY);
+        
 
         // Displace zoom (panning, not only zoom)
         let factor = 2;
         leftPerc = sign < 0 ? (leftPerc - 0.5) * factor + 0.5 : (leftPerc - 0.5) / factor + 0.5;
         rightPerc = sign < 0 ? (rightPerc - 0.5) * factor + 0.5 : (rightPerc - 0.5) / factor + 0.5;
-
+        
         
         this.endDate.setTime(this.endDate.getTime() + sign * timeInterval * percZoom * rightPerc);
         this.startDate.setTime(this.startDate.getTime() - sign * timeInterval * percZoom * leftPerc);
@@ -332,6 +338,15 @@ export default {
           this.startDate.setTime(this.limStartDate.getTime());
         if (this.endDate > this.limEndDate)
           this.endDate.setTime(this.limEndDate.getTime());
+
+        // Limit to hourly resolution
+        this.endDate.setUTCMinutes(0);
+        this.endDate.setUTCSeconds(0);
+        this.endDate.setUTCMilliseconds(0);
+        this.startDate.setUTCMinutes(0);
+        this.startDate.setUTCSeconds(0);
+        this.startDate.setUTCMilliseconds(0);
+
 
 
         this.updateHTMLTimeline();
