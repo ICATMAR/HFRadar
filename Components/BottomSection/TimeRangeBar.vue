@@ -518,7 +518,7 @@ export default {
         let totalTimeSpan = this.endDate.getTime() - this.startDate.getTime();
         let centeredValue = this.rangeArray[0] * 0.5 + this.rangeArray[1] * 0.5;
         let centeredDate = new Date(this.startDate.getTime() + totalTimeSpan * centeredValue / 100);
-        centeredDate.setMinutes(Math.floor(centeredDate.getMinutes() / 30) * 30); // 30 min intervals
+        centeredDate.setUTCMinutes(Math.floor(centeredDate.getUTCMinutes() / 30) * 30); // 30 min intervals
         let message = centeredDate.toISOString().substring(0, 16) + "Z";
         if (this.$refs.rangeSlider)
           this.$refs.rangeSlider.setMessage(message);
@@ -550,30 +550,30 @@ export default {
         if (totalYears != 0){
           
           this.years = [{ num: startYear, wght: (11 - startMonth + (daysInFirstMonth - startDay) / daysInFirstMonth)/12}];
-          this.months = [{ num: startMonth, wght: (daysInFirstMonth - startDay) / daysInFirstMonth, key: startMonth + "-" + startYear, year: startYear, name: this.monthNum2Str(startMonth)}];
+          // this.months = [{ num: startMonth, wght: (daysInFirstMonth - startDay) / daysInFirstMonth, key: startMonth + "-" + startYear, year: startYear, name: this.monthNum2Str(startMonth)}];
 
           // Fill months from first year
-          for (let i = startMonth + 1; i < 12; i++){
-            this.months.push({num: i, wght: 1, key: i + "-" + startYear, year: startYear, name: this.monthNum2Str(i)});
-          }
+          // for (let i = startMonth + 1; i < 12; i++){
+          //   this.months.push({num: i, wght: 1, key: i + "-" + startYear, year: startYear, name: this.monthNum2Str(i)});
+          // }
 
           // Fill years
           for (let i = 1; i<=totalYears; i++){
             if (startYear + i != endYear){
               this.years.push({num: startYear + i, wght: 1});
               // Fill months
-              for (let j = 0; j<12; j++){
-                this.months.push({num: j, wght: 1, key: j + "-" + (startYear+i), year: (startYear + i), name: this.monthNum2Str(j)});
-              }
+              // for (let j = 0; j<12; j++){
+              //   this.months.push({num: j, wght: 1, key: j + "-" + (startYear+i), year: (startYear + i), name: this.monthNum2Str(j)});
+              // }
             } else { // Last year is not necessarily complete
               this.years.push({ num: endYear, wght: (endMonth + endDay / daysInLastMonth)/12});// Todo: number of days is relative to the month
               // Fill months last year
-              for (let j = 0; j<=endMonth; j++){
-                if (j != endMonth)
-                  this.months.push({num: j, wght: 1, key: j + "-" + (endYear), year: endYear,  name: this.monthNum2Str(j)});
-                else
-                  this.months.push({ num: j, wght: endDay / daysInLastMonth, key: j + "-" + (endYear), year: endYear, name: this.monthNum2Str(j)});
-              } 
+              // for (let j = 0; j<=endMonth; j++){
+              //   if (j != endMonth)
+              //     this.months.push({num: j, wght: 1, key: j + "-" + (endYear), year: endYear,  name: this.monthNum2Str(j)});
+              //   else
+              //     this.months.push({ num: j, wght: endDay / daysInLastMonth, key: j + "-" + (endYear), year: endYear, name: this.monthNum2Str(j)});
+              // } 
             }
           }
         } 
@@ -581,50 +581,50 @@ export default {
         else {
           this.years = [{ num: startYear, wght: ((endMonth + endDay / daysInLastMonth) - (11 - startMonth + (daysInFirstMonth - startDay) / daysInFirstMonth)) / 12}];
           // Fill months
-          for (let i = startMonth; i <= endMonth; i++){
-            if (i != endMonth)
-              this.months.push({num: i, wght: 1, key: i + "-" + (endYear), year: endYear,  name: this.monthNum2Str(i)});
-            else
-              this.months.push({ num: i, wght: endDay / daysInLastMonth, key: i + "-" + (endYear), year: endYear, name: this.monthNum2Str(i)});
-          }
+          // for (let i = startMonth; i <= endMonth; i++){
+          //   if (i != endMonth)
+          //     this.months.push({num: i, wght: 1, key: i + "-" + (endYear), year: endYear,  name: this.monthNum2Str(i)});
+          //   else
+          //     this.months.push({ num: i, wght: endDay / daysInLastMonth, key: i + "-" + (endYear), year: endYear, name: this.monthNum2Str(i)});
+          // }
         }
 
 
 
         // Iterate dates
-        for (let idxY = startYear; idxY <= endYear; idxY++) { // Year
-          let sM = 0;
-          let eM = 11;
-          if (idxY == startYear) // We are in the first year
-            sM = startMonth;
-          if (idxY == endYear) // We are in the first year
-            eM = endMonth;
-          for (let idxM = sM; idxM <= eM; idxM++) { // Month
-            let sD = 1;
-            let eD = this.getDaysInMonth(idxY, idxM + 1);
-            if(idxM == startMonth) // First month (WARN: because timespan is less than 5 months apart, months from different years are not confused now)
-              sD = startDay;
-            if (idxM == endMonth) // Last month (WARN: same as above)
-              eD = endDay;
-            for (let idxD = sD; idxD <= eD; idxD++){
-              let dayWght = 1;
-              if (idxD == sD && idxM == startMonth) // First day
-                dayWght = (24-startHour)/24;
-              else if (idxD == eD && idxM == endMonth){
-                dayWght = endHour / 24;
-              }
-              this.days.push({
-                num: idxD,
-                wght: dayWght,
-                key: idxD + "-" + idxM + "-" + idxY,
-                title: idxD + "-" + (idxM+1) + "-" + idxY,
-                year: idxY,
-                month: idxM+1,
-                name: idxD
-              })
-            }
-          }
-        }
+        // for (let idxY = startYear; idxY <= endYear; idxY++) { // Year
+        //   let sM = 0;
+        //   let eM = 11;
+        //   if (idxY == startYear) // We are in the first year
+        //     sM = startMonth;
+        //   if (idxY == endYear) // We are in the first year
+        //     eM = endMonth;
+        //   for (let idxM = sM; idxM <= eM; idxM++) { // Month
+        //     let sD = 1;
+        //     let eD = this.getDaysInMonth(idxY, idxM + 1);
+        //     if(idxM == startMonth) // First month (WARN: because timespan is less than 5 months apart, months from different years are not confused now)
+        //       sD = startDay;
+        //     if (idxM == endMonth) // Last month (WARN: same as above)
+        //       eD = endDay;
+        //     for (let idxD = sD; idxD <= eD; idxD++){
+        //       let dayWght = 1;
+        //       if (idxD == sD && idxM == startMonth) // First day
+        //         dayWght = (24-startHour)/24;
+        //       else if (idxD == eD && idxM == endMonth){
+        //         dayWght = endHour / 24;
+        //       }
+        //       this.days.push({
+        //         num: idxD,
+        //         wght: dayWght,
+        //         key: idxD + "-" + idxM + "-" + idxY,
+        //         title: idxD + "-" + (idxM+1) + "-" + idxY,
+        //         year: idxY,
+        //         month: idxM+1,
+        //         name: idxD
+        //       })
+        //     }
+        //   }
+        // }
 
         
 
@@ -633,6 +633,8 @@ export default {
         this.selEndDate = new Date(endYear, endMonth - 1, endDay);
         this.setRangeSlider();
         
+        this.updateHTMLTimeline();
+        return;
         
         // Calculate wght according to number of years/months
         this.calcWidthPercentage();
