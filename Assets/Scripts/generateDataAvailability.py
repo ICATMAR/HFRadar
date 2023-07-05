@@ -66,7 +66,7 @@ folders = ["BEGU", "CREU", "ROSE"]
 min_file_size = 15240  # 10KB
 
 
-output_path = "../../data/hfRadarDataAvailability.js"
+output_path = "../../data/hfRadarDataAvailability.json"
 
 # Convert the paths to the correct format for Windows if necessary
 output_path = os.path.normpath(output_path)
