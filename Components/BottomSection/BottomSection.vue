@@ -24,7 +24,6 @@ export default {
       showDataBar: true,
 
       date: new Date(),
-      
     }
   },
   methods :{
@@ -51,7 +50,7 @@ export default {
   position: absolute;
   bottom: 0px;
   left: 0px;
-  right: 400px;
+  right: 340px;
   pointer-events: none;
 }
 
