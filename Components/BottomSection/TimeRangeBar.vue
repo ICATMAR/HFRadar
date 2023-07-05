@@ -10,7 +10,7 @@
           <div class="playButtons notextselect container-rows" >
             <span class="playPause" @click="playPause" :title="$i18n.t('timeControl.playPause')" v-show="!isPlaying">▶️</span>
             <span class="playPause" @click="playPause" :title="$i18n.t('timeControl.playPause')" v-show="isPlaying">⏸️</span>
-            <span v-show="isPlaying" style="font-size: 10px; margin: -5px;">{{timeStepFactor*0.5}}h</span>
+            <span v-show="isPlaying" style="font-size: 10px; margin: -5px;">{{timeStepFactor}}h</span>
             <!-- Fast-forward / Rewind -->
             <div class="container-columns" v-show="isPlaying">
               <div class="stepButtons" @click="rewind" :title="$i18n.t('timeControl.backward')">⏪</div>
@@ -126,9 +126,6 @@ export default {
       // Update rate
       this.timeIncrement = 5;
       this.FRAMERATE = 40;
-      // Play/Stop buttons
-      this.timeStep = 0.5; // Half hour
-      this.timeStepFactor = 1; // Fast-forward / Rewind
       
     },
     mounted (){
@@ -157,6 +154,9 @@ export default {
         startStr: '',
         endStr: '',
         isPlaying: false,
+        // Play stop buttons
+        timeStepFactor: 1, // Fast-forward / Rewind
+        timeStep: 1, // Hour
       }
     },
     methods: {
@@ -256,6 +256,8 @@ export default {
 
       // Update simulation
       updateSimulation: function(){
+        return;
+        debugger;
         let centeredDate = this.updateCenteredDate();
         if (this.$refs.dataStreamsBar)
           this.$refs.dataStreamsBar.updateCurrentDate(centeredDate.toISOString());
@@ -330,7 +332,7 @@ export default {
         leftPerc = sign < 0 ? (leftPerc - 0.5) * factor + 0.5 : (leftPerc - 0.5) / factor + 0.5;
         rightPerc = sign < 0 ? (rightPerc - 0.5) * factor + 0.5 : (rightPerc - 0.5) / factor + 0.5;
         
-        
+
         this.endDate.setTime(this.endDate.getTime() + sign * timeInterval * percZoom * rightPerc);
         this.startDate.setTime(this.startDate.getTime() - sign * timeInterval * percZoom * leftPerc);
         // Limit starting and ending dates
@@ -340,12 +342,8 @@ export default {
           this.endDate.setTime(this.limEndDate.getTime());
 
         // Limit to hourly resolution
-        this.endDate.setUTCMinutes(0);
-        this.endDate.setUTCSeconds(0);
-        this.endDate.setUTCMilliseconds(0);
-        this.startDate.setUTCMinutes(0);
-        this.startDate.setUTCSeconds(0);
-        this.startDate.setUTCMilliseconds(0);
+        this.limitToHourlyResolution(this.startDate);
+        this.limitToHourlyResolution(this.endDate);
 
 
 
@@ -449,6 +447,15 @@ export default {
 
 
       // INTERNAL METHODS
+      limitToHourlyResolution(date){
+        let minutes = date.getUTCMinutes();
+        if (minutes > 30){
+          date.setUTCHours(date.getUTCHours() + 1);
+        }
+        date.setUTCMinutes(0);
+        date.setUTCSeconds(0);
+        date.setUTCMilliseconds(0);
+      },
       // Decrease starting date (returns false if the starting date does not decrease)
       decreaseStartingDate(){
         this.startDate.setTime(this.startDate.getTime() - this.timeIncrement);
@@ -481,8 +488,9 @@ export default {
         if (!this.isPlaying)
           return
         // Get current date
-        if (this.currentDate == undefined)
-          this.updateCenteredDate();
+       
+        let currentTmst = window.GUIManager.currentTmst;
+        this.currentDate = new Date(currentTmst);
         
         // Add / Substract time to currentDate
         this.currentDate.setUTCMinutes(this.currentDate.getUTCMinutes() + 60 * this.timeStepFactor * this.timeStep);
@@ -502,6 +510,17 @@ export default {
             this.decreaseEndingDate();
         }
 
+        // Limit to hourly resolution
+        this.limitToHourlyResolution(this.startDate);
+        this.limitToHourlyResolution(this.endDate);
+
+        // Update canvas (start and end date might have changed)
+        this.updateHTMLTimeline();
+
+
+        // TODO: mixing between timerangebar and datastreamsbar EMIT UPDATE CURRENT DATE TODO CHANGE
+        window.eventBus.emit('DataStreamsBar_SelectedDateChanged', this.currentDate.toISOString())
+
 
         // Set message in range slider
         if (this.$refs.rangeSlider){
@@ -513,11 +532,13 @@ export default {
           this.$refs.rangeSlider.setSliderPosition(perc);
         }
         // Center on date
-        this.centerOnDate(this.currentDate);
+        // this.centerOnDate(this.currentDate);
 
         // Update simulation
-        if (this.$refs.dataStreamsBar)
+        if (this.$refs.dataStreamsBar){
+          this.$refs.dataStreamsBar.setStartEndDates(this.startDate, this.endDate);
           this.$refs.dataStreamsBar.updateCurrentDate(this.currentDate.toISOString());
+        }
 
         
         // Loop if is playing
