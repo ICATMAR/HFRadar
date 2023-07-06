@@ -1289,6 +1289,9 @@ class ParticleCombinedRadar extends Particle {
     // Transform point to screen space
     let coord = ol.proj.transform([longPoint, latPoint], 'EPSG:4326', 'EPSG:3857');
     let pixelCoord = this.particleSystem.map.getPixelFromCoordinate(coord);
+    if (pixelCoord == null){
+      debugger;
+    }
     // Assign to point
     point[0] = pixelCoord[0];
     point[1] = pixelCoord[1];    
