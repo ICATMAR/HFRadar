@@ -28,7 +28,7 @@
 
 
           <!-- Three rows -->
-          <div class="container-rows" style="width:100%" @wheel.prevent="onTimeBarWheel($event)">
+          <div class="container-rows timeline-container" @wheel.prevent="onTimeBarWheel($event)">
             <!-- Time slider -->
             <!-- <range-slider ref="rangeSlider" 
               @isChanging="onRangeSliderChange($event)" 
@@ -1077,6 +1077,22 @@ export default {
   position: relative;
 }
 
+/* Mobile */
+@media only screen and (max-width: 750px){
+  .time-range-bar-container{
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+  }
+
+  .timeline-container {
+    width: 100% !important;
+  }
+  .playButtons {
+    margin-bottom: 30px;
+  }
+}
+
 .hiddenClass {
   opacity: 0;
   border: none;
@@ -1148,8 +1164,7 @@ export default {
   border-right: 2px solid var(--darkBlue);
   bottom: 0; /* Fix for mobile? */
 
-  max-width: 80px;
-  min-width: 70px;
+  width: 90px;
   height: 90px;
   padding: 5px;
 
@@ -1158,6 +1173,10 @@ export default {
   flex-direction: column;
   align-content: center;
   justify-content: center;
+}
+
+.timeline-container {
+  width: calc(100% - 90px);
 }
 
 .playPause{

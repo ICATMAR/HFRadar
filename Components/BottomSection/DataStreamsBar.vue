@@ -9,7 +9,7 @@
       </div> -->
     </div>
 
-    <div style="position:absolute; top: -30px; background: white; text-align: center; width: 100%">
+    <div class="timeString">
       {{ timeStr }}
     </div>
 
@@ -117,10 +117,12 @@ export default {
       clickedDate.setUTCHours(hours);
       let formatedTmst = clickedDate.toISOString().substring(0, 14) + '00:00.000Z';
 
-      this.timeStr = formatedTmst;
+      //this.timeStr = this.formatTimestampString(clickedDate.toISOString());
+      
       
       // Date change event
       window.eventBus.emit('DataStreamsBar_SelectedDateChanged', formatedTmst);
+      this.updateCanvas();
 
       this.$emit('clicked', perc);
     },
@@ -319,10 +321,30 @@ export default {
         ctx.stroke();
 
         // Show time string
-        let formatedTmst = selTmst.substring(0, 14) + '00:00.000Z';
-        this.timeStr = formatedTmst;
+        this.timeStr = this.formatTimestampString(selTmst);
       
       }
+    },
+
+    formatTimestampString: function(tmst){
+      let dd = new Date(tmst);
+      let ss = dd.toLocaleString();
+      ss = ss.substring(0, ss.length - 6) + 'h';
+      // Add time difference from now
+      let now = new Date();
+      let timeDiff = dd.getTime() - now.getTime();
+      let hoursDiff = Math.floor(timeDiff/(60*60*1000));
+      let minDiff = 60 - Math.floor(timeDiff/(60*1000) - hoursDiff*60);
+
+      if (hoursDiff < -24 * 31){
+        return ss;
+      }
+      else if (hoursDiff < -24){
+        let daysDiff = Math.floor(hoursDiff / 24);
+        hoursDiff = hoursDiff - daysDiff*24;
+        return ss + " ("+ daysDiff + "d " + Math.abs(hoursDiff+1) + "h)";
+      } else
+        return ss + " (" + (hoursDiff+1) + "h " + minDiff + "min)";
     },
 
 
@@ -429,6 +451,17 @@ export default {
 
   background: linear-gradient(90deg, rgba(160, 215, 242, 0) 0%, rgba(160, 215, 242, 0.8) 10%, rgba(160, 215, 242, 0.8) 90%, rgba(160, 215, 242, 0.8) 100%);
   box-shadow: 0 -1px 2px rgba(160, 215, 242, 0.8);
+}
+
+.timeString {
+  position:absolute; 
+  top: -30px; 
+  color: white;
+  text-shadow: 0 0 4px black;
+  background: var(--blue);
+  background: linear-gradient(90deg, rgba(20, 120, 167, 0) 0%, rgba(20, 120, 167, 0.8) 10%, rgba(20, 120, 167, 0.8) 90%, rgba(20, 120, 167, 0) 100%);
+  text-align: center; 
+  width: 100%
 }
 
 .trackMark {
