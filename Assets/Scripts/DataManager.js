@@ -22,7 +22,15 @@ class DataManager {
       // Update data availability
       this.updateHourlyDataAvailability();
       window.eventBus.emit('DataManager_DataAvailabilityUpdated');
-    })
+    });
+    // User clicked on data streams bar
+    window.eventBus.on('DataStreamsBar_SelectedDateChanged', tmst => {
+      this.loadOnInteraction(tmst);
+    });
+
+
+
+
 
     // Load data availability
     if (window.FileManager){
@@ -128,6 +136,45 @@ class DataManager {
     });
     // TODO: optimize
     this.generateDailyDataAvailability(this.hourlyDataAvailability);
+  }
+
+
+
+  // Checks if to load data when the user or the app interacts with the interface
+  loadOnInteraction(tmst){
+    // Check if data is loaded, otherwise load
+    let key = tmst.substring(0,13) + 'Z';
+    // No data exists on that date
+    if (this.hourlyDataAvailability[key] == undefined)
+      return;
+    // Data exists and its loaded
+    let keys = Object.keys(this.hourlyDataAvailability[key]);
+    if (this.hourlyDataAvailability[key][keys[0]] == 2)
+      return;
+    // First load current file
+    this.loadStaticFilesRepository(tmst, tmst).then(hfRadar => {
+      if (hfRadar != undefined){
+        window.eventBus.emit('HFRadarDataLoaded', hfRadar.lastLoadedTimestamp);
+      }
+    });
+    console.log("RELOADING DATA MAYBE!!");
+    let sD = new Date(tmst);
+    let eD = new Date(tmst);
+    // When playing forward or backward, this function is called. Maybe need to recheck data availability. Also write if the file is being loaded
+    // TODO HERE
+    sD.setUTCDate(sD.getUTCDate() - 1);
+    eD.setUTCDate(eD.getUTCDate() + 1);
+    // Use web worker to load the rest of the files
+    if (window.DataWorker){
+      window.DataWorker.postMessage(['loadStaticFilesRepository', [sD.toISOString(), eD.toISOString()]]);
+    } 
+    // Fallback option
+    else {
+      window.DataManager.loadStaticFilesRepository(sD.toISOString(), eD.toISOString()).then((hfRadar) => {
+      if (hfRadar != undefined)
+        window.eventBus.emit('HFRadarDataLoaded');
+      });
+    }
   }
 
 
