@@ -29,13 +29,16 @@ class DataManager {
     });
 
 
-
+    // Status
+    this.isLoading = false;
 
 
     // Load data availability
     if (window.FileManager){
+      this.isLoading = true;
       window.FileManager.loadDataAvailability()
         .then(r => {
+          this.isLoading = false;
           this.hourlyDataAvailability = r;
           this.generateDailyDataAvailability(r);
           window.eventBus.emit('DataManager_HourlyDataAvailabilityLoaded');
@@ -151,30 +154,67 @@ class DataManager {
     let keys = Object.keys(this.hourlyDataAvailability[key]);
     if (this.hourlyDataAvailability[key][keys[0]] == 2)
       return;
+    // Data is currently being loaded
+    if (this.hourlyDataAvailability[key][keys[0]] == 3)
+      return;
     // First load current file
     this.loadStaticFilesRepository(tmst, tmst).then(hfRadar => {
       if (hfRadar != undefined){
         window.eventBus.emit('HFRadarDataLoaded', hfRadar.lastLoadedTimestamp);
       }
     });
-    console.log("RELOADING DATA MAYBE!!");
+
     let sD = new Date(tmst);
     let eD = new Date(tmst);
     // When playing forward or backward, this function is called. Maybe need to recheck data availability. Also write if the file is being loaded
     // TODO HERE
     sD.setUTCDate(sD.getUTCDate() - 1);
     eD.setUTCDate(eD.getUTCDate() + 1);
-    // Use web worker to load the rest of the files
-    if (window.DataWorker){
-      window.DataWorker.postMessage(['loadStaticFilesRepository', [sD.toISOString(), eD.toISOString()]]);
-    } 
-    // Fallback option
-    else {
-      window.DataManager.loadStaticFilesRepository(sD.toISOString(), eD.toISOString()).then((hfRadar) => {
-      if (hfRadar != undefined)
-        window.eventBus.emit('HFRadarDataLoaded');
-      });
+
+    // Iterate dates
+    let arrayDates = [];
+    let movingDate = new Date(sD.toISOString());
+    while (movingDate < eD){
+      // Check if the date exists or is already loaded
+      let key = movingDate.toISOString().substring(0,13) + 'Z';
+      // Data exists on date
+      if (this.hourlyDataAvailability[key] != undefined){
+        // Radar files are not loaded
+        let keys = Object.keys(this.hourlyDataAvailability[key]);
+        if (this.hourlyDataAvailability[key][keys[0]] == true){
+          arrayDates.push(movingDate.toISOString());
+          // Set the state to loading
+          Object.keys(this.hourlyDataAvailability[key]).forEach(kk => {
+            this.hourlyDataAvailability[key][kk] = 3;
+          });
+        }
+      }
+
+      // Add 1h
+      movingDate.setUTCHours(movingDate.getUTCHours() + 1);
+
     }
+    
+    if (arrayDates.length != 0){
+      this.isLoading = true;
+    }
+
+    this.loadDatedStaticFilesRepository(arrayDates).then(hfRadar => {
+      this.isLoading = false;
+      if (hfRadar != undefined)
+        window.eventBus.emit('HFRadarDataLoaded'); });
+
+    // // Use web worker to load the rest of the files
+    // if (window.DataWorker){
+    //   window.DataWorker.postMessage(['loadStaticFilesRepository', [sD.toISOString(), eD.toISOString()]]);
+    // } 
+    // // Fallback option
+    // else {
+    //   window.DataManager.loadStaticFilesRepository(sD.toISOString(), eD.toISOString()).then((hfRadar) => {
+    //   if (hfRadar != undefined)
+    //     window.eventBus.emit('HFRadarDataLoaded');
+    //   });
+    // }
   }
 
 
@@ -239,6 +279,7 @@ class DataManager {
     }
   }
 
+  // Tries to load the most recent file by using the current date and searching backwards until a file is found. Returns a HFRadar.
   async loadLatestStaticFilesRepository(){
     // Hourly
     let now = new Date();
@@ -271,7 +312,7 @@ class DataManager {
     return hfRadar;
   }
 
-
+  // Load files from a repository given a start and ending dates. Returns a promise
   loadStaticFilesRepository(startDate, endDate){
     
     // Find dates
@@ -331,6 +372,43 @@ class DataManager {
       return lastHFRadar;
     })
 
+  }
+
+  // Given an array of dates (ISOString), load those dates. Returns a promise
+  loadDatedStaticFilesRepository(arrayDates){
+
+    // Array of promises
+    let promises = [];
+    for (let i = 0; i < arrayDates.length; i++) {
+      promises.push(window.FileManager.loadDataFromRepository(arrayDates[i]));
+    }
+
+    let lastHFRadar;
+    // Resolve promises
+    return Promise.allSettled(promises).then(values => {
+      for (let i = 0; i < values.length; i++){
+        let filesOnDatePromiseResult = values[i];
+        // If promise was fullfiled (I think always)
+        if (filesOnDatePromiseResult.status == 'fulfilled'){
+          for (let j = 0; j < filesOnDatePromiseResult.value.length; j++){
+            let promiseResult = filesOnDatePromiseResult.value[j];
+            if (promiseResult.status == 'fulfilled'){
+              
+              lastHFRadar = this.addHFRadarData(promiseResult.value);
+              // Make it inactive it is radial?
+              if (lastHFRadar != undefined){
+                if (lastHFRadar.constructor.name == "HFRadar")
+                  lastHFRadar.isActivated = false;
+                else
+                  lastHFRadar.isActivated = true;
+              }
+              
+            }
+          }
+        }
+      }
+      return lastHFRadar;
+    })
   }
 
 
