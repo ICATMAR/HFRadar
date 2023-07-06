@@ -172,6 +172,10 @@ export default {
       let measures = ['ROSE','CREU','BEGU'];
       let loadedColor = 'darkBlue';
       let existsColor = 'rgb(127, 127, 127)';
+      // Time varying color (update canvas is painted contiously when loading data)
+      let maxValue = 255;
+      let dt = new Date().getTime()/(6*10) % 10;
+      let loadingColor = 'rgb('+ (255 - dt*10) +', '+ (245 - dt*10) +', 0)';
 
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -211,7 +215,7 @@ export default {
                 ctx.beginPath();
                 let radMod = Math.min(3, radius * factor * factor);
                 ctx.arc(posX, posY, radMod, 2 * Math.PI, 0, false);
-                ctx.fillStyle = ddData[measures[j]] == 2 ? loadedColor : existsColor;
+                ctx.fillStyle = ddData[measures[j]] == 2 ? loadedColor : ddData[measures[j]] == 3 ? loadingColor : existsColor;
                 ctx.fill();
               }
             }
@@ -290,7 +294,7 @@ export default {
                 ctx.beginPath();
                 let radMod = Math.min(3, radius * factor * factor);
                 ctx.arc(posX, posY, radMod, 2 * Math.PI, 0, false);
-                ctx.fillStyle = hhData[measures[j]] == 2 ? loadedColor : existsColor;
+                ctx.fillStyle = hhData[measures[j]] == 2 ? loadedColor : hhData[measures[j]] == 3 ? loadingColor : existsColor;
                 ctx.fill();
               }
             }
@@ -300,7 +304,7 @@ export default {
           }
 
 
-          // Increase half hour
+          // Increase an hour
           movingDate.setUTCMinutes(movingDate.getUTCMinutes() + 60);
           //console.log(movingDate.toISOString());
         }
@@ -323,6 +327,12 @@ export default {
         // Show time string
         this.timeStr = this.formatTimestampString(selTmst);
       
+      }
+
+
+      // If DataManager is loading, make an effect in the canvas
+      if (window.DataManager.isLoading){
+        setTimeout(this.updateCanvas, 40);
       }
     },
 
