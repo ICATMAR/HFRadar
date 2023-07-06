@@ -89,7 +89,7 @@ export default {
 
 
     // Selected date changed (slider moves or drag and drop files)
-    window.eventBus.on('TimeSlider_SelectedDateChanged', (tmst) =>{
+    window.eventBus.on('DataStreamsBar_SelectedDateChanged', (tmst) =>{
       // Keep the visibility of the radars that is set on the GUI
       this.radarsExist = false; // Reset and redefine if HF Radar exists on time stamp
       // Iterate all radars

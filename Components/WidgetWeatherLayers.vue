@@ -70,7 +70,7 @@
     mounted() {
       // EVENTS
       // Fishing track clicked
-      window.eventBus.on('TimeSlider_SelectedDateChanged', this.updateClimaLayer);
+      window.eventBus.on('DataStreamsBar_SelectedDateChanged', this.updateClimaLayer);
       
     },
     data (){

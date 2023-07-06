@@ -31,7 +31,7 @@ def generate_json(folders, output_path):
     with open(output_path, "w") as json_file:
         jsonData = json.dumps(data)
         # Prepend export default text
-        jsonData = 'let hfRadarDataAvailability;\nexport default hfRadarDataAvailability = ' + jsonData
+        #jsonData = 'let hfRadarDataAvailability;\nexport default hfRadarDataAvailability = ' + jsonData
         # Write to file
         json_file.write(jsonData)
 
@@ -66,7 +66,7 @@ folders = ["BEGU", "CREU", "ROSE"]
 min_file_size = 15240  # 10KB
 
 
-output_path = "../../data/hfRadarDataAvailability.js"
+output_path = "../../data/hfRadarDataAvailability.json"
 
 # Convert the paths to the correct format for Windows if necessary
 output_path = os.path.normpath(output_path)

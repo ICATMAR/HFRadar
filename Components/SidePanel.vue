@@ -116,7 +116,7 @@ export default {
     });
 
     // Selected date changes
-    window.eventBus.on('TimeSlider_SelectedDateChanged', (tmst) => {
+    window.eventBus.on('DataStreamsBar_SelectedDateChanged', (tmst) => {
       this.updateInformation(tmst);
       this.dataPointContent = '';
       this.isDataPointVisible = false;

@@ -4,14 +4,8 @@
       <!-- OL map -->
       <div id="map" ref="OLMap" v-on:drop="onDropFile($event)" v-on:dragover="onDragOver($event)"></div>
 
-      <!-- Time Range Bar
-      <time-range-bar ref="timeRangeBar" id="time-range-bar" 
-        @changeSelDates="onTimeRangeChange($event)" 
-        @changeLimits="onTimeRangeChangeLimits($event)">
-      </time-range-bar>
-       -->
-
       
+
 
 
       <!-- OVERLAYS -->
@@ -29,7 +23,11 @@
         </div>
       </div>
 
-      <time-slider></time-slider>
+      <!-- <time-slider></time-slider> -->
+
+      <!-- Bottom Section -->
+      <bottom-section></bottom-section>
+       
 
       <!-- Animation Canvas -->
       <animationCanvas ref="animationCanvas"></animationCanvas>
@@ -63,7 +61,7 @@
 <script>
 import AnimationCanvas from "./AnimationCanvas.vue";
 import TimeSlider from "./TimeSlider.vue";
-// import TimeRangeBar from "TimeRangeBar.vue";
+import BottomSection from "./BottomSection/BottomSection.vue";
 // import TracksTimeLine from "TracksTimeLine.vue";
 //import WMSLegend from "WMSLegend.vue";
 
@@ -186,7 +184,7 @@ export default {
         this.selectedDateChanged(tmst);
     });
     // Selected date changed (slider moves or drag and drop files)
-    window.eventBus.on('TimeSlider_SelectedDateChanged', (tmst) =>{
+    window.eventBus.on('DataStreamsBar_SelectedDateChanged', (tmst) =>{
       this.selectedDateChanged(tmst);
     });
     // TODO: COMBINE TWO NEXT EVENTS
@@ -1072,6 +1070,7 @@ export default {
   components: {
     "time-slider": TimeSlider,
     "animationCanvas": AnimationCanvas,
+    "bottom-section": BottomSection,
 },
   computed: {
       //foo: function () {}
