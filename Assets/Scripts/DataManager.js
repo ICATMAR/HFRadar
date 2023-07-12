@@ -8,6 +8,10 @@ const SEARCHHOURS = 24*7;
 class DataManager {
 
   HFRadars = {};
+    // https://ows.emodnet-bathymetry.eu/wms?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap&FORMAT=image%2Fpng8&TRANSPARENT=true&LAYERS=emodnet:mean_2016&TILED=TRUE&WIDTH=2048&HEIGHT=2048&CRS=EPSG%3A3857&STYLES=&BBOX=0.0%2C4836921.25%2C556597.45%2C5311971.85
+  LANDMAKSURL = './Assets/Images/LandMask_0_39.8_5_43.png';
+  LANDMASKBBOX = [0.0, 4836921.25, 556597.45, 5311971.85];// [0, 39.8, 5, 43];
+  
 
   constructor(){
     // EVENT LISTENERS
@@ -45,6 +49,9 @@ class DataManager {
         })
         .catch(e => {throw e})
     }
+
+    // Load land mask
+    this.loadLandMask();
   }
 
 
@@ -218,6 +225,30 @@ class DataManager {
   }
 
 
+  // Load land mask
+  loadLandMask(){
+    // Mask from 0-5 lon, 38.5-43 lat
+    //https://ows.emodnet-bathymetry.eu/wms?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap&FORMAT=image%2Fpng8&TRANSPARENT=true&LAYERS=emodnet:mean_2016&TILED=TRUE&WIDTH=2048&HEIGHT=2048&CRS=EPSG%3A3857&STYLES=&BBOX=0.0%2C4836921.25%2C556597.45%2C5311971.85
+    let img = new Image();
+    img.src = this.LANDMAKSURL;
+    img.onload = () => {
+      // Create canvas and get image data
+      let canvas = document.createElement('canvas');
+      let ctx = canvas.getContext('2d');
+      canvas.width = img.width;
+      canvas.height = img.height;
+      // Flip image and draw
+      //ctx.scale(1,-1);
+      ctx.drawImage(img, 0, 0);//-canvas.height);
+      // Get data
+      console.log("LAND MASK LOADED----------------")
+      this.landMask = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    }
+    img.onerror = (e) => console.error(e);
+  }
+
+
+
 
 
   // PUBLIC METHODS
@@ -278,6 +309,42 @@ class DataManager {
       endDate: endDate.toISOString()
     }
   }
+
+
+
+
+  // Evaluate if there is land or not
+  isThereLand(lon, lat){ // EPSG:3857
+    if (this.landMask == undefined)
+      return false;
+    let landMask = this.landMask;
+    let bbox = this.LANDMASKBBOX;
+
+    // Get indices
+    let lonRange = bbox[2] - bbox[0];
+    let latRange = bbox[3] - bbox[1];
+    let indexLon = (lon - bbox[0]) / lonRange;
+    let indexLat = (lat - bbox[1]) / latRange;
+    indexLat = 1 - indexLat;
+
+    // If outside the box, return false
+    if (indexLon < 0 || indexLon > 1 || indexLat < 0 || indexLat > 1)
+      return "Outside bounds";
+
+    // Find value in image data
+    let index = Math.floor(indexLat * landMask.height) * landMask.width + Math.floor(indexLon * landMask.width);
+    let alphaValue = landMask.data[index * 4 + 3];
+    if (alphaValue < 255)
+      return true
+    else 
+      return false
+  }
+
+
+
+
+
+
 
   // Tries to load the most recent file by using the current date and searching backwards until a file is found. Returns a HFRadar.
   async loadLatestStaticFilesRepository(){
@@ -710,8 +777,15 @@ class CombinedRadars extends HFRadar {
       
       let long = minLong + j * stepLong;
       let lat = minLat + i * stepLat;
-
-
+      // Transform to check land mask
+      let coord = ol.proj.transform([long, lat], 'EPSG:4326', 'EPSG:3857');
+      // If point is found in land, write as undefined and continue
+      if (window.DataManager.isThereLand(...coord)){
+        // Assign
+        dataGrid[ii * 2] = undefined;
+        dataGrid[ii * 2 + 1] = undefined;
+        continue;
+      }
 
 
 
