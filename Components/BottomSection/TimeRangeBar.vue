@@ -495,6 +495,13 @@ export default {
         // Add / Substract time to currentDate
         this.currentDate.setUTCMinutes(this.currentDate.getUTCMinutes() + 60 * this.timeStepFactor * this.timeStep);
 
+        // Stop reproduction if outside limit dates
+        if (this.currentDate > this.limEndDate || this.currentDate < this.limStartDate){
+          this.isPlaying = false;
+          // Return to previous value
+          this.currentDate.setUTCMinutes(this.currentDate.getUTCMinutes() - 60 * this.timeStepFactor * this.timeStep);
+        }
+
         // Update start and ending dates of timeline if on edges
         // Calculate percentage position
         let timeSpan = this.endDate.getTime() - this.startDate.getTime();

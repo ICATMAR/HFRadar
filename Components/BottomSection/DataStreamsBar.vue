@@ -2,7 +2,7 @@
   <div id="data-streams-bar">
     <!-- A div with the same width as TimeRange -->
     <div class="streamsContainer" ref="streamsContainer">
-      <canvas style="cursor: pointer" @mousemove="onMouseMoveCanvas" @mouseleave="onMouseLeaveCanvas" ref="dataStreamsCanvas" @click="streamsContainerClicked"></canvas>
+      <canvas class="streamsCanvas" @mousemove="onMouseMoveCanvas" @mouseleave="onMouseLeaveCanvas" ref="dataStreamsCanvas" @click="streamsContainerClicked"></canvas>
       <!-- <div class="trackMark" :class="{active: ff.selected}" @click="onTrackClicked" :id="ff.properties.id"
         :key="ff.properties.id" v-for="ff in features" :style="setFeatureStyle(ff)">
         &#11044;
@@ -339,7 +339,7 @@ export default {
     formatTimestampString: function(tmst){
       let dd = new Date(tmst);
       let ss = dd.toLocaleString();
-      ss = ss.substring(0, ss.length - 6) + 'h';
+      ss = ss.substring(0, ss.length - 6) + ':00';
       // Add time difference from now
       let now = new Date();
       let timeDiff = dd.getTime() - now.getTime();
@@ -453,6 +453,7 @@ export default {
 }
 
 .streamsContainer {
+  display: flex;
   height: 100%;
   position: relative;
   border-radius: 1rem 0.3rem 0.3rem 1rem;
@@ -461,6 +462,11 @@ export default {
 
   background: linear-gradient(90deg, rgba(160, 215, 242, 0) 0%, rgba(160, 215, 242, 0.8) 10%, rgba(160, 215, 242, 0.8) 90%, rgba(160, 215, 242, 0.8) 100%);
   box-shadow: 0 -1px 2px rgba(160, 215, 242, 0.8);
+}
+
+.streamsCanvas {
+  cursor: pointer;
+  width: 100%;
 }
 
 .timeString {
