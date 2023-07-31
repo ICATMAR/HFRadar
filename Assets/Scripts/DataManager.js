@@ -119,7 +119,7 @@ class DataManager {
         Object.keys(hourlyAvail).forEach(radarName => {
           if (Object.keys(this.dailyDataAvailability[date]).includes(radarName) == false){
             // Assign unregistered radar to dailyData
-            this.dailyDataAvailability[date][radarName] = hourlyAvail[radarname];
+            this.dailyDataAvailability[date][radarName] = hourlyAvail[radarName];
           }
         })
       }
