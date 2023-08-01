@@ -238,7 +238,7 @@ export default {
       this.map.updateSize();
     });
     // When radar is activated / deactivated
-    window.eventBus.on('SidePanelRadarActiveChange', (HFRadar) => {
+    window.eventBus.on('WidgetHFRadars_RadarActiveChange', (HFRadar) => {
       // Hide / show HF points
       this.updateHFRadarPointsVisibility(HFRadar);
     });

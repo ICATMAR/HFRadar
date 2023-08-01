@@ -210,7 +210,7 @@ export default {
       radar.isActivated = rr.isActivated;
       
       
-      window.eventBus.emit('SidePanelRadarActiveChange', window.DataManager.HFRadars[radar.UUID]);
+      window.eventBus.emit('WidgetHFRadars_RadarActiveChange', window.DataManager.HFRadars[radar.UUID]);
     },
 
   },
