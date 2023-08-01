@@ -50,7 +50,7 @@ dataTypes = {
     version: '1.1.1',
     layerName: 'thetao',
     timeScales: ['d', 'd3', 'm'], // In reanalysis, not hourly available: 'h', 'h3', 'h6', 'h12', 
-    range: [1, 40],
+    range: [10, 35],
     units: 'ºC',
     style: "boxfill/occam",
     forecast: {
@@ -102,7 +102,7 @@ dataTypes = {
     version: '1.1.1',
     layerName: 'bottomT',
     timeScales: ['d', 'd3', 'm'], // In reanalysis, not hourly available: 'h', 'h3', 'h6', 'h12', 
-    range: [1, 30],
+    range: [10, 25],
     units: 'ºC',
     style: "boxfill/occam",
     forecast: {
@@ -227,7 +227,7 @@ dataTypes = {
     version: '1.1.1',
     layerName: 'chl',
     timeScales: ['d', 'd3', 'm'],
-    range: [0.01, 1],
+    range: [0.01, 0.3],
     units: 'mg/m3',
     style: 'boxfill/occam',
     forecast: {
