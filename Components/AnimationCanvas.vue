@@ -35,9 +35,9 @@ export default {
     // EVENT LISTENERS
     // New HFRadar data
     window.eventBus.on('HFRadarDataLoaded', (tmst) =>{
-      // If there is no timestamp, do not update animation
-      if (tmst == undefined)
-        return;
+      // Find selected timestamp
+      tmst = window.GUIManager.currentTmst || tmst;
+
       // Iterate all radars
       Object.keys(window.DataManager.HFRadars).forEach(key => {
         let radar = window.DataManager.HFRadars[key];
@@ -174,7 +174,7 @@ export default {
 
 
     // When animation starts/stops
-    window.eventBus.on('SidePanelRadarActiveChange', (inRadar) => {
+    window.eventBus.on('WidgetHFRadars_RadarActiveChange', (inRadar) => {
       // TODO: CHANGE NAME BECAUSE THIS IS CALLED FROM WIDGET
       // Gotta be careful with .vue, as it tracks objects and its properties.
       let radar = window.DataManager.HFRadars[inRadar.UUID];
@@ -241,10 +241,14 @@ export default {
     },
     // Overall visibility on off
     radarTypeVisibilityChanged: function(radarType, areVisible){
+      let tmst = GUIManager.currentTmst;
       Object.keys(window.DataManager.HFRadars).forEach(key => {
         let radar = window.DataManager.HFRadars[key];
+        // Only if radar has data on that date
         if (radar.constructor.name == radarType){
           radar.isActivated = areVisible;
+          radar.pointsVisible = false;
+          this.updateRadarAnimationData(radar, tmst);
           this.updateRadarAnimationState(radar);
         }
       });
@@ -260,6 +264,26 @@ export default {
       //canvas.style["background-color"] = "red";
       canvas.id = canvasID;
       return canvas;
+    },
+
+    // Update animation data
+    // TODO: ALL NEEDS REFACTORING
+    updateRadarAnimationData(radar, tmst){
+      // If it is visible and has data, update data and start animation
+      if (radar.data[tmst] != undefined && radar.animEngine){
+        // Update radar data
+        // For HFRadar
+        if (radar.constructor.name == "HFRadar")
+        radar.animEngine.setHFRadarData(radar.data[tmst]);
+        // For combined
+        else if (radar.constructor.name == "CombinedRadars")
+          radar.animEngine.setCombinedRadarData(radar.dataGrid[tmst]);
+      }
+      if (radar.data[tmst] == undefined){
+        radar.isActivated = false;
+        radar.animEngine.isStopped = true;
+        radar.animEngine.clearCanvas();
+      }
     },
 
     // Updates animations

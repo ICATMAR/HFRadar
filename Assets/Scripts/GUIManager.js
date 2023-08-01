@@ -9,6 +9,18 @@ class GUIManager {
     arePointsVisible: false,
   }
 
+  // HF Radar widget
+  // TODO: INTEGRAT, NOW NOT USED IN APP
+  widgetHFRadars = {
+    isVisible: false,
+    areParticlesVisible: true,
+    arePointsVisible: true,
+    radarsVisible: {
+      'BEGU': true,
+      'CREU': true,
+    }
+  }
+
   // Data point selected
   isDataPointSelected = false;
 
@@ -45,6 +57,28 @@ class GUIManager {
       this.widgetCombinedRadars.arePointsVisible = value;
       this.isDataPointSelected = false;
     });
+
+    // WidgetHFRadars
+    // TODO INTEGRATE
+    // Wiget on/off
+    window.eventBus.on('WidgetHFRadars_VisibilityChanged', value => {
+      this.widgetHFRadars.isVisible = value;
+      this.isDataPointSelected = false;
+    });
+    // Animation for radars stopped
+    window.eventBus.on('WidgetHFRadars_AnimationActiveChanged', value => {
+      this.widgetHFRadars.areParticlesVisible = value;
+    });
+    // Points for radar
+    window.eventBus.on('WidgetHFRadars_PointsActiveChanged', value => {
+      this.widgetHFRadars.arePointsVisible = value;
+      this.isDataPointSelected = false;
+    });
+    // HFRadar visibility
+    window.eventBus.on('WidgetHFRadars_RadarActiveChange', radar => {
+      console.log("hello");
+    });
+
 
 
     // Map
