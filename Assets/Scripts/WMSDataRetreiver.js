@@ -242,12 +242,12 @@ dataTypes = {
     name: 'Wind',
     altNames: ['Wind'],
     doi: 'https://doi.org/10.48670/moi-00185',
-    url: 'CERSAT-GLO-BLENDED_WIND_L4_REP-V6-OBS_FULL_TIME_SERIE',
+    url: 'cmems_obs-wind_glo_phy_my_l4_0.125deg_PT1H',
     domainURL: 'https://my.cmems-du.eu/thredds/wms/',
     urlLocked: true,
     version: '1.1.1',
-    layerName: 'wind_speed',
-    timeScales: ['h6'],
+    layerName: 'wind',
+    timeScales: ['h'],
     range: [0, 30],
     units: 'm/s',
     style: "boxfill/occam",//"vector/occam",
@@ -257,10 +257,12 @@ dataTypes = {
       type: 'velocity'
     },
     forecast: {
-      url: 'CERSAT-GLO-BLENDED_WIND_L4-V6-OBS_FULL_TIME_SERIE',
+      url: 'cmems_obs-wind_glo_phy_nrt_l4_0.125deg_PT1H',
       domainURL: 'https://nrt.cmems-du.eu/thredds/wms/',
       version: '1.1.1',
-      timeScales: ['-h6'],
+      doi: 'https://doi.org/10.48670/moi-00305',
+      timeScales: ['h'],
+      urlLocked: true,
       timeScaleCorrection:
         {d: {min: 0, h: 12}},
       // CRS instead of SRS

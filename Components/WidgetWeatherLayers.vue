@@ -75,9 +75,9 @@
     },
     data (){
       return {
-        climaLayers: ['Sea Surface Temperature', 'Sea Temperature Anomaly', 'Sea Bottom Temperature', 'Chlorophyll', 'Salinity', 'Wave Significant Height', 'Current'],
+        climaLayers: ['Sea Surface Temperature', 'Sea Temperature Anomaly', 'Sea Bottom Temperature', 'Chlorophyll', 'Salinity', 'Wave Significant Height', 'Wind','Current'],
         // https://origin.fontawesome.com/search?o=r&m=free&f=classic
-        climaIcons: ['&#xf2c9;<sub>~</sub>', '&#x2206; &#xf2c9;', '&#xf2c9;<sup>~</sup>', 'C<sub>hl</sub>', '‰', '&#xe515;', '&#xf773;'],
+        climaIcons: ['&#xf2c9;<sub>~</sub>', '&#x2206; &#xf2c9;', '&#xf2c9;<sup>~</sup>', 'C<sub>hl</sub>', '‰', '&#xe515;','&#xf72e', '&#xf773;'],
         selClimaLayer: '',
         isClimaLayerVisible: false,
         climaOpacity: 1,
