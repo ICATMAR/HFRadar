@@ -11,7 +11,6 @@
             <button class="accordion-button" :ref="'HFRadarHeader' + index" type="button" data-bs-toggle="collapse"
               @click="onHeaderClick($event, index)">
               {{radar["FileType"].includes('tots') ? 'Combined Currents ' + radar["Site"] : 'HF Radar ' + radar["Site"]}}
-              <!-- <onoffButton class="onoffRadar" @click="onoffRadar(radar, $event)" :checked="radar.isActivated"></onoffButton> -->
             </button>
           </h2>
           <div :ref="'HFRadar' + index" :id="'bodySectionOne' + index" class="accordion-collapse collapse show"
@@ -196,14 +195,6 @@ export default {
       new window.bootstrap.Collapse(this.$refs['HFRadar'+index], {toggle: true});
 
     },
-    // On Off Radar
-    // onoffRadar(radar, e){
-    //   e.preventDefault();
-    //   e.stopPropagation();
-    //   let isChecked = e.target.parentElement.children[0].checked;
-    //   radar.isActivated = !isChecked; // isChecked gets updated after this event
-    //   window.eventBus.emit('WidgetHFRadars_RadarActiveChange', radar);
-    // },
     // On hide/show panel
     onSideArrowClick(){
       this.showPanel = this.showPanel ? false : true;
