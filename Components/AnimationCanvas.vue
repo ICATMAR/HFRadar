@@ -214,7 +214,6 @@ export default {
       Object.keys(window.DataManager.HFRadars).forEach(key => {
         let radar = window.DataManager.HFRadars[key];
         if (radar.constructor.name == radarType){
-          radar.animationVisible = active;
           // Update animation engine
           this.updateRadarAnimationState(radar);
         }
@@ -228,7 +227,6 @@ export default {
         let radar = window.DataManager.HFRadars[key];
         
         if (radar.constructor.name == radarType){
-          radar.pointsVisible = false;
           // HF Radar
           if (radarType == "HFRadar"){
             // GUI Info
@@ -303,12 +301,12 @@ export default {
 
       if (radar.animEngine){
         // Animation re-starts
-        if (radar.animEngine.isStopped && isActive && radar.animationVisible){
+        if (radar.animEngine.isStopped && isActive && window.GUIManager.widgetHFRadars.areParticlesVisible){
           radar.animEngine.isStopped = false;
           radar.animEngine.update();
         } 
         // Animation stops
-        else if ((!radar.animEngine.isStopped && !isActive) || !radar.animationVisible){
+        else if ((!radar.animEngine.isStopped && !isActive) || !window.GUIManager.widgetHFRadars.areParticlesVisible){
           radar.animEngine.isStopped = true;
           radar.animEngine.clearCanvas();
         }

@@ -530,11 +530,7 @@ class HFRadar {
   data = {};
   headers = {}; // Headers contain some time information too
   images = {};
-  // GUI state variables
-  pointsVisible = true; // User decides // Different for CombinedRadars
-  animationVisible = true; // User decides
-  isAnimated; // User decides
-  pointFeature; // Dots are reactive
+
   // Legend
   legendRange = [-100, 100];
 
@@ -657,7 +653,6 @@ class CombinedRadars extends HFRadar {
   constructor (CombinedRadarData){
     
     super(CombinedRadarData);
-    this.pointsVisible = false; 
     this.addRadarData(CombinedRadarData, 100, 200); // Consider using power of two numbers to create image and upsample later
   }
 

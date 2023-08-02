@@ -412,16 +412,16 @@ export default {
       let activeRadars = window.DataManager.getRadarsDataOn(tmst);
       if (activeRadars.length != 0 ){
         for (let i = 0; i < activeRadars.length; i++){
-          let HFRadar = activeRadars[i];
+          let radar = activeRadars[i];
 
-          // WARNING: createImage might be useful to create HFRadar previews.
+          // WARNING: createImage might be useful to create radar previews.
           // TODO: HFRadar.data.timestamp {dataPoints: [X], imgData: ...}
-          if (HFRadar.images[tmst] == undefined){
+          if (radar.images[tmst] == undefined){
             //let imgData = window.createImage(HFRadar, tmst);
-            //HFRadar.images[tmst] = imgData;
-            HFRadar.images[tmst] = null;
+            //radar.images[tmst] = imgData;
+            radar.images[tmst] = null;
           }
-          this.updateHFRadarData(HFRadar, tmst, HFRadar.images[tmst]);
+          this.updateRadarData(radar, tmst, radar.images[tmst]);
         }
 
       }
@@ -508,10 +508,10 @@ export default {
 
 
 
-    // Update HFRadar data
-    updateHFRadarData: function(HFRadar, tmst, imgData) {
+    // Update radar data
+    updateRadarData: function(radar, tmst, imgData) {
       // ID of the radar
-      let radarID = HFRadar.UUID;
+      let radarID = radar.UUID;
       // let radarImgLayerName = 'HFData' + radarID;
       // // Image-Static data layer
       // // Add image layer with HF Radar data
@@ -530,7 +530,7 @@ export default {
       
 
       // Center on latest radar location
-      let location = HFRadar.getRadarOrigin();
+      let location = radar.getRadarOrigin();
       this.centerOnCoord(location);
 
       
@@ -539,12 +539,12 @@ export default {
       // TODO: is this optimal?
       // Check if there is dataPoint feature defined
       let pointFeature;
-      //HFRadar.pointFeature = 'SNR (dB)'; // TODO HACK
-      //pointFeature = HFRadar.pointFeature;
+      //radar.pointFeature = 'SNR (dB)'; // TODO HACK
+      //pointFeature = radar.pointFeature;
       
       let featPoints = [];
-      for (let i = 0; i<HFRadar.data[tmst].length; i++){
-        let dataPoint = HFRadar.data[tmst][i];
+      for (let i = 0; i<radar.data[tmst].length; i++){
+        let dataPoint = radar.data[tmst][i];
         let featPoint = new ol.Feature({
           geometry: new ol.geom.Point(ol.proj.fromLonLat([dataPoint['Longitude (deg)'], dataPoint['Latitude (deg)']])),
         });
@@ -553,8 +553,8 @@ export default {
         let pointColor = [255, 255, 255, 0.2];
         if (pointFeature !== undefined){
           let value = dataPoint[pointFeature];
-          let featMax = HFRadar.dataPointFeatures[pointFeature].max;
-          let featMin = HFRadar.dataPointFeatures[pointFeature].min;
+          let featMax = radar.dataPointFeatures[pointFeature].max;
+          let featMin = radar.dataPointFeatures[pointFeature].min;
           let normValue = (value - featMin)/(featMax - featMin);
           pointRadius *= normValue * 10;
         }
@@ -581,7 +581,13 @@ export default {
       if (this.getMapLayer(radarPointsLayerName)) this.map.removeLayer(this.getMapLayer(radarPointsLayerName));
       // Add if radar is active
       // TODO: should this layer be created when it is not visible?
-      if (window.GUIManager.widgetHFRadars.isVisible && window.GUIManager.widgetHFRadars.arePointsVisible && window.GUIManager.widgetHFRadars.radarsVisible[HFRadar.Site])
+      let pointsVisible = false;
+      if (radar.constructor.name == "HFRadar")
+        pointsVisible = window.GUIManager.widgetHFRadars.isVisible && window.GUIManager.widgetHFRadars.arePointsVisible && window.GUIManager.widgetHFRadars.radarsVisible[HFRadar.Site]
+      else if (radar.constructor.name == "CombinedRadars")
+        pointsVisible = window.GUIManager.widgetCombinedRadars.isVisible && window.GUIManager.widgetCombinedRadars.arePointsVisible;
+
+      if (pointsVisible)
         this.map.addLayer(this.layers[radarPointsLayerName]);
 
     },
