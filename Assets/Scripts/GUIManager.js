@@ -45,39 +45,6 @@ class GUIManager {
       this.selectedDateChanged(tmst);
     });
 
-    // WidgetCombinedRadars
-    window.eventBus.on("WidgetCombinedRadars_VisibilityChanged", value => {
-      this.widgetCombinedRadars.isVisible = value;
-      this.isDataPointSelected = false;
-    });
-    window.eventBus.on("WidgetCombinedRadars_AnimationActiveChanged", value => {
-      this.widgetCombinedRadars.areParticlesVisible = value;
-    });
-    window.eventBus.on("WidgetCombinedRadars_PointsActiveChanged", value => {
-      this.widgetCombinedRadars.arePointsVisible = value;
-      this.isDataPointSelected = false;
-    });
-
-    // WidgetHFRadars
-    // TODO INTEGRATE
-    // Wiget on/off
-    window.eventBus.on('WidgetHFRadars_VisibilityChanged', value => {
-      this.widgetHFRadars.isVisible = value;
-      this.isDataPointSelected = false;
-    });
-    // Animation for radars stopped
-    window.eventBus.on('WidgetHFRadars_AnimationActiveChanged', value => {
-      this.widgetHFRadars.areParticlesVisible = value;
-    });
-    // Points for radar
-    window.eventBus.on('WidgetHFRadars_PointsActiveChanged', value => {
-      this.widgetHFRadars.arePointsVisible = value;
-      this.isDataPointSelected = false;
-    });
-    // HFRadar visibility
-    window.eventBus.on('WidgetHFRadars_RadarActiveChange', radar => {
-      console.log("hello");
-    });
 
 
 
@@ -114,7 +81,7 @@ class GUIManager {
       if (radars.length != 0 ){
         for (let i = 0; i < radars.length; i++){
           let HFRadar = radars[i];
-          if (HFRadar.constructor.name == 'CombinedRadars' && HFRadar.isActivated){
+          if (HFRadar.constructor.name == 'CombinedRadars'){
             combinedRadar = HFRadar;
           }
         }
