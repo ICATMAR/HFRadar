@@ -242,11 +242,27 @@ h4 {
 .widgetButtonHFRadar-active {
   background-color: var(--red);
   border: 2px solid rgb(255, 90, 90);
+  cursor: pointer;
 }
+
+.widgetButtonHFRadar-active:hover {
+  background-color: var(--red);
+  border: 2px solid rgb(255, 199, 199);
+  cursor: pointer;
+}
+
 .widgetButtonHFRadar-unavailable {
   background-color: rgb(136, 136, 136);
   border: 2px solid gray;
   pointer-events: none;
+  cursor:auto;
+}
+
+.widgetButtonHFRadar-unavailable:hover {
+  background-color: rgb(136, 136, 136);
+  border: 2px solid gray;
+  pointer-events: none;
+  cursor:auto;
 }
 
 

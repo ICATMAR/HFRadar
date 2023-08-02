@@ -298,8 +298,7 @@ export default {
     radarTypePointsActiveChanged: function(radarType, active){
       Object.keys(window.DataManager.HFRadars).forEach(key => {
         let radar = window.DataManager.HFRadars[key];
-        if (radar.constructor.name == radarType && radar.isActivated){
-          radar.pointsVisible = active;
+        if (radar.constructor.name == radarType){
           // Update map layers
           this.updateHFRadarPointsVisibility(radar);
         }
@@ -309,7 +308,6 @@ export default {
       Object.keys(window.DataManager.HFRadars).forEach(key => {
         let radar = window.DataManager.HFRadars[key];
         if (radar.constructor.name == radarType){
-          radar.isActivated = areVisible;
           this.updateHFRadarPointsVisibility(radar);
         }
       });
@@ -409,30 +407,24 @@ export default {
     selectedDateChanged: function(tmst){
       // Remove layers
       this.removeHFlayers();
-      // Make all radars inactive
-      Object.keys(window.DataManager.HFRadars).forEach(key => {
-        window.DataManager.HFRadars[key].hasDataOnTmst = false;
-      });
-
 
       // Get current active radars on that date
       let activeRadars = window.DataManager.getRadarsDataOn(tmst);
       if (activeRadars.length != 0 ){
         for (let i = 0; i < activeRadars.length; i++){
-          let HFRadar = activeRadars[i];
-          HFRadar.hasDataOnTmst = true;
+          let radar = activeRadars[i];
 
-          // WARNING: createImage might be useful to create HFRadar previews.
+          // WARNING: createImage might be useful to create radar previews.
           // TODO: HFRadar.data.timestamp {dataPoints: [X], imgData: ...}
-          if (HFRadar.images[tmst] == undefined){
+          if (radar.images[tmst] == undefined){
             //let imgData = window.createImage(HFRadar, tmst);
-            //HFRadar.images[tmst] = imgData;
-            HFRadar.images[tmst] = null;
+            //radar.images[tmst] = imgData;
+            radar.images[tmst] = null;
           }
-          this.updateHFRadarData(HFRadar, tmst, HFRadar.images[tmst]);
+          this.updateRadarData(radar, tmst, radar.images[tmst]);
         }
 
-        }
+      }
 
       // Vector - HFRadar Icons
       this.updateHFRadarIcons();
@@ -478,8 +470,8 @@ export default {
       Object.keys(radars).forEach(key => {
         // Only for radars, not for tots (combined)
         let radar = radars[key];
+        let hasDataNow = radar.data[window.GUIManager.currentTmst];
         if (!radar.dataGrid) {
-        
           // Create feature style
           let featStyle = new ol.style.Style({
             image: new ol.style.Icon({
@@ -487,7 +479,7 @@ export default {
               width: 10,
               height: 10,
               scale: [0.5, 0.5],
-              opacity: radar.hasDataOnTmst ? 1 : 0.3,
+              opacity: hasDataNow ? 1 : 0.3,
             })
           });
 
@@ -516,10 +508,10 @@ export default {
 
 
 
-    // Update HFRadar data
-    updateHFRadarData: function(HFRadar, tmst, imgData) {
+    // Update radar data
+    updateRadarData: function(radar, tmst, imgData) {
       // ID of the radar
-      let radarID = HFRadar.UUID;
+      let radarID = radar.UUID;
       // let radarImgLayerName = 'HFData' + radarID;
       // // Image-Static data layer
       // // Add image layer with HF Radar data
@@ -538,7 +530,7 @@ export default {
       
 
       // Center on latest radar location
-      let location = HFRadar.getRadarOrigin();
+      let location = radar.getRadarOrigin();
       this.centerOnCoord(location);
 
       
@@ -547,12 +539,12 @@ export default {
       // TODO: is this optimal?
       // Check if there is dataPoint feature defined
       let pointFeature;
-      //HFRadar.pointFeature = 'SNR (dB)'; // TODO HACK
-      //pointFeature = HFRadar.pointFeature;
+      //radar.pointFeature = 'SNR (dB)'; // TODO HACK
+      //pointFeature = radar.pointFeature;
       
       let featPoints = [];
-      for (let i = 0; i<HFRadar.data[tmst].length; i++){
-        let dataPoint = HFRadar.data[tmst][i];
+      for (let i = 0; i<radar.data[tmst].length; i++){
+        let dataPoint = radar.data[tmst][i];
         let featPoint = new ol.Feature({
           geometry: new ol.geom.Point(ol.proj.fromLonLat([dataPoint['Longitude (deg)'], dataPoint['Latitude (deg)']])),
         });
@@ -561,8 +553,8 @@ export default {
         let pointColor = [255, 255, 255, 0.2];
         if (pointFeature !== undefined){
           let value = dataPoint[pointFeature];
-          let featMax = HFRadar.dataPointFeatures[pointFeature].max;
-          let featMin = HFRadar.dataPointFeatures[pointFeature].min;
+          let featMax = radar.dataPointFeatures[pointFeature].max;
+          let featMin = radar.dataPointFeatures[pointFeature].min;
           let normValue = (value - featMin)/(featMax - featMin);
           pointRadius *= normValue * 10;
         }
@@ -588,10 +580,15 @@ export default {
       })
       if (this.getMapLayer(radarPointsLayerName)) this.map.removeLayer(this.getMapLayer(radarPointsLayerName));
       // Add if radar is active
-      if (HFRadar.isActivated && HFRadar.pointsVisible)
+      // TODO: should this layer be created when it is not visible?
+      let pointsVisible = false;
+      if (radar.constructor.name == "HFRadar")
+        pointsVisible = window.GUIManager.widgetHFRadars.isVisible && window.GUIManager.widgetHFRadars.arePointsVisible && window.GUIManager.widgetHFRadars.radarsVisible[radar.Site]
+      else if (radar.constructor.name == "CombinedRadars")
+        pointsVisible = window.GUIManager.widgetCombinedRadars.isVisible && window.GUIManager.widgetCombinedRadars.arePointsVisible;
+
+      if (pointsVisible)
         this.map.addLayer(this.layers[radarPointsLayerName]);
-
-
 
     },
 
@@ -600,11 +597,26 @@ export default {
     // Update HFRadar points visibility
     updateHFRadarPointsVisibility: function(radar){
       let radarPointsLayerName = 'HFPoints' + radar.UUID;
-      if (!radar.isActivated || !radar.pointsVisible){
+      let guiState = radar.constructor.name == "HFRadar" ? window.GUIManager.widgetHFRadars : window.GUIManager.widgetCombinedRadars;
+      
+      if (!guiState.isVisible || !guiState.arePointsVisible || radar.data[window.GUIManager.currentTmst] == undefined){
         // Remove layer
         if (this.getMapLayer(radarPointsLayerName)) this.map.removeLayer(this.getMapLayer(radarPointsLayerName));
         if (this.getMapLayer('HFSelPoint')) this.map.removeLayer(this.getMapLayer('HFSelPoint'));
-      } else if (radar.isActivated && radar.pointsVisible){
+      } 
+      // Add layer only if
+      else if (guiState.isVisible && guiState.arePointsVisible){
+        // Remove layers first
+        if (this.getMapLayer(radarPointsLayerName)) this.map.removeLayer(this.getMapLayer(radarPointsLayerName));
+        if (this.getMapLayer('HFSelPoint')) this.map.removeLayer(this.getMapLayer('HFSelPoint'));
+        
+        // If HFRadar is hidden
+        if (radar.constructor.name == "HFRadar"){
+          if (!guiState.radarsVisible[radar.Site]){
+            return;
+          }
+        }
+
         // Add layer
         this.map.addLayer(this.layers[radarPointsLayerName]);
       }
@@ -639,13 +651,15 @@ export default {
       let selRadar;
       let closestRadar = undefined;
       // Find closest points or radars
-      let radars = window.DataManager.HFRadars;
+      let radars = window.DataManager.getRadarsDataOn(window.GUIManager.currentTmst);//window.DataManager.HFRadars;
       if (Object.keys(radars).length != 0){
         // Iterate radar points and radars
         Object.keys(radars).forEach(key => {
           let radar = radars[key];
+          // GUI state
+          let guiState = radar.constructor.name == "HFRadar" ? window.GUIManager.widgetHFRadars : window.GUIManager.widgetCombinedRadars;
           // If radar has data, then check the proximity
-          if (radar.hasDataOnTmst && radar.isActivated && radar.pointsVisible){ // AND IS SELECTED? TWO RADARS TOGETHER, HOW TO SELECT ONE OR THE OTHER DATAPOINT?
+          if (guiState.isVisible && guiState.arePointsVisible){ // AND IS SELECTED? TWO RADARS TOGETHER, HOW TO SELECT ONE OR THE OTHER DATAPOINT?
             for (let j = 0; j < radar.currentData.length; j++){
               let dataPoint = radar.currentData[j]; 
               // Calculate distance (could do it in km with the right formula, but this is interaction and it does not matter that much)
@@ -666,7 +680,7 @@ export default {
           let location = radar.getRadarOrigin();
           // Find if a radar is the closest
           let dist = this.getDistance(location, coord);
-          if (dist < distMin && radar.hasDataOnTmst){
+          if (dist < distMin){
             distMin = dist;
             closestRadar = radar;
           }

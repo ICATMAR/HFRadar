@@ -422,15 +422,7 @@ class DataManager {
             let promiseResult = filesOnDatePromiseResult.value[j];
             if (promiseResult.status == 'fulfilled'){
               
-              lastHFRadar = this.addHFRadarData(promiseResult.value);
-              // Make it inactive it is radial?
-              if (lastHFRadar != undefined){
-                if (lastHFRadar.constructor.name == "HFRadar")
-                  lastHFRadar.isActivated = false;
-                else
-                  lastHFRadar.isActivated = true;
-              }
-              
+              lastHFRadar = this.addHFRadarData(promiseResult.value);        
             }
           }
         }
@@ -461,15 +453,7 @@ class DataManager {
             let promiseResult = filesOnDatePromiseResult.value[j];
             if (promiseResult.status == 'fulfilled'){
               
-              lastHFRadar = this.addHFRadarData(promiseResult.value);
-              // Make it inactive it is radial?
-              if (lastHFRadar != undefined){
-                if (lastHFRadar.constructor.name == "HFRadar")
-                  lastHFRadar.isActivated = false;
-                else
-                  lastHFRadar.isActivated = true;
-              }
-              
+              lastHFRadar = this.addHFRadarData(promiseResult.value);             
             }
           }
         }
@@ -517,7 +501,6 @@ class DataManager {
       let lastHFRadar;
       for (let i = 0; i < values.length; i++){
         lastHFRadar = this.addHFRadarData(values[i]);
-        lastHFRadar.isActivated = true;
       }
       window.eventBus.emit('HFRadarDataLoaded', lastHFRadar.lastLoadedTimestamp);
     })
@@ -547,13 +530,7 @@ class HFRadar {
   data = {};
   headers = {}; // Headers contain some time information too
   images = {};
-  // GUI state variables
-  isActivated; // User decides
-  pointsVisible = true; // User decides // Different for CombinedRadars
-  animationVisible = true; // User decides
-  hasDataOnTmst; // Has data on selected timestamp
-  isAnimated; // User decides
-  pointFeature; // Dots are reactive
+
   // Legend
   legendRange = [-100, 100];
 
@@ -567,6 +544,9 @@ class HFRadar {
     // TO FIX - IS THIS NECESSARY?
     for (let i = 0; i < keys.length; i++){
       let key = keys[i];
+      // Fix Site string
+      if (key == 'Site')
+        HFRadarData.header[key] = HFRadarData.header[key].replace(' ""\r', '').replace(" ", "");
       if (HFRadarData.header[key] != undefined)
         this[key] = HFRadarData.header[key];
     }
@@ -673,7 +653,6 @@ class CombinedRadars extends HFRadar {
   constructor (CombinedRadarData){
     
     super(CombinedRadarData);
-    this.pointsVisible = false; 
     this.addRadarData(CombinedRadarData, 100, 200); // Consider using power of two numbers to create image and upsample later
   }
 
