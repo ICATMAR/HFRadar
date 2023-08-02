@@ -213,7 +213,7 @@ export default {
       // Iterate radars and stop animations for combined radars
       Object.keys(window.DataManager.HFRadars).forEach(key => {
         let radar = window.DataManager.HFRadars[key];
-        if (radar.constructor.name == radarType){
+        if (radar.constructor.name == radarType && radar.data[window.GUIManager.currentTmst] != undefined){
           // Update animation engine
           this.updateRadarAnimationState(radar);
         }
