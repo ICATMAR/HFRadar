@@ -422,15 +422,7 @@ class DataManager {
             let promiseResult = filesOnDatePromiseResult.value[j];
             if (promiseResult.status == 'fulfilled'){
               
-              lastHFRadar = this.addHFRadarData(promiseResult.value);
-              // Make it inactive it is radial?
-              if (lastHFRadar != undefined){
-                if (lastHFRadar.constructor.name == "HFRadar")
-                  lastHFRadar.isActivated = false;
-                else
-                  lastHFRadar.isActivated = true;
-              }
-              
+              lastHFRadar = this.addHFRadarData(promiseResult.value);        
             }
           }
         }
@@ -461,15 +453,7 @@ class DataManager {
             let promiseResult = filesOnDatePromiseResult.value[j];
             if (promiseResult.status == 'fulfilled'){
               
-              lastHFRadar = this.addHFRadarData(promiseResult.value);
-              // Make it inactive it is radial?
-              if (lastHFRadar != undefined){
-                if (lastHFRadar.constructor.name == "HFRadar")
-                  lastHFRadar.isActivated = false;
-                else
-                  lastHFRadar.isActivated = true;
-              }
-              
+              lastHFRadar = this.addHFRadarData(promiseResult.value);             
             }
           }
         }
@@ -517,7 +501,6 @@ class DataManager {
       let lastHFRadar;
       for (let i = 0; i < values.length; i++){
         lastHFRadar = this.addHFRadarData(values[i]);
-        lastHFRadar.isActivated = true;
       }
       window.eventBus.emit('HFRadarDataLoaded', lastHFRadar.lastLoadedTimestamp);
     })

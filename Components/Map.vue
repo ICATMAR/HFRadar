@@ -298,8 +298,7 @@ export default {
     radarTypePointsActiveChanged: function(radarType, active){
       Object.keys(window.DataManager.HFRadars).forEach(key => {
         let radar = window.DataManager.HFRadars[key];
-        if (radar.constructor.name == radarType && radar.isActivated){
-          radar.pointsVisible = active;
+        if (radar.constructor.name == radarType){
           // Update map layers
           this.updateHFRadarPointsVisibility(radar);
         }
@@ -309,7 +308,6 @@ export default {
       Object.keys(window.DataManager.HFRadars).forEach(key => {
         let radar = window.DataManager.HFRadars[key];
         if (radar.constructor.name == radarType){
-          radar.isActivated = areVisible;
           this.updateHFRadarPointsVisibility(radar);
         }
       });
@@ -588,10 +586,9 @@ export default {
       })
       if (this.getMapLayer(radarPointsLayerName)) this.map.removeLayer(this.getMapLayer(radarPointsLayerName));
       // Add if radar is active
-      if (HFRadar.isActivated && HFRadar.pointsVisible)
+      // TODO: should this layer be created when it is not visible?
+      if (window.GUIManager.widgetHFRadars.isVisible && window.GUIManager.widgetHFRadars.arePointsVisible && window.GUIManager.widgetHFRadars.radarsVisible[HFRadar.Site])
         this.map.addLayer(this.layers[radarPointsLayerName]);
-
-
 
     },
 
@@ -600,11 +597,21 @@ export default {
     // Update HFRadar points visibility
     updateHFRadarPointsVisibility: function(radar){
       let radarPointsLayerName = 'HFPoints' + radar.UUID;
-      if (!radar.isActivated || !radar.pointsVisible){
+      let guiState = radar.constructor.name == "HFRadar" ? window.GUIManager.widgetHFRadars : window.GUIManager.widgetCombinedRadars;
+      
+      if (!guiState.isVisible || !guiState.arePointsVisible || radar.data[window.GUIManager.currentTmst] == undefined){
         // Remove layer
         if (this.getMapLayer(radarPointsLayerName)) this.map.removeLayer(this.getMapLayer(radarPointsLayerName));
         if (this.getMapLayer('HFSelPoint')) this.map.removeLayer(this.getMapLayer('HFSelPoint'));
-      } else if (radar.isActivated && radar.pointsVisible){
+      } 
+      // Add layer only if
+      else if (guiState.isVisible && guiState.arePointsVisible){
+        // IF HFRadar is hidden
+        if (radar.constructor.name == "HFRadar"){
+          if (!guiState.radarsVisible[radar.Site])
+            return;
+        }
+
         // Add layer
         this.map.addLayer(this.layers[radarPointsLayerName]);
       }
@@ -639,13 +646,15 @@ export default {
       let selRadar;
       let closestRadar = undefined;
       // Find closest points or radars
-      let radars = window.DataManager.HFRadars;
+      let radars = window.DataManager.getRadarsDataOn(window.GUIManager.currentTmst);//window.DataManager.HFRadars;
       if (Object.keys(radars).length != 0){
         // Iterate radar points and radars
         Object.keys(radars).forEach(key => {
           let radar = radars[key];
+          // GUI state
+          let guiState = radar.constructor.name == "HFRadar" ? window.GUIManager.widgetHFRadars : window.GUIManager.widgetCombinedRadars;
           // If radar has data, then check the proximity
-          if (radar.hasDataOnTmst && radar.isActivated && radar.pointsVisible){ // AND IS SELECTED? TWO RADARS TOGETHER, HOW TO SELECT ONE OR THE OTHER DATAPOINT?
+          if (guiState.isVisible && guiState.arePointsVisible){ // AND IS SELECTED? TWO RADARS TOGETHER, HOW TO SELECT ONE OR THE OTHER DATAPOINT?
             for (let j = 0; j < radar.currentData.length; j++){
               let dataPoint = radar.currentData[j]; 
               // Calculate distance (could do it in km with the right formula, but this is interaction and it does not matter that much)
@@ -666,7 +675,7 @@ export default {
           let location = radar.getRadarOrigin();
           // Find if a radar is the closest
           let dist = this.getDistance(location, coord);
-          if (dist < distMin && radar.hasDataOnTmst){
+          if (dist < distMin){
             distMin = dist;
             closestRadar = radar;
           }

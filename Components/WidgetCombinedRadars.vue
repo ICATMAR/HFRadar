@@ -16,7 +16,7 @@
 
       <!-- On/Off particle animation -->
       <div class='widgetButtonContainer'>
-        <onOffButton :checked="areParticlesVisible" :inSize="'18px'" @change="particlesButtonClicked($event)"></onOffButton>
+        <onOffButton ref="onOffParticles" :checked="areParticlesVisible" :inSize="'18px'" @change="particlesButtonClicked($event)"></onOffButton>
         <span class='widgetSpan'>particles</span>
       </div>
 
@@ -170,17 +170,26 @@ export default {
     },
     crossClicked: function(e){
       // Deactivate all CombinedRadars
-      window.eventBus.emit("WidgetCombinedRadars_VisibilityChanged", false);
       this.isVisible = false;
+      window.GUIManager.widgetCombinedRadars.isVisible = false;
+      window.GUIManager.isDataPointSelected = false;
+      window.eventBus.emit("WidgetCombinedRadars_VisibilityChanged", false);
     },
     openClicked: function(){
-      window.eventBus.emit("WidgetCombinedRadars_VisibilityChanged", true);
       this.isVisible = true;
+      window.GUIManager.widgetCombinedRadars.isVisible = true;
+      window.GUIManager.widgetCombinedRadars.areParticlesVisible = this.areParticlesVisible = true;
+      this.$refs.onOffParticles.setChecked(true); // TODO: This triggers the button (particlesButtonClicked), not optimal
+      window.GUIManager.isDataPointSelected = false;
+      window.eventBus.emit("WidgetCombinedRadars_VisibilityChanged", true);
     },
     particlesButtonClicked: function(e){
+      window.GUIManager.widgetCombinedRadars.areParticlesVisible = e.target.checked;
       window.eventBus.emit('WidgetCombinedRadars_AnimationActiveChanged', e.target.checked);
     },
     pointsButtonClicked: function(e){
+      window.GUIManager.widgetCombinedRadars.arePointsVisible = e.target.checked;
+      window.GUIManager.isDataPointSelected = false;
       window.eventBus.emit('WidgetCombinedRadars_PointsActiveChanged', e.target.checked);
     }
 
