@@ -583,7 +583,7 @@ export default {
       // TODO: should this layer be created when it is not visible?
       let pointsVisible = false;
       if (radar.constructor.name == "HFRadar")
-        pointsVisible = window.GUIManager.widgetHFRadars.isVisible && window.GUIManager.widgetHFRadars.arePointsVisible && window.GUIManager.widgetHFRadars.radarsVisible[HFRadar.Site]
+        pointsVisible = window.GUIManager.widgetHFRadars.isVisible && window.GUIManager.widgetHFRadars.arePointsVisible && window.GUIManager.widgetHFRadars.radarsVisible[radar.Site]
       else if (radar.constructor.name == "CombinedRadars")
         pointsVisible = window.GUIManager.widgetCombinedRadars.isVisible && window.GUIManager.widgetCombinedRadars.arePointsVisible;
 

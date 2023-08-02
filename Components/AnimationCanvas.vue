@@ -297,16 +297,21 @@ export default {
 
     // Updates animations
     updateRadarAnimationState(radar){
-      let isActive = window.GUIManager.widgetHFRadars.radarsVisible[radar.Site];
+      let isActive = false;
+      if (radar.constructor.name == "HFRadar")
+        isActive = window.GUIManager.widgetHFRadars.radarsVisible[radar.Site] && window.GUIManager.widgetHFRadars.areParticlesVisible;
+      else if (radar.constructor.name == "CombinedRadars")
+        isActive = window.GUIManager.widgetCombinedRadars.isVisible && window.GUIManager.widgetCombinedRadars.areParticlesVisible;
 
+      
       if (radar.animEngine){
         // Animation re-starts
-        if (radar.animEngine.isStopped && isActive && window.GUIManager.widgetHFRadars.areParticlesVisible){
+        if (radar.animEngine.isStopped && isActive){
           radar.animEngine.isStopped = false;
           radar.animEngine.update();
         } 
         // Animation stops
-        else if ((!radar.animEngine.isStopped && !isActive) || !window.GUIManager.widgetHFRadars.areParticlesVisible){
+        else if (!radar.animEngine.isStopped && !isActive){
           radar.animEngine.isStopped = true;
           radar.animEngine.clearCanvas();
         }
