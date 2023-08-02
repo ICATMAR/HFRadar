@@ -81,19 +81,10 @@ export default {
     
 
     // EVENTS
-    // When legends are loaded
-    // window.eventBus.on('AppManagerLegendsLoaded', (legends) => {
-      // Store legends when successfully loaded
-      // this.legends = [];
-      // legends.forEach(ll => {
-      //   if (ll.status == 'fulfilled'){
-      //     this.legends.push(ll.value);
-      //   }
-      // })
-      // this.legendsLoaded = true;
-      // this.legendSrc = this.legends[this.legendIndex].img.src;
-      // this.emitLegendChanged(this.legends[this.legendIndex]);
-    // });
+    // When new data loads, usually the widget also should be shown (with particles on)
+    window.eventBus.on('HFRadarDataLoaded', tmst => {
+      this.openClicked();
+    });
 
 
     // When mouse clicks a data point
