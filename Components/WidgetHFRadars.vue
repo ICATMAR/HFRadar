@@ -93,11 +93,11 @@ export default {
     // EVENTS
     // On radars load
     // Store a version of the radar here
-    window.eventBus.on('HFRadarDataLoaded', ()=>{
+    window.eventBus.on('HFRadarDataLoaded', (tmst)=>{
+      // Create radar variables for the widget
       Object.keys(window.DataManager.HFRadars).forEach(key => {
         let radar = window.DataManager.HFRadars[key];
         if (radar.constructor.name == "HFRadar"){
-          let availableTimestamps = Object.keys(radar.data);
           if (this.radars[key] == undefined){
             this.radars[key] = {
               UUID: key, 
@@ -107,6 +107,15 @@ export default {
             }
           }
         }
+      });
+
+      // Update widget when data is loaded
+      tmst = window.GUIManager.currentTmst || tmst;
+      let radars = window.DataManager.getRadarsDataOn(tmst);
+      Object.keys(radars).forEach(i => {
+        let radar = radars[i];
+        if (radar.constructor.name == "HFRadar")
+          this.radars[radar.UUID].hasDataOnTimestamp = true;
       });
     });
     // When mouse clicks a data point
