@@ -606,10 +606,15 @@ export default {
       } 
       // Add layer only if
       else if (guiState.isVisible && guiState.arePointsVisible){
-        // IF HFRadar is hidden
+        // Remove layers first
+        if (this.getMapLayer(radarPointsLayerName)) this.map.removeLayer(this.getMapLayer(radarPointsLayerName));
+        if (this.getMapLayer('HFSelPoint')) this.map.removeLayer(this.getMapLayer('HFSelPoint'));
+        
+        // If HFRadar is hidden
         if (radar.constructor.name == "HFRadar"){
-          if (!guiState.radarsVisible[radar.Site])
+          if (!guiState.radarsVisible[radar.Site]){
             return;
+          }
         }
 
         // Add layer

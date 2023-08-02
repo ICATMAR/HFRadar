@@ -118,9 +118,11 @@ export default {
             // Update data
             radar.animEngine.setHFRadarData(radar.data[tmst]);
             // TODO: DECIDE IF TO SHOW RADAR DATA OR NOT ACCORDING TO GUIMANAGER
-            let guiVisibile = window.GUIManager.widgetHFRadars.radarsVisible[radar.Site];
+            let guiState = window.GUIManager.widgetHFRadars;
+            let shouldAnimate = guiState.isVisible && guiState.areParticlesVisible && guiState.radarsVisible[radar.Site];
+            
             // Start animation
-            if (radar.animEngine.isStopped && window.GUIManager.widgetHFRadars.isVisible && guiVisibile){
+            if (radar.animEngine.isStopped && shouldAnimate){
               radar.animEngine.isStopped = false;
               radar.animEngine.update();
             }
