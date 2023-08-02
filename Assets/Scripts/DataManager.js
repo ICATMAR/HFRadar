@@ -567,6 +567,9 @@ class HFRadar {
     // TO FIX - IS THIS NECESSARY?
     for (let i = 0; i < keys.length; i++){
       let key = keys[i];
+      // Fix Site string
+      if (key == 'Site')
+        HFRadarData.header[key] = HFRadarData.header[key].replace(' ""\r', '').replace(" ", "");
       if (HFRadarData.header[key] != undefined)
         this[key] = HFRadarData.header[key];
     }
