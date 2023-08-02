@@ -66,8 +66,15 @@ export default {
               // Restart animation if it was stopped
               if (wasStopped)
                 radar.animEngine.update();
-            } else{
+            } else if (radar.constructor.name == "HFRadar"){
               radar.animEngine.setHFRadarData(radar.data[tmst]);
+              // Start animation according to GUIManager
+              let guiState = window.GUIManager.widgetHFRadars;
+              let shouldAnimate = guiState.areParticlesVisible && guiState.isVisible && guiState.radarsVisible[radar.Site];
+              if (shouldAnimate && radar.animEngine.isStopped){
+                radar.animEngine.isStopped = false;
+                radar.animEngine.update();
+              }
             }
           }
         }
