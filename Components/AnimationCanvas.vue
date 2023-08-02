@@ -243,8 +243,11 @@ export default {
             // Visible
             if (areVisible && radar.animEngine && radar.data[tmst] != undefined){
               radar.animEngine.setCombinedRadarData(radar.dataGrid[tmst]);
-              radar.animEngine.isStopped = false;
-              radar.animEngine.update();
+              // Re-start if it was stopped
+              if (radar.animEngine.isStopped){
+                radar.animEngine.isStopped = false;
+                radar.animEngine.update();
+              }
             }
             // Not visible
             else if (!areVisible && radar.animEngine){

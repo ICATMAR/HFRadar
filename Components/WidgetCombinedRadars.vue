@@ -178,7 +178,7 @@ export default {
     openClicked: function(){
       this.isVisible = true;
       window.GUIManager.widgetCombinedRadars.isVisible = true;
-      window.GUIManager.widgetCombinedRadars.areParticlesVisible = this.areParticlesVisible = true;
+      window.GUIManager.widgetCombinedRadars.areParticlesVisible = true;
       this.$refs.onOffParticles.setChecked(true); // TODO: This triggers the button (particlesButtonClicked), not optimal
       window.GUIManager.isDataPointSelected = false;
       window.eventBus.emit("WidgetCombinedRadars_VisibilityChanged", true);
