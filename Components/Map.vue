@@ -194,6 +194,8 @@ export default {
     window.eventBus.on('HFRadarDataLoaded', (tmst) =>{
       if (tmst != undefined)
         this.selectedDateChanged(tmst);
+      else
+        this.updateHFRadarIcons(); // TODO: could it be fixed by writting tmst = window.GUIManager.currentTmst || tmst?
     });
     // Selected date changed (slider moves or drag and drop files)
     window.eventBus.on('DataStreamsBar_SelectedDateChanged', (tmst) =>{
@@ -470,7 +472,8 @@ export default {
       Object.keys(radars).forEach(key => {
         // Only for radars, not for tots (combined)
         let radar = radars[key];
-        let hasDataNow = radar.data[window.GUIManager.currentTmst];
+        let hasDataNow = radar.data[window.GUIManager.currentTmst] != undefined;
+        
         if (!radar.dataGrid) {
           // Create feature style
           let featStyle = new ol.style.Style({
