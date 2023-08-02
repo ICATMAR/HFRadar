@@ -355,48 +355,6 @@ export default {
     },
 
 
-
-    // PUBLIC METHODS
-    // updateAnimation: function(radar, data, map){
-    //   debugger;
-    //   // NEVER CALLED?
-    //   // Update animation engine
-    //   if (radar.animEngine == undefined){
-    //     if (radar.hasDataOnTmst){
-    //       // Create canvas
-    //       let canvas = this.createCanvas("canvasHFRadarAnimation");
-    //       this.$refs["animationCanvas"].appendChild(canvas);
-    //       // Create animation
-    //       if (radar.dataGrid) // Combined Radar (tots)
-    //           radar.animEngine = new AnimationEngine(canvas, map, {"CombinedRadarData": data}, JSON.parse(JSON.stringify(this.legend)));
-    //         else
-    //           radar.animEngine = new AnimationEngine(canvas, map, {"HFRadarData": data}, JSON.parse(JSON.stringify(this.legend)));
-          
-    //       // Test
-    //       // let ctx = canvas.getContext("2d");
-    //       // ctx.fillStyle="blue";
-    //       // ctx.fillRect(0,0, canvas.width, canvas.height);
-    //     }
-
-    //   } else {
-    //     if (radar.hasDataOnTmst){
-    //       debugger;
-    //       // Update existing animation
-    //       radar.animEngine.setHFRadarData(data);
-    //       let wasStopped = radar.animEngine.isStopped;
-    //       radar.animEngine.isStopped = false;
-    //       if (wasStopped)
-    //         radar.animEngine.update();
-          
-    //     } else
-    //       radar.animEngine.isStopped = true;
-    //       radar.animEngine.clearCanvas();
-    //   }
-    //   // Map events for animation
-    //   map.on('moveend', radar.animEngine.onMapMoveEnd);
-    //   map.on('movestart', radar.animEngine.onMapMoveStart);
-    // },
-
   },
   components: {
     "widgetCombinedRadars": WidgetCombinedRadars,

@@ -407,18 +407,12 @@ export default {
     selectedDateChanged: function(tmst){
       // Remove layers
       this.removeHFlayers();
-      // Make all radars inactive
-      Object.keys(window.DataManager.HFRadars).forEach(key => {
-        window.DataManager.HFRadars[key].hasDataOnTmst = false;
-      });
-
 
       // Get current active radars on that date
       let activeRadars = window.DataManager.getRadarsDataOn(tmst);
       if (activeRadars.length != 0 ){
         for (let i = 0; i < activeRadars.length; i++){
           let HFRadar = activeRadars[i];
-          HFRadar.hasDataOnTmst = true;
 
           // WARNING: createImage might be useful to create HFRadar previews.
           // TODO: HFRadar.data.timestamp {dataPoints: [X], imgData: ...}
@@ -430,7 +424,7 @@ export default {
           this.updateHFRadarData(HFRadar, tmst, HFRadar.images[tmst]);
         }
 
-        }
+      }
 
       // Vector - HFRadar Icons
       this.updateHFRadarIcons();
@@ -476,8 +470,8 @@ export default {
       Object.keys(radars).forEach(key => {
         // Only for radars, not for tots (combined)
         let radar = radars[key];
+        let hasDataNow = radar.data[window.GUIManager.currentTmst];
         if (!radar.dataGrid) {
-        
           // Create feature style
           let featStyle = new ol.style.Style({
             image: new ol.style.Icon({
@@ -485,7 +479,7 @@ export default {
               width: 10,
               height: 10,
               scale: [0.5, 0.5],
-              opacity: radar.hasDataOnTmst ? 1 : 0.3,
+              opacity: hasDataNow ? 1 : 0.3,
             })
           });
 
