@@ -1,17 +1,17 @@
 <template>
   <div class="timeStringContainer">
     <!-- Backward 24h -->
-    <!-- <div class="white-text clickable" @clicked="">≪</div> -->
+    <div class="white-text clickable" @click="changeSelectedDate(-24)">≪</div>
     <!-- Backward 1h -->
-    <!-- <div class="white-text clickable">&lt;</div> -->
+    <div class="white-text clickable" @click="changeSelectedDate(-1)">&lt;</div>
     <!-- Time string -->
     <div class="white-text">
       {{ timeStr }}
     </div>
     <!-- Forward 1h -->
-    <!-- <div class="white-text clickable">></div> -->
+    <div class="white-text clickable" @click="changeSelectedDate(1)">></div>
     <!-- Forward 24h -->
-    <!-- <div class="white-text clickable">≫</div> -->
+    <div class="white-text clickable" @click="changeSelectedDate(24)">≫</div>
   </div>
 </template>
 
@@ -43,6 +43,12 @@ export default {
     }
   },
   methods: {
+    // Change current timestamp
+    changeSelectedDate(timeDifferenceInHours){
+      this.$emit('changeSelectedDate', timeDifferenceInHours);
+    },
+
+    // Format the time string to a human readable format
     formatTimestampString: function(tmst){
       let dd = new Date(tmst);
       let ss = dd.toLocaleString();
@@ -94,6 +100,8 @@ export default {
   align-items: center;
 }
 .timeStringContainer > div {
-  text-align: center; 
+  text-align: center;
+  user-select: none;
+  min-width: 30px;
 }
 </style>

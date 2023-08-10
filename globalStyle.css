@@ -16,6 +16,7 @@
 .white-text {
   color: white;
   text-shadow: 0 0 4px black;
+  font-size: clamp(0.9rem, 1.2vw, 1rem);
 }
 
 /* font-awesome 

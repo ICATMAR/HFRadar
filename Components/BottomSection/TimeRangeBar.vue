@@ -18,8 +18,8 @@
             </div>
             <!-- Step forward/backward -->
             <div class="container-columns" v-show="!isPlaying">
-              <div class="stepButtons" @click="stepBackward" :title="$i18n.t('timeControl.stepBackward')">◀️</div>
-              <div class="stepButtons" @click="stepForward" :title="$i18n.t('timeControl.stepForward')">▶️</div>
+              <div class="stepButtons" @click="stepInTimeInHours(-1)" :title="$i18n.t('timeControl.stepBackward')">◀️</div>
+              <div class="stepButtons" @click="stepInTimeInHours(1)" :title="$i18n.t('timeControl.stepForward')">▶️</div>
             </div>
             
             <!-- <div><b>Start:</b> {{startStr}}</div>
@@ -32,7 +32,7 @@
             
             
             <!-- Time string -->
-            <time-string></time-string>
+            <time-string @changeSelectedDate="stepInTimeInHours"></time-string>
             
             
             <!-- Data availability -->
@@ -236,14 +236,11 @@ export default {
             this.timeStepFactor *= 2;
         
       },
-      stepForward: function(){
-        this.timeStepFactor = 1;
-        this.isPlaying = true;
-        this.reproduceTimeline();
-        this.isPlaying = false;
-      },
-      stepBackward: function(){
-        this.timeStepFactor = -1;
+      // Makes a step and also stops reproduction
+      // This made sense before because the buttons to make steps disappear when is playing.
+      // Now this function is also used from TimeString.vue and maybe this behavior (stopping reproduction) is not desired.
+      stepInTimeInHours: function(hours){
+        this.timeStepFactor = hours;
         this.isPlaying = true;
         this.reproduceTimeline();
         this.isPlaying = false;
