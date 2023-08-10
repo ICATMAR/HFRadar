@@ -27,15 +27,12 @@
           </div>
 
 
-          <!-- Three rows -->
+          <!-- Four rows -->
           <div class="container-rows timeline-container" @wheel.prevent="onTimeBarWheel($event)">
-            <!-- Time slider -->
-            <!-- <range-slider ref="rangeSlider" 
-              @isChanging="onRangeSliderChange($event)" 
-              @mouseIsDown="onRangeSliderMouseDown($event)"
-              @mouseIsUp="onRangeSliderMouseUp($event)" 
-              @isDragging="onRangeSliderDrag($event)"
-            style="height: 50px; width: 100%"></range-slider> -->
+            
+            
+            <!-- Time string -->
+            <time-string></time-string>
             
             
             <!-- Data availability -->
@@ -86,6 +83,7 @@
 
 <script>
 import DataStreamsBar from './DataStreamsBar.vue';
+import TimeString from './TimeString.vue';
 // Import components
 // import RangeSlider from './RangeSlider.vue'
 
@@ -1048,6 +1046,7 @@ export default {
     components: {
       // 'range-slider': RangeSlider,
       'data-streams-bar': DataStreamsBar,
+      'time-string': TimeString,
     },
     computed: {
 
