@@ -13,14 +13,20 @@
     <!-- Forward 24h -->
     <div class="white-text clickable" @click="changeSelectedDate(24)">≫</div>
   </div>
+
+
+  <calendar></calendar>
 </template>
 
 
 
 <script>
 
+import Calendar from "./Calendar.vue"
+
 export default {
-  name: "AppManager",
+  name: "TimeString",
+  emits: ["changeSelectedDate"],
   created() {
     
   },
@@ -71,7 +77,7 @@ export default {
     },
   },
   components: {
-
+    calendar: Calendar
   }
 }
 </script>
