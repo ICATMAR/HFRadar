@@ -298,7 +298,7 @@ export default {
         this.hours.push({
           num: i,
           key: i + "-" + selDay + "-" + selMonth + "-" + selYear,
-          title: i + "-" + selDay + "-" + (selMonth+1) + "-" + selYear,
+          title: selDay + "-" + (selMonth+1) + "-" + selYear + " T" + String(i).padStart(2,'0'),
           year: selYear,
           month: selMonth+1,
           day: selDay,
