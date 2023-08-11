@@ -64,6 +64,7 @@
 <script>
 export default {
   name: "Calendar",
+  emits: ["hideCalendar"],
   created() {
     // Start and end dates if startDate and endDate are flexible
     this.startDate = new Date(2023, 3, 1); 
@@ -149,7 +150,8 @@ export default {
       let hour = parseInt(e.target.id.split('-')[0]);
       this.tempTmst = this.tempTmst.substring(0,11) + String(hour).padStart(2, '0') + this.tempTmst.substring(13);
       this.timeScaleToShow = 'year';
-      // TODO: CLOSE AND UPDATE TIMESTAMP
+      // Same functionality (TODO: should be in a separate function - acceptClicked is for the button and I am reusing it, bad programming!)
+      this.acceptClicked();
     },
 
 
@@ -191,12 +193,16 @@ export default {
     },
 
     acceptClicked: function(){
+      // Change GUI timestamp
+      window.GUIManager.currentTmst = this.tempTmst;
       // Send event
-      
+      window.eventBus.emit('Calendar_SelectedDate', this.tempTmst);
       // Hide the window
+      this.$emit('hideCalendar');
     },
     cancelClicked: function(){
-
+      // Hide window
+      this.$emit('hideCalendar');
     },
 
 

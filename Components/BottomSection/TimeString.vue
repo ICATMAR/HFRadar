@@ -5,7 +5,7 @@
     <!-- Backward 1h -->
     <div class="white-text clickable" @click="changeSelectedDate(-1)">&lt;</div>
     <!-- Time string -->
-    <div class="white-text">
+    <div class="white-text clickable" @click="isCalendarVisible = true">
       {{ timeStr }}
     </div>
     <!-- Forward 1h -->
@@ -15,7 +15,7 @@
   </div>
 
 
-  <calendar></calendar>
+  <calendar v-show=isCalendarVisible @hideCalendar="isCalendarVisible = false"></calendar>
 </template>
 
 
@@ -32,20 +32,20 @@ export default {
   },
   mounted() {
     // EVENTS
-    window.eventBus.on('DataStreamsBar_SelectedDateChanged', tmst => {
-      // Update time string
-      this.timeStr = this.formatTimestampString(tmst);
-    });
+    const setTimeStr = (tmst) => this.timeStr = this.formatTimestampString(tmst);
+    window.eventBus.on('DataStreamsBar_SelectedDateChanged', setTimeStr);
+    window.eventBus.on('Calendar_SelectedDate', setTimeStr);
     window.eventBus.on('HFRadarDataLoaded', (tmst) =>{
       if(tmst != undefined)
-      this.timeStr = this.formatTimestampString(tmst);
+        setTimeStr(tmst);
     });
     
   },
   data (){
     return {
       // Time string
-      timeStr: 'Loading dataset...'
+      timeStr: 'Loading dataset...',
+      isCalendarVisible: false,
     }
   },
   methods: {
@@ -57,7 +57,7 @@ export default {
     // Format the time string to a human readable format
     formatTimestampString: function(tmst){
       let dd = new Date(tmst);
-      let ss = dd.toLocaleString();
+      let ss = dd.toLocaleString('en-GB');
       ss = ss.substring(0, ss.length - 6) + ':00';
       // Add time difference from now
       let now = new Date();
