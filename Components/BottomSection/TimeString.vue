@@ -6,7 +6,7 @@
     <div class="white-text clickable" @click="changeSelectedDate(-1)">&lt;</div>
     <!-- Time string -->
     <div class="white-text clickable" @click="isCalendarVisible = true">
-      {{ timeStr }}
+      <span class="fa">&#xf073; </span>{{ timeStr }}
     </div>
     <!-- Forward 1h -->
     <div class="white-text clickable" @click="changeSelectedDate(1)">></div>
@@ -14,8 +14,9 @@
     <div class="white-text clickable" @click="changeSelectedDate(24)">≫</div>
   </div>
 
-
-  <calendar v-show=isCalendarVisible @hideCalendar="isCalendarVisible = false"></calendar>
+  <Transition> <!-- Vue transition -->
+    <calendar v-show=isCalendarVisible @hideCalendar="isCalendarVisible = false"></calendar>
+  </Transition>
 </template>
 
 
@@ -109,5 +110,20 @@ export default {
   text-align: center;
   user-select: none;
   min-width: 30px;
+}
+
+
+
+/* Transition */
+.v-enter-active,
+.v-leave-active {
+  transition: all 0.3s ease;
+}
+
+.v-enter-from,
+.v-leave-to {
+  opacity: 0;
+  height: 0;
+  transform: translateY(20px);
 }
 </style>
