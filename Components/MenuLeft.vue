@@ -56,6 +56,7 @@
 
     pointer-events: none;
 
+    z-index: 5;
   }
 
   @media screen and  (max-width: 770px) {

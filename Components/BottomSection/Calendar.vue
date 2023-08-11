@@ -1,62 +1,68 @@
 <template>
-  <div class="calendarContainer">
-    <!-- Info -->
-    <div class="white-text">Select the date (UTC-0)</div>
-    <!-- YEAR -->
-    <!-- Calendar -->
-    <div class="yearContainer" v-show="timeScaleToShow == 'year'">
-      <button v-for="yy in years" class="clickable white-text"
-        :class="[yy.isSelected ? 'yearButton button-active' : yy.num % 2 == 0 ? 'yearButton' : 'yearButton even']"
-        @click="onYearClicked($event)" :key="yy.num" :id="yy.num" :title="yy.num"
-        >{{yy.name}}</button>
-    </div>
-    <!-- MONTH -->
-    <!-- Selected date -->
-    <div class="text-white selectedDateContainer" v-show="timeScaleToShow == 'month'">
-      <div class="clickable" @click="changeYearClicked(-1)">&lt;</div>
-      <div class="clickable" @click="timeScaleToShow = 'year'">{{ tempTmst.substring(0,4) }}</div>
-      <div class="clickable" @click="changeYearClicked(1)">></div>
-    </div>
-    <!-- Calendar -->
-    <div class="timeline" ref="monthTimeline" v-show="timeScaleToShow == 'month'">
-      <button v-for="mm in months" class="monthButton clickable white-text"
-        :class="[mm.isSelected ? 'button-active' : '']"
-        @click="onMonthClicked($event)" :key="mm.key" :id="mm.key" :title="$i18n.t(mm.title) + ', ' + mm.year"
-        >{{$t(mm.title)}}</button>
-    </div>
-    <!-- DAY -->
-      <!-- Selected date -->
-    <div class="text-white selectedDateContainer" v-show="timeScaleToShow == 'day'">
-      <div class="clickable" @click="changeMonthClicked(-1)">&lt;</div>
-      <div class="clickable" @click="timeScaleToShow = 'month'">{{monthAbbr[parseInt(tempTmst.substring(5,7))-1][2]}} , {{ tempTmst.substring(0,4) }}</div>
-      <div class="clickable" @click="changeMonthClicked(1)">></div>
-    </div>
+  <div class="overlayContainer" @click="overlayClicked">
+    <div class="calendarContainer" @click.stop="">
+      <!-- Info -->
+      <div class="white-text" style="padding:10px">Select the date (UTC-0)</div>
+      <!-- YEAR -->
       <!-- Calendar -->
-    <div class="timeline daysContainer" ref="dayTimeline" v-show="timeScaleToShow == 'day'" >
-      <button v-for="dd in days" class="clickable white-text dayButton" :class="[dd.hasData == false ? 'noData' : dd.isSelected ? 'button-active' : '']"
-        @click="onDayClicked($event)" :key="dd.key" :id="dd.key" :title="dd.title"
-        >{{dd.name}}</button>
-    </div>
-    <!-- HOUR -->
+      <div class="yearContainer" v-show="timeScaleToShow == 'year'">
+        <button v-for="yy in years" class="clickable white-text"
+          :class="[yy.isSelected ? 'yearButton button-active' : yy.num % 2 == 0 ? 'yearButton' : 'yearButton even']"
+          @click="onYearClicked($event)" :key="yy.num" :id="yy.num" :title="yy.num"
+          >{{yy.name}}</button>
+      </div>
+      <!-- MONTH -->
       <!-- Selected date -->
-    <div class="text-white selectedDateContainer" v-show="timeScaleToShow == 'hour'">
-      <div class="clickable" @click="changeDayClicked(-1)">&lt;</div>
-      <div class="clickable" @click="timeScaleToShow = 'day'">{{ parseInt(tempTmst.substring(8,10)) }} , {{monthAbbr[parseInt(tempTmst.substring(5,7))-1][2]}} , {{ tempTmst.substring(0,4) }}</div>
-      <div class="clickable" @click="changeDayClicked(1)">></div>
-    </div>
+      <div class="text-white selectedDateContainer" v-show="timeScaleToShow == 'month'">
+        <div class="clickable" @click="changeYearClicked(-1)">&lt;</div>
+        <div class="clickable" @click="timeScaleToShow = 'year'">{{ tempTmst.substring(0,4) }}</div>
+        <div class="clickable" @click="changeYearClicked(1)">></div>
+      </div>
       <!-- Calendar -->
-    <div class="timeline" ref="dayTimeline" v-show="timeScaleToShow == 'hour'">
-      <button v-for="hh in hours" class="clickable white-text hourButton" :class="[hh.hasData == false ? 'noData' : hh.isSelected ? 'button-active' : '']"
-        @click="onHourClicked($event)" :key="hh.key" :id="hh.key" :title="hh.title"
-        >{{hh.name}}:00</button>
+      <div class="timeline" ref="monthTimeline" v-show="timeScaleToShow == 'month'">
+        <button v-for="mm in months" class="monthButton clickable white-text"
+          :class="[mm.isSelected ? 'button-active' : '']"
+          @click="onMonthClicked($event)" :key="mm.key" :id="mm.key" :title="$i18n.t(mm.title) + ', ' + mm.year"
+          >{{$t(mm.title)}}</button>
+      </div>
+      <!-- DAY -->
+        <!-- Selected date -->
+      <div class="text-white selectedDateContainer" v-show="timeScaleToShow == 'day'">
+        <div class="clickable" @click="changeMonthClicked(-1)">&lt;</div>
+        <div class="clickable" @click="timeScaleToShow = 'month'">{{monthAbbr[parseInt(tempTmst.substring(5,7))-1][2]}} , {{ tempTmst.substring(0,4) }}</div>
+        <div class="clickable" @click="changeMonthClicked(1)">></div>
+      </div>
+        <!-- Calendar -->
+      <div class="timeline daysContainer" ref="dayTimeline" v-show="timeScaleToShow == 'day'" >
+        <button v-for="dd in days" class="clickable white-text dayButton" :class="[dd.hasData == false ? 'noData' : dd.isSelected ? 'button-active' : '']"
+          @click="onDayClicked($event)" :key="dd.key" :id="dd.key" :title="dd.title"
+          >{{dd.name}}</button>
+      </div>
+      <!-- HOUR -->
+        <!-- Selected date -->
+      <div class="text-white selectedDateContainer" v-show="timeScaleToShow == 'hour'">
+        <div class="clickable" @click="changeDayClicked(-1)">&lt;</div>
+        <div class="clickable" @click="timeScaleToShow = 'day'">{{ parseInt(tempTmst.substring(8,10)) }} , {{monthAbbr[parseInt(tempTmst.substring(5,7))-1][2]}} , {{ tempTmst.substring(0,4) }}</div>
+        <div class="clickable" @click="changeDayClicked(1)">></div>
+      </div>
+        <!-- Calendar -->
+      <div class="timeline" ref="dayTimeline" v-show="timeScaleToShow == 'hour'">
+        <button v-for="hh in hours" class="clickable white-text hourButton" :class="[hh.hasData == false ? 'noData' : hh.isSelected ? 'button-active' : '']"
+          @click="onHourClicked($event)" :key="hh.key" :id="hh.key" :title="hh.title"
+          >{{hh.name}}:00</button>
+      </div>
+
+
+      <!-- Cancel / Ok -->
+      <div class="acceptContainer">
+        <button class="closeButton" @click="cancelClicked">Cancel</button>
+        <button class="acceptButton" @click="acceptClicked">OK</button>
+      </div>
+
+      
     </div>
 
 
-    <!-- Cancel / Ok -->
-    <div class="acceptContainer">
-      <button class="closeButton" @click="cancelClicked">Cancel</button>
-      <button class="acceptButton" @click="acceptClicked">OK</button>
-    </div>
   </div>
 </template>
 
@@ -205,6 +211,10 @@ export default {
       this.$emit('hideCalendar');
     },
 
+    overlayClicked: function(){
+      // Hide window
+      this.$emit('hideCalendar');
+    },
 
 
 
@@ -328,6 +338,20 @@ export default {
 
 
 <style scoped>
+
+.overlayContainer {
+  position: fixed;
+  width: 100vw;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+  background: rgb(198 240 255 / 70%);
+  right: 0;
+  bottom: 0;
+  top: 0;
+  left: 0;
+  z-index: 10;
+}
 .calendarContainer {
   position: fixed;
   right: 0;
