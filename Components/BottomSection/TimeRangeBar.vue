@@ -133,6 +133,7 @@ export default {
         this.$refs.dataStreamsBar.setStartEndDates(this.startDate, this.endDate);
       
       // EVENT LISTENERS
+      window.eventBus.on('Calendar_SelectedDate', tmst => this.calendarComponentChangedDate());
       // Create event listener
       window.addEventListener('resize', this.windowIsResizing);
     },
@@ -236,6 +237,9 @@ export default {
             this.timeStepFactor *= 2;
         
       },
+
+
+      // INTERNAL EVENTS
       // Makes a step and also stops reproduction
       // This made sense before because the buttons to make steps disappear when is playing.
       // Now this function is also used from TimeString.vue and maybe this behavior (stopping reproduction) is not desired.
@@ -244,6 +248,25 @@ export default {
         this.isPlaying = true;
         this.reproduceTimeline();
         this.isPlaying = false;
+      },
+      // Calendar.vue changes
+      calendarComponentChangedDate: function(){
+        // Get current date
+        let currentTmst = window.GUIManager.currentTmst;
+        this.currentDate = new Date(currentTmst);
+        
+        // Update start and ending dates
+        // It also calls this.updateHTMLTimeline()
+        this.centerOnDate(this.currentDate);
+
+        // TODO: mixing between timerangebar and datastreamsbar EMIT UPDATE CURRENT DATE TODO CHANGE
+        window.eventBus.emit('DataStreamsBar_SelectedDateChanged', this.currentDate.toISOString())
+
+        // Update simulation
+        if (this.$refs.dataStreamsBar){
+          this.$refs.dataStreamsBar.setStartEndDates(this.startDate, this.endDate);
+          this.$refs.dataStreamsBar.updateCurrentDate(this.currentDate.toISOString());
+        }
       },
 
 
@@ -483,7 +506,6 @@ export default {
         if (!this.isPlaying)
           return
         // Get current date
-       
         let currentTmst = window.GUIManager.currentTmst;
         this.currentDate = new Date(currentTmst);
         
@@ -960,6 +982,7 @@ export default {
 
       // Set time range slider according to selected start and end dates
       setRangeSlider: function(){
+        return;
         let sTime = this.startDate.getTime();
         let eTime = this.endDate.getTime();
 
@@ -1009,7 +1032,7 @@ export default {
 
       // Center the date on a specific date
       centerOnDate: function(cDate){
-        let timespan = this.selEndDate.getTime() - this.selStartDate.getTime();
+        let timespan = this.endDate.getTime() - this.startDate.getTime();
         let timeStart = cDate.getTime() - timespan/2;
         let timeEnd = cDate.getTime() + timespan/2;
         // If starting date is earlier than the limit, add this difference to the end time
@@ -1021,6 +1044,9 @@ export default {
         if (timeEnd > this.limEndDate.getTime()){
           timeStart -= timeEnd - this.limEndDate.getTime();
         }
+
+        this.startDate.setTime(timeStart);
+        this.endDate.setTime(timeEnd);
         
         // Set starting and ending dates
         //this.setSelStartDate(cDate.setTime(timeStart));
@@ -1029,7 +1055,7 @@ export default {
         //this.setSelEndDate(cDate.setTime(timeEnd));
 
         // Set handles in range slider
-        this.setRangeSlider();
+        //this.setRangeSlider();
         this.updateHTMLTimeline();
 
       },

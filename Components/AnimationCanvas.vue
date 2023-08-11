@@ -398,6 +398,7 @@ export default {
   width: 264px;
   display: flex;
   flex-direction: column;
+  z-index: 5;
 }
 
 
