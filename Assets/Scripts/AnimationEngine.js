@@ -327,8 +327,9 @@ class SourceWMS {
     wmsURL = SourceWMS.setWMSParameter(wmsURL, 'HEIGHT', '1024');
 
     // BBOX
-    this.bbox = this.medBBOX3857;//this.catseaBBOX;
-    wmsURL = SourceWMS.setWMSParameter(wmsURL, 'BBOX', JSON.stringify(this.bbox).replace('[', '').replace(']', ''));
+    this.bbox = this.medBBOX;//this.catseaBBOX;
+    this.bbox3857 = this.medBBOX3857;
+    wmsURL = SourceWMS.setWMSParameter(wmsURL, 'BBOX', JSON.stringify(this.bbox3857).replace('[', '').replace(']', ''));
     // CRS for BBOX (some services only accept 3857 boundaries?)
     wmsURL = SourceWMS.setWMSParameter(wmsURL, 'CRS', 'EPSG:3857');
 
@@ -360,7 +361,7 @@ class SourceWMS {
     canvas.width = this.longExtension / this.canvasLongLatStep;
     canvas.height = this.latExtension / this.canvasLongLatStep;
 
-    let ctx = canvas.getContext('2d');
+    let ctx = canvas.getContext('2d', {willReadFrequently: false});
     //document.body.append(canvas);
 
     // WMS data layers
