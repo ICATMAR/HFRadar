@@ -28,6 +28,8 @@ class AnimationEngine {
   isDestroyed = false;
   isStopped = false;
   
+  useArrows = false;
+  
 
   // Constructor
   /*
@@ -66,6 +68,9 @@ class AnimationEngine {
       // Create particle system
       this.particles = new ParticleSystem(this.canvasParticles, this.source, this.map);
       this.particles.clear();
+
+      // Define if using arrows
+      this.useArrows = animInfo.animation.useArrows == true;
 
       // Define callback when data is loaded
       //this.source.defineOnLoadCallback(this.particles.repositionParticles.bind(this.particles));
@@ -217,11 +222,16 @@ class AnimationEngine {
     if (this.source){
       //console.log(this.source.wmsURL);
       if (this.source.isReady)
-        if (!this.mapIsMoving)
+        if (!this.mapIsMoving){
           this.particles.draw(dt);
+        }
     }
 
-    // Loop
+    // Do not loop if using arrows and particles have been painted
+    if (this.useArrows)
+      return;
+
+    // Loop otherwise
     setTimeout(() => this.update() , this.FRAMERATE); // Frame rate in milliseconds
   }
 
@@ -231,6 +241,9 @@ class AnimationEngine {
     console.log("Source loaded!");
     // Reposition particles when data is loaded
     this.particles.repositionParticles();
+    // Update with draw for arrows
+    if (this.useArrows)
+      this.update();
   }
 
   clearCanvas(){
@@ -255,6 +268,8 @@ class AnimationEngine {
     if (this.source) {
       if (this.source.isReady){
         this.particles.repositionParticles();
+        if (this.useArrows) // Update and draw once for arrows
+          this.update();
       }
     }
     if (this.legend)
@@ -885,7 +900,7 @@ class ParticleSystem {
       if (this.source.constructor.name == 'SourceCombinedRadar'){
         this.particles[i] = new ParticleCombinedRadar(this);
       }
-      else if(true)
+      else if(source.animation.useArrows)
         this.particles[i] = new Arrow(this);
       else
         this.particles[i] = new Particle(this);
@@ -926,10 +941,12 @@ class ParticleSystem {
     
     // Trail effect
     // https://codepen.io/Tyriar/pen/BfizE
-    this.ctx.fillStyle = 'rgba(255, 255, 255, .9)';
-    this.ctx.globalCompositeOperation = "destination-in";
-    this.ctx.fillRect(0,0, this.canvas.width, this.canvas.height);
-    this.ctx.globalCompositeOperation = "source-over";
+    if (this.particles[0].constructor.name != 'Arrow'){
+      this.ctx.fillStyle = 'rgba(255, 255, 255, .9)';
+      this.ctx.globalCompositeOperation = "destination-in";
+      this.ctx.fillRect(0,0, this.canvas.width, this.canvas.height);
+      this.ctx.globalCompositeOperation = "source-over";
+    }
     // Trail color
     this.ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
 
@@ -1501,16 +1518,13 @@ class Arrow {
     // Draw in canvas
     let ctx = this.particleSystem.ctx;
 
-    // Change color
+
+    // Shadow
     ctx.stroke();
     ctx.beginPath();
-    //ctx.lineWidth = Math.max(value*15, 4);
-    //ctx.fillStyle = 'rgba(0, 0, 0, ', alphaFactor*0.0, ')';
-    let colorStr = 'rgba(' + this.color[0] + ',' + this.color[1] + ',' + this.color[2] + ', ' + 0.1 + ')'
-    ctx.strokeStyle = colorStr; // Makes the app go slow, consider something different
-    // Shadow
-    ctx.shadowColor = 'rgba(0, 0, 0, 0.1)';
-    ctx.shadowBlur = 4;
+    ctx.lineWidth = 1.1;
+    
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)'; // Makes the app go slow, consider something different
 
     ctx.moveTo(this.vertices[0], this.vertices[1]);
     ctx.lineTo(this.vertices[2], this.vertices[3]);
@@ -1518,6 +1532,26 @@ class Arrow {
     ctx.lineTo(this.vertices[2], this.vertices[3]);
     ctx.lineTo(this.vertices[6], this.vertices[7]);
     ctx.lineTo(this.vertices[2], this.vertices[3]);
+
+
+    // Main arrow
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.lineWidth = 1;
+    //ctx.lineWidth = Math.max(value*15, 4);
+    //ctx.fillStyle = 'rgba(0, 0, 0, ', alphaFactor*0.0, ')';
+    let colorStr = 'rgba(' + this.color[0] + ',' + this.color[1] + ',' + this.color[2] + ', ' + 0.2 + ')'
+    ctx.strokeStyle = colorStr; // Makes the app go slow, consider something different
+
+    ctx.moveTo(this.vertices[0], this.vertices[1]);
+    ctx.lineTo(this.vertices[2], this.vertices[3]);
+    ctx.lineTo(this.vertices[4], this.vertices[5]);
+    ctx.lineTo(this.vertices[2], this.vertices[3]);
+    ctx.lineTo(this.vertices[6], this.vertices[7]);
+    ctx.lineTo(this.vertices[2], this.vertices[3]);
+
+    
+
 
   }
 
