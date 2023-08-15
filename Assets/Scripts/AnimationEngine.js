@@ -450,6 +450,13 @@ class SourceWMS {
       return value;
     }
 
+    // If image is not loaded
+    if (this.isReady == false){
+      value[0] = undefined; value[1] = undefined; // Reset value
+      return;
+    }
+      
+
     // Get closest pixel to long lat (nearest-neighbour interpolation)
     let colPixelPos = Math.round((long - minLong) / this.canvasLongLatStep);
     let rowPixelPos = Math.round((lat - minLat) / this.canvasLongLatStep);
@@ -974,6 +981,12 @@ class Particle {
       this.draw = this.drawVelocity;
       this.numVerticesPath = 20;
       this.stepInPixels = 20;
+    }
+    if (particleSystem.source.animation.type == 'wind'){
+      this.draw = this.drawVelocity;
+      this.numVerticesPath = 20;
+      this.stepInPixels = 1;
+      this.particleSystem.speedFactor = 0.002;
     }
     else if (particleSystem.source.animation.type == 'wave'){
       this.draw = this.drawWaves;
