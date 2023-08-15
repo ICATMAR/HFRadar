@@ -45,7 +45,7 @@
   
   // Import components
   import WidgetWeatherLayers from "./WidgetWeatherLayers.vue";
-  import OnOffButton from "./OnOffButton.vue";
+  import OnOffButton from "../OnOffButton.vue";
 
   
   export default {

@@ -32,9 +32,9 @@
 
 
 // Import components
-import Map from "./Map.vue"
+import Map from "./Map/Map.vue"
 import SidePanel from "./SidePanel.vue"
-import MenuLeft from "./MenuLeft.vue";
+import MenuLeft from "./MapWidgets/MenuLeft.vue";
 // import CentralPanel from "./CentralPanel.vue"
 
 

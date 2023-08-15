@@ -60,7 +60,7 @@
 
 // Import components
 import LegendGUI from "./LegendGUI.vue";
-import OnOffButton from "./OnOffButton.vue";
+import OnOffButton from "../OnOffButton.vue";
 
 export default {
   name: 'widgetHFRadars', // Caps, no -

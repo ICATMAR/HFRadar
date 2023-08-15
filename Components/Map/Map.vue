@@ -27,23 +27,14 @@
 
       <!-- Bottom Section -->
       <bottom-section></bottom-section>
+
+      <!-- Direction for WMS layers -->
+      <!-- <directionCanvas></directionCanvas> -->
        
 
       <!-- Animation Canvas -->
       <animationCanvas ref="animationCanvas"></animationCanvas>
 
-
-      <!-- Tracks on the timeline -->
-      <!-- <tracks-timeline ref="tracksTimeLine" @clickTrackMark="setSelectedTrack" style="bottom: 120px; position: relative; z-index: 2"></tracks-timeline> -->
-
-      <!-- Track info panel -->
-      <!--track-panel></track-panel-->
-
-      <!-- Legend -->
-      <!--wms-legend @legendClicked="changeStyle($event)" ref="legendWMS" class="position-absolute top-0 end-0 d-sm-flex me-2 mt-5"></wms-legend-->
-      
-      <!-- WMS graphic legend -->
-      <!-- <img v-if="WMSLegendURL != ''" id='wmsLegend' :src="WMSLegendURL"> -->
 
     </div>
 </template>
@@ -60,10 +51,8 @@
 
 <script>
 import AnimationCanvas from "./AnimationCanvas.vue";
-import TimeSlider from "./TimeSlider.vue";
-import BottomSection from "./BottomSection/BottomSection.vue";
-// import TracksTimeLine from "TracksTimeLine.vue";
-//import WMSLegend from "WMSLegend.vue";
+import BottomSection from "../BottomSection/BottomSection.vue";
+
 
 export default {
   name: 'app-map',
@@ -275,7 +264,6 @@ export default {
         isLoaded: true,
       },
       isLayerDataReady: false,
-      WMSLegendURL: '',
       visibleHFRadars: [],
     }
   },
@@ -1080,8 +1068,6 @@ export default {
         // Remove clima layer
         if (climaLayer != undefined)
           this.map.removeLayer(climaLayer);
-        // Remove legend url
-        this.WMSLegendURL = '';
         
         return;
       }
@@ -1099,7 +1085,6 @@ export default {
 
   },
   components: {
-    "time-slider": TimeSlider,
     "animationCanvas": AnimationCanvas,
     "bottom-section": BottomSection,
 },

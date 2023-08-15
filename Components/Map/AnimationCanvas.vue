@@ -23,8 +23,8 @@
 
 // Import components
 //import Map from 'Components/Map.vue'
-import WidgetCombinedRadars from "./WidgetCombinedRadars.vue";
-import WidgetHFRadars from "./WidgetHFRadars.vue";
+import WidgetCombinedRadars from "../MapWidgets/WidgetCombinedRadars.vue";
+import WidgetHFRadars from "../MapWidgets/WidgetHFRadars.vue";
 
 export default {
   name: 'animationCanvas', // Caps, no -
