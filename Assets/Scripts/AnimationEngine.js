@@ -453,7 +453,7 @@ class SourceWMS {
     // If image is not loaded
     if (this.isReady == false){
       value[0] = undefined; value[1] = undefined; // Reset value
-      return;
+      return value;
     }
       
 
