@@ -29,7 +29,7 @@
       <bottom-section></bottom-section>
 
       <!-- Direction for WMS layers -->
-      <!-- <directionCanvas></directionCanvas> -->
+      <directionCanvas ref="directionCanvas"></directionCanvas>
        
 
       <!-- Animation Canvas -->
@@ -51,6 +51,7 @@
 
 <script>
 import AnimationCanvas from "./AnimationCanvas.vue";
+import DirectionCanvas from "./DirectionCanvas.vue";
 import BottomSection from "../BottomSection/BottomSection.vue";
 
 
@@ -787,6 +788,9 @@ export default {
           return;
         if (this.getMapLayer('data').getOpacity() != 0){  
           this.updateSourceData();
+          if (this.$refs.directionCanvas){
+            this.$refs.directionCanvas.onMapMoveEnd();
+          }
         }
       }
 
@@ -1086,6 +1090,7 @@ export default {
   },
   components: {
     "animationCanvas": AnimationCanvas,
+    "directionCanvas": DirectionCanvas,
     "bottom-section": BottomSection,
 },
   computed: {
