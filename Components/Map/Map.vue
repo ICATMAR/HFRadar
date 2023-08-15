@@ -29,7 +29,7 @@
       <bottom-section></bottom-section>
 
       <!-- Direction for WMS layers -->
-      <directionCanvas ref="directionCanvas"></directionCanvas>
+      <climaDirectionCanvas ref="climaDirectionCanvas"></climaDirectionCanvas>
        
 
       <!-- Animation Canvas -->
@@ -51,7 +51,7 @@
 
 <script>
 import AnimationCanvas from "./AnimationCanvas.vue";
-import DirectionCanvas from "./DirectionCanvas.vue";
+import ClimaDirectionCanvas from "./ClimaDirectionCanvas.vue";
 import BottomSection from "../BottomSection/BottomSection.vue";
 
 
@@ -1090,7 +1090,7 @@ export default {
   },
   components: {
     "animationCanvas": AnimationCanvas,
-    "directionCanvas": DirectionCanvas,
+    "climaDirectionCanvas": ClimaDirectionCanvas,
     "bottom-section": BottomSection,
 },
   computed: {

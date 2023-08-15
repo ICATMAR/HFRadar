@@ -17,7 +17,7 @@ to fill the whole screen with equally spaced HTML elements, without causing over
 
 
 export default {
-  name: 'directionCanvas',
+  name: 'climaDirectionCanvas',
   created(){},
   mounted() {
     // Canvas size
