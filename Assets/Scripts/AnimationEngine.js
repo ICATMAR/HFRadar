@@ -885,6 +885,8 @@ class ParticleSystem {
       if (this.source.constructor.name == 'SourceCombinedRadar'){
         this.particles[i] = new ParticleCombinedRadar(this);
       }
+      else if(true)
+        this.particles[i] = new Arrow(this);
       else
         this.particles[i] = new Particle(this);
     }
@@ -1403,6 +1405,156 @@ class ParticleCombinedRadar extends Particle {
 
 
 
+
+
+
+// Class for static directional arrows
+class Arrow {
+  // Variables
+  numVerticesPath = 8;
+  stepInPixels = 10; // Step (ideally in lat, long, not in pixels)
+  arrowTipLength = 0.5;
+  color = [0,0,0];
+
+  // Constructor
+  constructor(particleSystem){
+    this.particleSystem = particleSystem;
+    
+    // Variable for optimization
+    this.valueVec2 = [0,0];
+    this.pointVec2 = [0,0];
+    this.normDir = [0,0];
+
+    // Drawing function
+
+    // Vertices
+    this.vertices = new Float32Array(this.numVerticesPath * 2); // Vertices that define the arrow
+    this.vertexValue = 1; // One value per arrow
+  }
+
+  // Functions
+  // Reposition particle
+  repositionParticle(){
+    // Generate starting vertex with initial value
+    this.generatePoint(this.pointVec2, this.valueVec2);
+    // Assign initial position
+    this.vertices[0] = this.pointVec2[0];
+    this.vertices[1] = this.pointVec2[1];
+
+    // Assign value to arrow
+    this.vertexValue = Math.sqrt(this.valueVec2[0]*this.valueVec2[0] + this.valueVec2[1]*this.valueVec2[1]);
+
+    // Arrow direction
+    // Normalize value
+    this.normDir[0] = this.valueVec2[0]/this.vertexValue;
+    this.normDir[1] = this.valueVec2[1]/this.vertexValue;
+
+    // Step in arrow's direction
+    this.pointVec2[0] += this.normDir[0] * this.stepInPixels || 0;
+    this.pointVec2[1] -= this.normDir[1] * this.stepInPixels || 0; // North is inverted
+    // Assign to vertices array
+    this.vertices[2] = this.pointVec2[0];
+    this.vertices[3] = this.pointVec2[1];
+
+    // Arrow sides (45º rotation from arrow tip)
+    this.vertices[4] = this.vertices[0] + this.stepInPixels * this.arrowTipLength * 0.707 * (this.normDir[0] - this.normDir[1]);
+    this.vertices[5] = this.vertices[1] - this.stepInPixels * this.arrowTipLength * 0.707 * (this.normDir[0] + this.normDir[1]);
+
+    this.vertices[6] = this.vertices[0] + this.stepInPixels * this.arrowTipLength * 0.707 * (-this.normDir[0] - this.normDir[1]);
+    this.vertices[7] = this.vertices[1] - this.stepInPixels * this.arrowTipLength * 0.707 * (this.normDir[0] - this.normDir[1]);
+  }
+
+
+  // Generate new point
+  // Could be done more intelligent, like taking the extent of the layer from openlayers or the WMS service
+  generatePoint(point, value, callStackNum){
+    callStackNum = callStackNum || 1;
+    // Generate random X,Y number
+    point[0] = Math.random() * this.particleSystem.canvas.width;
+    point[1] = Math.random() * this.particleSystem.canvas.height;
+    // Check if it has data
+    if (point[0] == undefined || isNaN(point[0]) || point[0] == null)
+      console.error(point);
+    // Get value at pixel
+    // Transform pixel to long lat
+    let coord = this.particleSystem.map.getCoordinateFromPixel(point); // returns [long,lat]?
+    if (coord == null && callStackNum < 20){ // Library is not loaded yet?
+      this.generatePoint(point, value, callStackNum + 1);
+    } else if (callStackNum >= 20) // Library is not yet loaded
+      return;
+    coord = ol.proj.transform(coord, 'EPSG:3857', 'EPSG:4326');
+    // Get value at long lat from source
+    //value = this.particleSystem.source.getValueAtPixel(point, value);
+    value = this.particleSystem.source.getValueAtLongLat(coord[0], coord[1], value);
+    
+
+    // If pixel does not contain data, throw it again at least 20 times
+    if (value[0] == undefined && callStackNum < 20){
+      this.generatePoint(point, value, callStackNum + 1); // Recursive function
+    }
+  }
+
+
+  // Draw / Update
+  draw(dt){
+
+    // Draw in canvas
+    let ctx = this.particleSystem.ctx;
+
+    // Change color
+    ctx.stroke();
+    ctx.beginPath();
+    //ctx.lineWidth = Math.max(value*15, 4);
+    //ctx.fillStyle = 'rgba(0, 0, 0, ', alphaFactor*0.0, ')';
+    let colorStr = 'rgba(' + this.color[0] + ',' + this.color[1] + ',' + this.color[2] + ', ' + 0.1 + ')'
+    ctx.strokeStyle = colorStr; // Makes the app go slow, consider something different
+    // Shadow
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.1)';
+    ctx.shadowBlur = 4;
+
+    ctx.moveTo(this.vertices[0], this.vertices[1]);
+    ctx.lineTo(this.vertices[2], this.vertices[3]);
+    ctx.lineTo(this.vertices[4], this.vertices[5]);
+    ctx.lineTo(this.vertices[2], this.vertices[3]);
+    ctx.lineTo(this.vertices[6], this.vertices[7]);
+    ctx.lineTo(this.vertices[2], this.vertices[3]);
+
+  }
+
+
+  updateLegend(legend){
+    this.legend = legend;
+    this.defineColorWithLegend();
+  }
+  // These values depend on the variable range defined at the beginning of the file
+  defineColorWithLegend(legend){
+    return;
+    legend = legend || this.legend;
+    if(legend == undefined)
+      return;
+
+    let steps = legend.colorsStr.length;
+    let range = legend.legendRange; // HACK, THE SOURCE SHOULD HAVE THE RANGE: this.particleSystem.source.dataRange;
+    let unitStep = (range[1] - range[0])/steps;
+    let mag = this.signedMagnitude;
+    // Find color according to magnitude and legend
+    // Top bottom limits
+    if (mag < range[0])
+      this.color = legend.colorsStr[0];
+    else
+      this.color = legend.colorsStr[steps -1];
+    for (let i = 0; i < steps-1; i++){
+      let lowLim = range[0] + i*unitStep;
+      let highLim = range[0] + (i+1)*unitStep;
+      if (mag > lowLim && mag < highLim){
+        this.color = legend.colorsStr[i];
+        i = steps;
+      }
+    }
+  }
+
+
+}
 
 
 
