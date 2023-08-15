@@ -295,7 +295,9 @@ class SourceWMS {
   //medBBOX = [-19, 36, 31, 45]; // LONG, LAT -18.12, 36.3, 45.98, 30.18 from https://resources.marine.copernicus.eu/product-detail/MEDSEA_ANALYSISFORECAST_WAV_006_017/INFORMATION
   // WMS service does not always provide the BBOX given, be careful. Check with the URL
   medBBOX = [-17, 30, 30, 45];
+  medBBOX3857 = [-1892431.3434856508, 3339584.723798207, 3503549.8435043753, 5621521.486192066];
   catseaBBOX = [-1, 36, 9, 44]; // LONG, LAT
+
 
 
   // Constructor
@@ -325,8 +327,11 @@ class SourceWMS {
     wmsURL = SourceWMS.setWMSParameter(wmsURL, 'HEIGHT', '1024');
 
     // BBOX
-    this.bbox = this.medBBOX;//this.catseaBBOX;
+    this.bbox = this.medBBOX3857;//this.catseaBBOX;
     wmsURL = SourceWMS.setWMSParameter(wmsURL, 'BBOX', JSON.stringify(this.bbox).replace('[', '').replace(']', ''));
+    // CRS for BBOX (some services only accept 3857 boundaries?)
+    wmsURL = SourceWMS.setWMSParameter(wmsURL, 'CRS', 'EPSG:3857');
+
     // STYLE gray
     let style = 'boxfill/greyscale';
     wmsURL = SourceWMS.setWMSParameter(wmsURL, 'STYLES', style);
@@ -340,6 +345,8 @@ class SourceWMS {
 
     // COLORRANGE
     this.colorrange = SourceWMS.getWMSParameter(wmsURL, 'COLORSCALERANGE').split('%2C');
+    if (this.colorrange.length == 1) // Split by comma
+      this.colorrange = SourceWMS.getWMSParameter(wmsURL, 'COLORSCALERANGE').split(',');
     this.colorrange = this.colorrange.map((e) => parseFloat(e));
 
 
@@ -414,7 +421,7 @@ class SourceWMS {
       return wmsURL + '&' + paramName + '=' + paramContent;
     }
     let currentContent = SourceWMS.getWMSParameter(wmsURL, paramName);
-    return wmsURL.replace(currentContent, paramContent);
+    return wmsURL.replace(paramName + '=' + currentContent, paramName + '=' + paramContent);
   }
 
 
