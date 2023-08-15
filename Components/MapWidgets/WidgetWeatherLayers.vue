@@ -64,7 +64,7 @@
   export default {
     name: 'widgetWeatherLayers', // Caps, no -
     created() {
-      // Create data retreiver
+      // Create data retriever
       this.dataRetriever = new WMSDataRetriever();
     },
     mounted() {

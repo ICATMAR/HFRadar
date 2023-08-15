@@ -6,6 +6,16 @@
 
 <script>
 
+
+/*
+TODO:
+Data could be painted in the map with two methods: canvas or HTML elements
+The issue with the canvas is that is resolution dependent and the painting of arrows might be more difficult and not so pretty
+With HTML elements we can put them accross the screen and use different icons. CSS can do the size and rotation. Although it might be difficult
+to fill the whole screen with equally spaced HTML elements, without causing overflow. Need to try maybe.
+*/
+
+
 export default {
   name: 'directionCanvas',
   created(){},
@@ -13,6 +23,8 @@ export default {
     // Canvas size
     this.createCanvas('dirCanvas');
 
+    // WMS data retriever
+    this.dataRetriever = new WMSDataRetriever(); // TODO: this class should be a singleton
 
     // EVENTS
     // Clima layer
@@ -40,7 +52,7 @@ export default {
       this.canvas = canvas;
 
       // Test
-      canvas.style["background-color"] = "rgba(1, 0, 0, 0.5)";
+      canvas.style["background-color"] = "rgba(1, 0, 0, 0.0)";
       
       this.$refs.canvasContainer.appendChild(canvas);
 
@@ -49,10 +61,36 @@ export default {
 
     // New clima layer selected
     setClimaLayer: function(infoWMS){
-      debugger;
+      // Hide if undefined (send undefined when closing widget)
+      if (infoWMS == undefined){
+        this.$refs.canvasContainer.style.display = 'none';
+      }
       // Check if it has animation parameter
       if (infoWMS.animation){
-        console.log("WORK TO DO HERE");
+        // OL map
+        if (this.map == undefined){
+          this.map = this.$parent.map;
+        }
+
+        // Prepare WMS url
+        let url = infoWMS.url;
+        url += '?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap&FORMAT=image/png&TRANSPARENT=true';
+        Object.keys(infoWMS.params).forEach(key => {
+          url += '&' + key + '=' + infoWMS.params[key];
+        });
+        infoWMS.wmsURL = url;
+
+        // Create animation engine
+        if (this.animEngine == undefined){
+          this.animEngine = new AnimationEngine(this.canvas, this.map, infoWMS, undefined);
+          // Bind events
+          // Map events for animation
+          this.$parent.map.on('moveend', this.animEngine.onMapMoveEnd);
+          this.$parent.map.on('movestart', this.animEngine.onMapMoveStart);
+        } else {
+          this.animEngine.setWMSSource(infoWMS.wmsURL, infoWMS.animation);
+        }
+        return
       }
     },
 

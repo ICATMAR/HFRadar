@@ -557,7 +557,7 @@ dataTypes = {
       name: dataType.name, // not necessary?
       doi: dataType.doi,
       attributions: '© CMEMS', // TODO
-      // animation
+      animation: dataType.animation,
     }
   }
 

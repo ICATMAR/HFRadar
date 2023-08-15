@@ -294,8 +294,7 @@ class SourceWMS {
 
   //medBBOX = [-19, 36, 31, 45]; // LONG, LAT -18.12, 36.3, 45.98, 30.18 from https://resources.marine.copernicus.eu/product-detail/MEDSEA_ANALYSISFORECAST_WAV_006_017/INFORMATION
   // WMS service does not always provide the BBOX given, be careful. Check with the URL
-  medBBOX = [-17, 30, 30, 45];
-  medBBOX3857 = [-1892431.3434856508, 3339584.723798207, 3503549.8435043753, 5621521.486192066];
+  medBBOX = [30, -17, 45, 30]; // NOW IT IS LAT
   catseaBBOX = [-1, 36, 9, 44]; // LONG, LAT
 
 
@@ -328,10 +327,10 @@ class SourceWMS {
 
     // BBOX
     this.bbox = this.medBBOX;//this.catseaBBOX;
-    this.bbox3857 = this.medBBOX3857;
-    wmsURL = SourceWMS.setWMSParameter(wmsURL, 'BBOX', JSON.stringify(this.bbox3857).replace('[', '').replace(']', ''));
+    //this.bbox3857 = this.medBBOX3857;
+    wmsURL = SourceWMS.setWMSParameter(wmsURL, 'BBOX', JSON.stringify(this.bbox).replace('[', '').replace(']', ''));
     // CRS for BBOX (some services only accept 3857 boundaries?)
-    wmsURL = SourceWMS.setWMSParameter(wmsURL, 'CRS', 'EPSG:3857');
+    //wmsURL = SourceWMS.setWMSParameter(wmsURL, 'CRS', 'EPSG:3857');
 
     // STYLE gray
     let style = 'boxfill/greyscale';
