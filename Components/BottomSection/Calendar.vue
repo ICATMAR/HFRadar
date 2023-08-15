@@ -388,9 +388,9 @@ export default {
   padding: 20px;
 }
 
-.monthButton {
+/* .monthButton {
   
-}
+} */
 
 .daysContainer {
   width: calc(clamp(20px, 6vw, 40px) * 8.5);
