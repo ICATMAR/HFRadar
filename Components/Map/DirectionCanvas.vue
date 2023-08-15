@@ -64,6 +64,7 @@ export default {
       // Hide if undefined (send undefined when closing widget)
       if (infoWMS == undefined){
         this.$refs.canvasContainer.style.display = 'none';
+        return;
       }
       // Check if it has animation parameter
       if (infoWMS.animation){
