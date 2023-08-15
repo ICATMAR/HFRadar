@@ -110,7 +110,7 @@ export default {
      
     // EVENTS
     window.eventBus.on("HFRadarDataLoaded", tmst => {
-      console.log(tmst);
+      //console.log(tmst);
       //let tempTmst = window.GUIManager.currentTmst;
       //this.createHTML(tempTmst);
     });
