@@ -96,6 +96,12 @@ button:hover {
   transform: scale(1.05);
   transition: all 0.2s ease-in-out;
 }
+.unavailable {
+  background-color: rgb(136, 136, 136);
+  border: 2px solid gray;
+  pointer-events: none;
+  cursor:auto;
+}
 
 
 
