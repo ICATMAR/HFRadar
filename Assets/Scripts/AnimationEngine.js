@@ -1430,6 +1430,7 @@ class Arrow {
   // Variables
   numVerticesPath = 8;
   stepInPixels = 10; // Step (ideally in lat, long, not in pixels)
+  stepInLongLat = 1;
   arrowTipLength = 0.5;
   color = [0,0,0];
 
@@ -1440,6 +1441,7 @@ class Arrow {
     // Variable for optimization
     this.valueVec2 = [0,0];
     this.pointVec2 = [0,0];
+    this.tempVec2 =  [0,0];
     this.normDir = [0,0];
 
     // Drawing function
@@ -1467,18 +1469,38 @@ class Arrow {
     this.normDir[1] = this.valueVec2[1]/this.vertexValue;
 
     // Step in arrow's direction
-    this.pointVec2[0] += this.normDir[0] * this.stepInPixels || 0;
-    this.pointVec2[1] -= this.normDir[1] * this.stepInPixels || 0; // North is inverted
-    // Assign to vertices array
-    this.vertices[2] = this.pointVec2[0];
-    this.vertices[3] = this.pointVec2[1];
+    // Convert to long lat
+    let map = this.particleSystem.map;
+    this.tempVec2[0] = this.vertices[0];
+    this.tempVec2[1] = this.vertices[1];
+    this.tempVec2 = map.getCoordinateFromPixel(this.tempVec2);
+    this.tempVec2 = ol.proj.transform(this.tempVec2, 'EPSG:3857', 'EPSG:4326');
+    let long = this.tempVec2[0];
+    let lat = this.tempVec2[1];
+    // Step in long lat
+    let nextLong = long + ((this.normDir[0] * this.stepInLongLat) / earthRadius) * (180 / Math.PI) / Math.cos(lat * Math.PI / 180);
+    let nextLat = lat + ((this.normDir[1] * this.stepInLongLat) / earthRadius) * (180 / Math.PI);
+    this.tempVec2[0] = nextLong;
+    this.tempVec2[1] = nextLat;
+    // Convert to screen pixel
+    let coord = ol.proj.transform(this.tempVec2, 'EPSG:4326', 'EPSG:3857');
+    let pixelPos = map.getPixelFromCoordinate(coord);
+    // Assign to vertices path
+    this.vertices[2] = pixelPos[0];
+    this.vertices[3] = pixelPos[1];
 
-    // Arrow sides (45º rotation from arrow tip)
-    this.vertices[4] = this.vertices[0] + this.stepInPixels * this.arrowTipLength * 0.707 * (this.normDir[0] - this.normDir[1]);
-    this.vertices[5] = this.vertices[1] - this.stepInPixels * this.arrowTipLength * 0.707 * (this.normDir[0] + this.normDir[1]);
+    // this.pointVec2[0] += this.normDir[0] * this.stepInPixels || 0;
+    // this.pointVec2[1] -= this.normDir[1] * this.stepInPixels || 0; // North is inverted
+    // // Assign to vertices array
+    // this.vertices[2] = this.pointVec2[0];
+    // this.vertices[3] = this.pointVec2[1];
 
-    this.vertices[6] = this.vertices[0] + this.stepInPixels * this.arrowTipLength * 0.707 * (-this.normDir[0] - this.normDir[1]);
-    this.vertices[7] = this.vertices[1] - this.stepInPixels * this.arrowTipLength * 0.707 * (this.normDir[0] - this.normDir[1]);
+    // // Arrow sides (45º rotation from arrow tip)
+    // this.vertices[4] = this.vertices[0] + this.stepInPixels * this.arrowTipLength * 0.707 * (this.normDir[0] - this.normDir[1]);
+    // this.vertices[5] = this.vertices[1] - this.stepInPixels * this.arrowTipLength * 0.707 * (this.normDir[0] + this.normDir[1]);
+
+    // this.vertices[6] = this.vertices[0] + this.stepInPixels * this.arrowTipLength * 0.707 * (-this.normDir[0] - this.normDir[1]);
+    // this.vertices[7] = this.vertices[1] - this.stepInPixels * this.arrowTipLength * 0.707 * (this.normDir[0] - this.normDir[1]);
   }
 
 
@@ -1520,18 +1542,18 @@ class Arrow {
 
 
     // Shadow
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.lineWidth = 1.1;
+    // ctx.stroke();
+    // ctx.beginPath();
+    // ctx.lineWidth = 1.1;
     
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)'; // Makes the app go slow, consider something different
+    // ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)'; // Makes the app go slow, consider something different
 
-    ctx.moveTo(this.vertices[0], this.vertices[1]);
-    ctx.lineTo(this.vertices[2], this.vertices[3]);
-    ctx.lineTo(this.vertices[4], this.vertices[5]);
-    ctx.lineTo(this.vertices[2], this.vertices[3]);
-    ctx.lineTo(this.vertices[6], this.vertices[7]);
-    ctx.lineTo(this.vertices[2], this.vertices[3]);
+    // ctx.moveTo(this.vertices[0], this.vertices[1]);
+    // ctx.lineTo(this.vertices[2], this.vertices[3]);
+    // ctx.lineTo(this.vertices[4], this.vertices[5]);
+    // ctx.lineTo(this.vertices[2], this.vertices[3]);
+    // ctx.lineTo(this.vertices[6], this.vertices[7]);
+    // ctx.lineTo(this.vertices[2], this.vertices[3]);
 
 
     // Main arrow
@@ -1540,15 +1562,15 @@ class Arrow {
     ctx.lineWidth = 1;
     //ctx.lineWidth = Math.max(value*15, 4);
     //ctx.fillStyle = 'rgba(0, 0, 0, ', alphaFactor*0.0, ')';
-    let colorStr = 'rgba(' + this.color[0] + ',' + this.color[1] + ',' + this.color[2] + ', ' + 0.2 + ')'
+    let colorStr = 'rgba(' + this.color[0] + ',' + this.color[1] + ',' + this.color[2] + ', ' + 0.7 + ')'
     ctx.strokeStyle = colorStr; // Makes the app go slow, consider something different
 
     ctx.moveTo(this.vertices[0], this.vertices[1]);
     ctx.lineTo(this.vertices[2], this.vertices[3]);
-    ctx.lineTo(this.vertices[4], this.vertices[5]);
-    ctx.lineTo(this.vertices[2], this.vertices[3]);
-    ctx.lineTo(this.vertices[6], this.vertices[7]);
-    ctx.lineTo(this.vertices[2], this.vertices[3]);
+    // ctx.lineTo(this.vertices[4], this.vertices[5]);
+    // ctx.lineTo(this.vertices[2], this.vertices[3]);
+    // ctx.lineTo(this.vertices[6], this.vertices[7]);
+    // ctx.lineTo(this.vertices[2], this.vertices[3]);
 
     
 
