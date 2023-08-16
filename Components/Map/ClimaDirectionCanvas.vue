@@ -81,10 +81,11 @@ export default {
         });
         infoWMS.wmsURL = url;
 
+        // Force arrows
+        infoWMS.animation.useArrows = true;
+
         // Create animation engine
         if (this.animEngine == undefined){
-          // Force arrows
-          infoWMS.animation.useArrows = true;
           this.animEngine = new AnimationEngine(this.canvas, this.map, infoWMS, undefined);
           // Bind events
           // Map events for animation
