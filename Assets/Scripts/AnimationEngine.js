@@ -55,6 +55,8 @@ class AnimationEngine {
     // Set height and width of the canvas
     this.canvasParticles.width = this.map.getViewport().offsetWidth;
     this.canvasParticles.height = this.map.getViewport().offsetHeight;
+    // Calculate geographic extent of the canvas
+    this.calculateCanvasGeographicExtent();
     // Set up variable for when map is moving
     this.mapIsMoving = false;
     // https://stackoverflow.com/questions/11565471/removing-event-listener-which-was-added-with-bind
@@ -258,12 +260,25 @@ class AnimationEngine {
     // Resize num of particles
     if (typeof this.particles.resizeNumParticles === 'function')
       this.particles.resizeNumParticles();
+    
+  }
+
+  calculateCanvasGeographicExtent(){
+    // Calculate map extent in long lat
+    let extent = this.map.getView().calculateExtent();
+    let mapExtentMin = ol.proj.transform([extent[0], extent[1]], 'EPSG:3857', 'EPSG:4326');
+    let mapExtentMax = ol.proj.transform([extent[2], extent[3]], 'EPSG:3857', 'EPSG:4326');
+    this.canvasParticles.mapMinLong = mapExtentMin[0];
+    this.canvasParticles.mapMinLat = mapExtentMin[1];
+    this.canvasParticles.mapMaxLong = mapExtentMax[0];
+    this.canvasParticles.mapMaxLat = mapExtentMax[1];
   }
 
 
   // Callback when map size changes
   onMapMoveEnd(){
     this.resizeCanvas();
+    this.calculateCanvasGeographicExtent();
     this.mapIsMoving = false;
     if (this.source) {
       if (this.source.isReady){
@@ -928,6 +943,12 @@ class ParticleSystem {
   }
   // Reposition particles
   repositionParticles(){
+    // Calculate lat-pixel ratio
+    let latRange = this.canvas.mapMaxLat - this.canvas.mapMinLat;
+    this.latPixelRatio = latRange / this.canvas.width;
+    console.log("Lat-pixel ratio: " + this.latPixelRatio);
+
+    // Reposition particles
     for (let i = 0; i < this.numParticles; i++)
       this.particles[i].repositionParticle();
   }
@@ -1471,6 +1492,9 @@ class Arrow {
     this.normDir[0] = this.valueVec2[0]/this.vertexValue;
     this.normDir[1] = this.valueVec2[1]/this.vertexValue;
 
+    // Redefine step according to lat-pixel ratio
+    this.stepInLongLat = this.particleSystem.latPixelRatio / 0.0008532612403800892;
+
     // Step in arrow's direction
     // Convert to long lat
     let map = this.particleSystem.map;
@@ -1594,7 +1618,7 @@ class Arrow {
     ctx.lineWidth = 1;
     //ctx.lineWidth = Math.max(value*15, 4);
     //ctx.fillStyle = 'rgba(0, 0, 0, ', alphaFactor*0.0, ')';
-    let colorStr = 'rgba(' + this.color[0] + ',' + this.color[1] + ',' + this.color[2] + ', ' + 0.7 + ')'
+    let colorStr = 'rgba(' + this.color[0] + ',' + this.color[1] + ',' + this.color[2] + ', ' + 0.3 + ')'
     ctx.strokeStyle = colorStr; // Makes the app go slow, consider something different
 
     ctx.moveTo(this.vertices[0], this.vertices[1]);
