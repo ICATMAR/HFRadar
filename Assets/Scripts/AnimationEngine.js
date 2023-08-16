@@ -1428,7 +1428,7 @@ class ParticleCombinedRadar extends Particle {
 // Class for static directional arrows
 class Arrow {
   // Variables
-  numVerticesPath = 8;
+  numVerticesPath = 5;
   stepInPixels = 10; // Step (ideally in lat, long, not in pixels)
   stepInLongLat = 1;
   arrowTipLength = 0.5;
@@ -1442,6 +1442,7 @@ class Arrow {
     this.valueVec2 = [0,0];
     this.pointVec2 = [0,0];
     this.tempVec2 =  [0,0];
+    this.temp2Vec2 = [0,0];
     this.normDir = [0,0];
 
     // Drawing function
@@ -1456,6 +1457,8 @@ class Arrow {
   repositionParticle(){
     // Generate starting vertex with initial value
     this.generatePoint(this.pointVec2, this.valueVec2);
+    if (this.valueVec2[0] == undefined)
+      return;
     // Assign initial position
     this.vertices[0] = this.pointVec2[0];
     this.vertices[1] = this.pointVec2[1];
@@ -1478,16 +1481,33 @@ class Arrow {
     let long = this.tempVec2[0];
     let lat = this.tempVec2[1];
     // Step in long lat
-    let nextLong = long + ((this.normDir[0] * this.stepInLongLat) / earthRadius) * (180 / Math.PI) / Math.cos(lat * Math.PI / 180);
-    let nextLat = lat + ((this.normDir[1] * this.stepInLongLat) / earthRadius) * (180 / Math.PI);
-    this.tempVec2[0] = nextLong;
-    this.tempVec2[1] = nextLat;
-    // Convert to screen pixel
-    let coord = ol.proj.transform(this.tempVec2, 'EPSG:4326', 'EPSG:3857');
-    let pixelPos = map.getPixelFromCoordinate(coord);
-    // Assign to vertices path
+    let pixelPos = this.pixelPosWithStepInLongLat(long, lat, this.normDir, this.stepInLongLat, this.tempVec2);
     this.vertices[2] = pixelPos[0];
     this.vertices[3] = pixelPos[1];
+    // Tip long lat
+    let tipLong = this.tempVec2[0];
+    let tipLat = this.tempVec2[1];
+
+    // Perpendicular step
+    // Perpendicular direction
+    this.temp2Vec2[0] = -this.normDir[1];
+    this.temp2Vec2[1] = this.normDir[0];
+    pixelPos = this.pixelPosWithStepInLongLat(tipLong, tipLat, this.temp2Vec2, this.stepInLongLat/3, this.tempVec2);
+    this.vertices[4] = pixelPos[0];
+    this.vertices[5] = pixelPos[1];
+
+    // Top tip arrow
+    pixelPos = this.pixelPosWithStepInLongLat(tipLong, tipLat, this.normDir, this.stepInLongLat*1.2, this.tempVec2);
+    this.vertices[6] = pixelPos[0];
+    this.vertices[7] = pixelPos[1];
+
+    // Right step
+    this.temp2Vec2[0] = this.normDir[1];
+    this.temp2Vec2[1] = -this.normDir[0];
+    pixelPos = this.pixelPosWithStepInLongLat(tipLong, tipLat, this.temp2Vec2, this.stepInLongLat/3, this.tempVec2);
+    this.vertices[8] = pixelPos[0];
+    this.vertices[9] = pixelPos[1];
+
 
     // this.pointVec2[0] += this.normDir[0] * this.stepInPixels || 0;
     // this.pointVec2[1] -= this.normDir[1] * this.stepInPixels || 0; // North is inverted
@@ -1501,6 +1521,18 @@ class Arrow {
 
     // this.vertices[6] = this.vertices[0] + this.stepInPixels * this.arrowTipLength * 0.707 * (-this.normDir[0] - this.normDir[1]);
     // this.vertices[7] = this.vertices[1] - this.stepInPixels * this.arrowTipLength * 0.707 * (this.normDir[0] - this.normDir[1]);
+  }
+
+  pixelPosWithStepInLongLat(long, lat, dirVec2, step, nextLongLatVec2){
+    // Step in long lat
+    let nextLong = long + ((dirVec2[0] * step) / earthRadius) * (180 / Math.PI) / Math.cos(lat * Math.PI / 180);
+    let nextLat = lat + ((dirVec2[1] * step) / earthRadius) * (180 / Math.PI);
+    nextLongLatVec2[0] = nextLong;
+    nextLongLatVec2[1] = nextLat;
+    // Convert to screen pixel
+    let coord = ol.proj.transform(nextLongLatVec2, 'EPSG:4326', 'EPSG:3857');
+    let pixelPos = this.particleSystem.map.getPixelFromCoordinate(coord);
+    return pixelPos;
   }
 
 
@@ -1567,10 +1599,11 @@ class Arrow {
 
     ctx.moveTo(this.vertices[0], this.vertices[1]);
     ctx.lineTo(this.vertices[2], this.vertices[3]);
-    // ctx.lineTo(this.vertices[4], this.vertices[5]);
-    // ctx.lineTo(this.vertices[2], this.vertices[3]);
-    // ctx.lineTo(this.vertices[6], this.vertices[7]);
-    // ctx.lineTo(this.vertices[2], this.vertices[3]);
+    ctx.lineTo(this.vertices[4], this.vertices[5]);
+    ctx.lineTo(this.vertices[6], this.vertices[7]);
+    ctx.lineTo(this.vertices[8], this.vertices[9]);
+    ctx.lineTo(this.vertices[2], this.vertices[3]);
+    
 
     
 
