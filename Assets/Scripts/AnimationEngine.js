@@ -97,7 +97,9 @@ class AnimationEngine {
 
     // Create CombinedRadar source
     if (animInfo.CombinedRadarData){
+      //this.useArrows = true;
       this.source = new SourceCombinedRadar(animInfo.CombinedRadarData);
+      //this.source.animation.useArrows = true;
       // Create particle system
       this.particles = new ParticleSystem(this.canvasParticles, this.source, this.map);
       this.particles.clear();
@@ -912,7 +914,7 @@ class ParticleSystem {
     // Create particles
     this.particles = [];
     for (let i = 0; i < this.fullScreenNumParticles; i++){
-      if (this.source.constructor.name == 'SourceCombinedRadar'){
+      if (this.source.constructor.name == 'SourceCombinedRadar' && !source.animation.useArrows){
         this.particles[i] = new ParticleCombinedRadar(this);
       }
       else if(source.animation.useArrows)
