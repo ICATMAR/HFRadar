@@ -942,11 +942,6 @@ class ParticleSystem {
   
   // Reposition particles
   repositionParticles(){
-    // Calculate lat-pixel ratio
-    let latRange = this.canvas.mapMaxLat - this.canvas.mapMinLat;
-    this.latPixelRatio = latRange / this.canvas.width;
-    console.log("Lat-pixel ratio: " + this.latPixelRatio);
-
     // Reposition particles
     for (let i = 0; i < this.numParticles; i++)
       this.particles[i].repositionParticle();
@@ -1495,9 +1490,13 @@ class Arrow {
     this.normDir[0] = this.valueVec2[0]/this.vertexValue;
     this.normDir[1] = this.valueVec2[1]/this.vertexValue;
 
-    // Redefine step according to lat-pixel ratio
+    // Redefine step according to long and lat pixel ratio
     // Determines the size of the arrow
-    this.stepInLongLat = this.particleSystem.latPixelRatio / 0.0008//0.0008532612403800892;
+    let canvas = this.particleSystem.canvas;
+    // Compensate for zoom in and out
+    this.stepInLongLat = canvas.mapMaxLat - canvas.mapMinLat;
+    // Compensate for canvas height as it modifies latRange
+    this.stepInLongLat /= this.particleSystem.canvas.height / 900;
 
     // Step in arrow's direction
     // Convert to long lat
@@ -1561,10 +1560,8 @@ class Arrow {
     let aspectRatio = this.particleSystem.canvas.width / this.particleSystem.canvas.height;
     let gridWidth;
     // Grid width is defined by the height and width of the canvas
-    if (aspectRatio > 1) // width is bigger than height
-      gridWidth = Math.floor(Math.sqrt(this.particleSystem.numParticles / aspectRatio)); // Floor it so there might be arrows outside the screen size and not otherwise (missing arrows in corners maybe)
-    else
-      gridWidth = Math.floor(Math.sqrt(this.particleSystem.numParticles * aspectRatio));
+    gridWidth = 0.9 * Math.ceil(Math.sqrt(this.particleSystem.numParticles * aspectRatio)); // Floor it so there might be arrows outside the screen size and not otherwise (missing arrows in corners maybe)
+
     // Find the column and row of the particle
     let col = this.particleNumber % gridWidth;
     let row = Math.floor(this.particleNumber / gridWidth);
