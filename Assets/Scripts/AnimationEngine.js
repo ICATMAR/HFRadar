@@ -916,7 +916,7 @@ class ParticleSystem {
         this.particles[i] = new ParticleCombinedRadar(this);
       }
       else if(source.animation.useArrows)
-        this.particles[i] = new Arrow(this);
+        this.particles[i] = new Arrow(this, i);
       else
         this.particles[i] = new Particle(this);
     }
@@ -931,16 +931,15 @@ class ParticleSystem {
   // Functions
   // Set num particles according to the number of pixels and source
   resizeNumParticles(){
-    //if (this.source.constructor.name == 'SourceWMS'){
-      let numPixels = this.canvas.width * this.canvas.height;
-      let numParticlesFactor = numPixels / this.fullScreenPixels;
-      // Active number of animations
-      numParticlesFactor /= AnimationEngine.getNumActiveAnimations();
-      // Define number of particles
-      this.numParticles = Math.min(Math.round(numParticlesFactor * this.fullScreenNumParticles), this.fullScreenNumParticles);
-    //} else if (this.source.constructor.name == 'SourceHFRadar'){
-    //}
+    let numPixels = this.canvas.width * this.canvas.height;
+    let numParticlesFactor = numPixels / this.fullScreenPixels;
+    // Active number of animations
+    numParticlesFactor /= AnimationEngine.getNumActiveAnimations();
+    // Define number of particles
+    this.numParticles = Math.min(Math.round(numParticlesFactor * this.fullScreenNumParticles), this.fullScreenNumParticles);
+
   }
+  
   // Reposition particles
   repositionParticles(){
     // Calculate lat-pixel ratio
@@ -1449,15 +1448,17 @@ class ParticleCombinedRadar extends Particle {
 // Class for static directional arrows
 class Arrow {
   // Variables
-  numVerticesPath = 5;
-  stepInPixels = 10; // Step (ideally in lat, long, not in pixels)
+  numVerticesPath = 5; // bottom arrow, center arrow, left corner, top arrow, right corner
   stepInLongLat = 1;
   arrowTipLength = 0.5;
   color = [0,0,0];
 
   // Constructor
-  constructor(particleSystem){
+  constructor(particleSystem, particleNumber){
     this.particleSystem = particleSystem;
+
+    // Particle number
+    this.particleNumber = particleNumber;
     
     // Variable for optimization
     this.valueVec2 = [0,0];
@@ -1465,8 +1466,6 @@ class Arrow {
     this.tempVec2 =  [0,0];
     this.temp2Vec2 = [0,0];
     this.normDir = [0,0];
-
-    // Drawing function
 
     // Vertices
     this.vertices = new Float32Array(this.numVerticesPath * 2); // Vertices that define the arrow
@@ -1493,7 +1492,8 @@ class Arrow {
     this.normDir[1] = this.valueVec2[1]/this.vertexValue;
 
     // Redefine step according to lat-pixel ratio
-    this.stepInLongLat = this.particleSystem.latPixelRatio / 0.0008532612403800892;
+    // Determines the size of the arrow
+    this.stepInLongLat = this.particleSystem.latPixelRatio / 0.0008//0.0008532612403800892;
 
     // Step in arrow's direction
     // Convert to long lat
@@ -1532,21 +1532,10 @@ class Arrow {
     this.vertices[8] = pixelPos[0];
     this.vertices[9] = pixelPos[1];
 
-
-    // this.pointVec2[0] += this.normDir[0] * this.stepInPixels || 0;
-    // this.pointVec2[1] -= this.normDir[1] * this.stepInPixels || 0; // North is inverted
-    // // Assign to vertices array
-    // this.vertices[2] = this.pointVec2[0];
-    // this.vertices[3] = this.pointVec2[1];
-
-    // // Arrow sides (45º rotation from arrow tip)
-    // this.vertices[4] = this.vertices[0] + this.stepInPixels * this.arrowTipLength * 0.707 * (this.normDir[0] - this.normDir[1]);
-    // this.vertices[5] = this.vertices[1] - this.stepInPixels * this.arrowTipLength * 0.707 * (this.normDir[0] + this.normDir[1]);
-
-    // this.vertices[6] = this.vertices[0] + this.stepInPixels * this.arrowTipLength * 0.707 * (-this.normDir[0] - this.normDir[1]);
-    // this.vertices[7] = this.vertices[1] - this.stepInPixels * this.arrowTipLength * 0.707 * (this.normDir[0] - this.normDir[1]);
   }
 
+
+  // Return pixel position according to step in lat long
   pixelPosWithStepInLongLat(long, lat, dirVec2, step, nextLongLatVec2){
     // Step in long lat
     let nextLong = long + ((dirVec2[0] * step) / earthRadius) * (180 / Math.PI) / Math.cos(lat * Math.PI / 180);
@@ -1561,33 +1550,28 @@ class Arrow {
 
 
   // Generate new point
-  // Could be done more intelligent, like taking the extent of the layer from openlayers or the WMS service
+  // Use a grid with equidistant particles
   generatePoint(point, value, callStackNum){
-    callStackNum = callStackNum || 1;
-    // Generate random X,Y number
-    point[0] = Math.random() * this.particleSystem.canvas.width;
-    point[1] = Math.random() * this.particleSystem.canvas.height;
-    // Check if it has data
-    if (point[0] == undefined || isNaN(point[0]) || point[0] == null)
-      console.error(point);
+    // callstacknum not used
+    // Calculate grid position
+    let normNumber = this.particleNumber / this.particleSystem.numParticles;
+    let index = Math.floor(normNumber * this.particleSystem.canvas.width * this.particleSystem.canvas.height);
+    let col = index % this.particleSystem.canvas.width;
+    let row = Math.floor(index / this.particleSystem.canvas.width);
+    point[0] = col; // x
+    point[1] = row; // y
     // Get value at pixel
-    // Transform pixel to long lat
-    let coord = this.particleSystem.map.getCoordinateFromPixel(point); // returns [long,lat]?
-    if (coord == null && callStackNum < 20){ // Library is not loaded yet?
-      this.generatePoint(point, value, callStackNum + 1);
-    } else if (callStackNum >= 20) // Library is not yet loaded
-      return;
+    let coord = this.particleSystem.map.getCoordinateFromPixel(point);
+    if (coord == null)
+      debugger;
     coord = ol.proj.transform(coord, 'EPSG:3857', 'EPSG:4326');
     // Get value at long lat from source
-    //value = this.particleSystem.source.getValueAtPixel(point, value);
     value = this.particleSystem.source.getValueAtLongLat(coord[0], coord[1], value);
-    
-
-    // If pixel does not contain data, throw it again at least 20 times
-    if (value[0] == undefined && callStackNum < 20){
-      this.generatePoint(point, value, callStackNum + 1); // Recursive function
-    }
+    // If pixel does not contain data
+    if (value[0] == undefined)
+      return value;
   }
+
 
 
   // Draw / Update
