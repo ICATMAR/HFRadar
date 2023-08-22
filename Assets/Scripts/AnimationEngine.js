@@ -1592,27 +1592,26 @@ class Arrow {
 
 
     // Shadow
-    // ctx.stroke();
-    // ctx.beginPath();
-    // ctx.lineWidth = 1.1;
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.lineWidth = 2;
     
-    // ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)'; // Makes the app go slow, consider something different
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.4)'; // Makes the app go slow, consider something different
 
-    // ctx.moveTo(this.vertices[0], this.vertices[1]);
-    // ctx.lineTo(this.vertices[2], this.vertices[3]);
-    // ctx.lineTo(this.vertices[4], this.vertices[5]);
-    // ctx.lineTo(this.vertices[2], this.vertices[3]);
-    // ctx.lineTo(this.vertices[6], this.vertices[7]);
-    // ctx.lineTo(this.vertices[2], this.vertices[3]);
+    ctx.lineTo(this.vertices[4], this.vertices[5]);
+    ctx.lineTo(this.vertices[6], this.vertices[7]);
+    ctx.lineTo(this.vertices[8], this.vertices[9]);
+    ctx.lineTo(this.vertices[4], this.vertices[5]);
+    ctx.fill();
 
 
     // Main arrow
-    ctx.stroke();
+    // ctx.stroke();
     ctx.beginPath();
     ctx.lineWidth = 1;
     //ctx.lineWidth = Math.max(value*15, 4);
     //ctx.fillStyle = 'rgba(0, 0, 0, ', alphaFactor*0.0, ')';
-    let colorStr = 'rgba(' + this.color[0] + ',' + this.color[1] + ',' + this.color[2] + ', ' + 0.3 + ')'
+    let colorStr = 'rgba(' + this.color[0] + ',' + this.color[1] + ',' + this.color[2] + ', ' + 0.4 + ')'
     ctx.strokeStyle = colorStr; // Makes the app go slow, consider something different
 
     ctx.moveTo(this.vertices[0], this.vertices[1]);
