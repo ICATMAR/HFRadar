@@ -92,9 +92,20 @@ export default {
           this.$parent.map.on('moveend', this.animEngine.onMapMoveEnd);
           this.$parent.map.on('movestart', this.animEngine.onMapMoveStart);
         } else {
+          this.animEngine.isStopped = false;
           this.animEngine.setWMSSource(infoWMS.wmsURL, infoWMS.animation);
         }
         return
+      } 
+      // Hide animation layer
+      else {
+        if (this.animEngine != undefined){
+          // Stop animation
+          this.animEngine.isStopped = true;
+          // Clear canvas
+          this.animEngine.clearCanvas();
+        }
+        
       }
     },
 
