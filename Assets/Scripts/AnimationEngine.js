@@ -1477,8 +1477,12 @@ class Arrow {
   repositionParticle(){
     // Generate starting vertex with initial value
     this.generatePoint(this.pointVec2, this.valueVec2);
-    if (this.valueVec2[0] == undefined)
+    if (this.valueVec2[0] == undefined){
+      // Reset particle
+      this.vertices.fill(-1);
       return;
+    }
+      
     // Assign initial position
     this.vertices[0] = this.pointVec2[0];
     this.vertices[1] = this.pointVec2[1];
@@ -1551,15 +1555,24 @@ class Arrow {
 
   // Generate new point
   // Use a grid with equidistant particles
-  generatePoint(point, value, callStackNum){
+  generatePoint(point, value){
     // callstacknum not used
     // Calculate grid position
-    let normNumber = this.particleNumber / this.particleSystem.numParticles;
-    let index = Math.floor(normNumber * this.particleSystem.canvas.width * this.particleSystem.canvas.height);
-    let col = index % this.particleSystem.canvas.width;
-    let row = Math.floor(index / this.particleSystem.canvas.width);
-    point[0] = col; // x
-    point[1] = row; // y
+    let aspectRatio = this.particleSystem.canvas.width / this.particleSystem.canvas.height;
+    let gridWidth;
+    // Grid width is defined by the height and width of the canvas
+    if (aspectRatio > 1) // width is bigger than height
+      gridWidth = Math.floor(Math.sqrt(this.particleSystem.numParticles / aspectRatio)); // Floor it so there might be arrows outside the screen size and not otherwise (missing arrows in corners maybe)
+    else
+      gridWidth = Math.floor(Math.sqrt(this.particleSystem.numParticles * aspectRatio));
+    // Find the column and row of the particle
+    let col = this.particleNumber % gridWidth;
+    let row = Math.floor(this.particleNumber / gridWidth);
+
+    // Determine the pixel spacing between particles
+    let pixelSpacing = this.particleSystem.canvas.width / gridWidth;// Space out arrows. Should it be dependent on screen size?
+    point[0] = col * pixelSpacing; // x
+    point[1] = row * pixelSpacing; // y
     // Get value at pixel
     let coord = this.particleSystem.map.getCoordinateFromPixel(point);
     if (coord == null)
