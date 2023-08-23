@@ -1266,7 +1266,7 @@ class ParticleCombinedRadar extends Particle {
     super(particleSystem);
 
     particleSystem.speedFactor = 0.01;
-    this.stepInPixels = 0.1;
+    this.stepInLongLat = 0.008;
     this.color = [255,255,255];
   }
 
@@ -1282,25 +1282,32 @@ class ParticleCombinedRadar extends Particle {
     this.vertices[0] = this.pointVec2[0];
     this.vertices[1] = this.pointVec2[1];
 
+    // Get position in long lat
+    let coord = this.particleSystem.map.getCoordinateFromPixel(this.pointVec2);
+    coord = ol.proj.transform(coord, 'EPSG:3857', 'EPSG:4326');
+
     // Create vertices path
     // There is an advantge of storing pixel location: when painting we dont need to transform from lat-long to screen space
     for (var i = 1; i < this.numVerticesPath; i++){
       // Make step
-      // North is inverted because of pixels (less pixels, more north)
-      this.pointVec2[0] += this.valueVec2[0] * this.stepInPixels || 0; // 0 if there is no data
-      this.pointVec2[1] -= this.valueVec2[1] * this.stepInPixels || 0; // 0 if there is no data
-      // Assign positions to vertices array
-      this.vertices[i*2] = this.pointVec2[0];
-      this.vertices[i*2 + 1] = this.pointVec2[1];
-
-      // Transform pixel to long lat
-      let coord = this.particleSystem.map.getCoordinateFromPixel(this.pointVec2);
-      coord = ol.proj.transform(coord, 'EPSG:3857', 'EPSG:4326');
-      // Get new value according to longitude and latitude
+      let step = this.stepInLongLat;
+      // Step in long lat
+      let nextLong = coord[0] + ((this.valueVec2[0] * step) / earthRadius) * (180 / Math.PI) / Math.cos(coord[0] * Math.PI / 180);
+      let nextLat = coord[1] + ((this.valueVec2[1] * step) / earthRadius) * (180 / Math.PI);
+      // Convert to pixel coordinates
+      coord[0] = nextLong;
+      coord[1] = nextLat;
+      let coord3857 = ol.proj.transform(coord, 'EPSG:4326', 'EPSG:3857');
+      let pixelPos = this.particleSystem.map.getPixelFromCoordinate(coord3857);
+      // Store values
+      this.vertices[i*2] = pixelPos[0];
+      this.vertices[i*2 + 1] = pixelPos[1];
+      // Get value
       this.valueVec2 = this.particleSystem.source.getValueAtLongLat(coord[0], coord[1], this.valueVec2);
       // Assign values
       if (this.valueVec2[0] !== undefined)
         this.verticesValue[i] = Math.sqrt(this.valueVec2[0]*this.valueVec2[0] + this.valueVec2[1]*this.valueVec2[1]);
+   
     }
 
     // Assign first value (avoids white dots in animation)
