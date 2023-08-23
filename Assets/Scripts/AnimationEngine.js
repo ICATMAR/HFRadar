@@ -871,7 +871,9 @@ class ParticleHF {
       colorStr = this.color.replace(')', ', ' + alphaFactor/255 + ')');
     else // Hex
       colorStr =  '#' + this.color + alphaFactor.toString(16).padStart(2,'0');
-    ctx.strokeStyle = colorStr; // Makes the app go slow, consider something different
+
+    if (colorStr.localeCompare(ctx.strokeStyle) != 0)
+      ctx.strokeStyle = colorStr; // Makes the app go slow, consider something different
     ctx.moveTo(x, y)
     ctx.lineTo(nextX, nextY);
   }
@@ -994,7 +996,7 @@ class ParticleSystem {
 class Particle {
   // Variables
   numVerticesPath = 20;
-  stepInPixels = 20; // Step (ideally in lat, long, not in pixels)
+  stepInLongLat = 1;
   color = [0,0,0];
 
   // Constructor
@@ -1016,23 +1018,23 @@ class Particle {
     if (particleSystem.source.animation.type == 'velocity'){
       this.draw = this.drawVelocity;
       this.numVerticesPath = 20;
-      this.stepInPixels = 20;
+      this.stepInLongLat = 7;
     }
     if (particleSystem.source.animation.type == 'wind'){
       this.draw = this.drawVelocity;
       this.numVerticesPath = 20;
-      this.stepInPixels = 1;
+      this.stepInLongLat = 1;
       this.particleSystem.speedFactor = 0.002;
     }
     else if (particleSystem.source.animation.type == 'wave'){
       this.draw = this.drawWaves;
       this.numVerticesPath = 8;
-      this.stepInPixels = 20;
+      this.stepInLongLat = 50;
     }
     else if (particleSystem.source.animation.type == 'whiteWave'){
       this.draw = this.drawWaves;
       this.numVerticesPath = 4;
-      this.stepInPixels = 20;
+      this.stepInLongLat = 50;
       this.color = [255,255,255];
       this.particleSystem.speedFactor = 6;
     }
@@ -1053,21 +1055,25 @@ class Particle {
     this.vertices[0] = this.pointVec2[0];
     this.vertices[1] = this.pointVec2[1];
 
+    // Get position in long lat
+    let coord = this.particleSystem.map.getCoordinateFromPixel(this.pointVec2);
+    coord = ol.proj.transform(coord, 'EPSG:3857', 'EPSG:4326');
+
     // Create vertices path
     for (var i = 1; i < this.numVerticesPath; i++){
       // Make step
-      // North is inverted because of pixels (less pixels, more north)
-      this.pointVec2[0] += this.valueVec2[0] * this.stepInPixels || 0; // 0 if there is no data
-      this.pointVec2[1] -= this.valueVec2[1] * this.stepInPixels || 0; // 0 if there is no data
-      // Assign positions to vertices array
-      this.vertices[i*2] = this.pointVec2[0];
-      this.vertices[i*2 + 1] = this.pointVec2[1];
-      // Get new value according to point
-      //this.valueVec2 = this.particleSystem.source.getValueAtPixel(this.pointVec2, this.valueVec2); // Is rounding the pixel movement, could be done with floats
-      
-      // Transform pixel to long lat
-      let coord = this.particleSystem.map.getCoordinateFromPixel(this.pointVec2);
-      coord = ol.proj.transform(coord, 'EPSG:3857', 'EPSG:4326');
+      let step = this.stepInLongLat;
+      // Step in long lat
+      let nextLong = coord[0] + ((this.valueVec2[0] * step) / earthRadius) * (180 / Math.PI) / Math.cos(coord[0] * Math.PI / 180);
+      let nextLat = coord[1] + ((this.valueVec2[1] * step) / earthRadius) * (180 / Math.PI);
+      // Convert to pixel coordinates
+      coord[0] = nextLong;
+      coord[1] = nextLat;
+      let coord3857 = ol.proj.transform(coord, 'EPSG:4326', 'EPSG:3857');
+      let pixelPos = this.particleSystem.map.getPixelFromCoordinate(coord3857);
+      // Store values
+      this.vertices[i*2] = pixelPos[0];
+      this.vertices[i*2 + 1] = pixelPos[1];
       // Get new value according to longitude and latitude
       this.valueVec2 = this.particleSystem.source.getValueAtLongLat(coord[0], coord[1], this.valueVec2);
       // Assign values
@@ -1148,8 +1154,9 @@ class Particle {
       ctx.beginPath();
       //ctx.lineWidth = Math.max(value*15, 4);
       //ctx.fillStyle = 'rgba(0, 0, 0, ', alphaFactor*0.0, ')';
-      let colorStr = 'rgba(' + this.color[0] + ',' + this.color[1] + ',' + this.color[2] + ', ' + 0.7 + ')'
-      ctx.strokeStyle = colorStr; // Makes the app go slow, consider something different
+      let colorStr = 'rgba(' + this.color[0] + ',' + this.color[1] + ',' + this.color[2] + ', ' + 0.7 + ')';
+      if (colorStr.localeCompare(ctx.strokeStyle) != 0)
+        ctx.strokeStyle = colorStr; // Makes the app go slow, consider something different
 
     ctx.moveTo(this.prevPos[0], this.prevPos[1])
     ctx.lineTo(this.currentPos[0], this.currentPos[1]);
@@ -1204,7 +1211,8 @@ class Particle {
     ctx.lineWidth = Math.max(value*15, 4);
     //ctx.fillStyle = 'rgba(0, 0, 0, ', alphaFactor*0.0, ')';
     let colorStr = 'rgba(' + this.color[0] + ',' + this.color[1] + ',' + this.color[2] + ', ' + alphaFactor * 0.5 + ')'
-    ctx.strokeStyle = colorStr; // Makes the app go slow, consider something different
+    if (colorStr.localeCompare(ctx.strokeStyle) != 0)
+      ctx.strokeStyle = colorStr; // Makes the app go slow, consider something different
     ctx.moveTo(this.prevPos[0], this.prevPos[1])
     ctx.lineTo(this.currentPos[0], this.currentPos[1]);
 
@@ -1624,7 +1632,8 @@ class Arrow {
     //ctx.lineWidth = Math.max(value*15, 4);
     //ctx.fillStyle = 'rgba(0, 0, 0, ', alphaFactor*0.0, ')';
     let colorStr = 'rgba(' + this.color[0] + ',' + this.color[1] + ',' + this.color[2] + ', ' + 0.4 + ')'
-    ctx.strokeStyle = colorStr; // Makes the app go slow, consider something different
+    if (colorStr.localeCompare(ctx.strokeStyle) != 0)
+      ctx.strokeStyle = colorStr; // Makes the app go slow, consider something different
 
     ctx.moveTo(this.vertices[0], this.vertices[1]);
     ctx.lineTo(this.vertices[2], this.vertices[3]);
