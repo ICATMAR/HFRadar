@@ -1406,8 +1406,11 @@ class ParticleCombinedRadar extends Particle {
       ctx.beginPath();
       ctx.lineWidth = 1.5;
       //ctx.fillStyle = 'rgba(0, 0, 0, ', alphaFactor*0.0, ')';
-      let colorStr = 'rgba(' + this.color[0] + ',' + this.color[1] + ',' + this.color[2] + ', ' + 0.7 + ')'
-      ctx.strokeStyle = colorStr; // Makes the app go slow, consider something different
+      let colorStr = 'rgba(' + this.color[0] + ',' + this.color[1] + ',' + this.color[2] + ', ' + 0.7 + ')';
+      if (colorStr.localeCompare(ctx.strokeStyle) != 0){
+        ctx.strokeStyle = colorStr; // Makes the app go slow, optimize by not setting it when the same color is used twice
+      }
+      
 
     ctx.moveTo(this.prevPos[0], this.prevPos[1])
     ctx.lineTo(this.currentPos[0], this.currentPos[1]);
