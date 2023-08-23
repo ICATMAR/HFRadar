@@ -1,5 +1,5 @@
 <template>
-  <div ref="canvasContainer" class="canvasContainer"></div>
+  <div ref="climaDirectionCanvas" class="climaDirectionCanvas"></div>
 
 </template>
 
@@ -54,7 +54,7 @@ export default {
       // Test
       canvas.style["background-color"] = "rgba(1, 0, 0, 0.0)";
       
-      this.$refs.canvasContainer.appendChild(canvas);
+      this.$refs.climaDirectionCanvas.appendChild(canvas);
 
       return canvas;
     },
@@ -63,8 +63,10 @@ export default {
     setClimaLayer: function(infoWMS){
       // Hide if undefined (send undefined when closing widget)
       if (infoWMS == undefined){
-        this.$refs.canvasContainer.style.display = 'none';
+        this.$refs.climaDirectionCanvas.style.display = 'none';
         return;
+      } else {
+        this.$refs.climaDirectionCanvas.style.display = 'revert';
       }
       // Check if it has animation parameter
       if (infoWMS.animation){
@@ -132,7 +134,7 @@ export default {
 
 
 <style scoped>
-.canvasContainer {
+.climaDirectionCanvas {
   background: none;
   position:absolute;
   width: 100%;
