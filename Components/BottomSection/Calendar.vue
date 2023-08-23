@@ -55,8 +55,8 @@
 
       <!-- Cancel / Ok -->
       <div class="acceptContainer">
-        <button class="closeButton" @click="cancelClicked">Cancel</button>
-        <button class="acceptButton" @click="acceptClicked">OK</button>
+        <button class="closeButton clickable" @click="cancelClicked">Cancel</button>
+        <button class="acceptButton clickable" :class="[timeScaleToShow == 'hour' ? '' : 'unavailable']" @click="acceptClicked">OK</button>
       </div>
 
       
@@ -110,7 +110,7 @@ export default {
      
     // EVENTS
     window.eventBus.on("HFRadarDataLoaded", tmst => {
-      console.log(tmst);
+      //console.log(tmst);
       //let tempTmst = window.GUIManager.currentTmst;
       //this.createHTML(tempTmst);
     });
@@ -199,6 +199,8 @@ export default {
     },
 
     acceptClicked: function(){
+      // Reset calendar
+      this.timeScaleToShow = 'year';
       // Change GUI timestamp
       window.GUIManager.currentTmst = this.tempTmst;
       // Send event
@@ -207,11 +209,15 @@ export default {
       this.$emit('hideCalendar');
     },
     cancelClicked: function(){
+      // Reset calendar
+      this.timeScaleToShow = 'year';
       // Hide window
       this.$emit('hideCalendar');
     },
 
     overlayClicked: function(){
+      // Reset calendar
+      this.timeScaleToShow = 'year';
       // Hide window
       this.$emit('hideCalendar');
     },

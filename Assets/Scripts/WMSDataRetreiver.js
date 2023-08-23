@@ -259,7 +259,7 @@ dataTypes = {
     animation: {
       layerNames: ['eastward_wind', 'northward_wind'], // East, North
       format: 'east_north',
-      type: 'velocity'
+      type: 'wind'
     },
     forecast: {
       url: 'cmems_obs-wind_glo_phy_nrt_l4_0.125deg_PT1H',
@@ -557,7 +557,7 @@ dataTypes = {
       name: dataType.name, // not necessary?
       doi: dataType.doi,
       attributions: '© CMEMS', // TODO
-      // animation
+      animation: dataType.animation,
     }
   }
 

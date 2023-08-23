@@ -40,6 +40,9 @@ export default {
       if(tmst != undefined)
         setTimeStr(tmst);
     });
+
+    // Automatic update of time string (time diff mainly)
+    this.updateTimeString();
     
   },
   data (){
@@ -47,6 +50,7 @@ export default {
       // Time string
       timeStr: 'Loading dataset...',
       isCalendarVisible: false,
+      currentTmst: undefined,
     }
   },
   methods: {
@@ -57,6 +61,7 @@ export default {
 
     // Format the time string to a human readable format
     formatTimestampString: function(tmst){
+      this.currentTmst = tmst;
       let dd = new Date(tmst);
       let ss = dd.toLocaleString('en-GB');
       ss = ss.substring(0, ss.length - 6) + ':00';
@@ -76,6 +81,19 @@ export default {
       } else
         return ss + " (" + (hoursDiff+1) + "h " + minDiff + "min)";
     },
+
+    
+    // Update time string to display
+    updateTimeString: function(){
+      if (this.currentTmst != undefined){
+        this.timeStr = this.formatTimestampString(this.currentTmst);
+      }
+
+      // Loop
+      setTimeout(() => {
+        this.updateTimeString();
+      }, 30*1000); // Every 30 seconds
+    }
   },
   components: {
     calendar: Calendar
