@@ -133,6 +133,7 @@
     justify-content: center;
     align-items: center;
     padding: 8px;
+    pointer-events: all;
   }
 
   .otherBaseLayersContainer{
