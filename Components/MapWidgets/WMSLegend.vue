@@ -15,9 +15,12 @@
       <!-- Tooltip mouse moving on map -->
       <div v-else-if=showValueMap class="tooltip fade show bs-tooltip-start" ref="legendTooltipMapValue"
           style="position: absolute; white-space: nowrap; inset: 0px 0px auto auto; margin: 0px; transform: translate(-120px, 30px);">
-        <!-- <div class="tooltip-arrow" v-show="!horizontal" style="position: absolute; top: 0px; transform: translate(0px, 8px); white-space: nowrap;"></div> -->
-        <div class="tipText tooltip-inner">{{legendValue}} {{legendUnits}}</div>
+        <div class="tooltip-arrow" v-show="!horizontal" style="position: absolute; top: 0px; transform: translate(0px, 8px); white-space: nowrap;"></div>
+        <!-- <div class="tipText tooltip-inner sideTip">{{legendValue}} {{legendUnits}}</div> -->
       </div>
+
+      <div v-if=showValueMap class="tipText tooltip-inner sideTip">{{legendValue}} {{legendUnits}}</div>
+
 
   </div>
 </template>
@@ -428,6 +431,8 @@ export default {
 
 .legendCanvas {
   pointer-events: all;
+  height: 15px;
+  width: 200px;
 }
 
 .tooltip {
@@ -441,6 +446,12 @@ export default {
   font-size: clamp(0.6rem, 1.2vw, 0.8rem);
 
   background: var(--darkBlue);
+}
+
+.sideTip {
+  position: absolute;
+  right: -30px;
+  transform: translateX(50%) translateY(-25%);
 }
 
 </style>
