@@ -112,7 +112,7 @@ export default {
       defaultLegendName: 'absModifiedOccam',
       defaultLegendRange: [0, 100], // TODO: this is defined in the data manager, or it should be in DataTypes somewhere?
       defaultUnits: 'cm/s',
-      selectedLegends: ['absModifiedOccam.png', 'absColdOccam.png', 'absGrayScale.png', 'absGrayScaleReverse.png' ],
+      selectedLegends: ['absModifiedOccam.png', 'absColdOccam.png', 'white.png', 'black.png' ],
       isVisible: true,
       areParticlesVisible: true,
       arePointsVisible: false,
