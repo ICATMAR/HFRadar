@@ -145,6 +145,26 @@ export default {
           name: 'data',
           zIndex: -2,
         }),
+
+        // Shoreline
+        shoreline: new ol.layer.VectorTile({
+          name: 'shoreline',
+          maxZoom: 22,
+          source: new ol.source.VectorTile({
+            attributions: '© European Environment Agency',
+            format: new ol.format.MVT(),
+            url: 'data/shoreline-tiles/{z}/{x}/{y}.pbf',
+            maxZoom: 10, // Defined in MVT folders
+            zDirection: -1
+          }),
+          style: new ol.style.Style({
+            stroke: new ol.style.Stroke({
+              color: 'rgba(0,0,0,0.7)',
+              width: 1
+            })
+          }),
+        }),
+
         // Land mask
         // landMask: new ol.layer.Image({
         //   name: 'landMask',
@@ -325,7 +345,7 @@ export default {
           // 12 nm
           //this.layers.eez12nm,
           // Shoreline
-          //this.layers.shoreline,
+          this.layers.shoreline,
           
           // Ports
           //this.layers.portsLayer,
