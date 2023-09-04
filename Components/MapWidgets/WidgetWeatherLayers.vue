@@ -47,8 +47,8 @@
 
 
     <!-- Data source attribution -->
-    <span class="wrapText">{{$t('Data from')}}: <a title="Weather data source" :href="sourceDoi" target="_blank">E.U.
-            Copernicus Marine Service Information</a></span>
+    <span class="wrapText">{{$t('Data source')}}: <a class="widgetSpan clickable" title="Weather data source" :href="sourceDoi" target="_blank">E.U. CMEMS,
+            Copernicus Marine Service</a></span>
     
 
 
