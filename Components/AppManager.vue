@@ -14,7 +14,7 @@
     </div>
 
     <!-- Central Panel -->
-    <!-- <central-panel></central-panel> -->
+    <central-panel></central-panel>
 
     <!-- ICONS -->
     <a href="https://icatmar.cat/">
@@ -41,7 +41,7 @@
 import Map from "./Map/Map.vue"
 import SidePanel from "./SidePanel.vue"
 import MenuLeft from "./MapWidgets/MenuLeft.vue";
-// import CentralPanel from "./CentralPanel.vue"
+import CentralPanel from "./Panels/CentralPanel.vue"
 
 
 export default {
@@ -119,7 +119,7 @@ export default {
     "mapOL": Map,
     "side-panel": SidePanel,
     "menu-left": MenuLeft,
-    // "central-panel": CentralPanel,
+    "central-panel": CentralPanel,
   }
 }
 </script>
