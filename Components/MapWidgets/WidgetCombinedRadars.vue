@@ -5,31 +5,34 @@
     <!-- Title -->
     <div class="titleWidget" :class="{'titleWidget-closed': !isVisible}">
       <h4>Currents</h4>
-      <div class="icon-str" @click="infoClicked()">i</div>
-      <div class="icon-str icon-str-close" v-show="isVisible" @click="crossClicked()"></div>
-      <div class="icon-str icon-str-open" v-show="!isVisible" @click="openClicked()"></div>
+      <onOffButton :checked="true" :inSize="'18px'" @change="currentsOnOffButtonClicked($event)"></onOffButton>
+
+      <div class="icon-str" @click="infoClicked()" v-show="isVisible">i</div>
       <!-- TODO GRAPH ICON -->
     </div>
 
+    <Transition>
+    <div v-show="isVisible">
     <!-- Buttons animation and points -->
     <div id="buttonsContainer" v-show="isVisible">
 
       <!-- On/Off particle animation -->
       <div class='widgetButtonContainer'>
-        <onOffButton ref="onOffParticles" :checked="areParticlesVisible" :inSize="'18px'" @change="particlesButtonClicked($event)"></onOffButton>
+        <onOffButton ref="onOffParticles" :checked="areParticlesVisible" :inSize="'15px'" @change="particlesButtonClicked($event)"></onOffButton>
         <span class='widgetSpan'>particles</span>
       </div>
 
       <!-- On/Off points -->
       <div class='widgetButtonContainer'>
-        <onOffButton :checked="arePointsVisible" :inSize="'18px'" @change="pointsButtonClicked($event)"></onOffButton>
+        <onOffButton :checked="arePointsVisible" :inSize="'15px'" @change="pointsButtonClicked($event)"></onOffButton>
         <span class='widgetSpan'>points</span>
       </div>
       <!-- Maybe point variable too here? -->
     </div>
+  
 
     <!-- Animation legend -->
-    <legendGUI ref="legendGUI" v-show="isVisible"
+    <legendGUI ref="legendGUI"
       :legendName="defaultLegendName" 
       :legendRange="defaultLegendRange"
       :defaultUnits="defaultUnits"
@@ -39,9 +42,12 @@
       @rangeClicked="rangeClicked()"
       @unitsClicked="unitsClicked()"
 
-      ></legendGUI>
+    ></legendGUI>
+    </div>
+    </Transition>
 
-      <div :style="{'padding-bottom': isVisible ? '30px' : '10px'}"></div>
+    <div :style="{'padding-bottom': isVisible ? '30px' : '10px'}"></div>
+    
   </div>
 </template>
 
@@ -83,7 +89,7 @@ export default {
     // EVENTS
     // When new data loads, usually the widget also should be shown (with particles on)
     window.eventBus.on('HFRadarDataLoaded', tmst => {
-      this.openClicked();
+      this.currentsOnOffButtonClicked({target: {checked: true}});
     });
 
 
@@ -123,8 +129,6 @@ export default {
     legendChanged: function(legendObj){
       window.eventBus.emit('WidgetCombinedRadars_LegendChanged', legendObj);
     },
-
-
     rangeClicked: function(e){
       
       // 50, 100, 150, 200
@@ -136,7 +140,6 @@ export default {
 
       this.$refs.legendGUI.setRange(this.currentRange);
     },
-
     unitsClicked: function(e){
       let units = ['cm/s', 'm/s', 'mph', 'km/h'];
       let transformFunc = [
@@ -156,23 +159,17 @@ export default {
 
 
     // USER INTERACTION
+    currentsOnOffButtonClicked: function(e){
+        this.isVisible = e.target.checked;
+        window.GUIManager.widgetCombinedRadars.isVisible = e.target.checked;
+        window.GUIManager.isDataPointSelected = false;
+        window.eventBus.emit("WidgetCombinedRadars_VisibilityChanged", e.target.checked);
+        if (e.target.checked)
+          this.$refs.onOffParticles.setChecked(true); // TODO: This triggers the button (particlesButtonClicked), not optimal
+
+    },
     infoClicked: function(e){
       window.eventBus.emit("Widget_InfoClicked");
-    },
-    crossClicked: function(e){
-      // Deactivate all CombinedRadars
-      this.isVisible = false;
-      window.GUIManager.widgetCombinedRadars.isVisible = false;
-      window.GUIManager.isDataPointSelected = false;
-      window.eventBus.emit("WidgetCombinedRadars_VisibilityChanged", false);
-    },
-    openClicked: function(){
-      this.isVisible = true;
-      window.GUIManager.widgetCombinedRadars.isVisible = true;
-      window.GUIManager.widgetCombinedRadars.areParticlesVisible = true;
-      this.$refs.onOffParticles.setChecked(true); // TODO: This triggers the button (particlesButtonClicked), not optimal
-      window.GUIManager.isDataPointSelected = false;
-      window.eventBus.emit("WidgetCombinedRadars_VisibilityChanged", true);
     },
     particlesButtonClicked: function(e){
       window.GUIManager.widgetCombinedRadars.areParticlesVisible = e.target.checked;
@@ -213,6 +210,19 @@ export default {
   flex-direction: row;
   flex-wrap: nowrap;
   align-items: center;
+}
+
+
+
+.v-enter-active,
+.v-leave-active {
+  transition: opacity scale 0.5s ease;
+}
+
+.v-enter-from,
+.v-leave-to {
+  opacity: 0;
+  transform: scale(0.2);
 }
 
 </style>

@@ -50,11 +50,17 @@ export default {
   position: absolute;
   bottom: 0px;
   left: 0px;
-  right: 340px;
+  right: 300px;
   pointer-events: none;
 }
 
 
+/* Mobile */
+@media screen and (max-width: 770px) {
+  #bottom-section {
+    right: 0px;
+  }
+}
 
 
 /* Transitions for elements */

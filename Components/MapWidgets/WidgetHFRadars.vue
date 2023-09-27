@@ -5,54 +5,59 @@
     <!-- Title -->
     <div class="titleWidget" :class="{'titleWidget-closed': !isVisible}">
       <h4>High-Freq. Radars</h4>
-      <div class="icon-str" @click="infoClicked()">i</div>
-      <div class="icon-str icon-str-close" v-show="isVisible" @click="crossClicked()"></div>
-      <div class="icon-str icon-str-open" v-show="!isVisible" @click="openClicked()"></div>
+      <onOffButton :checked="false" :inSize="'18px'" @change="currentsOnOffButtonClicked($event)"></onOffButton>
+
+      <div class="icon-str" @click="infoClicked()" v-show="isVisible">i</div>
       <!-- TODO GRAPH ICON - REPRESENTATION -->
     </div>
 
-
-    <!-- Existing radars -->
-    <div id="existingRadarsContainer" v-show="isVisible">
-      <div v-for="radar in radars">
-        <button 
-          :class="{'widgetButtonHFRadar-active': radar.isActivated, 'widgetButtonHFRadar-unavailable': !radar.hasDataOnTimestamp}" class="widgetButtonHFRadar"  
-          @click="radarActivatedChanged(radar)">
-            {{ radar.Site }}
-        </button>
+    <Transition>
+    <div v-show="isVisible">
+      <!-- Existing radars -->
+      <div id="existingRadarsContainer" v-show="isVisible">
+        <div v-for="radar in radars">
+          <button 
+            :class="{'widgetButtonHFRadar-active': radar.isActivated, 'widgetButtonHFRadar-unavailable': !radar.hasDataOnTimestamp}" class="widgetButtonHFRadar"  
+            @click="radarActivatedChanged(radar)">
+              {{ radar.Site }}
+          </button>
+        </div>
       </div>
+
+
+      <!-- Buttons animation and points -->
+      <div id="buttonsContainer" v-show="isVisible">
+
+        <!-- On/Off particle animation -->
+        <div class='widgetButtonContainer'>
+          <onOffButton :checked="true" :inSize="'15px'" @change="particlesButtonClicked($event)"></onOffButton>
+          <span class='widgetSpan'>particles</span>
+        </div>
+
+        <!-- On/Off points -->
+        <div class='widgetButtonContainer'>
+          <onOffButton :checked="true" :inSize="'15px'" @change="pointsButtonClicked($event)"></onOffButton>
+          <span class='widgetSpan'>points</span>
+        </div>
+        <!-- Maybe point variable too here? -->
+      </div>
+
+      <!-- Animation legend -->
+      <legendGUI ref="legendGUI" v-show="isVisible"
+        :legendName="defaultLegendName" 
+        :legendRange="defaultLegendRange"
+        :defaultUnits="defaultUnits"
+        :selectedLegends="selectedLegends"
+
+        @legendChanged="legendChanged"
+        @rangeClicked="rangeClicked()"
+        @unitsClicked="unitsClicked()"
+      ></legendGUI>
     </div>
+    </Transition>
 
-
-    <!-- Buttons animation and points -->
-    <div id="buttonsContainer" v-show="isVisible">
-
-      <!-- On/Off particle animation -->
-      <div class='widgetButtonContainer'>
-        <onOffButton :checked="true" :inSize="'18px'" @change="particlesButtonClicked($event)"></onOffButton>
-        <span class='widgetSpan'>particles</span>
-      </div>
-
-      <!-- On/Off points -->
-      <div class='widgetButtonContainer'>
-        <onOffButton :checked="true" :inSize="'18px'" @change="pointsButtonClicked($event)"></onOffButton>
-        <span class='widgetSpan'>points</span>
-      </div>
-      <!-- Maybe point variable too here? -->
-    </div>
-
-    <!-- Animation legend -->
-    <legendGUI ref="legendGUI" v-show="isVisible"
-      :legendName="defaultLegendName" 
-      :legendRange="defaultLegendRange"
-      :defaultUnits="defaultUnits"
-      :selectedLegends="selectedLegends"
-
-      @legendChanged="legendChanged"
-      @rangeClicked="rangeClicked()"
-      @unitsClicked="unitsClicked()"
-    ></legendGUI>
   </div>
+  
 </template>
 
 
@@ -190,21 +195,14 @@ export default {
 
 
     // USER INTERACTION
+    currentsOnOffButtonClicked: function(e){
+        this.isVisible = e.target.checked;
+        window.GUIManager.widgetHFRadars.isVisible = e.target.checked;
+        window.GUIManager.isDataPointSelected = false;
+        window.eventBus.emit("WidgetHFRadars_VisibilityChanged", e.target.checked);
+    },
     infoClicked: function(e){
       window.eventBus.emit("Widget_InfoClicked");
-    },
-    crossClicked: function(e){
-      // Deactivate all radars
-      this.isVisible = false;
-      window.GUIManager.widgetHFRadars.isVisible = false;
-      window.GUIManager.isDataPointSelected = false;
-      window.eventBus.emit("WidgetHFRadars_VisibilityChanged", false);
-    },
-    openClicked: function(){
-      window.GUIManager.widgetHFRadars.isVisible = true;
-      window.GUIManager.isDataPointSelected = false;
-      this.isVisible = true;
-      window.eventBus.emit("WidgetHFRadars_VisibilityChanged", true);
     },
     particlesButtonClicked: function(e){
       window.GUIManager.widgetHFRadars.areParticlesVisible = e.target.checked;
@@ -272,6 +270,21 @@ export default {
   display: flex;
   flex-direction: row;
   align-items: center;
+  justify-content: center;
 }
+
+
+
+.v-enter-active,
+.v-leave-active {
+  transition: opacity scale 0.5s ease;
+}
+
+.v-enter-from,
+.v-leave-to {
+  opacity: 0;
+  transform: scale(0.2);
+}
+
 
 </style>

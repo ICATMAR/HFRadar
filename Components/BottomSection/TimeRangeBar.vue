@@ -1173,6 +1173,8 @@ export default {
   flex-direction: row;
   justify-content: space-evenly;
   align-items: center;
+  user-select: none;
+  pointer-events: none;
 }
 
 .container-rows {
