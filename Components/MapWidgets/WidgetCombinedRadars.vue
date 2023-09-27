@@ -14,7 +14,7 @@
     <Transition>
     <div v-show="isVisible">
     <!-- Buttons animation and points -->
-    <div id="buttonsContainer" v-show="isVisible">
+    <div id="buttonsContainer">
 
       <!-- On/Off particle animation -->
       <div class='widgetButtonContainer'>
@@ -46,7 +46,9 @@
     </div>
     </Transition>
 
+    
     <div :style="{'padding-bottom': isVisible ? '30px' : '10px'}"></div>
+
     
   </div>
 </template>
@@ -216,13 +218,13 @@ export default {
 
 .v-enter-active,
 .v-leave-active {
-  transition: opacity scale 0.5s ease;
+  transition: all 0.5s ease;
 }
 
 .v-enter-from,
 .v-leave-to {
   opacity: 0;
-  transform: scale(0.2);
+  transform: translateX(100px);
 }
 
 </style>

@@ -14,7 +14,7 @@
     <Transition>
     <div v-show="isVisible">
       <!-- Existing radars -->
-      <div id="existingRadarsContainer" v-show="isVisible">
+      <div id="existingRadarsContainer">
         <div v-for="radar in radars">
           <button 
             :class="{'widgetButtonHFRadar-active': radar.isActivated, 'widgetButtonHFRadar-unavailable': !radar.hasDataOnTimestamp}" class="widgetButtonHFRadar"  
@@ -26,7 +26,7 @@
 
 
       <!-- Buttons animation and points -->
-      <div id="buttonsContainer" v-show="isVisible">
+      <div id="buttonsContainer">
 
         <!-- On/Off particle animation -->
         <div class='widgetButtonContainer'>
@@ -277,14 +277,15 @@ export default {
 
 .v-enter-active,
 .v-leave-active {
-  transition: opacity scale 0.5s ease;
+  transition: all 0.5s ease;
 }
 
 .v-enter-from,
 .v-leave-to {
   opacity: 0;
-  transform: scale(0.2);
+  transform: translateX(100px);
 }
+
 
 
 </style>
