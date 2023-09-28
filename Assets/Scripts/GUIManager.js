@@ -21,6 +21,9 @@ class GUIManager {
     }
   }
 
+  // Advanced interface
+  isAdvancedInterface = false;
+
   // Data point selected
   isDataPointSelected = false;
 
@@ -46,6 +49,10 @@ class GUIManager {
     });
 
 
+    // Advanced interface button
+    window.eventBus.on('AdvancedInterfaceOnOff', state => {
+      this.isAdvancedInterface = state;
+    })
 
 
     // Map

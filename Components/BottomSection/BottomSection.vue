@@ -3,7 +3,7 @@
 
     <!-- Time Range Bar -->
     <Transition><!-- Vue transition -->
-      <time-range-bar v-show="showDataBar"></time-range-bar>
+      <time-range-bar v-show="isAdvancedInterfaceOnOff"></time-range-bar>
     </Transition>
 
   </div>
@@ -17,20 +17,17 @@ import TimeRangeBar from "./TimeRangeBar.vue"
 export default {
   name:"BottomSection",
   mounted() {
+    // EVENTS
+    window.eventBus.on('AdvancedInterfaceOnOff', state => this.isAdvancedInterfaceOnOff = state);
 
   },
   data() {
     return {
-      showDataBar: true,
-
-      date: new Date(),
+      isAdvancedInterfaceOnOff: true,
     }
   },
   methods :{
 
-    dataBarButtonClicked: function (e) {
-      this.showDataBar = !this.showDataBar;
-    },
   },
   components: {
     "time-range-bar": TimeRangeBar,
