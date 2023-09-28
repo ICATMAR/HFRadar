@@ -3,7 +3,7 @@
 
       <!-- Advanced menu -->
       <div id="advancedMenuContainer" class="clickable">
-        <onOffButton ref="advancedOnOffButton" :checked="true" :inSize="'18px'" @change="advancedOnOffButtonClicked($event)"></onOffButton>
+        <onOffButton ref="advancedOnOffButton" :checked="false" :inSize="'18px'" @change="advancedOnOffButtonClicked($event)"></onOffButton>
         <span @click="advancedOnOffButtonClicked">Advanced interface</span>
       </div>
 
@@ -26,14 +26,14 @@
 
     },
     mounted(){
-
+      window.eventBus.emit("AdvancedInterfaceOnOff", this.isAdvancedInterfaceOnOff);
     },
     unmounted(){
   
     },
     data(){
       return {
-        isAdvancedInterfaceOnOff: true,
+        isAdvancedInterfaceOnOff: false,
       }
     },
     methods: {

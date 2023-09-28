@@ -109,10 +109,6 @@ export default {
     })
 
 
-    window.eventBus.on('GUIManager_MouseMovingCurrentsValue', magnitude => {
-      this.$refs.legendGUI.setCurrentValue(magnitude);
-    })
-
     
   },
   data (){
