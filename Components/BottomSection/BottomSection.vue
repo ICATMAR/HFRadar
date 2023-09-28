@@ -6,6 +6,11 @@
       <time-range-bar v-show="isAdvancedInterfaceOnOff"></time-range-bar>
     </Transition>
 
+    <!-- Simple time slider -->
+    <Transition><!-- Vue transition -->
+      <timeSlider v-show="!isAdvancedInterfaceOnOff"></timeSlider>
+    </Transition>
+
   </div>
 </template>
 
@@ -13,6 +18,7 @@
 
 <script>
 import TimeRangeBar from "./TimeRangeBar.vue"
+import TimeSlider from "./TimeSlider.vue";
 
 export default {
   name:"BottomSection",
@@ -31,7 +37,8 @@ export default {
   },
   components: {
     "time-range-bar": TimeRangeBar,
-  }
+    "timeSlider": TimeSlider,
+}
 }
 </script>
 
