@@ -7,7 +7,7 @@
       <mapOL></mapOL>
 
       <!-- Side planel -->
-      <side-panel></side-panel>
+      <side-panel v-show="isAdvancedInterfaceOnOff"></side-panel>
 
       <!-- Menu Left -->
       <menu-left></menu-left>
@@ -105,11 +105,20 @@ export default {
     });
     window.FileManager.loadBaseLayerIcons().then(values => {
       window.eventBus.emit('AppManager_BaseLayerIconsLoaded', values);
-    })
+    });
+
+
+    // EVENTS
+    // Advanced interface
+    window.eventBus.on("AdvancedInterfaceOnOff", state => {
+      if (!state) // Emits an event that resizes the map canvas
+        window.eventBus.emit('SidePanelSizechanged', this.showPanel);
+      this.isAdvancedInterfaceOnOff = state;
+    });
   },
   data (){
     return {
-
+      isAdvancedInterfaceOnOff: false,
     }
   },
   methods: {

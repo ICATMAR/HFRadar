@@ -19,7 +19,7 @@
     </div>
 
     <!-- Drop-down with other legends -->
-    <span v-show="isMouseOver">
+    <span v-show="isMouseOver && isAdvancedInterfaceOnOff">
       <div v-for="legend, index, in legends" >
         <img v-if="selectedLegends.includes(legend.legendName)" :src="legend.img.src" @click="legendClicked($event, index)">
       </div>
@@ -36,12 +36,12 @@
 
 export default {
   name: 'legendGUI', // Caps, no -
-  props: [
-    'legendName',
-    'legendRange',
-    'defaultUnits',
-    'selectedLegends',
-  ],
+  props: {
+    'legendName': {default: 'absModifiedOccam', type: String},
+    'legendRange':{default: [0, 100], type: Array},
+    'defaultUnits': {default: 'cm/s', type: String},
+    'selectedLegends': {default: ['absModifiedOccam.png', 'absColdOccam.png', 'white.png', 'black.png' ], type: Array},
+  },
   created() {
     this.units = this.defaultUnits;
   },
@@ -76,6 +76,14 @@ export default {
       this.currentValue = '';
     });
 
+    // User moves mouse on map
+    window.eventBus.on('GUIManager_MouseMovingCurrentsValue', magnitude => {
+      this.setCurrentValue(magnitude);
+    });
+
+    // Advanced interface
+    window.eventBus.on('AdvancedInterfaceOnOff', state => this.isAdvancedInterfaceOnOff = state);
+
   },
   data (){
     return {
@@ -88,6 +96,8 @@ export default {
       //legendRange: [-100, 100], // Legend range is changed in AnimationCanvas.vue, when the animation is created
       currentValue: '',
       transformFunc: (value) => {return value},
+
+      isAdvancedInterfaceOnOff: false,
     }
   },
   methods: {
@@ -139,6 +149,25 @@ export default {
       this.currentValue = value;
       this.$refs.tooltipLegend.style.left = (100 * (this.currentValue - this.legendRange[0]) / (this.legendRange[1] - this.legendRange[0])) + '%';
       this.$refs.tooltipLegendBar.style.left = (100 * (this.currentValue - this.legendRange[0]) / (this.legendRange[1] - this.legendRange[0])) + '%';
+    },
+    // Set legend color
+    setLegendColorScale: function(legendName){
+      let index = undefined;
+      // Find index according to default legend name     
+      for (let i = 0; i < this.legends.length; i++){
+        if (this.legends[i].img.src.includes('/' + legendName)){
+          index = i;
+          i = this.legends.length; // Exit loop
+        }
+      }
+      // Legend is found
+      if (index != undefined){
+        this.legendIndex = index;
+        this.legendSrc = this.legends[this.legendIndex].img.src;
+        this.emitLegendChanged(this.legends[this.legendIndex]);
+      }
+
+      
     }
   },
   components: {

@@ -3,15 +3,15 @@
   <div id='timeSlider' ref='timeSlider'>
     <!-- Tooltip -->
     <div id="toolTip" ref="toolTip">
-      <button v-show="isDataAvailableAtHour.length > 0" class="bbArrow backTime" @click="moveBackward">&lt;</button>
+      <button v-show="isDataAvailableAtHour.length > 0" class="bbArrow backTime clickable" @click="moveBackward">&lt;</button>
       <div>{{ timeStr }}</div>
-      <button v-show="isDataAvailableAtHour.length > 0" class="bbArrow forwardTime" @click="moveForward">></button>
+      <button v-show="isDataAvailableAtHour.length > 0" class="bbArrow forwardTime clickable" @click="moveForward">></button>
     </div>
 
     <!-- Slider and data availability-->
-    <div>
+    <div class="sliderElement" draggable="false">
       <!-- Data availability -->
-      <div id = 'dataAvailability'>
+      <div id ='dataAvailability'>
         <div>
           <template v-for="(isAvailable, index) in isDataAvailableAtHour">
             <div class="circle" v-show="isAvailable" v-bind:style="'left: ' + 100*index/numHours + '%'"></div>
@@ -20,6 +20,7 @@
       </div>
       <!-- Slider -->
       <input type="range" ref="slider" id="slider" min="0" max="10" v-on:click="onClick($event)" v-on:change="onChange($event)" v-on:input="onInput($event)">
+
     </div>
 
   </div>
@@ -37,6 +38,37 @@ export default {
     
   },
   mounted() {
+    // HACK: FOR SOME (CSS) REASON THE SLIDER DOES NOT ALLOW DRAGGING
+    // THEREFORE CREATE OWN EVENTS
+    const slider = this.$refs.slider;
+    slider.addEventListener('mousedown', (event) => {
+      event.preventDefault(); // Prevent the default drag-and-drop behavior
+      slider.focus(); // Ensure the slider is in focus
+      // Add an event listener for the mousemove event
+      document.addEventListener('mousemove', handleSliderMove);
+      handleSliderMove(event);
+    });
+    // Add an event listener for the mouseup event to stop tracking the slider movement
+    document.addEventListener('mouseup', () => {
+      document.removeEventListener('mousemove', handleSliderMove);
+    });
+    // Function to handle slider movement
+    const handleSliderMove = (event) => {
+      const sliderRect = slider.getBoundingClientRect();
+      const offsetX = event.clientX - sliderRect.left;
+      const percentage = (offsetX / sliderRect.width) * 100;
+
+      // Update the slider value based on the mouse position
+      slider.value = Math.round(0.01*percentage*(slider.max-slider.min) + 1*slider.min);
+      this.onChange({target: slider});
+      //this.onInput({target: slider});
+    }
+
+
+
+
+
+
     window.eventBus.on('HFRadarDataLoaded', (tmst) => {
       let startEndDates = window.DataManager.getStartEndDates();
       // If tmst is not defined, set it to latest
@@ -52,13 +84,7 @@ export default {
       let currentDate = new Date(tmst);
       this.$refs.slider.value = currentDate.getTime()/(1000*60*60);
 
-      this.timeStr = currentDate.toISOString();
-      // Add time difference from now
-      let now = new Date();
-      let timeDiff = currentDate.getTime() - now.getTime();
-      let hoursDiff = Math.floor(timeDiff/(60*60*1000));
-      let minDiff = 60 - Math.floor(timeDiff/(60*1000) - hoursDiff*60);
-      this.timeStr += " (" + (hoursDiff+1) + "h " + minDiff + "min)";
+      this.timeStr = this.formatTimestampString(currentDate.toISOString());
       
       this.updateDataAvailability(sDate, eDate);
       // Date change event
@@ -79,28 +105,25 @@ export default {
   methods: {
     onClick: function(e){
       e.preventDefault();
-      //e.stopPropagation();
+      e.stopPropagation();
     },
 
     // When element loses focus (mouseup)
     // Slider change
     onChange: function(e){
       let timestamp = new Date(e.target.value*1000*60*60).toISOString();
+      this.timeStr = this.formatTimestampString(timestamp);
       // Date change event
       window.eventBus.emit('TimeSlider_SelectedDateChanged', timestamp);
+      // TODO: mixing between timerangebar and datastreamsbar EMIT UPDATE CURRENT DATE TODO CHANGE
+      window.eventBus.emit('DataStreamsBar_SelectedDateChanged', timestamp)
     },
 
     // When element is dragged
     onInput: function(e){
       // Update self tooltip
       let dd = new Date(e.target.value*1000*60*60);
-      this.timeStr = dd.toISOString();
-      // Add time difference from now
-      let now = new Date();
-      let timeDiff = dd.getTime() - now.getTime();
-      let hoursDiff = Math.floor(timeDiff/(60*60*1000));
-      let minDiff = 60 - Math.floor(timeDiff/(60*1000) - hoursDiff*60);
-      this.timeStr += " (" + (hoursDiff+1) + "h " + minDiff + "min)";
+      this.timeStr = this.formatTimestampString(dd.toISOString());
     },
 
     // Time arrows clicked
@@ -129,11 +152,13 @@ export default {
         for (let i = 0; i < Object.keys(HFRadars).length; i++){
 
           let HFRadar = HFRadars[Object.keys(HFRadars)[i]];
-          let timestamps = Object.keys(HFRadar.data);
-          for (let j = 0; j<timestamps.length; j++){
-            let tmpDate = new Date(timestamps[j]);
-            let hourIndex = (tmpDate.getTime() - sDate.getTime())/(1000*60*60);
-            this.isDataAvailableAtHour[hourIndex] = true;
+          if (HFRadar.constructor.name == "CombinedRadars"){
+            let timestamps = Object.keys(HFRadar.data);
+            for (let j = 0; j<timestamps.length; j++){
+              let tmpDate = new Date(timestamps[j]);
+              let hourIndex = (tmpDate.getTime() - sDate.getTime())/(1000*60*60);
+              this.isDataAvailableAtHour[hourIndex] = true;
+            }
           }
         }
 
@@ -151,7 +176,30 @@ export default {
       setTimeout(() => {
         this.updateTimeString();
       }, 30*1000); // Every 30 seconds
-    }
+    },
+
+
+    formatTimestampString: function(tmst){
+      this.currentTmst = tmst;
+      let dd = new Date(tmst);
+      let ss = dd.toLocaleString('en-GB');
+      ss = ss.substring(0, ss.length - 6) + ':00';
+      // Add time difference from now
+      let now = new Date();
+      let timeDiff = dd.getTime() - now.getTime();
+      let hoursDiff = Math.floor(timeDiff/(60*60*1000));
+      let minDiff = 60 - Math.floor(timeDiff/(60*1000) - hoursDiff*60);
+    
+      if (hoursDiff < -24 * 31){
+        return ss;
+      }
+      else if (hoursDiff < -24){
+        let daysDiff = Math.floor(hoursDiff / 24);
+        hoursDiff = hoursDiff - daysDiff*24;
+        return ss + " ("+ daysDiff + "d " + Math.abs(hoursDiff+1) + "h)";
+      } else
+        return ss + " (" + (hoursDiff+1) + "h " + minDiff + "min)";
+    },
   },
   components: {
     //'map': Map,
@@ -241,5 +289,10 @@ export default {
   padding: 2px;
   transform: translateX(-2px);
   -ms-transform: translateX(-2px);
+}
+
+.sliderElement{
+  user-select: all;
+  pointer-events: all;
 }
 </style>

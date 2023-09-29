@@ -57,6 +57,19 @@ export default {
     });
 
 
+    // When the side panel is hiden
+    window.eventBus.on('SidePanelSizechanged', (isSidePanelOpen) => {
+      setTimeout(()=> this.updateCanvas(), 100);
+      this.updateCanvas();
+    });
+
+    // Advanced interface
+    window.eventBus.on('AdvancedInterfaceOnOff', state => {
+      setTimeout(()=> this.updateCanvas(), 100);
+      this.updateCanvas();
+    });
+
+
 
 
 
@@ -170,7 +183,8 @@ export default {
       let maxValue = 255;
       let dt = new Date().getTime()/(6*10) % 10;
       let loadingColor = 'rgb('+ (255 - dt*10) +', '+ (245 - dt*10) +', 0)';
-
+      
+      canvas.width = canvas.clientWidth;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       // For daily maximum representation

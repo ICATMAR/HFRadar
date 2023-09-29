@@ -6,7 +6,7 @@
 
       <!-- Animation legend -->
       <!-- todo v:for for different data types? -->
-      <div class="widgetContainer">
+      <div class="widgetContainer" v-show="isAdvancedInterfaceOnOff">
         <Transition>
           <widgetCombinedRadars ref="widgetCombinedRadars" v-show="combinedRadarsExist"></widgetCombinedRadars>
         </Transition>
@@ -14,6 +14,10 @@
           <widgetHFRadars ref="widgetHFRadars" v-show="radarsExist"></widgetHFRadars>
         </Transition>
       </div>
+
+      <!-- Legend GUI for non-advanced-->
+      <legendGUI class="widgetContainer" v-show="!isAdvancedInterfaceOnOff"
+        ></legendGUI>
 
   </div>
 </template>
@@ -25,6 +29,7 @@
 //import Map from 'Components/Map.vue'
 import WidgetCombinedRadars from "../MapWidgets/WidgetCombinedRadars.vue";
 import WidgetHFRadars from "../MapWidgets/WidgetHFRadars.vue";
+import LegendGUI from "../MapWidgets/LegendGUI.vue";
 
 export default {
   name: 'animationCanvas', // Caps, no -
@@ -185,6 +190,10 @@ export default {
       this.updateRadarAnimationState(radar);
     });
 
+
+    // Advanced interface
+    window.eventBus.on("AdvancedInterfaceOnOff", state => this.isAdvancedInterfaceOnOff = state);
+
     
   },
   data (){
@@ -194,6 +203,7 @@ export default {
       radarsExist: false,
       legendCombinedRadars: undefined,
       legendHFRadar: undefined,
+      isAdvancedInterfaceOnOff: false,
     }
   },
   methods: {
@@ -239,7 +249,7 @@ export default {
           // HF Radar
           if (radarType == "HFRadar"){
             // GUI Info
-            let isRadarActivated = window.GUIManager.widgetHFRadars.radarsVisible[radar.Site];
+            let isRadarActivated = window.GUIManager.widgetHFRadars.radarsVisible[radar.Site]  && window.GUIManager.widgetHFRadars.areParticlesVisible;
             // Visible
             if (areVisible && isRadarActivated && radar.animEngine && radar.data[tmst] != undefined){
               radar.animEngine.setHFRadarData(radar.data[tmst]);
@@ -374,6 +384,7 @@ export default {
   components: {
     "widgetCombinedRadars": WidgetCombinedRadars,
     "widgetHFRadars": WidgetHFRadars,
+    "legendGUI": LegendGUI,
   }
 }
 </script>

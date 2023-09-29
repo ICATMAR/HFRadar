@@ -5,7 +5,7 @@
     <!-- Title -->
     <div class="titleWidget" :class="{'titleWidget-closed': !isVisible}">
       <h4>High-Freq. Radars</h4>
-      <onOffButton :checked="false" :inSize="'18px'" @change="currentsOnOffButtonClicked($event)"></onOffButton>
+      <onOffButton ref="onOffCurrents" :checked="false" :inSize="'18px'" @change="currentsOnOffButtonClicked($event)"></onOffButton>
 
       <div class="icon-str" @click="infoClicked()" v-show="isVisible">i</div>
       <!-- TODO GRAPH ICON - REPRESENTATION -->
@@ -30,13 +30,13 @@
 
         <!-- On/Off particle animation -->
         <div class='widgetButtonContainer'>
-          <onOffButton :checked="true" :inSize="'15px'" @change="particlesButtonClicked($event)"></onOffButton>
+          <onOffButton ref="onOffParticles" :checked="true" :inSize="'15px'" @change="particlesButtonClicked($event)"></onOffButton>
           <span class='widgetSpan'>particles</span>
         </div>
 
         <!-- On/Off points -->
         <div class='widgetButtonContainer'>
-          <onOffButton :checked="true" :inSize="'15px'" @change="pointsButtonClicked($event)"></onOffButton>
+          <onOffButton ref="onOffPoints" :checked="true" :inSize="'15px'" @change="pointsButtonClicked($event)"></onOffButton>
           <span class='widgetSpan'>points</span>
         </div>
         <!-- Maybe point variable too here? -->
@@ -144,6 +144,16 @@ export default {
     });
 
 
+    // Advanced interface
+    window.eventBus.on("AdvancedInterfaceOnOff", state => {
+      // Reset state in simple interface
+      if (!state){
+        // Fake button actions
+        this.$refs.onOffCurrents.setChecked(false);
+        this.$refs.onOffParticles.setChecked(window.GUIManager.widgetHFRadars.areParticlesVisible);
+        this.$refs.onOffPoints.setChecked(window.GUIManager.widgetHFRadars.arePointsVisible);
+      }
+    });
     
   },
   data (){

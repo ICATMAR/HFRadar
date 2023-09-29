@@ -58,7 +58,17 @@
         for (let i = 0; i< values.length; i++){
           this.baseLayers.push(values[i].value);
         }
-      })
+      });
+
+      // Advanced interface
+      window.eventBus.on("AdvancedInterfaceOnOff", state => {
+        // Reset state in simple interface
+        if (!state){
+          this.$refs.weatherOnOffButton.setChecked(false);
+          if (this.baseLayers.length != 0) // Base layers loaded
+            this.baseLayerClicked(undefined, 0);
+        }
+      });
       
     },
     data (){
