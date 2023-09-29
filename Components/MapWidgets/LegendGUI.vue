@@ -149,6 +149,25 @@ export default {
       this.currentValue = value;
       this.$refs.tooltipLegend.style.left = (100 * (this.currentValue - this.legendRange[0]) / (this.legendRange[1] - this.legendRange[0])) + '%';
       this.$refs.tooltipLegendBar.style.left = (100 * (this.currentValue - this.legendRange[0]) / (this.legendRange[1] - this.legendRange[0])) + '%';
+    },
+    // Set legend color
+    setLegendColorScale: function(legendName){
+      let index = undefined;
+      // Find index according to default legend name     
+      for (let i = 0; i < this.legends.length; i++){
+        if (this.legends[i].img.src.includes('/' + legendName)){
+          index = i;
+          i = this.legends.length; // Exit loop
+        }
+      }
+      // Legend is found
+      if (index != undefined){
+        this.legendIndex = index;
+        this.legendSrc = this.legends[this.legendIndex].img.src;
+        this.emitLegendChanged(this.legends[this.legendIndex]);
+      }
+
+      
     }
   },
   components: {

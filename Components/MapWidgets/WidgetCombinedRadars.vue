@@ -5,7 +5,7 @@
     <!-- Title -->
     <div class="titleWidget" :class="{'titleWidget-closed': !isVisible}">
       <h4>Currents</h4>
-      <onOffButton :checked="true" :inSize="'18px'" @change="currentsOnOffButtonClicked($event)"></onOffButton>
+      <onOffButton ref="onOffCurrents" :checked="true" :inSize="'18px'" @change="currentsOnOffButtonClicked($event)"></onOffButton>
 
       <div class="icon-str" @click="infoClicked()" v-show="isVisible">i</div>
       <!-- TODO GRAPH ICON -->
@@ -24,7 +24,7 @@
 
       <!-- On/Off points -->
       <div class='widgetButtonContainer'>
-        <onOffButton :checked="arePointsVisible" :inSize="'15px'" @change="pointsButtonClicked($event)"></onOffButton>
+        <onOffButton ref="onOffPoints" :checked="arePointsVisible" :inSize="'15px'" @change="pointsButtonClicked($event)"></onOffButton>
         <span class='widgetSpan'>points</span>
       </div>
       <!-- Maybe point variable too here? -->
@@ -106,23 +106,47 @@ export default {
         currentValue = dataPoint['Velocity (cm/s)'].toFixed(1);
       }
       this.$refs.legendGUI.setCurrentValue(currentValue);
-    })
+    });
 
 
+    // Advanced interface
+    window.eventBus.on("AdvancedInterfaceOnOff", state => {
+      // Reset state in simple interface
+      if (!state){
+        let initialGUIState = this.getInitialState();
+        Object.keys(initialGUIState).forEach(key => {
+          this[key] = initialGUIState[key];
+        });
+        // Fake button actions
+        this.$refs.onOffCurrents.setChecked(true);
+        this.$refs.onOffParticles.setChecked(this.areParticlesVisible);
+        this.$refs.onOffPoints.setChecked(this.arePointsVisible);
+        if (this.$refs.legendGUI.legendsLoaded){
+          this.$refs.legendGUI.setLegendColorScale(this.defaultLegendName);
+          this.$refs.legendGUI.setRange(this.defaultLegendRange);
+        }
+      }
+    });
     
   },
   data (){
-    return {
-      defaultLegendName: 'absModifiedOccam',
-      defaultLegendRange: [0, 100], // TODO: this is defined in the data manager, or it should be in DataTypes somewhere?
-      defaultUnits: 'cm/s',
-      selectedLegends: ['absModifiedOccam.png', 'absColdOccam.png', 'white.png', 'black.png' ],
-      isVisible: true,
-      areParticlesVisible: true,
-      arePointsVisible: false,
-    }
+    return this.getInitialState();
   },
   methods: {
+    // INITIAL STATE
+    getInitialState: function(){
+      return {
+        defaultLegendName: 'absModifiedOccam',
+        defaultLegendRange: [0, 100], // TODO: this is defined in the data manager, or it should be in DataTypes somewhere?
+        defaultUnits: 'cm/s',
+        selectedLegends: ['absModifiedOccam.png', 'absColdOccam.png', 'white.png', 'black.png' ],
+        isVisible: true,
+        areParticlesVisible: true,
+        arePointsVisible: false,
+      }
+    },
+
+
     // LEGEND EMITS
     legendChanged: function(legendObj){
       window.eventBus.emit('WidgetCombinedRadars_LegendChanged', legendObj);
