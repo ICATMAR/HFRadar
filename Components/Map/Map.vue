@@ -264,6 +264,13 @@ export default {
     window.eventBus.on('WMSLegend_LegendClicked', style => {
       this.changeStyle(style);
     });
+
+
+    // Advanced interface
+    window.eventBus.on('AdvancedInterfaceOnOff', state => {
+      setTimeout(()=> this.map.updateSize(), 100);
+      this.map.updateSize();
+    });
     
 
   },
