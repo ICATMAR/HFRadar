@@ -249,7 +249,7 @@ export default {
           // HF Radar
           if (radarType == "HFRadar"){
             // GUI Info
-            let isRadarActivated = window.GUIManager.widgetHFRadars.radarsVisible[radar.Site];
+            let isRadarActivated = window.GUIManager.widgetHFRadars.radarsVisible[radar.Site]  && window.GUIManager.widgetHFRadars.areParticlesVisible;
             // Visible
             if (areVisible && isRadarActivated && radar.animEngine && radar.data[tmst] != undefined){
               radar.animEngine.setHFRadarData(radar.data[tmst]);
