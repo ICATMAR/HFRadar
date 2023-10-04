@@ -3,7 +3,12 @@
 
     <!-- Time Range Bar -->
     <Transition><!-- Vue transition -->
-      <time-range-bar v-show="showDataBar"></time-range-bar>
+      <time-range-bar v-show="isAdvancedInterfaceOnOff"></time-range-bar>
+    </Transition>
+
+    <!-- Simple time slider -->
+    <Transition><!-- Vue transition -->
+      <timeSlider v-show="!isAdvancedInterfaceOnOff"></timeSlider>
     </Transition>
 
   </div>
@@ -13,28 +18,27 @@
 
 <script>
 import TimeRangeBar from "./TimeRangeBar.vue"
+import TimeSlider from "./TimeSlider.vue";
 
 export default {
   name:"BottomSection",
   mounted() {
+    // EVENTS
+    window.eventBus.on('AdvancedInterfaceOnOff', state => this.isAdvancedInterfaceOnOff = state);
 
   },
   data() {
     return {
-      showDataBar: true,
-
-      date: new Date(),
+      isAdvancedInterfaceOnOff: true,
     }
   },
   methods :{
 
-    dataBarButtonClicked: function (e) {
-      this.showDataBar = !this.showDataBar;
-    },
   },
   components: {
     "time-range-bar": TimeRangeBar,
-  }
+    "timeSlider": TimeSlider,
+}
 }
 </script>
 
@@ -50,11 +54,17 @@ export default {
   position: absolute;
   bottom: 0px;
   left: 0px;
-  right: 340px;
+  right: 300px;
   pointer-events: none;
 }
 
 
+/* Mobile */
+@media screen and (max-width: 770px) {
+  #bottom-section {
+    right: 0px;
+  }
+}
 
 
 /* Transitions for elements */

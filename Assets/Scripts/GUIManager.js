@@ -9,6 +9,21 @@ class GUIManager {
     arePointsVisible: false,
   }
 
+  // HF Radar widget
+  // TODO: INTEGRAT, NOW NOT USED IN APP
+  widgetHFRadars = {
+    isVisible: false,
+    areParticlesVisible: true,
+    arePointsVisible: true,
+    radarsVisible: {
+      'BEGU': true,
+      'CREU': true,
+    }
+  }
+
+  // Advanced interface
+  isAdvancedInterface = false;
+
   // Data point selected
   isDataPointSelected = false;
 
@@ -33,18 +48,11 @@ class GUIManager {
       this.selectedDateChanged(tmst);
     });
 
-    // WidgetCombinedRadars
-    window.eventBus.on("WidgetCombinedRadars_VisibilityChanged", value => {
-      this.widgetCombinedRadars.isVisible = value;
-      this.isDataPointSelected = false;
-    });
-    window.eventBus.on("WidgetCombinedRadars_AnimationActiveChanged", value => {
-      this.widgetCombinedRadars.areParticlesVisible = value;
-    });
-    window.eventBus.on("WidgetCombinedRadars_PointsActiveChanged", value => {
-      this.widgetCombinedRadars.arePointsVisible = value;
-      this.isDataPointSelected = false;
-    });
+
+    // Advanced interface button
+    window.eventBus.on('AdvancedInterfaceOnOff', state => {
+      this.isAdvancedInterface = state;
+    })
 
 
     // Map
@@ -80,7 +88,7 @@ class GUIManager {
       if (radars.length != 0 ){
         for (let i = 0; i < radars.length; i++){
           let HFRadar = radars[i];
-          if (HFRadar.constructor.name == 'CombinedRadars' && HFRadar.isActivated){
+          if (HFRadar.constructor.name == 'CombinedRadars'){
             combinedRadar = HFRadar;
           }
         }

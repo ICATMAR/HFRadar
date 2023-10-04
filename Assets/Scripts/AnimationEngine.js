@@ -28,6 +28,8 @@ class AnimationEngine {
   isDestroyed = false;
   isStopped = false;
   
+  useArrows = false;
+  
 
   // Constructor
   /*
@@ -53,6 +55,8 @@ class AnimationEngine {
     // Set height and width of the canvas
     this.canvasParticles.width = this.map.getViewport().offsetWidth;
     this.canvasParticles.height = this.map.getViewport().offsetHeight;
+    // Calculate geographic extent of the canvas
+    this.calculateCanvasGeographicExtent();
     // Set up variable for when map is moving
     this.mapIsMoving = false;
     // https://stackoverflow.com/questions/11565471/removing-event-listener-which-was-added-with-bind
@@ -66,6 +70,9 @@ class AnimationEngine {
       // Create particle system
       this.particles = new ParticleSystem(this.canvasParticles, this.source, this.map);
       this.particles.clear();
+
+      // Define if using arrows
+      this.useArrows = animInfo.animation.useArrows == true;
 
       // Define callback when data is loaded
       //this.source.defineOnLoadCallback(this.particles.repositionParticles.bind(this.particles));
@@ -90,7 +97,9 @@ class AnimationEngine {
 
     // Create CombinedRadar source
     if (animInfo.CombinedRadarData){
+      //this.useArrows = true;
       this.source = new SourceCombinedRadar(animInfo.CombinedRadarData);
+      //this.source.animation.useArrows = true;
       // Create particle system
       this.particles = new ParticleSystem(this.canvasParticles, this.source, this.map);
       this.particles.clear();
@@ -217,11 +226,16 @@ class AnimationEngine {
     if (this.source){
       //console.log(this.source.wmsURL);
       if (this.source.isReady)
-        if (!this.mapIsMoving)
+        if (!this.mapIsMoving){
           this.particles.draw(dt);
+        }
     }
 
-    // Loop
+    // Do not loop if using arrows and particles have been painted
+    if (this.useArrows)
+      return;
+
+    // Loop otherwise
     setTimeout(() => this.update() , this.FRAMERATE); // Frame rate in milliseconds
   }
 
@@ -231,6 +245,9 @@ class AnimationEngine {
     console.log("Source loaded!");
     // Reposition particles when data is loaded
     this.particles.repositionParticles();
+    // Update with draw for arrows
+    if (this.useArrows)
+      this.update();
   }
 
   clearCanvas(){
@@ -245,16 +262,31 @@ class AnimationEngine {
     // Resize num of particles
     if (typeof this.particles.resizeNumParticles === 'function')
       this.particles.resizeNumParticles();
+    
+  }
+
+  calculateCanvasGeographicExtent(){
+    // Calculate map extent in long lat
+    let extent = this.map.getView().calculateExtent();
+    let mapExtentMin = ol.proj.transform([extent[0], extent[1]], 'EPSG:3857', 'EPSG:4326');
+    let mapExtentMax = ol.proj.transform([extent[2], extent[3]], 'EPSG:3857', 'EPSG:4326');
+    this.canvasParticles.mapMinLong = mapExtentMin[0];
+    this.canvasParticles.mapMinLat = mapExtentMin[1];
+    this.canvasParticles.mapMaxLong = mapExtentMax[0];
+    this.canvasParticles.mapMaxLat = mapExtentMax[1];
   }
 
 
   // Callback when map size changes
   onMapMoveEnd(){
     this.resizeCanvas();
+    this.calculateCanvasGeographicExtent();
     this.mapIsMoving = false;
     if (this.source) {
       if (this.source.isReady){
         this.particles.repositionParticles();
+        if (this.useArrows) // Update and draw once for arrows
+          this.update();
       }
     }
     if (this.legend)
@@ -294,8 +326,9 @@ class SourceWMS {
 
   //medBBOX = [-19, 36, 31, 45]; // LONG, LAT -18.12, 36.3, 45.98, 30.18 from https://resources.marine.copernicus.eu/product-detail/MEDSEA_ANALYSISFORECAST_WAV_006_017/INFORMATION
   // WMS service does not always provide the BBOX given, be careful. Check with the URL
-  medBBOX = [-17, 30, 30, 45];
+  medBBOX = [30, -17, 45, 30]; // NOW IT IS LAT
   catseaBBOX = [-1, 36, 9, 44]; // LONG, LAT
+
 
 
   // Constructor
@@ -326,7 +359,11 @@ class SourceWMS {
 
     // BBOX
     this.bbox = this.medBBOX;//this.catseaBBOX;
+    //this.bbox3857 = this.medBBOX3857;
     wmsURL = SourceWMS.setWMSParameter(wmsURL, 'BBOX', JSON.stringify(this.bbox).replace('[', '').replace(']', ''));
+    // CRS for BBOX (some services only accept 3857 boundaries?)
+    //wmsURL = SourceWMS.setWMSParameter(wmsURL, 'CRS', 'EPSG:3857');
+
     // STYLE gray
     let style = 'boxfill/greyscale';
     wmsURL = SourceWMS.setWMSParameter(wmsURL, 'STYLES', style);
@@ -340,6 +377,8 @@ class SourceWMS {
 
     // COLORRANGE
     this.colorrange = SourceWMS.getWMSParameter(wmsURL, 'COLORSCALERANGE').split('%2C');
+    if (this.colorrange.length == 1) // Split by comma
+      this.colorrange = SourceWMS.getWMSParameter(wmsURL, 'COLORSCALERANGE').split(',');
     this.colorrange = this.colorrange.map((e) => parseFloat(e));
 
 
@@ -353,7 +392,7 @@ class SourceWMS {
     canvas.width = this.longExtension / this.canvasLongLatStep;
     canvas.height = this.latExtension / this.canvasLongLatStep;
 
-    let ctx = canvas.getContext('2d');
+    let ctx = canvas.getContext('2d', {willReadFrequently: false});
     //document.body.append(canvas);
 
     // WMS data layers
@@ -414,7 +453,7 @@ class SourceWMS {
       return wmsURL + '&' + paramName + '=' + paramContent;
     }
     let currentContent = SourceWMS.getWMSParameter(wmsURL, paramName);
-    return wmsURL.replace(currentContent, paramContent);
+    return wmsURL.replace(paramName + '=' + currentContent, paramName + '=' + paramContent);
   }
 
 
@@ -442,6 +481,13 @@ class SourceWMS {
       value[0] = undefined; value[1] = undefined; // Reset value
       return value;
     }
+
+    // If image is not loaded
+    if (this.isReady == false){
+      value[0] = undefined; value[1] = undefined; // Reset value
+      return value;
+    }
+      
 
     // Get closest pixel to long lat (nearest-neighbour interpolation)
     let colPixelPos = Math.round((long - minLong) / this.canvasLongLatStep);
@@ -825,7 +871,9 @@ class ParticleHF {
       colorStr = this.color.replace(')', ', ' + alphaFactor/255 + ')');
     else // Hex
       colorStr =  '#' + this.color + alphaFactor.toString(16).padStart(2,'0');
-    ctx.strokeStyle = colorStr; // Makes the app go slow, consider something different
+
+    if (colorStr.localeCompare(ctx.strokeStyle) != 0)
+      ctx.strokeStyle = colorStr; // Makes the app go slow, consider something different
     ctx.moveTo(x, y)
     ctx.lineTo(nextX, nextY);
   }
@@ -868,9 +916,11 @@ class ParticleSystem {
     // Create particles
     this.particles = [];
     for (let i = 0; i < this.fullScreenNumParticles; i++){
-      if (this.source.constructor.name == 'SourceCombinedRadar'){
+      if (this.source.constructor.name == 'SourceCombinedRadar' && !source.animation.useArrows){
         this.particles[i] = new ParticleCombinedRadar(this);
       }
+      else if(source.animation.useArrows)
+        this.particles[i] = new Arrow(this, i);
       else
         this.particles[i] = new Particle(this);
     }
@@ -885,18 +935,18 @@ class ParticleSystem {
   // Functions
   // Set num particles according to the number of pixels and source
   resizeNumParticles(){
-    //if (this.source.constructor.name == 'SourceWMS'){
-      let numPixels = this.canvas.width * this.canvas.height;
-      let numParticlesFactor = numPixels / this.fullScreenPixels;
-      // Active number of animations
-      numParticlesFactor /= AnimationEngine.getNumActiveAnimations();
-      // Define number of particles
-      this.numParticles = Math.min(Math.round(numParticlesFactor * this.fullScreenNumParticles), this.fullScreenNumParticles);
-    //} else if (this.source.constructor.name == 'SourceHFRadar'){
-    //}
+    let numPixels = this.canvas.width * this.canvas.height;
+    let numParticlesFactor = numPixels / this.fullScreenPixels;
+    // Active number of animations
+    numParticlesFactor /= AnimationEngine.getNumActiveAnimations();
+    // Define number of particles
+    this.numParticles = Math.min(Math.round(numParticlesFactor * this.fullScreenNumParticles), this.fullScreenNumParticles);
+
   }
+  
   // Reposition particles
   repositionParticles(){
+    // Reposition particles
     for (let i = 0; i < this.numParticles; i++)
       this.particles[i].repositionParticle();
   }
@@ -910,10 +960,12 @@ class ParticleSystem {
     
     // Trail effect
     // https://codepen.io/Tyriar/pen/BfizE
-    this.ctx.fillStyle = 'rgba(255, 255, 255, .9)';
-    this.ctx.globalCompositeOperation = "destination-in";
-    this.ctx.fillRect(0,0, this.canvas.width, this.canvas.height);
-    this.ctx.globalCompositeOperation = "source-over";
+    if (this.particles[0].constructor.name != 'Arrow'){
+      this.ctx.fillStyle = 'rgba(255, 255, 255, .9)';
+      this.ctx.globalCompositeOperation = "destination-in";
+      this.ctx.fillRect(0,0, this.canvas.width, this.canvas.height);
+      this.ctx.globalCompositeOperation = "source-over";
+    }
     // Trail color
     this.ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
 
@@ -944,7 +996,7 @@ class ParticleSystem {
 class Particle {
   // Variables
   numVerticesPath = 20;
-  stepInPixels = 20; // Step (ideally in lat, long, not in pixels)
+  stepInLongLat = 1;
   color = [0,0,0];
 
   // Constructor
@@ -966,17 +1018,23 @@ class Particle {
     if (particleSystem.source.animation.type == 'velocity'){
       this.draw = this.drawVelocity;
       this.numVerticesPath = 20;
-      this.stepInPixels = 20;
+      this.stepInLongLat = 7;
+    }
+    if (particleSystem.source.animation.type == 'wind'){
+      this.draw = this.drawVelocity;
+      this.numVerticesPath = 20;
+      this.stepInLongLat = 1;
+      this.particleSystem.speedFactor = 0.002;
     }
     else if (particleSystem.source.animation.type == 'wave'){
       this.draw = this.drawWaves;
       this.numVerticesPath = 8;
-      this.stepInPixels = 20;
+      this.stepInLongLat = 50;
     }
     else if (particleSystem.source.animation.type == 'whiteWave'){
       this.draw = this.drawWaves;
       this.numVerticesPath = 4;
-      this.stepInPixels = 20;
+      this.stepInLongLat = 50;
       this.color = [255,255,255];
       this.particleSystem.speedFactor = 6;
     }
@@ -997,21 +1055,25 @@ class Particle {
     this.vertices[0] = this.pointVec2[0];
     this.vertices[1] = this.pointVec2[1];
 
+    // Get position in long lat
+    let coord = this.particleSystem.map.getCoordinateFromPixel(this.pointVec2);
+    coord = ol.proj.transform(coord, 'EPSG:3857', 'EPSG:4326');
+
     // Create vertices path
     for (var i = 1; i < this.numVerticesPath; i++){
       // Make step
-      // North is inverted because of pixels (less pixels, more north)
-      this.pointVec2[0] += this.valueVec2[0] * this.stepInPixels || 0; // 0 if there is no data
-      this.pointVec2[1] -= this.valueVec2[1] * this.stepInPixels || 0; // 0 if there is no data
-      // Assign positions to vertices array
-      this.vertices[i*2] = this.pointVec2[0];
-      this.vertices[i*2 + 1] = this.pointVec2[1];
-      // Get new value according to point
-      //this.valueVec2 = this.particleSystem.source.getValueAtPixel(this.pointVec2, this.valueVec2); // Is rounding the pixel movement, could be done with floats
-      
-      // Transform pixel to long lat
-      let coord = this.particleSystem.map.getCoordinateFromPixel(this.pointVec2);
-      coord = ol.proj.transform(coord, 'EPSG:3857', 'EPSG:4326');
+      let step = this.stepInLongLat;
+      // Step in long lat
+      let nextLong = coord[0] + ((this.valueVec2[0] * step) / earthRadius) * (180 / Math.PI) / Math.cos(coord[0] * Math.PI / 180);
+      let nextLat = coord[1] + ((this.valueVec2[1] * step) / earthRadius) * (180 / Math.PI);
+      // Convert to pixel coordinates
+      coord[0] = nextLong;
+      coord[1] = nextLat;
+      let coord3857 = ol.proj.transform(coord, 'EPSG:4326', 'EPSG:3857');
+      let pixelPos = this.particleSystem.map.getPixelFromCoordinate(coord3857);
+      // Store values
+      this.vertices[i*2] = pixelPos[0];
+      this.vertices[i*2 + 1] = pixelPos[1];
       // Get new value according to longitude and latitude
       this.valueVec2 = this.particleSystem.source.getValueAtLongLat(coord[0], coord[1], this.valueVec2);
       // Assign values
@@ -1092,8 +1154,9 @@ class Particle {
       ctx.beginPath();
       //ctx.lineWidth = Math.max(value*15, 4);
       //ctx.fillStyle = 'rgba(0, 0, 0, ', alphaFactor*0.0, ')';
-      let colorStr = 'rgba(' + this.color[0] + ',' + this.color[1] + ',' + this.color[2] + ', ' + 0.7 + ')'
-      ctx.strokeStyle = colorStr; // Makes the app go slow, consider something different
+      let colorStr = 'rgba(' + this.color[0] + ',' + this.color[1] + ',' + this.color[2] + ', ' + 0.7 + ')';
+      if (colorStr.localeCompare(ctx.strokeStyle) != 0)
+        ctx.strokeStyle = colorStr; // Makes the app go slow, consider something different
 
     ctx.moveTo(this.prevPos[0], this.prevPos[1])
     ctx.lineTo(this.currentPos[0], this.currentPos[1]);
@@ -1148,7 +1211,8 @@ class Particle {
     ctx.lineWidth = Math.max(value*15, 4);
     //ctx.fillStyle = 'rgba(0, 0, 0, ', alphaFactor*0.0, ')';
     let colorStr = 'rgba(' + this.color[0] + ',' + this.color[1] + ',' + this.color[2] + ', ' + alphaFactor * 0.5 + ')'
-    ctx.strokeStyle = colorStr; // Makes the app go slow, consider something different
+    if (colorStr.localeCompare(ctx.strokeStyle) != 0)
+      ctx.strokeStyle = colorStr; // Makes the app go slow, consider something different
     ctx.moveTo(this.prevPos[0], this.prevPos[1])
     ctx.lineTo(this.currentPos[0], this.currentPos[1]);
 
@@ -1210,7 +1274,7 @@ class ParticleCombinedRadar extends Particle {
     super(particleSystem);
 
     particleSystem.speedFactor = 0.01;
-    this.stepInPixels = 0.1;
+    this.stepInLongLat = 0.008;
     this.color = [255,255,255];
   }
 
@@ -1226,25 +1290,32 @@ class ParticleCombinedRadar extends Particle {
     this.vertices[0] = this.pointVec2[0];
     this.vertices[1] = this.pointVec2[1];
 
+    // Get position in long lat
+    let coord = this.particleSystem.map.getCoordinateFromPixel(this.pointVec2);
+    coord = ol.proj.transform(coord, 'EPSG:3857', 'EPSG:4326');
+
     // Create vertices path
     // There is an advantge of storing pixel location: when painting we dont need to transform from lat-long to screen space
     for (var i = 1; i < this.numVerticesPath; i++){
       // Make step
-      // North is inverted because of pixels (less pixels, more north)
-      this.pointVec2[0] += this.valueVec2[0] * this.stepInPixels || 0; // 0 if there is no data
-      this.pointVec2[1] -= this.valueVec2[1] * this.stepInPixels || 0; // 0 if there is no data
-      // Assign positions to vertices array
-      this.vertices[i*2] = this.pointVec2[0];
-      this.vertices[i*2 + 1] = this.pointVec2[1];
-
-      // Transform pixel to long lat
-      let coord = this.particleSystem.map.getCoordinateFromPixel(this.pointVec2);
-      coord = ol.proj.transform(coord, 'EPSG:3857', 'EPSG:4326');
-      // Get new value according to longitude and latitude
+      let step = this.stepInLongLat;
+      // Step in long lat
+      let nextLong = coord[0] + ((this.valueVec2[0] * step) / earthRadius) * (180 / Math.PI) / Math.cos(coord[0] * Math.PI / 180);
+      let nextLat = coord[1] + ((this.valueVec2[1] * step) / earthRadius) * (180 / Math.PI);
+      // Convert to pixel coordinates
+      coord[0] = nextLong;
+      coord[1] = nextLat;
+      let coord3857 = ol.proj.transform(coord, 'EPSG:4326', 'EPSG:3857');
+      let pixelPos = this.particleSystem.map.getPixelFromCoordinate(coord3857);
+      // Store values
+      this.vertices[i*2] = pixelPos[0];
+      this.vertices[i*2 + 1] = pixelPos[1];
+      // Get value
       this.valueVec2 = this.particleSystem.source.getValueAtLongLat(coord[0], coord[1], this.valueVec2);
       // Assign values
       if (this.valueVec2[0] !== undefined)
         this.verticesValue[i] = Math.sqrt(this.valueVec2[0]*this.valueVec2[0] + this.valueVec2[1]*this.valueVec2[1]);
+   
     }
 
     // Assign first value (avoids white dots in animation)
@@ -1343,8 +1414,11 @@ class ParticleCombinedRadar extends Particle {
       ctx.beginPath();
       ctx.lineWidth = 1.5;
       //ctx.fillStyle = 'rgba(0, 0, 0, ', alphaFactor*0.0, ')';
-      let colorStr = 'rgba(' + this.color[0] + ',' + this.color[1] + ',' + this.color[2] + ', ' + 0.7 + ')'
-      ctx.strokeStyle = colorStr; // Makes the app go slow, consider something different
+      let colorStr = 'rgba(' + this.color[0] + ',' + this.color[1] + ',' + this.color[2] + ', ' + 0.7 + ')';
+      if (colorStr.localeCompare(ctx.strokeStyle) != 0){
+        ctx.strokeStyle = colorStr; // Makes the app go slow, optimize by not setting it when the same color is used twice
+      }
+      
 
     ctx.moveTo(this.prevPos[0], this.prevPos[1])
     ctx.lineTo(this.currentPos[0], this.currentPos[1]);
@@ -1383,6 +1457,231 @@ class ParticleCombinedRadar extends Particle {
 
 
 
+
+
+
+// Class for static directional arrows
+class Arrow {
+  // Variables
+  numVerticesPath = 5; // bottom arrow, center arrow, left corner, top arrow, right corner
+  stepInLongLat = 1;
+  arrowTipLength = 0.5;
+  color = [0,0,0];
+
+  // Constructor
+  constructor(particleSystem, particleNumber){
+    this.particleSystem = particleSystem;
+
+    // Particle number
+    this.particleNumber = particleNumber;
+    
+    // Variable for optimization
+    this.valueVec2 = [0,0];
+    this.pointVec2 = [0,0];
+    this.tempVec2 =  [0,0];
+    this.temp2Vec2 = [0,0];
+    this.normDir = [0,0];
+
+    // Vertices
+    this.vertices = new Float32Array(this.numVerticesPath * 2); // Vertices that define the arrow
+    this.vertexValue = 1; // One value per arrow
+  }
+
+  // Functions
+  // Reposition particle
+  repositionParticle(){
+    // Generate starting vertex with initial value
+    this.generatePoint(this.pointVec2, this.valueVec2);
+    if (this.valueVec2[0] == undefined){
+      // Reset particle
+      this.vertices.fill(-1);
+      return;
+    }
+      
+    // Assign initial position
+    this.vertices[0] = this.pointVec2[0];
+    this.vertices[1] = this.pointVec2[1];
+
+    // Assign value to arrow
+    this.vertexValue = Math.sqrt(this.valueVec2[0]*this.valueVec2[0] + this.valueVec2[1]*this.valueVec2[1]);
+
+    // Arrow direction
+    // Normalize value
+    this.normDir[0] = this.valueVec2[0]/this.vertexValue;
+    this.normDir[1] = this.valueVec2[1]/this.vertexValue;
+
+    // Redefine step according to long and lat pixel ratio
+    // Determines the size of the arrow
+    let canvas = this.particleSystem.canvas;
+    // Compensate for zoom in and out
+    this.stepInLongLat = canvas.mapMaxLat - canvas.mapMinLat;
+    // Compensate for canvas height as it modifies latRange
+    this.stepInLongLat /= this.particleSystem.canvas.height / 900;
+
+    // Step in arrow's direction
+    // Convert to long lat
+    let map = this.particleSystem.map;
+    this.tempVec2[0] = this.vertices[0];
+    this.tempVec2[1] = this.vertices[1];
+    this.tempVec2 = map.getCoordinateFromPixel(this.tempVec2);
+    this.tempVec2 = ol.proj.transform(this.tempVec2, 'EPSG:3857', 'EPSG:4326');
+    let long = this.tempVec2[0];
+    let lat = this.tempVec2[1];
+    // Step in long lat
+    let pixelPos = this.pixelPosWithStepInLongLat(long, lat, this.normDir, this.stepInLongLat, this.tempVec2);
+    this.vertices[2] = pixelPos[0];
+    this.vertices[3] = pixelPos[1];
+    // Tip long lat
+    let tipLong = this.tempVec2[0];
+    let tipLat = this.tempVec2[1];
+
+    // Perpendicular step
+    // Perpendicular direction
+    this.temp2Vec2[0] = -this.normDir[1];
+    this.temp2Vec2[1] = this.normDir[0];
+    pixelPos = this.pixelPosWithStepInLongLat(tipLong, tipLat, this.temp2Vec2, this.stepInLongLat/3, this.tempVec2);
+    this.vertices[4] = pixelPos[0];
+    this.vertices[5] = pixelPos[1];
+
+    // Top tip arrow
+    pixelPos = this.pixelPosWithStepInLongLat(tipLong, tipLat, this.normDir, this.stepInLongLat*1.2, this.tempVec2);
+    this.vertices[6] = pixelPos[0];
+    this.vertices[7] = pixelPos[1];
+
+    // Right step
+    this.temp2Vec2[0] = this.normDir[1];
+    this.temp2Vec2[1] = -this.normDir[0];
+    pixelPos = this.pixelPosWithStepInLongLat(tipLong, tipLat, this.temp2Vec2, this.stepInLongLat/3, this.tempVec2);
+    this.vertices[8] = pixelPos[0];
+    this.vertices[9] = pixelPos[1];
+
+  }
+
+
+  // Return pixel position according to step in lat long
+  pixelPosWithStepInLongLat(long, lat, dirVec2, step, nextLongLatVec2){
+    // Step in long lat
+    let nextLong = long + ((dirVec2[0] * step) / earthRadius) * (180 / Math.PI) / Math.cos(lat * Math.PI / 180);
+    let nextLat = lat + ((dirVec2[1] * step) / earthRadius) * (180 / Math.PI);
+    nextLongLatVec2[0] = nextLong;
+    nextLongLatVec2[1] = nextLat;
+    // Convert to screen pixel
+    let coord = ol.proj.transform(nextLongLatVec2, 'EPSG:4326', 'EPSG:3857');
+    let pixelPos = this.particleSystem.map.getPixelFromCoordinate(coord);
+    return pixelPos;
+  }
+
+
+  // Generate new point
+  // Use a grid with equidistant particles
+  generatePoint(point, value){
+    // callstacknum not used
+    // Calculate grid position
+    let aspectRatio = this.particleSystem.canvas.width / this.particleSystem.canvas.height;
+    let gridWidth;
+    // Grid width is defined by the height and width of the canvas
+    gridWidth = 0.9 * Math.ceil(Math.sqrt(this.particleSystem.numParticles * aspectRatio)); // Floor it so there might be arrows outside the screen size and not otherwise (missing arrows in corners maybe)
+
+    // Find the column and row of the particle
+    let col = this.particleNumber % gridWidth;
+    let row = Math.floor(this.particleNumber / gridWidth);
+
+    // Determine the pixel spacing between particles
+    let pixelSpacing = this.particleSystem.canvas.width / gridWidth;// Space out arrows. Should it be dependent on screen size?
+    point[0] = col * pixelSpacing; // x
+    point[1] = row * pixelSpacing; // y
+    // Get value at pixel
+    let coord = this.particleSystem.map.getCoordinateFromPixel(point);
+    if (coord == null)
+      debugger;
+    coord = ol.proj.transform(coord, 'EPSG:3857', 'EPSG:4326');
+    // Get value at long lat from source
+    value = this.particleSystem.source.getValueAtLongLat(coord[0], coord[1], value);
+    // If pixel does not contain data
+    if (value[0] == undefined)
+      return value;
+  }
+
+
+
+  // Draw / Update
+  draw(dt){
+
+    // Draw in canvas
+    let ctx = this.particleSystem.ctx;
+
+
+    // Shadow
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.lineWidth = 2;
+    
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.4)'; // Makes the app go slow, consider something different
+
+    ctx.lineTo(this.vertices[4], this.vertices[5]);
+    ctx.lineTo(this.vertices[6], this.vertices[7]);
+    ctx.lineTo(this.vertices[8], this.vertices[9]);
+    ctx.lineTo(this.vertices[4], this.vertices[5]);
+    ctx.fill();
+
+
+    // Main arrow
+    // ctx.stroke();
+    ctx.beginPath();
+    ctx.lineWidth = 1;
+    //ctx.lineWidth = Math.max(value*15, 4);
+    //ctx.fillStyle = 'rgba(0, 0, 0, ', alphaFactor*0.0, ')';
+    let colorStr = 'rgba(' + this.color[0] + ',' + this.color[1] + ',' + this.color[2] + ', ' + 0.4 + ')'
+    if (colorStr.localeCompare(ctx.strokeStyle) != 0)
+      ctx.strokeStyle = colorStr; // Makes the app go slow, consider something different
+
+    ctx.moveTo(this.vertices[0], this.vertices[1]);
+    ctx.lineTo(this.vertices[2], this.vertices[3]);
+    ctx.lineTo(this.vertices[4], this.vertices[5]);
+    ctx.lineTo(this.vertices[6], this.vertices[7]);
+    ctx.lineTo(this.vertices[8], this.vertices[9]);
+    ctx.lineTo(this.vertices[2], this.vertices[3]);
+    
+
+    
+
+
+  }
+
+
+  updateLegend(legend){
+    this.legend = legend;
+    this.defineColorWithLegend();
+  }
+  // These values depend on the variable range defined at the beginning of the file
+  defineColorWithLegend(legend){
+    return;
+    legend = legend || this.legend;
+    if(legend == undefined)
+      return;
+
+    let steps = legend.colorsStr.length;
+    let range = legend.legendRange; // HACK, THE SOURCE SHOULD HAVE THE RANGE: this.particleSystem.source.dataRange;
+    let unitStep = (range[1] - range[0])/steps;
+    let mag = this.signedMagnitude;
+    // Find color according to magnitude and legend
+    // Top bottom limits
+    if (mag < range[0])
+      this.color = legend.colorsStr[0];
+    else
+      this.color = legend.colorsStr[steps -1];
+    for (let i = 0; i < steps-1; i++){
+      let lowLim = range[0] + i*unitStep;
+      let highLim = range[0] + (i+1)*unitStep;
+      if (mag > lowLim && mag < highLim){
+        this.color = legend.colorsStr[i];
+        i = steps;
+      }
+    }
+  }
+
+
+}
 
 
 

@@ -13,6 +13,11 @@
   font-family: "Poppins", "Sans-serif";
 }
 
+.white-text {
+  color: white;
+  text-shadow: 0 0 4px black;
+  font-size: clamp(0.9rem, 1.2vw, 1rem);
+}
 
 /* font-awesome 
   https://github.com/FortAwesome/Font-Awesome/blob/6.x/css/all.min.css 
@@ -90,6 +95,12 @@ button:hover {
 .clickable:hover {
   transform: scale(1.05);
   transition: all 0.2s ease-in-out;
+}
+.unavailable {
+  background-color: rgb(136, 136, 136);
+  border: 2px solid gray;
+  pointer-events: none;
+  cursor:auto;
 }
 
 
@@ -242,11 +253,27 @@ h4 {
 .widgetButtonHFRadar-active {
   background-color: var(--red);
   border: 2px solid rgb(255, 90, 90);
+  cursor: pointer;
 }
+
+.widgetButtonHFRadar-active:hover {
+  background-color: var(--red);
+  border: 2px solid rgb(255, 199, 199);
+  cursor: pointer;
+}
+
 .widgetButtonHFRadar-unavailable {
   background-color: rgb(136, 136, 136);
   border: 2px solid gray;
   pointer-events: none;
+  cursor:auto;
+}
+
+.widgetButtonHFRadar-unavailable:hover {
+  background-color: rgb(136, 136, 136);
+  border: 2px solid gray;
+  pointer-events: none;
+  cursor:auto;
 }
 
 
