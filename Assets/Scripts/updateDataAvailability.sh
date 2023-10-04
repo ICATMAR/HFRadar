@@ -10,6 +10,9 @@ git pull
 cd ..
 cd HFRadar/Assets/Scripts
 
+# Make sure you are in the latest version of the web app
+git pull
+
 # Call the generateDataAvailability.py script
 python generateDataAvailability.py
 
