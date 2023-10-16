@@ -900,6 +900,7 @@ class ParticleSystem {
   fullScreenNumParticles = 30000;
   speedFactor = 0.7;
   fullScreenPixels = 1920 * 1080;
+  minParticles = 4000;
 
   // Constructor
   constructor(canvas, source, olMap){
@@ -941,7 +942,8 @@ class ParticleSystem {
     numParticlesFactor /= AnimationEngine.getNumActiveAnimations();
     // Define number of particles
     this.numParticles = Math.min(Math.round(numParticlesFactor * this.fullScreenNumParticles), this.fullScreenNumParticles);
-
+    // Minimum
+    this.numParticles = Math.max(this.numParticles, this.minParticles);
   }
   
   // Reposition particles
