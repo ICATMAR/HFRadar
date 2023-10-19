@@ -1,17 +1,18 @@
 #!/bin/bash
 
 # Navigate to the HFRadarData folder
-cd ../../../HFRadarData
+#cd ../../../HFRadarData
 
 # Perform git pull to update the repository
+cd /var/www/HFRadar
 git pull
 
 # Move back to the original directory
-cd ..
-cd HFRadar/Assets/Scripts
+cd /var/www/HFRadar/Assets/Scripts
+#cd HFRadar/Assets/Scripts
 
 # Make sure you are in the latest version of the web app
-git pull
+#git pull
 
 # Call the generateDataAvailability.py script
 python generateDataAvailability.py
