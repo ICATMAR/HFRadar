@@ -11,20 +11,23 @@ def generate_json(folders, output_path):
     data = {}
 
     for folder in folders:
-
-      folder_path = os.path.join(script_directory, "../../../HFRadarData/" + folder)
-      for _, _, files in os.walk(folder_path):
-          for file_name in files:
-                # Check minimum size
-                file_path = os.path.join(folder_path, file_name)
-                if os.path.getsize(file_path) >= min_file_size:
-                    timestamp = extract_timestamp(file_name)
-                    if timestamp:
-                        timestamp_formatted = format_timestamp(timestamp)  # Format the timestamp
-                        if timestamp_formatted not in data:
-                            data[timestamp_formatted] = {}
-                        # TODO: read some information about quality flags / number of points and write it to the radar
-                        data[timestamp_formatted][folder] = True
+        sup_folder_path = os.path.join(script_directory, "../../../data/observational/hf_radar/currents/" + folder)
+        for year_folder in os.listdir(sup_folder_path):
+            year_folder_path = os.path.join(sup_folder_path, year_folder)
+            for month_folder in os.listdir(year_folder_path):
+                folder_path = os.path.join(year_folder_path, month_folder)
+                for _, _, files in os.walk(folder_path):
+                    for file_name in files:
+                        # Check minimum size
+                        file_path = os.path.join(folder_path, file_name)
+                        if os.path.getsize(file_path) >= min_file_size:
+                            timestamp = extract_timestamp(file_name)
+                            if timestamp:
+                                timestamp_formatted = format_timestamp(timestamp)  # Format the timestamp
+                                if timestamp_formatted not in data:
+                                    data[timestamp_formatted] = {}
+                                # TODO: read some information about quality flags / number of points and write it to the radar
+                                data[timestamp_formatted][folder] = True
 
 
     #print(data)
@@ -60,7 +63,7 @@ def format_timestamp(timestamp):
 script_directory = os.path.dirname(os.path.abspath(__file__))
 
 # Specify the folders to search for files
-folders = ["BEGU", "CREU", "ROSE"]
+folders = ["L2/BEGU", "L2/CREU", "L3/tuv"]
 
 # Specify the minimum file size in bytes
 min_file_size = 15240  # 10KB
