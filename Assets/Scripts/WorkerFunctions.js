@@ -101,7 +101,7 @@
   loadDataFromRepository = function(timestamp){
 
     //let baseURL = 'https://icatmar.github.io/HFRadarData/'
-    let baseURL = '/HFRadarData/'
+    let baseURL = '/data/observational/hf_radar/currents/'
 
     let date = new Date(timestamp);
     //date = firstDate; // HACK
@@ -116,11 +116,11 @@
     let promises = [];
     let urls = [
       // Begur
-      baseURL + 'BEGU/RDLm_BEGU_' + year + '_' + month + '_' + day + '_' + hour + '00.ruv',
+      baseURL + 'L2/BEGU/' + year + '/' + month + '/RDLm_BEGU_' + year + '_' + month + '_' + day + '_' + hour + '00_l2b.ruv',
       //  Creus
-      baseURL + 'CREU/RDLm_CREU_' + year + '_' + month + '_' + day + '_' + hour + '00.ruv',
+      baseURL + 'L2/CREU/' + year + '/' + month + '/RDLm_CREU_' + year + '_' + month + '_' + day + '_' + hour + '00_l2b.ruv',
       // Totals Roses
-      baseURL + 'ROSE/TOTL_ROSE_' + year + '_' + month + '_' + day + '_' + hour + '00.tuv'
+      baseURL + 'L3/tuv/' + year + '/' + month + '/TOTL_ROSE_' + year + '_' + month + '_' + day + '_' + hour + '00.tuv'
     ];
 
     for (let i = 0; i < urls.length; i++){

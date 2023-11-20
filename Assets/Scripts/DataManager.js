@@ -620,8 +620,10 @@ class HFRadar {
 
   getRadarOrigin(){
     let locationStr = this.header.Origin;
-    let location = locationStr.replace(/\s\s+/g, ',').replace(',', '').replace('\r', '').split(',');
+    let location = locationStr.trim().replace(/\s\s+/g, ',').replace('\r', '').split(',');
     location = location.slice(0,2).reverse();
+    location[0] = parseFloat(location[0]);
+    location[1] = parseFloat(location[1]);
     return location;
   }
 
