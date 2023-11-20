@@ -872,8 +872,10 @@ class ParticleHF {
     else // Hex
       colorStr =  '#' + this.color + alphaFactor.toString(16).padStart(2,'0');
 
-    if (colorStr.localeCompare(ctx.strokeStyle) != 0)
+    if (colorStr != ctx.prevStrokeStyle){
+      ctx.prevStrokeStyle = colorStr;
       ctx.strokeStyle = colorStr; // Makes the app go slow, consider something different
+    }
     ctx.moveTo(x, y)
     ctx.lineTo(nextX, nextY);
   }
@@ -1157,9 +1159,10 @@ class Particle {
       //ctx.lineWidth = Math.max(value*15, 4);
       //ctx.fillStyle = 'rgba(0, 0, 0, ', alphaFactor*0.0, ')';
       let colorStr = 'rgba(' + this.color[0] + ',' + this.color[1] + ',' + this.color[2] + ', ' + 0.7 + ')';
-      if (colorStr.localeCompare(ctx.strokeStyle) != 0)
+      if (colorStr != ctx.prevStrokeStyle){
+        ctx.prevStrokeStyle = colorStr;
         ctx.strokeStyle = colorStr; // Makes the app go slow, consider something different
-
+      }
     ctx.moveTo(this.prevPos[0], this.prevPos[1])
     ctx.lineTo(this.currentPos[0], this.currentPos[1]);
 
@@ -1213,8 +1216,10 @@ class Particle {
     ctx.lineWidth = Math.max(value*15, 4);
     //ctx.fillStyle = 'rgba(0, 0, 0, ', alphaFactor*0.0, ')';
     let colorStr = 'rgba(' + this.color[0] + ',' + this.color[1] + ',' + this.color[2] + ', ' + alphaFactor * 0.5 + ')'
-    if (colorStr.localeCompare(ctx.strokeStyle) != 0)
+    if (colorStr != ctx.prevStrokeStyle){
+      ctx.prevStrokeStyle = colorStr;
       ctx.strokeStyle = colorStr; // Makes the app go slow, consider something different
+    }
     ctx.moveTo(this.prevPos[0], this.prevPos[1])
     ctx.lineTo(this.currentPos[0], this.currentPos[1]);
 
@@ -1417,7 +1422,8 @@ class ParticleCombinedRadar extends Particle {
       ctx.lineWidth = 1.5;
       //ctx.fillStyle = 'rgba(0, 0, 0, ', alphaFactor*0.0, ')';
       let colorStr = 'rgba(' + this.color[0] + ',' + this.color[1] + ',' + this.color[2] + ', ' + 0.7 + ')';
-      if (colorStr.localeCompare(ctx.strokeStyle) != 0){
+      if (colorStr != ctx.prevStrokeStyle){
+        ctx.prevStrokeStyle = colorStr;
         ctx.strokeStyle = colorStr; // Makes the app go slow, optimize by not setting it when the same color is used twice
       }
       
@@ -1633,9 +1639,12 @@ class Arrow {
     ctx.lineWidth = 1;
     //ctx.lineWidth = Math.max(value*15, 4);
     //ctx.fillStyle = 'rgba(0, 0, 0, ', alphaFactor*0.0, ')';
-    let colorStr = 'rgba(' + this.color[0] + ',' + this.color[1] + ',' + this.color[2] + ', ' + 0.4 + ')'
-    if (colorStr.localeCompare(ctx.strokeStyle) != 0)
+    let colorStr = 'rgba(' + this.color[0] + ',' + this.color[1] + ',' + this.color[2] + ', ' + 0.4 + ')';
+    
+    if (colorStr != ctx.prevStrokeStyle){
+      ctx.prevStrokeStyle = colorStr;
       ctx.strokeStyle = colorStr; // Makes the app go slow, consider something different
+    }
 
     ctx.moveTo(this.vertices[0], this.vertices[1]);
     ctx.lineTo(this.vertices[2], this.vertices[3]);
