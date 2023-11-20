@@ -10,7 +10,7 @@ def count_files(folder_path):
 def generate_json(folders, output_path):
     data = {}
 
-    for folder in folders:
+    for index, folder in enumerate(folders):
         sup_folder_path = os.path.join(script_directory, "../../../data/observational/hf_radar/currents/" + folder)
         for year_folder in os.listdir(sup_folder_path):
             year_folder_path = os.path.join(sup_folder_path, year_folder)
@@ -27,7 +27,7 @@ def generate_json(folders, output_path):
                                 if timestamp_formatted not in data:
                                     data[timestamp_formatted] = {}
                                 # TODO: read some information about quality flags / number of points and write it to the radar
-                                data[timestamp_formatted][folder] = True
+                                data[timestamp_formatted][siteNames[index]] = True
 
 
     #print(data)
@@ -64,6 +64,8 @@ script_directory = os.path.dirname(os.path.abspath(__file__))
 
 # Specify the folders to search for files
 folders = ["L2/BEGU", "L2/CREU", "L3/tuv"]
+# Site names (useful for the web app)
+siteNames = ["BEGU", "CREU", "ROSE"]
 
 # Specify the minimum file size in bytes
 min_file_size = 15240  # 10KB
