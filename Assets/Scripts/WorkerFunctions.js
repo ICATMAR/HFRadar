@@ -1,5 +1,6 @@
 // This functions are used by the worker. They are defined here so they can be used by the main thread in case that web workers do not work.
 
+requestedFiles = [];
 
   // Parse text
   parseText = function(rawText){
@@ -124,6 +125,11 @@
     ];
 
     for (let i = 0; i < urls.length; i++){
+      // Check if this file was already requested
+      if (requestedFiles.indexOf(urls[i]) != -1){
+        continue;}
+      // Request file
+      requestedFiles.push(urls[i]);
       promises.push(
         fetch(urls[i])
           .then( r => r.text()) // https://stackoverflow.com/questions/32545632/how-can-i-download-a-file-using-window-fetch
@@ -201,6 +207,12 @@
   }
 
 
+  // Get requested files
+  getRequestedFiles = function(){
+    return requestedFiles;
+  }
+
+
 
 
 
@@ -213,5 +225,6 @@ if (typeof self !== 'undefined'){
     loadStaticFilesRepository,
     loadDataFromRepository,
     parseText,
+    getRequestedFiles,
   }
 }

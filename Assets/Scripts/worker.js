@@ -38,6 +38,7 @@ onmessage = async (e) => {
       }
     });
 
+    self.postMessage(['requestedFiles', workerFunctions.getRequestedFiles()]);
     self.postMessage(['loadDataFromRepository', hfRadarData]);
   }
 
@@ -48,6 +49,7 @@ onmessage = async (e) => {
   // Load static files from repository
   else if (message[0] == 'loadStaticFilesRepository'){
     let hfRadarData = await workerFunctions.loadStaticFilesRepository(...message[1]);
+    self.postMessage(['requestedFiles', workerFunctions.getRequestedFiles()]);
     self.postMessage(['loadStaticFilesRepository', hfRadarData]);
   }
 

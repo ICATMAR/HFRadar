@@ -49,6 +49,11 @@ class FileManager {
           }
           window.eventBus.emit('HFRadarDataLoaded');
         }
+        // Keep track of requested files
+        else if (result[0] == 'requestedFiles'){
+          let reqFiles = result[1];
+          this.requestedFiles.push(...reqFiles);
+        }
       }
     }
   }
@@ -253,6 +258,12 @@ class FileManager {
     ];
 
     for (let i = 0; i < urls.length; i++){
+      // Check if this file was already requested
+      if (this.requestedFiles.indexOf(urls[i]) != -1){
+        continue;
+      }
+      // Request file
+      this.requestedFiles.push(urls[i]);
       promises.push(
         fetch(urls[i])
           .then( r => r.text()) // https://stackoverflow.com/questions/32545632/how-can-i-download-a-file-using-window-fetch
