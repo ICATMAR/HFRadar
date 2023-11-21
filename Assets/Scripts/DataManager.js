@@ -241,7 +241,6 @@ class DataManager {
       //ctx.scale(1,-1);
       ctx.drawImage(img, 0, 0);//-canvas.height);
       // Get data
-      console.log("LAND MASK LOADED----------------")
       this.landMask = ctx.getImageData(0, 0, canvas.width, canvas.height);
     }
     img.onerror = (e) => console.error(e);
@@ -278,13 +277,15 @@ class DataManager {
     let keys = Object.keys(this.HFRadars);
     for (let i = 0; i < keys.length; i++){
       let radar = this.HFRadars[keys[i]];
-      if (radar.data[timestamp] != undefined){
+      if (radar.data){
+        if (radar.data[timestamp] != undefined){
         
-        radar.currentData = radar.data[timestamp];
-        
-        radarsData.push(radar);
-      } else
-        radar.currentData = "undefined";
+          radar.currentData = radar.data[timestamp];
+          
+          radarsData.push(radar);
+        } else
+          radar.currentData = "undefined";
+      }
     }
      return radarsData;
   }
@@ -421,7 +422,6 @@ class DataManager {
           for (let j = 0; j < filesOnDatePromiseResult.value.length; j++){
             let promiseResult = filesOnDatePromiseResult.value[j];
             if (promiseResult.status == 'fulfilled'){
-              
               lastHFRadar = this.addHFRadarData(promiseResult.value);        
             }
           }
@@ -527,7 +527,10 @@ class DataManager {
 // HFRadar class (for data managing purposes)
 class HFRadar {
 
-  data = {};
+  // data = {};
+  // waveData = {};
+  // waveDataHourly = {};
+  // windData = {};
   headers = {}; // Headers contain some time information too
   images = {};
 
@@ -563,8 +566,114 @@ class HFRadar {
   // Ingest new data
   // Could use the HFRadarData.header.UUID to identify the files. Timestamp works better for accessibility.
   addRadarData(HFRadarData){
+
+    // Process wave history data
+    if (HFRadarData.header.FileType.includes('Wave')){
+      this.waveData = this.waveData || {};
+      this.windData = this.windData || {};
+      for (let i = 0; i < HFRadarData.data.length; i++){
+        let wData = HFRadarData.data[i];
+        if (wData.MWHT != "999.00"){
+          this.waveData[wData.TMST] = wData;
+        }
+        this.windData[wData.TMST] = wData.WNDB;
+      }
+      // TODO: calculate hourly wave and wind data
+      // Hourly data
+      this.waveHourlyData = this.waveHourlyData || {};
+      this.windHourlyData = this.windHourlyData || {};
+      let sDate = new Date(HFRadarData.data[0].TMST);
+      let eDate = new Date(HFRadarData.data[HFRadarData.data.length-1].TMST);
+      let movingDate = new Date(sDate.getTime());
+      movingDate.setUTCHours(0);
+      movingDate.setUTCMinutes(0);
+      // 10 min interval
+      let num10minSteps = Math.ceil((eDate.getTime() - movingDate.getTime()) / (1000 * 60 * 6)); // Wave data is collected every 10 min
+      let waveCount = 0;
+      let windCount = 0;
+      let wHeights = [];
+      let wPeriods = [];
+      let wBearings = [];
+      let windBearings = [];
+      // Helper function to calculate average angle and stds
+      const avgBearings = function(bearings){
+        let sumSin = bearings.reduce((sum, value) => sum + Math.sin(value * Math.PI/180), 0);
+        let sumCos = bearings.reduce((sum, value) => sum + Math.cos(value * Math.PI/180), 0);
+        let bearing = (Math.atan2(sumSin/bearings.length, sumCos/bearings.length) * 180 / Math.PI);
+        if (bearing < 0)
+          bearing += 360;
+        return bearing;
+      }
+      // TODO STD
+      // TODO ANGLE STD https://en.wikipedia.org/wiki/Directional_statistics#Standard_deviation
+      // Interate in 10 min intervals
+      for (let i = 0; i < num10minSteps; i++){
+        if (movingDate.getUTCMinutes() == 40){
+          let tmst = movingDate.toISOString().substring(0, 14) + "00:00.000Z";
+          // Wave parameters
+          if (waveCount != 0){
+            // Calculate parameters
+            let heightMean = wHeights.reduce((sum, value) => sum + value, 0) / waveCount;
+            let periodMean = wPeriods.reduce((sum, value) => sum + value, 0) / waveCount;
+            let bearingMean = avgBearings(wBearings);           
+            // TODO: RANGE CELLS
+            // TODO: STD
+            this.waveHourlyData[tmst] = {
+              "MWHT": heightMean,
+              "MWPD": periodMean,
+              "WAVB": bearingMean,
+              "TMST": tmst,
+              "N": waveCount,
+            };
+          }
+          // Wind parameters
+          if (windCount != 0){
+            let windBearingMean = avgBearings(windBearings);
+            this.windHourlyData[tmst] = {
+              "WNDB": windBearingMean,
+              "TMST": tmst,
+              "N": windCount
+            }
+          }
+          
+          // Reset
+          waveCount = 0;
+          windCount = 0;
+          wHeights = [];
+          wPeriods = [];
+          wBearings = [];
+          windBearings = [];
+        }
+
+
+        // Keep values for averaging
+        let wData = this.waveData[movingDate.toISOString()];
+        // If wave data exists
+        if (wData["MWHT"] != "999.00"){
+          wHeights.push(1 * wData["MWHT"]);
+          wPeriods.push(1 * wData["MWPD"]);
+          wBearings.push(1 * wData["WAVB"])
+          waveCount++;
+        }
+        // Wind data (always exist?)
+        if (wData["WNDB"] != "999.00"){
+          windBearings.push(1 * wData["WNDB"]);
+          windCount++;
+        }
+
+        // Increase time stamp
+        movingDate.setUTCMinutes(movingDate.getUTCMinutes() + 10);
+
+      }
+      console.log(sDate)
+      console.log(eDate);
+      return;
+    }
+    
+    // Process radar data
+    this.data = this.data || {};
     // Get timestamp
-    let timestamp = this.getTimestamp(HFRadarData)
+    let timestamp = this.getTimestamp(HFRadarData);
 
     // Check if timestamp already exists
     if (this.data[timestamp] != undefined) 
@@ -647,6 +756,23 @@ class HFRadar {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 class CombinedRadars extends HFRadar {
 
   dataGrid = {};
@@ -662,6 +788,8 @@ class CombinedRadars extends HFRadar {
   addRadarData(CombinedRadarData, resolutionLong, resolutionLat){
     if (this.dataGrid == undefined)
      this.dataGrid = {};
+    if (this.data == undefined)
+      this.data = {};
 
 
     // Get timestamp

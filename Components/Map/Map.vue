@@ -488,7 +488,8 @@ export default {
       Object.keys(radars).forEach(key => {
         // Only for radars, not for tots (combined)
         let radar = radars[key];
-        let hasDataNow = radar.data[window.GUIManager.currentTmst] != undefined;
+        let radarData = radar.data || radar.waveData;
+        let hasDataNow = radarData[window.GUIManager.currentTmst] != undefined;
         
         if (!radar.dataGrid) {
           // Create feature style

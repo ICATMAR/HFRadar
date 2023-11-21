@@ -60,9 +60,19 @@ class FileManager {
 
 
 
+  parseText = function(rawText){
+    // Get FileType
+    let fileType = getParamFromTable(rawText, 'FileType');
+
+    // Radials and Currents map
+    if (fileType.includes('RadialMap') || fileType.includes('CurrentMap'))
+      return parseRadialCurrentMapText(rawText);
+    else if (fileType.includes('WaveHistory'))
+      return parseWaveHistoryText(rawText);
+  }
 
   // Parse text
-  parseText = function(rawText){
+  parseRadialCurrentMapText = function(rawText){
     
     // Index header
     let tableStartIndex = rawText.indexOf('TableStart:') + 12;
@@ -131,7 +141,7 @@ class FileManager {
 
     // Get metadata
     let headerText = rawText.substring(0, rawText.indexOf('%TableType'));
-    headerText = headerText.replaceAll('%', '');
+    headerText = headerText.replaceAll('%', '').replaceAll('\r', '');
     let headerRows = headerText.split('\n');
     let header = {};
     // Iterate columns
@@ -147,7 +157,7 @@ class FileManager {
 
 
   // Parse wave files
-  parseHFRadarWaves = function(rawText){
+  parseWaveHistoryText = function(rawText){
     // Number of table columns
     let rawColNum = rawText.substring(rawText.indexOf('%TableColumns: '), rawText.indexOf('%TableColumnTypes:')).replace('\n', '').replace('%TableColumns: ', '');
     let colNum = parseFloat(rawColNum);
@@ -170,7 +180,6 @@ class FileManager {
     let tableLines = rawText.substring(rawText.indexOf('%TableStart:'), rawText.indexOf('%TableEnd:')).split('\n');
     let data = [];
     // Iterate lines
-    let timeTmp = new Date(startDate.toISOString());
     for (let i = 0; i < tableLines.length; i++){
       let line = tableLines[i];
       if (line.startsWith('%') || line.length < 5)
@@ -192,7 +201,7 @@ class FileManager {
         dataRow[abrHeaders[j]] = values[j];
       }
       // Add time ISO
-      dataRow.TIMEISO = new Date(startDate.getTime() + 1000*dataRow.TIME).toISOString();
+      dataRow.TMST = new Date(startDate.getTime() + 1000*dataRow.TIME).toISOString();
       data.push(dataRow);
       
     }
@@ -205,13 +214,12 @@ class FileManager {
     let header = {};
     // Iterate columns
     for (let i = 0; i < headerRows.length; i++) {
-      if (headerRows[i].length == 0)
+      let rowText = headerRows[i].replace('\r', '');
+      if (rowText.length == 0)
         continue;
 
-      let itemName = headerRows[i].split(':')[0];
-      header[itemName] = headerRows[i].split(':')[1].trim();
-      
-      
+      let itemName = rowText.split(':')[0];
+      header[itemName] = rowText.split(':')[1].trim();
     }
 
     return {header, data};
@@ -221,7 +229,7 @@ class FileManager {
 
 
   // Extract values from table
-  getParamFromTable = function(rawText, param, tableType){
+  getParamFromTable = function(rawText, param){
 
     let paramIndex = rawText.indexOf(param) + param.length;
     let cols = rawText.substring(paramIndex, paramIndex + 200).split('\n');
@@ -236,6 +244,7 @@ class FileManager {
 
     //let baseURL = 'https://icatmar.github.io/HFRadarData/'
     let baseURL = '/data/observational/hf_radar/currents/'
+    let wavesBaseURL = '/data/observational/hf_radar/waves/'
 
     let date = new Date(timestamp);
     //date = firstDate; // HACK
@@ -254,7 +263,11 @@ class FileManager {
       //  Creus
       baseURL + 'L2/CREU/' + year + '/' + month + '/RDLm_CREU_' + year + '_' + month + '_' + day + '_' + hour + '00_l2b.ruv',
       // Totals Roses
-      baseURL + 'L3/tuv/' + year + '/' + month + '/TOTL_ROSE_' + year + '_' + month + '_' + day + '_' + hour + '00.tuv'
+      baseURL + 'L3/tuv/' + year + '/' + month + '/TOTL_ROSE_' + year + '_' + month + '_' + day + '_' + hour + '00.tuv',
+      // Waves Begur
+      wavesBaseURL + 'BEGU/' + year + '/WVLM_BEGU_' + year + '_' + month + '_01_0000.wls',
+      // Waves Creus
+      wavesBaseURL + 'CREU/' + year + '/WVLM_CREU_' + year + '_' + month + '_01_0000.wls',
     ];
 
     for (let i = 0; i < urls.length; i++){
@@ -269,7 +282,7 @@ class FileManager {
           .then( r => r.text()) // https://stackoverflow.com/questions/32545632/how-can-i-download-a-file-using-window-fetch
           .then (res => {
             if (res[0] == '<')
-              throw new Error('File not found: ' + urls[i])
+              throw new Error('File not found: ' + urls[i]);
             return parseText(res);
           })
         );

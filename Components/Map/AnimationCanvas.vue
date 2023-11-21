@@ -46,42 +46,46 @@ export default {
       // Iterate all radars
       Object.keys(window.DataManager.HFRadars).forEach(key => {
         let radar = window.DataManager.HFRadars[key];
+        // Check if there is radar data (waveData can be loaded first)
+
         // Check if there is radar data on that tmst
-        if (radar.data[tmst] != undefined){
-  
-          // Activate widget
-          if (radar.constructor.name == "CombinedRadars")
-            this.combinedRadarsExist = true;
-          else if (radar.constructor.name == "HFRadar")
-            this.radarsExist = true;
-          
-          // Create animation for radar
-          // If canvas does not have animation engine
-          if (radar.animEngine == undefined){
-            this.createAnimationEngine(radar, tmst);
-          }
-          // Update animation
-          else {
-            // Update existing animation
-            if (radar.constructor.name == "CombinedRadars"){
-              radar.animEngine.setCombinedRadarData(radar.dataGrid[tmst]);
-              // Start combined radars animation (TODO: and activate widget?)
-              let wasStopped = radar.animEngine.isStopped;
-              radar.animEngine.isStopped = false;
-              // Restart animation if it was stopped
-              if (wasStopped)
-                radar.animEngine.update();
-            } else if (radar.constructor.name == "HFRadar"){
-              radar.animEngine.setHFRadarData(radar.data[tmst]);
-              // Start animation according to GUIManager
-              let guiState = window.GUIManager.widgetHFRadars;
-              let shouldAnimate = guiState.areParticlesVisible && guiState.isVisible && guiState.radarsVisible[radar.Site];
-              if (shouldAnimate && radar.animEngine.isStopped){
+        if (radar.data){ //|| radar.waveData
+          if (radar.data[tmst] != undefined){
+    
+            // Activate widget
+            if (radar.constructor.name == "CombinedRadars")
+              this.combinedRadarsExist = true;
+            else if (radar.constructor.name == "HFRadar")
+              this.radarsExist = true;
+            
+            // Create animation for radar
+            // If canvas does not have animation engine
+            if (radar.animEngine == undefined){
+              this.createAnimationEngine(radar, tmst);
+            }
+            // Update animation
+            else {
+              // Update existing animation
+              if (radar.constructor.name == "CombinedRadars"){
+                radar.animEngine.setCombinedRadarData(radar.dataGrid[tmst]);
+                // Start combined radars animation (TODO: and activate widget?)
+                let wasStopped = radar.animEngine.isStopped;
                 radar.animEngine.isStopped = false;
-                radar.animEngine.update();
+                // Restart animation if it was stopped
+                if (wasStopped)
+                  radar.animEngine.update();
+              } else if (radar.constructor.name == "HFRadar"){
+                radar.animEngine.setHFRadarData(radar.data[tmst]);
+                // Start animation according to GUIManager
+                let guiState = window.GUIManager.widgetHFRadars;
+                let shouldAnimate = guiState.areParticlesVisible && guiState.isVisible && guiState.radarsVisible[radar.Site];
+                if (shouldAnimate && radar.animEngine.isStopped){
+                  radar.animEngine.isStopped = false;
+                  radar.animEngine.update();
+                }
               }
             }
-          }
+          } 
         }
         // If radar does not have data on that timestamp
         else if (radar.animEngine != undefined) {
