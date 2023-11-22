@@ -610,6 +610,29 @@ export default {
       if (pointsVisible)
         this.map.addLayer(this.layers[radarPointsLayerName]);
 
+
+
+
+      // Show wave data
+      if (radar.constructor.name == "HFRadar"){
+        // https://openlayers.org/en/latest/examples/overlay.html
+        let coord3857 = ol.proj.fromLonLat([location[0], location[1]]);
+        // Test, add div
+        let el = document.createElement('button');
+        el.innerText = 'Test';
+        el.style["margin-right"] = "20px";
+
+        // Vienna marker
+        const marker = new ol.Overlay({
+          position: coord3857,
+          positioning: 'center-right',
+          element: el,
+          stopEvent: false,
+        });
+        this.map.addOverlay(marker);
+      }
+      
+
     },
 
 
