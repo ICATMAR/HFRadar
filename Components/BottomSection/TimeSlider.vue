@@ -70,7 +70,10 @@ export default {
 
 
     window.eventBus.on('HFRadarDataLoaded', (tmst) => {
-      let startEndDates = window.DataManager.getStartEndDates();
+      
+      let startEndDates = window.DataManager.getStartEndDatesTotals();
+      if (startEndDates == undefined)
+        return;
       // If tmst is not defined, set it to latest
       tmst = tmst || startEndDates.endDate;
 

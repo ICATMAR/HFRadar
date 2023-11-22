@@ -15,12 +15,7 @@ class DataManager {
 
   constructor(){
     // EVENT LISTENERS
-    window.eventBus.on('LoadedHFRadarData', (HFRadarData) => { // From FileManager.js
-      this.addHFRadarData(HFRadarData);
-    });
-    window.eventBus.on('LoadedDropedHFRadarData', (HFRadarData) => { // From FileManager.js
-      this.addHFRadarData(HFRadarData);
-    });
+
     // This event can be called from this class, from FileManager.js or AppManager.vue
     window.eventBus.on('HFRadarDataLoaded', () => {
       // Update data availability
@@ -131,7 +126,7 @@ class DataManager {
     // Iterate radars
     Object.keys(this.HFRadars).forEach(key => {
       let HFRadar = this.HFRadars[key];
-      let data = HFRadar.data;
+      let data = HFRadar.data || HFRadar.waveHourlyData;
       let site = HFRadar.header.Site.replace(' ""', '').replaceAll(" ", "").replaceAll("\r", "");
       // Iterate timestamps
       Object.keys(data).forEach(tmst => {
@@ -291,19 +286,29 @@ class DataManager {
   }
 
   // Get start and end dates of loaded data
-  getStartEndDates(){
+  getStartEndDatesTotals(){
     let startDate = new Date();
     let endDate = new Date(1970);
+    let combinedRadarsExists = false;
     // Iterate radars to find latest and earliest dates
     let keys = Object.keys(this.HFRadars);
     for (let i = 0; i < keys.length; i++){
-      Object.keys(this.HFRadars[keys[i]].data).forEach(tmst => {
-        if (new Date(tmst) < startDate)
-          startDate = new Date(tmst);
-        if (new Date(tmst) > endDate )
-          endDate = new Date(tmst);
-      });
+      let radar = this.HFRadars[keys[i]];
+      if (radar == undefined)
+        debugger;
+      if (radar.constructor.name == 'CombinedRadars'){
+        combinedRadarsExists = true;
+        Object.keys(radar.data).forEach(tmst => {
+          if (new Date(tmst) < startDate)
+            startDate = new Date(tmst);
+          if (new Date(tmst) > endDate )
+            endDate = new Date(tmst);
+        });
+      }
     }
+
+    if (!combinedRadarsExists)
+      return undefined;
 
     return {
       startDate: startDate.toISOString(),
@@ -422,7 +427,9 @@ class DataManager {
           for (let j = 0; j < filesOnDatePromiseResult.value.length; j++){
             let promiseResult = filesOnDatePromiseResult.value[j];
             if (promiseResult.status == 'fulfilled'){
-              lastHFRadar = this.addHFRadarData(promiseResult.value);        
+              lastHFRadar = this.addHFRadarData(promiseResult.value);
+              if (lastHFRadar.data == undefined)
+                lastHFRadar = undefined;
             }
           }
         }
@@ -588,13 +595,14 @@ class HFRadar {
       movingDate.setUTCHours(0);
       movingDate.setUTCMinutes(0);
       // 10 min interval
-      let num10minSteps = Math.ceil((eDate.getTime() - movingDate.getTime()) / (1000 * 60 * 6)); // Wave data is collected every 10 min
+      let num10minSteps = Math.ceil((eDate.getTime() - movingDate.getTime()) / (1000 * 60 * 10)); // Wave data is collected every 10 min
       let waveCount = 0;
       let windCount = 0;
       let wHeights = [];
       let wPeriods = [];
       let wBearings = [];
       let windBearings = [];
+      let sources = [];
       // Helper function to calculate average angle and stds
       const avgBearings = function(bearings){
         let sumSin = bearings.reduce((sum, value) => sum + Math.sin(value * Math.PI/180), 0);
@@ -624,6 +632,7 @@ class HFRadar {
               "WAVB": bearingMean,
               "TMST": tmst,
               "N": waveCount,
+              sources,
             };
           }
           // Wind parameters
@@ -632,7 +641,8 @@ class HFRadar {
             this.windHourlyData[tmst] = {
               "WNDB": windBearingMean,
               "TMST": tmst,
-              "N": windCount
+              "N": windCount,
+              sources,
             }
           }
           
@@ -643,30 +653,35 @@ class HFRadar {
           wPeriods = [];
           wBearings = [];
           windBearings = [];
+          sources = [];
         }
 
 
         // Keep values for averaging
         let wData = this.waveData[movingDate.toISOString()];
-        // If wave data exists
-        if (wData["MWHT"] != "999.00"){
-          wHeights.push(1 * wData["MWHT"]);
-          wPeriods.push(1 * wData["MWPD"]);
-          wBearings.push(1 * wData["WAVB"])
-          waveCount++;
+        // Missing date
+        if (wData != undefined){
+           // If wave data exists
+          if (wData["MWHT"] != "999.00"){
+            wHeights.push(1 * wData["MWHT"]);
+            wPeriods.push(1 * wData["MWPD"]);
+            wBearings.push(1 * wData["WAVB"])
+            waveCount++;
+          }
+          // Wind data (always exist?)
+          if (wData["WNDB"] != "999.00"){
+            windBearings.push(1 * wData["WNDB"]);
+            windCount++;
+          }
         }
-        // Wind data (always exist?)
-        if (wData["WNDB"] != "999.00"){
-          windBearings.push(1 * wData["WNDB"]);
-          windCount++;
-        }
-
+          
+       
+        sources.push(wData);
         // Increase time stamp
         movingDate.setUTCMinutes(movingDate.getUTCMinutes() + 10);
 
       }
-      console.log(sDate)
-      console.log(eDate);
+
       return;
     }
     
