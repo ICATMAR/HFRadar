@@ -294,8 +294,6 @@ class DataManager {
     let keys = Object.keys(this.HFRadars);
     for (let i = 0; i < keys.length; i++){
       let radar = this.HFRadars[keys[i]];
-      if (radar == undefined)
-        debugger;
       if (radar.constructor.name == 'CombinedRadars'){
         combinedRadarsExists = true;
         Object.keys(radar.data).forEach(tmst => {
