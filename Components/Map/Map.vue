@@ -23,6 +23,9 @@
         </div>
       </div>
 
+      <!-- Overlay wave data -->
+      <overlay-wave-data ref="overlayWaveData"></overlay-wave-data>
+
       <!-- <time-slider></time-slider> -->
 
       <!-- Bottom Section -->
@@ -53,7 +56,7 @@
 import AnimationCanvas from "./AnimationCanvas.vue";
 import ClimaDirectionCanvas from "./ClimaDirectionCanvas.vue";
 import BottomSection from "../BottomSection/BottomSection.vue";
-
+import OverlayWaveData from "./OverlayWaveData.vue";
 
 export default {
   name: 'app-map',
@@ -488,7 +491,8 @@ export default {
       Object.keys(radars).forEach(key => {
         // Only for radars, not for tots (combined)
         let radar = radars[key];
-        let hasDataNow = radar.data[window.GUIManager.currentTmst] != undefined;
+        let radarData = radar.data || radar.waveData;
+        let hasDataNow = radarData[window.GUIManager.currentTmst] != undefined;
         
         if (!radar.dataGrid) {
           // Create feature style
@@ -820,6 +824,11 @@ export default {
           }
         }
       }
+      // Hide/show wave info
+      if (this.$refs.overlayWaveData){
+        let zoomLevel = this.map.getView().getZoom();
+        this.$refs.overlayWaveData.updatePanel(zoomLevel);
+      }
 
     },
     onMapMoveStart: function(){
@@ -1119,6 +1128,7 @@ export default {
     "animationCanvas": AnimationCanvas,
     "climaDirectionCanvas": ClimaDirectionCanvas,
     "bottom-section": BottomSection,
+    "overlay-wave-data": OverlayWaveData,
 },
   computed: {
       //foo: function () {}

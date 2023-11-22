@@ -2,8 +2,19 @@
 
 requestedFiles = [];
 
-  // Parse text
   parseText = function(rawText){
+    // Get FileType
+    let fileType = getParamFromTable(rawText, 'FileType');
+
+    // Radials and Currents map
+    if (fileType.includes('RadialMap') || fileType.includes('CurrentMap'))
+      return parseRadialCurrentMapText(rawText);
+    else if (fileType.includes('WaveHistory'))
+      return parseWaveHistoryText(rawText);
+  }
+
+  // Parse text
+  parseRadialCurrentMapText = function(rawText){
     // Index header
     let tableStartIndex = rawText.indexOf('TableStart:') + 12;
     let tableEndIndex = rawText.indexOf('%TableEnd:');
@@ -71,7 +82,7 @@ requestedFiles = [];
 
     // Get metadata
     let headerText = rawText.substring(0, rawText.indexOf('%TableType'));
-    headerText = headerText.replaceAll('%', '');
+    headerText = headerText.replaceAll('%', '').replaceAll('\r', '');
     let headerRows = headerText.split('\n');
     let header = {};
     // Iterate columns
@@ -82,6 +93,78 @@ requestedFiles = [];
 
     // TODO: COMBINED RADAR DATA DOES NOT HAVE PATTERNUUID. IT HAS AN EXTRA TABLE WITH THE LOCATION OF THE RADARS. SHOULD ADD..
     return {header, 'data': out};
+  }
+
+
+
+  // Parse wave files
+  parseWaveHistoryText = function(rawText){
+    // Number of table columns
+    let rawColNum = rawText.substring(rawText.indexOf('%TableColumns: '), rawText.indexOf('%TableColumnTypes:')).replace('\n', '').replace('%TableColumns: ', '');
+    let colNum = parseFloat(rawColNum);
+
+    // Column abbrevation headers
+    let rawAbrHeaders = rawText.substring(rawText.indexOf('%TableColumnTypes: '), rawText.indexOf('%TableRows: ')).replace('\n', '').replace('%TableColumnTypes: ', '');
+    let abrHeaders = rawAbrHeaders.trim().split(' ');
+
+    // Validate
+    if (colNum != abrHeaders.length){
+      console.error("Column number does not match header number: " + colNum + " vs " + abrHeaders.length);
+      debugger;
+    }
+
+    // Get start date
+    let dstr = rawText.substring(rawText.indexOf('%TimeStamp: '), rawText.indexOf('%TimeZone: ')).replace('\n', '').replace('%TimeStamp: ', '').trim().replaceAll('  ', ' ').split(' ');
+    let startDate = new Date(dstr[0]+'-'+dstr[1]+'-'+dstr[2]);
+
+    // Get data from table
+    let tableLines = rawText.substring(rawText.indexOf('%TableStart:'), rawText.indexOf('%TableEnd:')).split('\n');
+    let data = [];
+    // Iterate lines
+    for (let i = 0; i < tableLines.length; i++){
+      let line = tableLines[i];
+      if (line.startsWith('%') || line.length < 5)
+        continue;
+      
+      let values = line.trim().split(/\s+/).filter(Boolean);
+      // Validate
+      if (colNum != values.length){
+        console.error('Number of values does not match number of columns: ' + colNum + " vs " + values.length);
+        console.log(i);
+        console.log(tableLines[i-1]);
+        console.log(tableLines[i]);
+        debugger;
+      }
+      // Iterate values
+      // Store values
+      let dataRow = {};
+      for (let j = 0; j < values.length; j++){
+        dataRow[abrHeaders[j]] = values[j];
+      }
+      // Add time ISO
+      dataRow.TMST = new Date(startDate.getTime() + 1000*dataRow.TIME).toISOString();
+      data.push(dataRow);
+      
+    }
+
+
+    // Get metadata wave history
+    let headerText = rawText.substring(0, rawText.indexOf('%TableType'));
+    headerText = headerText.replaceAll('%', '');
+    let headerRows = headerText.split('\n');
+    let header = {};
+    // Iterate columns
+    for (let i = 0; i < headerRows.length; i++) {
+      let rowText = headerRows[i].replace('\r', '');
+      if (rowText.length == 0)
+        continue;
+
+      let itemName = rowText.split(':')[0];
+      header[itemName] = rowText.split(':')[1].trim();
+    }
+
+
+    return {header, data};
   }
 
 
@@ -194,7 +277,7 @@ requestedFiles = [];
           
           for (let j = 0; j < filesOnDatePromiseResult.value.length; j++){
             let promiseResult = filesOnDatePromiseResult.value[j];
-            if (promiseResult.status == 'fulfilled'){          
+            if (promiseResult.status == 'fulfilled'){
               hfRadarData.push(promiseResult.value);
             }
           }
