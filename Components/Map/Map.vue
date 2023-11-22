@@ -23,6 +23,9 @@
         </div>
       </div>
 
+      <!-- Overlay wave data -->
+      <overlay-wave-data ref="overlayWaveData"></overlay-wave-data>
+
       <!-- <time-slider></time-slider> -->
 
       <!-- Bottom Section -->
@@ -53,7 +56,7 @@
 import AnimationCanvas from "./AnimationCanvas.vue";
 import ClimaDirectionCanvas from "./ClimaDirectionCanvas.vue";
 import BottomSection from "../BottomSection/BottomSection.vue";
-
+import OverlayWaveData from "./OverlayWaveData.vue";
 
 export default {
   name: 'app-map',
@@ -610,29 +613,6 @@ export default {
       if (pointsVisible)
         this.map.addLayer(this.layers[radarPointsLayerName]);
 
-
-
-
-      // Show wave data
-      if (radar.constructor.name == "HFRadar"){
-        // https://openlayers.org/en/latest/examples/overlay.html
-        let coord3857 = ol.proj.fromLonLat([location[0], location[1]]);
-        // Test, add div
-        let el = document.createElement('button');
-        el.innerText = 'Test';
-        el.style["margin-right"] = "20px";
-
-        // Vienna marker
-        const marker = new ol.Overlay({
-          position: coord3857,
-          positioning: 'center-right',
-          element: el,
-          stopEvent: false,
-        });
-        this.map.addOverlay(marker);
-      }
-      
-
     },
 
 
@@ -843,6 +823,11 @@ export default {
             this.$refs.directionCanvas.onMapMoveEnd();
           }
         }
+      }
+      // Hide/show wave info
+      if (this.$refs.overlayWaveData){
+        let zoomLevel = this.map.getView().getZoom();
+        this.$refs.overlayWaveData.updatePanel(zoomLevel);
       }
 
     },
@@ -1143,6 +1128,7 @@ export default {
     "animationCanvas": AnimationCanvas,
     "climaDirectionCanvas": ClimaDirectionCanvas,
     "bottom-section": BottomSection,
+    "overlay-wave-data": OverlayWaveData,
 },
   computed: {
       //foo: function () {}
