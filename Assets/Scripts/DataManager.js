@@ -581,7 +581,7 @@ class HFRadar {
         if (wData.MWHT != "999.00"){
           this.waveData[wData.TMST] = wData;
         }
-        this.windData[wData.TMST] = wData.WNDB;
+        this.windData[wData.TMST] = wData;
       }
       // TODO: calculate hourly wave and wind data
       // Hourly data
@@ -656,25 +656,28 @@ class HFRadar {
 
 
         // Keep values for averaging
-        let wData = this.waveData[movingDate.toISOString()];
+        let wvData = this.waveData[movingDate.toISOString()];
+        let wdData = this.windData[movingDate.toISOString()];
         // Missing date
-        if (wData != undefined){
+        if (wvData != undefined){
            // If wave data exists
-          if (wData["MWHT"] != "999.00"){
-            wHeights.push(1 * wData["MWHT"]);
-            wPeriods.push(1 * wData["MWPD"]);
-            wBearings.push(1 * wData["WAVB"])
+          if (wvData["MWHT"] != "999.00"){
+            wHeights.push(1 * wvData["MWHT"]);
+            wPeriods.push(1 * wvData["MWPD"]);
+            wBearings.push(1 * wvData["WAVB"])
             waveCount++;
           }
+        }
+        if (wdData != undefined){
           // Wind data (always exist?)
-          if (wData["WNDB"] != "999.00"){
-            windBearings.push(1 * wData["WNDB"]);
+          if (wdData["WNDB"] != "999.00"){
+            windBearings.push(1 * wdData["WNDB"]);
             windCount++;
           }
         }
           
        
-        sources.push(wData);
+        sources.push(wvData || wdData);
         // Increase time stamp
         movingDate.setUTCMinutes(movingDate.getUTCMinutes() + 10);
 

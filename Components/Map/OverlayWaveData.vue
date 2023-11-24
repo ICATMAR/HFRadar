@@ -2,11 +2,22 @@
   
   <div id="overlay-wave-data" ref="containerWaveInfo">
   <!-- Container -->
-    <div v-for="key in Object.keys(radarData)" :id="key" :ref="key" class="wavepanel" :class="[isTooFar ? 'hide' : 'show']">
-      <!-- Wave data -->
-      <div><span><strong>Waves: </strong>{{ radarData[key].waveHeight }} m, {{ radarData[key].wavePeriod }} s, {{ radarData[key].waveBearing }}</span></div>
-      <!-- Wind data -->
-      <div><span><strong>Wind direction:</strong> {{ radarData[key].windBearing }}</span></div>
+    <div v-for="key in Object.keys(radarData)" :id="key" :ref="key"  :class="[isTooFar ? 'hide' : 'show']">
+      <!-- Wave panel -->
+      <div class="wavepanel" v-show="radarData[key].hasData">
+        <!-- Site -->
+        <div><span><strong>{{ radarData[key].site }}</strong></span></div>
+        <!-- Wave data -->
+        <div v-show="radarData[key].waveHeight != undefined">
+          <span><strong>Waves: </strong>{{ radarData[key].waveHeight }} m, {{ radarData[key].wavePeriod }} s, {{ radarData[key].waveBearing }}</span>
+          <span class="fa" :style="{transform: 'rotate('+ (radarData[key].waveBearingValue-45) +'deg)' }">&#xf124;</span>
+        </div>
+        <!-- Wind data -->
+        <div v-show="radarData[key].windBearing != undefined">
+          <span><strong>Wind direction:</strong> {{ radarData[key].windBearing }}</span>
+          <span class="fa" :style="{transform: 'rotate('+ (radarData[key].windBearingValue-45) +'deg)' }">&#xf124;</span>
+        </div>
+      </div>
 
     </div>
   </div>
@@ -50,9 +61,11 @@ export default {
         // Check if radar is HFRadar and if it was wave data
         if (radar.constructor.name == "HFRadar" && radar.waveHourlyData){
           // Check if there is data on that date
-          if (radar.waveHourlyData[tmst]){
-            // Create if it does not exist
+          if (radar.waveHourlyData[tmst] || radar.windHourlyData[tmst]){
+            // Create if it does not exist and create map overlay
             if (this.radarData[radar.UUID] == undefined){
+              this.radarData[radar.UUID] = {"site": radar.Site, "hasData": true};
+
               if (this.map == undefined){
                 this.map = this.$parent.map;
               }
@@ -72,17 +85,30 @@ export default {
               })
             
             }
-            this.radarData[radar.UUID] = {
-              waveHeight: radar.waveHourlyData[tmst].MWHT.toFixed(2),
-              wavePeriod: radar.waveHourlyData[tmst].MWPD.toFixed(1),
-              waveBearing: this.bearing2compassRose(radar.waveHourlyData[tmst].WAVB),
-              windBearing: this.bearing2compassRose(radar.windHourlyData[tmst].WNDB),
-            }
 
+            // Radar has data
+            this.radarData[radar.UUID].hasData = true;
+
+            // Update wave data
+            if (radar.waveHourlyData[tmst]){
+                this.radarData[radar.UUID].waveHeight = radar.waveHourlyData[tmst].MWHT.toFixed(2);
+                this.radarData[radar.UUID].wavePeriod = radar.waveHourlyData[tmst].MWPD.toFixed(1);
+                this.radarData[radar.UUID].waveBearing = this.bearing2compassRose(radar.waveHourlyData[tmst].WAVB);
+                this.radarData[radar.UUID].waveBearingValue = radar.waveHourlyData[tmst].WAVB;
+            } else
+              this.radarData[radar.UUID].waveHeight = undefined;
+            // Update wind data
+            if (radar.windHourlyData[tmst]){
+              this.radarData[radar.UUID].windBearingValue = radar.windHourlyData[tmst].WNDB;
+              this.radarData[radar.UUID].windBearing = this.bearing2compassRose(radar.windHourlyData[tmst].WNDB);
+            } else
+            this.radarData[radar.UUID].windBearing = undefined;
           } else {
-            // If it exists, do not show
+            // If it exists, do not show data
             if (this.radarData[radar.UUID] != undefined){
-              delete this.radarData[radar.UUID];
+              this.radarData[radar.UUID].waveHeight = undefined;
+              this.radarData[radar.UUID].windBearing = undefined;
+              this.radarData[radar.UUID].hasData = false;
             }
           }
           
@@ -124,7 +150,7 @@ export default {
 <style scoped>
 .wavepanel {
   margin-right: 20px;
-  background: var(--darkBlue);
+  background: rgb(15 48 98 / 71%);/*var(--darkBlue);*/
   padding: 10px;
   border-radius: 17px;
 
@@ -132,9 +158,11 @@ export default {
 }
 
 .hide {
-  opacity: 0
+  opacity: 0;
+  transition: all 1s;
 }
 .show {
-  opacity: 1
+  opacity: 1;
+  transition: all 1s;
 }
 </style>
