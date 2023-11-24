@@ -10,12 +10,12 @@
         <!-- Wave data -->
         <div v-show="radarData[key].waveHeight != undefined">
           <span><strong>Waves: </strong>{{ radarData[key].waveHeight }} m, {{ radarData[key].wavePeriod }} s, {{ radarData[key].waveBearing }}</span>
-          <span class="fa" :style="{transform: 'rotate('+ (radarData[key].waveBearingValue-45) +'deg)' }">&#xf124;</span>
+          <span class="fa" :style="{transform: 'rotate('+ (radarData[key].waveBearingValue-45+180) +'deg)' }">&#xf124;</span>
         </div>
         <!-- Wind data -->
         <div v-show="radarData[key].windBearing != undefined">
           <span><strong>Wind direction:</strong> {{ radarData[key].windBearing }}</span>
-          <span class="fa" :style="{transform: 'rotate('+ (radarData[key].windBearingValue-45) +'deg)' }">&#xf124;</span>
+          <span class="fa" :style="{transform: 'rotate('+ (radarData[key].windBearingValue-45+180) +'deg)' }">&#xf124;</span>
         </div>
       </div>
 
