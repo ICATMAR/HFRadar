@@ -815,14 +815,15 @@ export default {
       // TODO: this could be optimized --> get a canvas with all data and relate lat-long to that canvas
       if (this.isLayerDataReady){
 
-        if (this.getMapLayer('data') == undefined)
-          return;
-        if (this.getMapLayer('data').getOpacity() != 0){  
-          this.updateSourceData();
-          if (this.$refs.directionCanvas){
-            this.$refs.directionCanvas.onMapMoveEnd();
+        if (this.getMapLayer('data') != undefined){
+          if (this.getMapLayer('data').getOpacity() != 0){  
+            this.updateSourceData();
+            if (this.$refs.directionCanvas){
+              this.$refs.directionCanvas.onMapMoveEnd();
+            }
           }
         }
+        
       }
       // Hide/show wave info
       if (this.$refs.overlayWaveData){
