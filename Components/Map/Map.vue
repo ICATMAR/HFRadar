@@ -26,6 +26,9 @@
       <!-- Overlay wave data -->
       <overlay-wave-data ref="overlayWaveData"></overlay-wave-data>
 
+      <!-- Overlay wave data -->
+      <overlay-buoy-data ref="overlayBuoyData"></overlay-buoy-data>
+
       <!-- <time-slider></time-slider> -->
 
       <!-- Bottom Section -->
@@ -57,6 +60,7 @@ import AnimationCanvas from "./AnimationCanvas.vue";
 import ClimaDirectionCanvas from "./ClimaDirectionCanvas.vue";
 import BottomSection from "../BottomSection/BottomSection.vue";
 import OverlayWaveData from "./OverlayWaveData.vue";
+import OverlayBuoyData from "./OverlayBuoyData.vue";
 
 export default {
   name: 'app-map',
@@ -826,9 +830,13 @@ export default {
         
       }
       // Hide/show wave info
+      let zoomLevel = this.map.getView().getZoom();
       if (this.$refs.overlayWaveData){
-        let zoomLevel = this.map.getView().getZoom();
         this.$refs.overlayWaveData.updatePanel(zoomLevel);
+      }
+      // Hide/show buoy info
+      if (this.$refs.overlayBuoyData){
+        this.$refs.overlayBuoyData.updatePanel(zoomLevel);
       }
 
     },
@@ -1130,6 +1138,7 @@ export default {
     "climaDirectionCanvas": ClimaDirectionCanvas,
     "bottom-section": BottomSection,
     "overlay-wave-data": OverlayWaveData,
+    "overlay-buoy-data": OverlayBuoyData,
 },
   computed: {
       //foo: function () {}
