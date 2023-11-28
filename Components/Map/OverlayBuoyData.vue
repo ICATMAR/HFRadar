@@ -5,58 +5,65 @@
     <div v-for="buoyName in Object.keys(buoysData)" :id="buoyName" :ref="buoyName" class="buoyContainer" :class="[!isTooFar && isAdvancedInterfaceOnOff ? 'show' : 'hide']">
       <!-- Buoy icon -->
       <!-- <div style="padding: 10px; border-radius:5px; background-color: red">Boya</div> -->
-      <img class="icon-str icon-big icon-img" src="/HFRadar/Assets/Images/buoy.svg">
+      <img class="icon-str icon-big icon-img" @click="buoyIconClicked(buoyName)" src="/HFRadar/Assets/Images/buoy.svg">
 
       <!-- Buoy panel -->
-      <div class="wavepanel" v-if="buoysData[buoyName].hasData">
+      <Transition>
+      <div class="wavepanel" v-if="buoysData[buoyName].showInfo">
         <!-- Site -->
-        <div><span><strong style="text-decoration: underline">{{ buoyName }}'s buoy</strong></span></div>
+        <div class="buoyTitle">
+          <span><strong>{{ buoyName }}'s buoy</strong></span>
+          <span class="icon-str">i</span>
+        </div>
 
         <!-- Buoy data -->
-        <!-- Waves -->
-        <div v-if="buoys[buoyName].params.includes('Hm0')">
-          <span>
-            <strong>Waves: </strong>
-            {{buoysData[buoyName].data['Hm0(m)'].toFixed(2)}} m, 
-            {{buoysData[buoyName].data['Tm02(s)'].toFixed(1)}} s, 
-            {{ bearing2compassRose(buoysData[buoyName].data['MeanDir(º)']) }}
-            <span class="fa" :style="{transform: 'rotate('+ (buoysData[buoyName].data['MeanDir(º)']-45+180) +'deg)' }">&#xf124;</span>
-          </span>
-        </div>
-        <!-- Wind -->
-        <div v-if="buoys[buoyName].params.includes('WindSpeed')">
-          <span>
-            <strong>Wind: </strong>
-            {{buoysData[buoyName].data['WindSpeed(m/s)'].toFixed(1)}} m/s, 
-            {{ bearing2compassRose(buoysData[buoyName].data['WindDir(º)']) }}
-            <span class="fa" :style="{transform: 'rotate('+ (buoysData[buoyName].data['WindDir(º)']-45+180) +'deg)' }">&#xf124;</span>
-          </span>
-        </div>
-        <!-- Currents -->
-        <div v-if="buoys[buoyName].params.includes('CurrentSpeed')">
-          <span>
-            <strong>Current: </strong>
-            {{buoysData[buoyName].data['CurrentSpeed(cm/s)'].toFixed(1)}} cm/s, 
-            {{ bearing2compassRose(buoysData[buoyName].data['CurrentDir(º)']) }}
-            <span class="fa" :style="{transform: 'rotate('+ (buoysData[buoyName].data['CurrentDir(º)']-45) +'deg)' }">&#xf124;</span>
-          </span>
-        </div>
-        <!-- Water temperature -->
-        <div v-if="buoys[buoyName].params.includes('WaterTemp')">
-          <span>
-            <strong>Water temperature: </strong>
-            {{buoysData[buoyName].data['WaterTemp(ºC)'].toFixed(1)}} ºC
-          </span>
-        </div>
-        <!-- Air temperature -->
-        <div v-if="buoys[buoyName].params.includes('AirTemp')">
-          <span>
-            <strong>Air temperature: </strong>
-            {{buoysData[buoyName].data['AirTemp(ºC)'].toFixed(1)}} ºC
-          </span>
+        <div v-if="buoysData[buoyName].hasData">
+          <!-- Waves -->
+          <div v-if="buoys[buoyName].params.includes('Hm0')">
+            <span>
+              <strong>Waves: </strong>
+              {{buoysData[buoyName].data['Hm0(m)'].toFixed(2)}} m, 
+              {{buoysData[buoyName].data['Tm02(s)'].toFixed(1)}} s, 
+              {{ bearing2compassRose(buoysData[buoyName].data['MeanDir(º)']) }}
+              <span class="fa" :style="{transform: 'rotate('+ (buoysData[buoyName].data['MeanDir(º)']-45+180) +'deg)' }">&#xf124;</span>
+            </span>
+          </div>
+          <!-- Wind -->
+          <div v-if="buoys[buoyName].params.includes('WindSpeed')">
+            <span>
+              <strong>Wind: </strong>
+              {{buoysData[buoyName].data['WindSpeed(m/s)'].toFixed(1)}} m/s, 
+              {{ bearing2compassRose(buoysData[buoyName].data['WindDir(º)']) }}
+              <span class="fa" :style="{transform: 'rotate('+ (buoysData[buoyName].data['WindDir(º)']-45+180) +'deg)' }">&#xf124;</span>
+            </span>
+          </div>
+          <!-- Currents -->
+          <div v-if="buoys[buoyName].params.includes('CurrentSpeed')">
+            <span>
+              <strong>Current: </strong>
+              {{buoysData[buoyName].data['CurrentSpeed(cm/s)'].toFixed(1)}} cm/s, 
+              {{ bearing2compassRose(buoysData[buoyName].data['CurrentDir(º)']) }}
+              <span class="fa" :style="{transform: 'rotate('+ (buoysData[buoyName].data['CurrentDir(º)']-45) +'deg)' }">&#xf124;</span>
+            </span>
+          </div>
+          <!-- Water temperature -->
+          <!-- <div v-if="buoys[buoyName].params.includes('WaterTemp')">
+            <span>
+              <strong>Water temperature: </strong>
+              {{buoysData[buoyName].data['WaterTemp(ºC)'].toFixed(1)}} ºC
+            </span>
+          </div> -->
+          <!-- Air temperature -->
+          <!-- <div v-if="buoys[buoyName].params.includes('AirTemp')">
+            <span>
+              <strong>Air temperature: </strong>
+              {{buoysData[buoyName].data['AirTemp(ºC)'].toFixed(1)}} ºC
+            </span>
+          </div> -->
         </div>
         
       </div>
+      </Transition>
 
     </div>
   </div>
@@ -74,7 +81,7 @@ export default {
   mounted() {
     // Create buoysData and add to map
     Object.keys(this.buoys).forEach(buoyName => {
-      this.buoysData[buoyName] = {"hasData": false};
+      this.buoysData[buoyName] = {"hasData": false, "showInfo": true};
       this.buoys[buoyName].coord3857 = ol.proj.fromLonLat([this.buoys[buoyName].location[0], this.buoys[buoyName].location[1]]);
     });
 
@@ -119,6 +126,17 @@ export default {
           location: [2.2072, 41.323],
           coord3857: undefined,
           data: {}, // tmst1: {Hm0: value, Tm02: value...}, tmst2: {...} 
+        },
+        "Tarragona": {
+          id: '2720',
+          params: ['Hm0', 'Tm02', 'Tp','MeanDir','MeanDirPeak', 
+                    'WindSpeed', 'WindDir',
+                    'CurrentSpeed', 'CurrentDir',
+                    'WaterTemp',
+                    'AirTemp'],
+          location: [1.4673, 40.6851],
+          coord3857: undefined,
+          data: {},
         }
       },
       // https://movil.puertos.es/cma2/app/CMA/adhoc/station_data?station=2798&params=Hm0,Tm02,Tp,MeanDir,MeanDirPeak&from=20231107@0000&to=20231128@0000
@@ -126,6 +144,10 @@ export default {
     }
   },
   methods: {
+    // USER ACTIONS
+    buoyIconClicked: function(buoyName){
+      this.buoysData[buoyName].showInfo = !this.buoysData[buoyName].showInfo;
+    },
     // INTERNAL
     selectedDateChanged: function(tmst){
       // First initialization
@@ -202,14 +224,13 @@ export default {
     updateContent: function(buoyName, tmst){
 
       if (this.buoys[buoyName].data[tmst] == undefined){
-        debugger;
+        this.buoysData[buoyName].hasData = false;
         return;
       }
 
-      this.buoysData[buoyName] = {
-        hasData: true,
-        data: {},
-      };
+      
+      this.buoysData[buoyName].hasData = true;
+      this.buoysData[buoyName].data = {};
       
       Object.keys(this.buoys[buoyName].data[tmst]).forEach(key => {
         this.buoysData[buoyName].data[key] = this.buoys[buoyName].data[tmst][key];
@@ -274,6 +295,13 @@ export default {
   display: flex;
   align-items: center;
 }
+
+.buoyTitle {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: solid 2px white;
+}
 .wavepanel {
   margin-right: 20px;
   background: rgb(15 48 98 / 71%);/*var(--darkBlue);*/
@@ -290,5 +318,17 @@ export default {
 .show {
   opacity: 1;
   transition: all 1s;
+}
+
+
+
+.v-enter-active,
+.v-leave-active {
+  transition: opacity 0.5s ease;
+}
+
+.v-enter-from,
+.v-leave-to {
+  opacity: 0;
 }
 </style>
