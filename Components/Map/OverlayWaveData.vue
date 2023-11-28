@@ -2,11 +2,15 @@
   
   <div id="overlay-wave-data" ref="containerWaveInfo">
   <!-- Container -->
-    <div v-for="key in Object.keys(radarData)" :id="key" :ref="key"  :class="[isTooFar ? 'hide' : 'show']">
+    <div v-for="key in Object.keys(radarData)" :id="key" :ref="key" class="radarPanelContainer">
+
       <!-- Wave panel -->
-      <div class="wavepanel" v-show="radarData[key].hasData">
+      <div class="wavepanel" :class="[isTooFar ? 'hide' : 'show']" v-if="radarData[key].hasData">
         <!-- Site -->
-        <div><span><strong>{{ radarData[key].site }}</strong></span></div>
+        <div class="radarTitle">
+          <span><strong>{{ radarData[key].site }}</strong></span>
+          <a href="https://www.icatmar.cat" target="_blank" rel="noopener noreferrer" class="icon-str">i</a>
+        </div>
         <!-- Wave data -->
         <div v-show="radarData[key].waveHeight != undefined">
           <span><strong>Waves: </strong>{{ radarData[key].waveHeight }} m, {{ radarData[key].wavePeriod }} s, {{ radarData[key].waveBearing }}</span>
@@ -18,6 +22,10 @@
           <span class="fa" :style="{transform: 'rotate('+ (radarData[key].windBearingValue-45+180) +'deg)' }">&#xf124;</span>
         </div>
       </div>
+
+      
+      <!-- Radar icon -->
+      <img class="icon-str icon-big icon-img radarIcon" src="/HFRadar/Assets/Images/radar.svg">
 
     </div>
   </div>
@@ -148,6 +156,24 @@ export default {
 
 
 <style scoped>
+
+.radarPanelContainer {
+  display: flex;
+  align-items: center;
+}
+
+.radarTitle {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: solid 2px white;
+}
+
+.radarIcon {
+  width: 35px;
+  height: 35px;
+  margin-right: -17.5px; /* half of its width */
+}
 .wavepanel {
   margin-right: 20px;
   background: rgb(15 48 98 / 71%);/*var(--darkBlue);*/

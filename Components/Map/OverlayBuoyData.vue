@@ -13,7 +13,7 @@
         <!-- Site -->
         <div class="buoyTitle">
           <span><strong>{{ buoyName }}'s buoy</strong></span>
-          <span class="icon-str">i</span>
+          <a href="https://www.puertos.es/" target="_blank" rel="noopener noreferrer" class="icon-str">i</a>
         </div>
 
         <!-- Buoy data -->
@@ -235,7 +235,7 @@ export default {
       Object.keys(this.buoys[buoyName].data[tmst]).forEach(key => {
         this.buoysData[buoyName].data[key] = this.buoys[buoyName].data[tmst][key];
       });
-      console.log(this.buoysData[buoyName].data)
+      //console.log(this.buoysData[buoyName].data)
     },
 
 
