@@ -5,20 +5,40 @@
     <div v-for="buoyName in Object.keys(buoysData)" :id="buoyName" :ref="buoyName" class="buoyContainer" :class="[!isTooFar && isAdvancedInterfaceOnOff ? 'show' : 'hide']">
       <!-- Buoy icon -->
       <!-- <div style="padding: 10px; border-radius:5px; background-color: red">Boya</div> -->
-      <img style="width: 30px; height:60px" src="/HFRadar/Assets/Images/cbos-buoy.svg">
+      <img class="icon-str icon-big icon-img" src="/HFRadar/Assets/Images/buoy.svg">
 
       <!-- Buoy panel -->
       <div class="wavepanel" v-if="buoysData[buoyName].hasData">
         <!-- Site -->
         <div><span><strong>{{ buoyName }}'s buoy</strong></span></div>
         <!-- Buoy data -->
-        <div v-for="varName in Object.keys(buoysData[buoyName].data)">
+        <!-- <div v-for="varName in Object.keys(buoysData[buoyName].data)">
           <span v-if="!varName.includes('MeanDir')"><strong>{{ varName }}: </strong>{{ buoysData[buoyName].data[varName] }}</span>
           
           <span v-else>
             <strong>{{ varName }}: </strong>
             {{ bearing2compassRose(buoysData[buoyName].data[varName]) }}
             <span class="fa" :style="{transform: 'rotate('+ (buoysData[buoyName].data[varName]-45+180) +'deg)' }">&#xf124;</span>
+          </span>
+        </div> -->
+        <!-- Buoy data 2 -->
+        <!-- Waves -->
+        <div>
+          <span>
+            <strong>Waves: </strong>
+            {{buoysData[buoyName].data['Hm0(m)'].toFixed(2)}} m, 
+            {{buoysData[buoyName].data['Tm02(s)'].toFixed(1)}} s, 
+            {{ bearing2compassRose(buoysData[buoyName].data['MeanDir(º)']) }}
+            <span class="fa" :style="{transform: 'rotate('+ (buoysData[buoyName].data['MeanDir(º)']-45+180) +'deg)' }">&#xf124;</span>
+          </span>
+        </div>
+        <!-- Wind -->
+        <div>
+          <span>
+            <strong>Wind: </strong>
+            {{buoysData[buoyName].data['WindSpeed(m/s)'].toFixed(1)}} m/s, 
+            {{ bearing2compassRose(buoysData[buoyName].data['WindDir(º)']) }}
+            <span class="fa" :style="{transform: 'rotate('+ (buoysData[buoyName].data['WindDir(º)']-45+180) +'deg)' }">&#xf124;</span>
           </span>
         </div>
         
@@ -69,7 +89,7 @@ export default {
       buoys: {
         "Begur": {
           id: '2798',
-          params: ['Hm0', 'Tm02', 'Tp','MeanDir','MeanDirPeak'],
+          params: ['Hm0', 'Tm02', 'Tp','MeanDir','MeanDirPeak', 'WindSpeed', 'WindDir'],
           location: [3.65, 41.90],
           coord3857: undefined,
           data: {}, // tmst1: {Hm0: value, Tm02: value...}, tmst2: {...} 
