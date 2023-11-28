@@ -10,20 +10,11 @@
       <!-- Buoy panel -->
       <div class="wavepanel" v-if="buoysData[buoyName].hasData">
         <!-- Site -->
-        <div><span><strong>{{ buoyName }}'s buoy</strong></span></div>
+        <div><span><strong style="text-decoration: underline">{{ buoyName }}'s buoy</strong></span></div>
+
         <!-- Buoy data -->
-        <!-- <div v-for="varName in Object.keys(buoysData[buoyName].data)">
-          <span v-if="!varName.includes('MeanDir')"><strong>{{ varName }}: </strong>{{ buoysData[buoyName].data[varName] }}</span>
-          
-          <span v-else>
-            <strong>{{ varName }}: </strong>
-            {{ bearing2compassRose(buoysData[buoyName].data[varName]) }}
-            <span class="fa" :style="{transform: 'rotate('+ (buoysData[buoyName].data[varName]-45+180) +'deg)' }">&#xf124;</span>
-          </span>
-        </div> -->
-        <!-- Buoy data 2 -->
         <!-- Waves -->
-        <div>
+        <div v-if="buoys[buoyName].params.includes('Hm0')">
           <span>
             <strong>Waves: </strong>
             {{buoysData[buoyName].data['Hm0(m)'].toFixed(2)}} m, 
@@ -33,12 +24,35 @@
           </span>
         </div>
         <!-- Wind -->
-        <div>
+        <div v-if="buoys[buoyName].params.includes('WindSpeed')">
           <span>
             <strong>Wind: </strong>
             {{buoysData[buoyName].data['WindSpeed(m/s)'].toFixed(1)}} m/s, 
             {{ bearing2compassRose(buoysData[buoyName].data['WindDir(º)']) }}
             <span class="fa" :style="{transform: 'rotate('+ (buoysData[buoyName].data['WindDir(º)']-45+180) +'deg)' }">&#xf124;</span>
+          </span>
+        </div>
+        <!-- Currents -->
+        <div v-if="buoys[buoyName].params.includes('CurrentSpeed')">
+          <span>
+            <strong>Current: </strong>
+            {{buoysData[buoyName].data['CurrentSpeed(cm/s)'].toFixed(1)}} m/s, 
+            {{ bearing2compassRose(buoysData[buoyName].data['CurrentDir(º)']) }}
+            <span class="fa" :style="{transform: 'rotate('+ (buoysData[buoyName].data['CurrentDir(º)']-45) +'deg)' }">&#xf124;</span>
+          </span>
+        </div>
+        <!-- Water temperature -->
+        <div v-if="buoys[buoyName].params.includes('WaterTemp')">
+          <span>
+            <strong>Water temperature: </strong>
+            {{buoysData[buoyName].data['WaterTemp(ºC)'].toFixed(1)}} ºC
+          </span>
+        </div>
+        <!-- Air temperature -->
+        <div v-if="buoys[buoyName].params.includes('AirTemp')">
+          <span>
+            <strong>Air temperature: </strong>
+            {{buoysData[buoyName].data['AirTemp(ºC)'].toFixed(1)}} ºC
           </span>
         </div>
         
@@ -89,8 +103,20 @@ export default {
       buoys: {
         "Begur": {
           id: '2798',
-          params: ['Hm0', 'Tm02', 'Tp','MeanDir','MeanDirPeak', 'WindSpeed', 'WindDir'],
+          params: ['Hm0', 'Tm02', 'Tp','MeanDir','MeanDirPeak', 
+                    'WindSpeed', 'WindDir',
+                    'CurrentSpeed', 'CurrentDir',
+                    'WaterTemp',
+                    'AirTemp'],
           location: [3.65, 41.90],
+          coord3857: undefined,
+          data: {}, // tmst1: {Hm0: value, Tm02: value...}, tmst2: {...} 
+        },
+        "Barcelona": {
+          id: '1731',
+          params: ['Hm0', 'Tm02', 'Tp','MeanDir','MeanDirPeak', 
+                    'WaterTemp'],
+          location: [2.2072, 41.323],
           coord3857: undefined,
           data: {}, // tmst1: {Hm0: value, Tm02: value...}, tmst2: {...} 
         }
@@ -188,7 +214,7 @@ export default {
       Object.keys(this.buoys[buoyName].data[tmst]).forEach(key => {
         this.buoysData[buoyName].data[key] = this.buoys[buoyName].data[tmst][key];
       });
-      
+      console.log(this.buoysData[buoyName].data)
     },
 
 
