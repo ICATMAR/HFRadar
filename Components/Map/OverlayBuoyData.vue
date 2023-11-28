@@ -36,7 +36,7 @@
         <div v-if="buoys[buoyName].params.includes('CurrentSpeed')">
           <span>
             <strong>Current: </strong>
-            {{buoysData[buoyName].data['CurrentSpeed(cm/s)'].toFixed(1)}} m/s, 
+            {{buoysData[buoyName].data['CurrentSpeed(cm/s)'].toFixed(1)}} cm/s, 
             {{ bearing2compassRose(buoysData[buoyName].data['CurrentDir(º)']) }}
             <span class="fa" :style="{transform: 'rotate('+ (buoysData[buoyName].data['CurrentDir(º)']-45) +'deg)' }">&#xf124;</span>
           </span>
