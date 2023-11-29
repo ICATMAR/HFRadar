@@ -241,6 +241,9 @@ export default {
 
 
 <style scoped>
+a {
+  text-decoration: none;
+}
 
 .radarPanelContainer {
   display: flex;

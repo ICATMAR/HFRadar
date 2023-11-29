@@ -46,20 +46,49 @@
               <span class="fa" :style="{transform: 'rotate('+ (buoysData[buoyName].data['CurrentDir(º)']-45) +'deg)' }">&#xf124;</span>
             </span>
           </div>
-          <!-- Water temperature -->
-          <!-- <div v-if="buoys[buoyName].params.includes('WaterTemp')">
-            <span>
-              <strong>Water temperature: </strong>
-              {{buoysData[buoyName].data['WaterTemp(ºC)'].toFixed(1)}} ºC
-            </span>
-          </div> -->
-          <!-- Air temperature -->
-          <!-- <div v-if="buoys[buoyName].params.includes('AirTemp')">
-            <span>
-              <strong>Air temperature: </strong>
-              {{buoysData[buoyName].data['AirTemp(ºC)'].toFixed(1)}} ºC
-            </span>
-          </div> -->
+          
+          <!-- Extra data -->
+          <Transition>
+          <div v-show="buoys[buoyName].showAllData">
+
+            <!-- Water temperature -->
+            <div v-if="buoys[buoyName].params.includes('WaterTemp')">
+              <span>
+                <strong>Water temperature: </strong>
+                {{buoysData[buoyName].data['WaterTemp(ºC)'].toFixed(1)}} ºC
+              </span>
+            </div>
+            <!-- Salinity -->
+            <div v-if="buoys[buoyName].params.includes('Salinity')">
+              <span>
+                <strong>Salinity: </strong>
+                {{buoysData[buoyName].data['Salinity(PSU)'].toFixed(1)}} psu
+              </span>
+            </div>
+            <!-- Air temperature -->
+            <div v-if="buoys[buoyName].params.includes('AirTemp')">
+              <span>
+                <strong>Air temperature: </strong>
+                {{buoysData[buoyName].data['AirTemp(ºC)'].toFixed(1)}} ºC
+              </span>
+            </div>
+            <!-- Air pressure -->
+            <div v-if="buoys[buoyName].params.includes('AirTemp')">
+              <span>
+                <strong>Air pressure: </strong>
+                {{buoysData[buoyName].data['AirPressure(mb)'].toFixed(1)}} mb
+              </span>
+            </div>
+
+          </div>
+          </Transition>
+
+          <!-- Button showAllData ON OFF-->
+          <div class="button-container">
+            <button v-show="!buoys[buoyName].showAllData" class="more-data-button" @click="buoys[buoyName].showAllData = true">+</button>
+            <button v-show="buoys[buoyName].showAllData" class="more-data-button" @click="buoys[buoyName].showAllData = false">-</button>
+          </div>
+          
         </div>
         
       </div>
@@ -114,7 +143,9 @@ export default {
                     'WindSpeed', 'WindDir',
                     'CurrentSpeed', 'CurrentDir',
                     'WaterTemp',
-                    'AirTemp'],
+                    'AirTemp',
+                    'Salinity',
+                    'AirPressure'],
           location: [3.65, 41.90],
           coord3857: undefined,
           data: {}, // tmst1: {Hm0: value, Tm02: value...}, tmst2: {...} 
@@ -133,8 +164,36 @@ export default {
                     'WindSpeed', 'WindDir',
                     'CurrentSpeed', 'CurrentDir',
                     'WaterTemp',
-                    'AirTemp'],
+                    'AirTemp',
+                    'Salinity',
+                    'AirPressure'],
           location: [1.4673, 40.6851],
+          coord3857: undefined,
+          data: {},
+        },
+        "Valencia": {
+          id: '2630',
+          params: ['Hm0', 'Hmax', 'Tm02', 'Tp','MeanDir','MeanDirPeak', 
+                    'WindSpeed', 'WindDir',
+                    'CurrentSpeed', 'CurrentDir',
+                    'WaterTemp',
+                    'AirTemp',
+                    'Salinity',
+                    'AirPressure'],
+          location: [0.2020, 39.5205],
+          coord3857: undefined,
+          data: {},
+        },
+        "Dragonera": {
+          id: '2820',
+          params: ['Hm0', 'Hmax', 'Tm02', 'Tp','MeanDir','MeanDirPeak', 
+                    'WindSpeed', 'WindDir',
+                    'CurrentSpeed', 'CurrentDir',
+                    'WaterTemp',
+                    'AirTemp',
+                    'Salinity',
+                    'AirPressure'],
+          location: [	2.0953, 39.5630],
           coord3857: undefined,
           data: {},
         }
@@ -291,6 +350,10 @@ export default {
 
 <style scoped>
 
+a {
+  text-decoration: none;
+}
+
 .buoyContainer {
   display: flex;
   align-items: center;
@@ -311,6 +374,22 @@ export default {
   transition: all 1s;
 }
 
+.button-container {
+  display: flex;
+  width: 100%;
+  justify-content: center;
+}
+.more-data-button {
+  height: 10px;
+  background: var(--blue);
+  width: 80%;
+  padding: 5px;
+  margin-top: 5px;
+}
+.more-data-button:hover{
+  background: var(--lightBlue);
+}
+
 .hide {
   opacity: 0;
   transition: all 1s;
@@ -324,11 +403,12 @@ export default {
 
 .v-enter-active,
 .v-leave-active {
-  transition: opacity 0.5s ease;
+  transition: all 0.5s ease;
 }
 
 .v-enter-from,
 .v-leave-to {
   opacity: 0;
+  transform: scale(0.9);
 }
 </style>
