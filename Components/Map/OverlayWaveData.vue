@@ -5,7 +5,7 @@
     <div v-for="key in Object.keys(radarData)" :id="key" :ref="key" class="radarPanelContainer">
 
       <!-- Wave panel -->
-      <div class="wavepanel" :class="[isTooFar ? 'hide' : 'show']">
+      <div class="wavepanel" :class="[!isTooFar && radarData[key].showInfo ? 'show' : 'hide']">
         <!-- Site -->
         <div class="radarTitle">
           <span><strong>{{ radarData[key].site }}</strong></span>
@@ -40,7 +40,11 @@
       
       <!-- Radar icon -->
       <!-- window.eventBus.emit('Map_ClickedHFRadar', closestRadar); -->
-      <img class="icon-str icon-big icon-img radarIcon" :class="[radarData[key].fileStatus == 0 ? 'iconNoFile' : radarData[key].fileStatus == 3 ? 'iconLoading' : '']" src="/HFRadar/Assets/Images/radar.svg">
+      <img 
+        class="icon-str icon-big icon-img radarIcon" 
+        :class="[radarData[key].fileStatus == 0 ? 'iconNoFile' : radarData[key].fileStatus == 3 ? 'iconLoading' : '']" 
+        @click="radarIconClicked(key)"
+        src="/HFRadar/Assets/Images/radar.svg">
 
     </div>
   </div>
@@ -82,6 +86,19 @@ export default {
     }
   },
   methods: {
+    // USER INTERACTION
+    radarIconClicked: function(uuid){
+      // Hide / show overlay panel
+      this.radarData[uuid].showInfo = !this.radarData[uuid].showInfo;
+      // Special for advanced interface
+      if (!window.GUIManager.isAdvancedInterface){
+        // Show radials?
+        
+        // Show timeline of values?
+      }
+    },
+
+
     // INTERNAL
     createRadarDataObject: function(){
       // Create radar objects and add to map
@@ -95,6 +112,7 @@ export default {
           
           this.radarData[radar.UUID] = {
             "site": radar.Site, 
+            "showInfo": true,
             "hasData": false,
             "fileStatus": fileStatus,
           };
@@ -116,6 +134,7 @@ export default {
               stopEvent: false,
             });
             this.map.addOverlay(waveInfo);
+            waveInfo.element.parentElement.style.zIndex = '1';
           })
 
         }
@@ -125,7 +144,7 @@ export default {
       
     },
 
-
+    // Fill the object radarData that shows the data in the interface
     updateContent: function(tmst){
 
       Object.keys(this.radarData).forEach(uuid => {
