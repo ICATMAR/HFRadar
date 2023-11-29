@@ -39,6 +39,7 @@
 
       
       <!-- Radar icon -->
+      <!-- window.eventBus.emit('Map_ClickedHFRadar', closestRadar); -->
       <img class="icon-str icon-big icon-img radarIcon" :class="[radarData[key].fileStatus == 0 ? 'iconNoFile' : radarData[key].fileStatus == 3 ? 'iconLoading' : '']" src="/HFRadar/Assets/Images/radar.svg">
 
     </div>

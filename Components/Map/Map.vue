@@ -211,8 +211,6 @@ export default {
     window.eventBus.on('HFRadarDataLoaded', (tmst) =>{
       if (tmst != undefined)
         this.selectedDateChanged(tmst);
-      else
-        this.updateHFRadarIcons(); // TODO: could it be fixed by writting tmst = window.GUIManager.currentTmst || tmst?
     });
     // Selected date changed (slider moves or drag and drop files)
     window.eventBus.on('DataStreamsBar_SelectedDateChanged', (tmst) =>{
@@ -451,11 +449,9 @@ export default {
 
       }
 
-      // Vector - HFRadar Icons
-      this.updateHFRadarIcons();
     },
 
-    // Remove HFRadar layers HFData, HFIcon, HFPoints
+    // Remove HFRadar layers HFData, HFPoints
     removeHFlayers: function(){
       this.map.getLayers().getArray().slice().forEach(layerItem => {
           if (layerItem != undefined){
@@ -471,67 +467,6 @@ export default {
 
 
 
-    // Update HFRadar icons
-    // Show current radars and change the opacity of the icon if they have no data on that day
-    updateHFRadarIcons: function(){
-      let radars = window.DataManager.HFRadars;
-      // If layer does not exists, create one
-      if (!this.layers['HFIcons']){
-        this.layers['HFIcons'] = new ol.layer.Vector({
-          name: 'HFIcons',
-          source: new ol.source.Vector({
-            features: []
-          })
-        });
-        // Add to map
-        this.map.addLayer(this.layers['HFIcons']);
-      }
-
-      let layerIcons = this.layers['HFIcons'];
-      // Get current features
-      //let features = layerIcons.getSource().getFeatures();
-      // debugger;
-      // Update features (one per HFRadar)
-      Object.keys(radars).forEach(key => {
-        // Only for radars, not for tots (combined)
-        let radar = radars[key];
-        let radarData = radar.data || radar.waveData;
-        let hasDataNow = radarData[window.GUIManager.currentTmst] != undefined;
-        
-        if (!radar.dataGrid) {
-          // Create feature style
-          let featStyle = new ol.style.Style({
-            image: new ol.style.Icon({
-              src: 'Assets/Images/antenna.png',
-              width: 10,
-              height: 10,
-              scale: [0.5, 0.5],
-              opacity: hasDataNow ? 1 : 0.3,
-            })
-          });
-
-          let feature = layerIcons.getSource().getFeatureById(key);
-          // Create feature if it does not exist
-          if (feature == null){
-            // let locationStr = radar.header.Origin;
-            // let location = locationStr.replace(/\s\s+/g, ',').replace(',', '').replace('\r', '').split(',');
-            // location = location.reverse();
-            let location = radar.getRadarOrigin();
-            feature = new ol.Feature({
-              name: 'HFRadarIcon' + key,
-              geometry: new ol.geom.Point(ol.proj.fromLonLat(location)),
-            });
-            // Set feature id
-            feature.setId(key);
-            feature.setStyle(featStyle);
-            layerIcons.getSource().addFeature(feature);
-          } else
-            feature.setStyle(featStyle);
-        }
-
-      }); // End of HFRadars iteration
-      
-    },
 
 
 
@@ -676,7 +611,6 @@ export default {
       let coord = ol.proj.transform(evt.coordinate, 'EPSG:3857', 'EPSG:4326');
       let closestDataPoint;
       let selRadar;
-      let closestRadar = undefined;
       // Find closest points or radars
       let radars = window.DataManager.getRadarsDataOn(window.GUIManager.currentTmst);//window.DataManager.HFRadars;
       if (Object.keys(radars).length != 0){
@@ -700,32 +634,12 @@ export default {
             }
           }
         });
-        // Check if the radar is closest than a datapoint
-        Object.keys(radars).forEach(key => {
-          let radar = radars[key];
-          // Radar distance
-          let location = radar.getRadarOrigin();
-          // Find if a radar is the closest
-          let dist = this.getDistance(location, coord);
-          if (dist < distMin){
-            distMin = dist;
-            closestRadar = radar;
-          }
-        });
-        // If a radar is closest
-        if (closestRadar !== undefined){
-          // Limit by pixel distance
-          let epsg3857coord = ol.proj.fromLonLat(closestRadar.getRadarOrigin());
-          let pixelCoord = this.map.getPixelFromCoordinate(epsg3857coord);
-          let pixelDistance = Math.sqrt(Math.pow(evt.originalEvent.clientX - pixelCoord[0],2) + Math.pow(evt.originalEvent.clientY - pixelCoord[1],2));
-          if (pixelDistance < 20)
-            window.eventBus.emit('Map_ClickedHFRadar', closestRadar);
-        }
+
         
         
         // If point is closest, emit only if click is close to point in pixels
         // Limit by distance in pixels
-        else if (closestDataPoint){
+        if (closestDataPoint){
           let epsg3857coord = ol.proj.fromLonLat([closestDataPoint['Longitude (deg)'], closestDataPoint['Latitude (deg)']]);
           let pixelCoord = this.map.getPixelFromCoordinate(epsg3857coord);
 
