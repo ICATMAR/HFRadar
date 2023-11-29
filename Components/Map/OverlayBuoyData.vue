@@ -5,7 +5,7 @@
     <div v-for="buoyName in Object.keys(buoysData)" :id="buoyName" :ref="buoyName" class="buoyContainer" :class="[!isTooFar && isAdvancedInterfaceOnOff ? 'show' : 'hide']">
       <!-- Buoy icon -->
       <!-- <div style="padding: 10px; border-radius:5px; background-color: red">Boya</div> -->
-      <img class="icon-str icon-big icon-img" @click="buoyIconClicked(buoyName)" src="/HFRadar/Assets/Images/buoy.svg">
+      <img class="icon-str icon-medium icon-img" @click="buoyIconClicked(buoyName)" src="/HFRadar/Assets/Images/buoy.svg">
 
       <!-- Buoy panel -->
       <Transition>

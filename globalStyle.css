@@ -180,6 +180,16 @@ button:hover {
   height: 35px;
 }
 
+.icon-medium {
+  width: 30px;
+  height: 30px;
+}
+
+.icon-small{
+  width: 25px;
+  height: 25px;
+}
+
 .icon-img:hover {
   border: 2px solid var(--lightBlue);
   cursor:pointer;

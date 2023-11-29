@@ -197,12 +197,13 @@ export default {
           else if (window.DataManager.hourlyDataAvailability[tmst.substring(0,13) + 'Z']) {
             if (window.DataManager.hourlyDataAvailability[tmst.substring(0,13) + 'Z'][radar.Site] == 3) {
               this.radarData[radar.UUID].fileStatus = 3;
-              console.log("FILE STATUS LOADING")
+              this.radarData[radar.UUID].hasData = false;
             }
           }
           // File does not exist
           else {
             this.radarData[radar.UUID].fileStatus = 0;
+            this.radarData[radar.UUID].hasData = false;
           }
           
         }
