@@ -13,7 +13,7 @@
         <!-- Site -->
         <div class="buoyTitle">
           <span><strong>{{ buoyName }}'s buoy</strong></span>
-          <a href="https://www.puertos.es/" target="_blank" rel="noopener noreferrer" class="icon-str">i</a>
+          <a href="https://portus.puertos.es/" target="_blank" rel="noopener noreferrer" class="icon-str">i</a>
         </div>
 
         <!-- Buoy data -->
@@ -50,6 +50,18 @@
           <!-- Extra data -->
           <Transition>
           <div v-show="buoys[buoyName].showAllData">
+            <!-- Wave max -->
+            <div v-if="buoys[buoyName].params.includes('Hmax')">
+              <span>
+                <strong>Wave max: </strong>
+                {{buoysData[buoyName].data['Hmax(m)'].toFixed(1)}} m, 
+                {{buoysData[buoyName].data['Tp(s)'].toFixed(1)}} s
+                <template v-if="buoysData[buoyName].data['MeanDirPeak(º)'] != undefined">,
+                  {{ bearing2compassRose(buoysData[buoyName].data['MeanDirPeak(º)']) }}
+                  <span class="fa" :style="{transform: 'rotate('+ (buoysData[buoyName].data['MeanDirPeak(º)']-45+180) +'deg)' }">&#xf124;</span>
+                </template>
+              </span>
+            </div>
 
             <!-- Water temperature -->
             <div v-if="buoys[buoyName].params.includes('WaterTemp')">
@@ -139,7 +151,7 @@ export default {
       buoys: {
         "Begur": {
           id: '2798',
-          params: ['Hm0', 'Tm02', 'Tp','MeanDir','MeanDirPeak', 
+          params: ['Hm0', 'Hmax', 'Tm02', 'Tp','MeanDir','MeanDirPeak', 
                     'WindSpeed', 'WindDir',
                     'CurrentSpeed', 'CurrentDir',
                     'WaterTemp',
@@ -152,7 +164,7 @@ export default {
         },
         "Barcelona": {
           id: '1731',
-          params: ['Hm0', 'Tm02', 'Tp','MeanDir','MeanDirPeak', 
+          params: ['Hm0', 'Hmax', 'Tm02', 'Tp','MeanDir', 
                     'WaterTemp'],
           location: [2.2072, 41.323],
           coord3857: undefined,
@@ -160,7 +172,7 @@ export default {
         },
         "Tarragona": {
           id: '2720',
-          params: ['Hm0', 'Tm02', 'Tp','MeanDir','MeanDirPeak', 
+          params: ['Hm0', 'Hmax', 'Tm02', 'Tp','MeanDir','MeanDirPeak', 
                     'WindSpeed', 'WindDir',
                     'CurrentSpeed', 'CurrentDir',
                     'WaterTemp',
@@ -319,6 +331,8 @@ export default {
 
     // Bearing to direction
     bearing2compassRose(bearing){
+      if (bearing == undefined)
+        debugger;
       // Define directional ranges in degrees
       const directions = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW', 'N'];
       const ranges = [22.5, 67.5, 112.5, 157.5, 202.5, 247.5, 292.5, 337.5, 360];
