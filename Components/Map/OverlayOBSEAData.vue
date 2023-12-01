@@ -2,93 +2,90 @@
   
   <div id="overlay-OBSEA-data" ref="containerOBSEAInfo">
   <!-- Container -->
-    <div v-for="buoyName in Object.keys(buoysData)" :id="buoyName" :ref="buoyName" class="buoyContainer" :class="[!isTooFar && isAdvancedInterfaceOnOff ? 'show' : 'hide']">
-      <!-- Buoy icon -->
-      <!-- <div style="padding: 10px; border-radius:5px; background-color: red">Boya</div> -->
-      <img class="icon-str icon-medium icon-img" @click="buoyIconClicked(buoyName)" src="/HFRadar/Assets/Images/buoy.svg">
-
-      <!-- Buoy panel -->
+    <!-- <div v-for="stationId in Object.keys(stationsData)" :id="stationId" :ref="stationId" class="OBSEAContainer" :class="[!isTooFar && isAdvancedInterfaceOnOff ? 'show' : 'hide']"> -->
+    <div v-for="stationId in Object.keys(stationsData)" :id="stationId" :ref="stationId" class="OBSEAContainer">
+      <!-- Station panel -->
       <Transition>
-      <div class="wavepanel" v-if="buoysData[buoyName].showInfo">
+      <div class="stationPanel" v-if="stationsData[stationId].showInfo">
         <!-- Site -->
-        <div class="buoyTitle">
-          <span><strong>{{ buoyName }}'s buoy</strong></span>
-          <a href="https://portus.puertos.es/" target="_blank" rel="noopener noreferrer" class="icon-str">i</a>
+        <div class="stationTitle">
+          <span><strong>OBSEA station</strong></span>
+          <a href="https://obsea.es/" target="_blank" rel="noopener noreferrer" class="icon-str">i</a>
         </div>
 
-        <!-- Buoy data -->
-        <div v-if="buoysData[buoyName].hasData">
+        <!-- Station data -->
+        <div v-if="stationsData[stationId].hasData">
           <!-- Waves -->
-          <div v-if="buoys[buoyName].params.includes('Hm0')">
+          <div v-if="stations[stationId].params.includes('Hm0')">
             <span>
               <strong>Waves: </strong>
-              {{buoysData[buoyName].data['Hm0(m)'].toFixed(2)}} m, 
-              {{buoysData[buoyName].data['Tm02(s)'].toFixed(1)}} s, 
-              {{ bearing2compassRose(buoysData[buoyName].data['MeanDir(º)']) }}
-              <span class="fa" :style="{transform: 'rotate('+ (buoysData[buoyName].data['MeanDir(º)']-45+180) +'deg)' }">&#xf124;</span>
+              {{stationsData[stationId].data['Hm0(m)'].toFixed(2)}} m, 
+              {{stationsData[stationId].data['Tm02(s)'].toFixed(1)}} s, 
+              {{ bearing2compassRose(stationsData[stationId].data['MeanDir(º)']) }}
+              <span class="fa" :style="{transform: 'rotate('+ (stationsData[stationId].data['MeanDir(º)']-45+180) +'deg)' }">&#xf124;</span>
             </span>
           </div>
           <!-- Wind -->
-          <div v-if="buoys[buoyName].params.includes('WindSpeed')">
+          <div v-if="stations[stationId].params.includes('WindSpeed')">
             <span>
               <strong>Wind: </strong>
-              {{buoysData[buoyName].data['WindSpeed(m/s)'].toFixed(1)}} m/s, 
-              {{ bearing2compassRose(buoysData[buoyName].data['WindDir(º)']) }}
-              <span class="fa" :style="{transform: 'rotate('+ (buoysData[buoyName].data['WindDir(º)']-45+180) +'deg)' }">&#xf124;</span>
+              {{stationsData[stationId].data['WindSpeed(m/s)'].toFixed(1)}} m/s, 
+              {{ bearing2compassRose(stationsData[stationId].data['WindDir(º)']) }}
+              <span class="fa" :style="{transform: 'rotate('+ (stationsData[stationId].data['WindDir(º)']-45+180) +'deg)' }">&#xf124;</span>
             </span>
           </div>
           <!-- Currents -->
-          <div v-if="buoys[buoyName].params.includes('CurrentSpeed')">
+          <div v-if="stations[stationId].params.includes('CurrentSpeed')">
             <span>
               <strong>Current: </strong>
-              {{buoysData[buoyName].data['CurrentSpeed(cm/s)'].toFixed(1)}} cm/s, 
-              {{ bearing2compassRose(buoysData[buoyName].data['CurrentDir(º)']) }}
-              <span class="fa" :style="{transform: 'rotate('+ (buoysData[buoyName].data['CurrentDir(º)']-45) +'deg)' }">&#xf124;</span>
+              {{stationsData[stationId].data['CurrentSpeed(cm/s)'].toFixed(1)}} cm/s, 
+              {{ bearing2compassRose(stationsData[stationId].data['CurrentDir(º)']) }}
+              <span class="fa" :style="{transform: 'rotate('+ (stationsData[stationId].data['CurrentDir(º)']-45) +'deg)' }">&#xf124;</span>
             </span>
           </div>
           
           <!-- Extra data -->
           <Transition>
-          <div v-show="buoys[buoyName].showAllData">
+          <div v-show="stations[stationId].showAllData">
             <!-- Wave max -->
-            <div v-if="buoys[buoyName].params.includes('Hmax')">
+            <div v-if="stations[stationId].params.includes('Hmax')">
               <span>
                 <strong>Wave max: </strong>
-                {{buoysData[buoyName].data['Hmax(m)'].toFixed(1)}} m, 
-                {{buoysData[buoyName].data['Tp(s)'].toFixed(1)}} s
-                <template v-if="buoysData[buoyName].data['MeanDirPeak(º)'] != undefined">,
-                  {{ bearing2compassRose(buoysData[buoyName].data['MeanDirPeak(º)']) }}
-                  <span class="fa" :style="{transform: 'rotate('+ (buoysData[buoyName].data['MeanDirPeak(º)']-45+180) +'deg)' }">&#xf124;</span>
+                {{stationsData[stationId].data['Hmax(m)'].toFixed(1)}} m, 
+                {{stationsData[stationId].data['Tp(s)'].toFixed(1)}} s
+                <template v-if="stationsData[stationId].data['MeanDirPeak(º)'] != undefined">,
+                  {{ bearing2compassRose(stationsData[stationId].data['MeanDirPeak(º)']) }}
+                  <span class="fa" :style="{transform: 'rotate('+ (stationsData[stationId].data['MeanDirPeak(º)']-45+180) +'deg)' }">&#xf124;</span>
                 </template>
               </span>
             </div>
 
             <!-- Water temperature -->
-            <div v-if="buoys[buoyName].params.includes('WaterTemp')">
+            <div v-if="stations[stationId].params.includes('WaterTemp')">
               <span>
                 <strong>Water temperature: </strong>
-                {{buoysData[buoyName].data['WaterTemp(ºC)'].toFixed(1)}} ºC
+                {{stationsData[stationId].data['WaterTemp(ºC)'].toFixed(1)}} ºC
               </span>
             </div>
             <!-- Salinity -->
-            <div v-if="buoys[buoyName].params.includes('Salinity')">
+            <div v-if="stations[stationId].params.includes('Salinity')">
               <span>
                 <strong>Salinity: </strong>
-                {{buoysData[buoyName].data['Salinity(PSU)'].toFixed(1)}} psu
+                {{stationsData[stationId].data['Salinity(PSU)'].toFixed(1)}} psu
               </span>
             </div>
             <!-- Air temperature -->
-            <div v-if="buoys[buoyName].params.includes('AirTemp')">
+            <div v-if="stations[stationId].params.includes('AirTemp')">
               <span>
                 <strong>Air temperature: </strong>
-                {{buoysData[buoyName].data['AirTemp(ºC)'].toFixed(1)}} ºC
+                {{stationsData[stationId].data['AirTemp(ºC)'].toFixed(1)}} ºC
               </span>
             </div>
             <!-- Air pressure -->
-            <div v-if="buoys[buoyName].params.includes('AirTemp')">
+            <div v-if="stations[stationId].params.includes('AirTemp')">
               <span>
                 <strong>Air pressure: </strong>
-                {{buoysData[buoyName].data['AirPressure(mb)'].toFixed(1)}} mb
+                {{stationsData[stationId].data['AirPressure(mb)'].toFixed(1)}} mb
               </span>
             </div>
 
@@ -97,14 +94,19 @@
 
           <!-- Button showAllData ON OFF-->
           <div class="button-container">
-            <button v-show="!buoys[buoyName].showAllData" class="more-data-button" @click="buoys[buoyName].showAllData = true">+</button>
-            <button v-show="buoys[buoyName].showAllData" class="more-data-button" @click="buoys[buoyName].showAllData = false">-</button>
+            <button v-show="!stations[stationId].showAllData" class="more-data-button" @click="stations[stationId].showAllData = true">+</button>
+            <button v-show="stations[stationId].showAllData" class="more-data-button" @click="stations[stationId].showAllData = false">-</button>
           </div>
           
         </div>
         
       </div>
       </Transition>
+
+
+      <!-- Station icon -->
+      <img class="icon-str icon-medium icon-img" @click="OBSEAIconClicked(stationId)" src="/HFRadar/Assets/Images/buoy.svg">
+
 
     </div>
   </div>
@@ -121,16 +123,8 @@ export default {
   created(){},
   mounted() {
     // Get OBSEA sites
-    this.getOBSEASites().then(sites => {
-      this.sites = sites;
-      // Get data
+    this.loadOBSEAAPI();
 
-    });
-    // Create buoysData and add to map
-    Object.keys(this.buoys).forEach(buoyName => {
-      this.buoysData[buoyName] = {"hasData": false, "showInfo": true};
-      this.buoys[buoyName].coord3857 = ol.proj.fromLonLat([this.buoys[buoyName].location[0], this.buoys[buoyName].location[1]]);
-    });
 
     // EVENTS
     // HFRadarLoaded
@@ -149,38 +143,22 @@ export default {
   },
   data () {
     return {
-      once: false,
       isAdvancedInterfaceOnOff: false,
-      OBSEAData: {},
       isTooFar: false,
-      // https://portus.puertos.es/
-      buoys: {
-        "Begur": {
-          id: '2798',
-          params: ['Hm0', 'Hmax', 'Tm02', 'Tp','MeanDir','MeanDirPeak', 
-                    'WindSpeed', 'WindDir',
-                    'CurrentSpeed', 'CurrentDir',
-                    'WaterTemp',
-                    'AirTemp',
-                    'Salinity',
-                    'AirPressure'],
-          location: [3.65, 41.90],
-          coord3857: undefined,
-          data: {}, // tmst1: {Hm0: value, Tm02: value...}, tmst2: {...} 
-        },
-      },
-      // https://movil.puertos.es/cma2/app/CMA/adhoc/station_data?station=2798&params=Hm0,Tm02,Tp,MeanDir,MeanDirPeak&from=20231107@0000&to=20231128@0000
-      url: 'https://movil.puertos.es/cma2/app/CMA/adhoc/station_data?station={{id}}&params={{params}}&from={{sYear}}{{sMonth}}{{sDay}}@{{sHour}}{{sMinute}}&to={{eYear}}{{eMonth}}{{eDay}}@{{eHour}}{{eMinute}}', 
+      stations: {},
+      stationsData: {},
+      // https://data.obsea.es/data-api/Datastreams(313)/Observations?$select=resultTime,result&$top=1000000&$filter=resultQuality/qc_flag%20eq%201%20and%20resultTime%20ge%202022-01-01T00:00:00.000Z%20and%20resultTime%20lt%202023-11-30T14:00:00.000Z&$orderBy=resultTime%20asc
+      url: 'https://data.obsea.es/data-api/Datastreams({{datastream}})/Observations?$select=resultTime,result&$filter=resultQuality/qc_flag eq 1 and resultTime ge {{sDate}} and resultTime lt {{eDate}}&$orderBy=resultTime asc', 
     }
   },
   methods: {
     // USER ACTIONS
-    OBSEAIconClicked: function(buoyName){
-      this.buoysData[buoyName].showInfo = !this.buoysData[buoyName].showInfo;
+    OBSEAIconClicked: function(stationId){
+      this.stationsData[stationId].showInfo = !this.stationsData[stationId].showInfo;
     },
     // INTERNAL
     // Use API to get observed variables and locations
-    getOBSEASites: async function(){
+    loadOBSEAAPI: async function(){
       // Using sensor things API
       // https://data.obsea.es/data-api/ObservedProperties
       // Get observed properties
@@ -207,12 +185,6 @@ export default {
             // Skip if no phenomenon time
             if (el.phenomenonTime == undefined)
               return;
-            // Skip if phenomenonTime is older than current date (sensor is not active)
-            let oneWeekAgo = new Date();
-            oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-            let latestTmst = el.phenomenonTime.split('/')[1];
-            if (new Date(latestTmst) < oneWeekAgo)
-              return;
             // Assign to sites
             observedProperties[prop].sites.push(el);
           });
@@ -230,7 +202,7 @@ export default {
           delete observedProperties[prop];
         }
       });
-      console.warn("Deleted observed properties, as no recent data is present: " + deletedProps);
+      console.warn("Deleted observed properties, as no station is collecting them or there is no 30 min average: " + deletedProps);
 
 
       // Reorganize data by sites
@@ -251,7 +223,90 @@ export default {
         })
       });
 
-      return sites;
+      
+      
+
+      // Create data structure for vue
+      let stations = this.stations;
+      for (let i = 0; i < Object.keys(sites).length; i++){
+        let key = Object.keys(sites)[i];
+        let site = sites[key]
+        // Create station data object
+        if (stations[key] == undefined) {
+          stations[key] = {
+            hasData: false,
+            showInfo: true,
+            params: [],
+            location: key.split(",").reverse(),
+            data: {}, // tmst1: {WDIR: value, WSP: value...}, tmst2: {}...
+          }
+          // Params
+          for (let j = 0; j < Object.keys(site).length; j++){
+            let param = Object.keys(site)[j];
+            let paramData = site[param];
+
+            let paramObj = {
+              "description": paramData.description,
+              "name": paramData.name,
+              "units": '',
+            }
+            // Get datastream(s)
+            paramObj.datastreams = [];
+            for (let k = 0; k < site[param].sites.length; k++){
+              let dtstm = site[param].sites[k];
+              if (dtstm.observedArea.coordinates[0] == stations[key].location[0]){
+                let dataStreamObj = {
+                  "id": dtstm["@iot.id"],
+                  "latestTmst": dtstm.phenomenonTime.split("/")[1],
+                  "units": dtstm.unitOfMeasurement.symbol,
+                  "sensorDepth": await fetch("https://data.obsea.es/data-api/Datastreams("+ dtstm["@iot.id"] +")/Sensor").then(res => res.json()).then(jj => jj.properties.deployment.coordinates.meters_depth),
+                }
+                // ADCP currents
+                if (dtstm.name.includes('CSPD')){
+                  dataStreamObj.depth = dtstm.properties["ADCP cell parameters"]["center depth"];
+                }
+
+                paramObj.datastreams.push(dataStreamObj);
+              }
+            }
+            stations[key].params.push(paramObj);
+          }
+
+
+        }
+      }
+
+
+
+      // Create stationsData and add to map
+      Object.keys(this.stations).forEach(stationId => {
+        this.stationsData[stationId] = {"hasData": false, "showInfo": true};
+        this.stations[stationId].coord3857 = ol.proj.fromLonLat([this.stations[stationId].location[0], this.stations[stationId].location[1]]);
+      });
+
+
+
+      // In next tick the objects should already exist, thus add to map overlay
+      this.$nextTick(() => {
+        // Get map
+        if (this.map == undefined){
+          this.map = this.$parent.map;
+        }
+        
+        // Relate overlay with map
+        Object.keys(this.stations).forEach(stationId => {
+          // Station info
+          const stationInfo = new ol.Overlay({
+            position: this.stations[stationId].coord3857,
+            positioning: 'center-right',
+            element: this.$refs[stationId],
+            stopEvent: false,
+          });
+          this.map.addOverlay(stationInfo);
+        });
+
+        console.log("Added OBSEA stations");
+      });
 
 
     },
@@ -259,113 +314,78 @@ export default {
 
 
     selectedDateChanged: function(tmst){
-      // First initialization
-      if (!this.once){
-        // Get map
-        if (this.map == undefined){
-          this.map = this.$parent.map;
-        }
-        // Relate overlay with map
-        Object.keys(this.buoys).forEach(buoyName => {
-          // Buoy info
-          const buoyInfo = new ol.Overlay({
-            position: this.buoys[buoyName].coord3857,
-            positioning: 'center-left',
-            element: this.$refs[buoyName],
-            stopEvent: false,
-          });
-          this.map.addOverlay(buoyInfo);
-        })
-        this.once = true;
-      }
 
-      // Hide all data from buoyData
-      Object.keys(this.buoys).forEach(buoyName => {
-        this.buoysData[buoyName].hasData = false;
+      let stations = this.stations;
+      // Hide all data from stations
+      Object.keys(stations).forEach(stationId => {
+        stations[stationId].hasData = false;
       });
 
       // Add one day before and after of the tmst
       let currentDate = new Date(tmst);
       let sDate = new Date(currentDate.getTime() - 24 * 60 * 60  * 1000);
       let eDate = new Date(currentDate.getTime() + 24 * 60 * 60  * 1000);
-      // Iterate buoys
-      Object.keys(this.buoys).forEach(buoyName => {
-        let buoy = this.buoys[buoyName];
-        // Check if the buoy data has all timestamps (timestep of 1h)
-        if (buoy.data[tmst] == undefined){
-          // Load data (yesteray, today, tomorrow)
-          // Generate url
-          // Id
-          let url = this.url.replace('{{id}}', buoy.id);
-          // Params
-          let paramsStr = '';
-          buoy.params.forEach(p => paramsStr += p + ",");
-          paramsStr = paramsStr.substring(0, paramsStr.length - 1);
-          url = url.replace('{{params}}', paramsStr);
-          // Start date
-          url = url.replace('{{sYear}}', sDate.getUTCFullYear());
-          url = url.replace('{{sMonth}}', String(sDate.getUTCMonth() + 1).padStart(2,'0'));
-          url = url.replace('{{sDay}}', String(sDate.getUTCDate()).padStart(2,'0'));
-          url = url.replace('{{sHour}}', String(sDate.getUTCHours()).padStart(2,'0'));
-          url = url.replace('{{sMinute}}', String(sDate.getUTCMinutes()).padStart(2,'0'));
-          // End date
-          url = url.replace('{{eYear}}', eDate.getUTCFullYear());
-          url = url.replace('{{eMonth}}', String(eDate.getUTCMonth() + 1).padStart(2,'0'));
-          url = url.replace('{{eDay}}', String(eDate.getUTCDate()).padStart(2,'0'));
-          url = url.replace('{{eHour}}', String(eDate.getUTCHours()).padStart(2,'0'));
-          url = url.replace('{{eMinute}}', String(eDate.getUTCMinutes()).padStart(2,'0'));
-          
-          // Fetch
-          fetch(url).then(res => res.json()).then(r => {
-            this.parseAPIResult(r, buoyName);
-            // Update buoys content once loaded
-            this.updateContent(buoyName, tmst);
-          });
+
+      let url = this.url;
+      // Iterate data streams to fetch data
+      for (let i = 0; i < Object.keys(stations).length; i++){
+        let station = stations[Object.keys(stations)[i]];
+        // Iterate parameters (temp, wind, etc...)
+        for (let j = 0; j < station.params.length; j++){
+          let param = station.params[j];
+          // Check if data already exists
+          debugger;
+          // Iterate datastreams
+          for (let k = 0; k < param.datastreams.length; k++){
+            let datastream = param.datastreams[k];
+            // Check latest data available
+            if (new Date(datastream.latestTmst) > sDate) {
+              // Fetch data
+              let streamURL = url.replace('{{datastream}}', datastream.id).replace('{{sDate}}', sDate.toISOString()).replace('{{eDate}}', eDate.toISOString());
+              //console.log(streamURL);
+              fetch(streamURL).then(res => res.json()).then(r => {
+                this.parseAPIResult(station, param, datastream, r.value)
+                this.updateContent(station, tmst);
+              });
+            }
+          }
         }
-        // Data already exists
-        else {
-          // Update buoys content
-          this.updateContent(buoyName, tmst);
-        }
-      });
+      }
+
+      return;
+      
     },
 
-    updateContent: function(buoyName, tmst){
+    updateContent: function(stationId, tmst){
 
-      if (this.buoys[buoyName].data[tmst] == undefined){
-        this.buoysData[buoyName].hasData = false;
+      if (this.stations[stationId].data[tmst] == undefined){
+        this.stationsData[stationId].hasData = false;
         return;
       }
 
       
-      this.buoysData[buoyName].hasData = true;
-      this.buoysData[buoyName].data = {};
+      this.stationsData[stationId].hasData = true;
+      this.stationsData[stationId].data = {};
       
-      Object.keys(this.buoys[buoyName].data[tmst]).forEach(key => {
-        this.buoysData[buoyName].data[key] = this.buoys[buoyName].data[tmst][key];
+      Object.keys(this.stations[stationId].data[tmst]).forEach(key => {
+        this.stationsData[stationId].data[key] = this.stations[stationId].data[tmst][key];
       });
-      //console.log(this.buoysData[buoyName].data)
+      //console.log(this.stationsData[stationId].data)
     },
 
 
-    parseAPIResult(result, buoyName){
-      let buoy = this.buoys[buoyName];
-      let header = result.content[0];
-      let content = result.content[1];
-      content.forEach(c => {
-        let date = new Date(c[0] * 1000);
-        let tmst = date.toISOString();
-        if (buoy.data[tmst] != undefined){
-          //console.warn("Overwritting buoy data for " + buoyName + " buoy at " + tmst);
-        } else {
-          buoy.data[tmst] = {}
-          for (let i = 1; i < header.length; i++){
-            buoy.data[tmst][header[i]] = c[i][0];
-          }
-        }
-      })
+    parseAPIResult(station, param, datastream, data){
+      for (let i = 0; i < data.length; i++){
+        let tmst = data[i].resultTime;
+        if (station.data[tmst] == undefined)
+          station.data[tmst] = {};
 
+        param.units = datastream.units;
+        station.data[tmst][param.name] = data[i].result;
+      }
     },
+    
+
 
     // Bearing to direction
     bearing2compassRose(bearing){
@@ -417,7 +437,7 @@ a {
   align-items: center;
   border-bottom: solid 2px white;
 }
-.wavepanel {
+.stationPanel {
   margin-right: 20px;
   background: rgb(15 48 98 / 71%);/*var(--darkBlue);*/
   padding: 10px;

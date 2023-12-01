@@ -104,12 +104,18 @@ for (let i = 0; i < Object.keys(sites).length; i++){//.forEach(key => {
       for (let k = 0; k < site[param].sites.length; k++){//site[param].sites//.forEach(dtstm => {
         let dtstm = site[param].sites[k];
         if (dtstm.observedArea.coordinates[0] == stationData[key].location[0]){
-          paramObj.datastreams.push({
+          let dataStreamObj = {
             "id": dtstm["@iot.id"],
             "latestTmst": dtstm.phenomenonTime.split("/")[1],
             "units": dtstm.unitOfMeasurement.symbol,
-            "depth": await fetch("https://data.obsea.es/data-api/Datastreams("+ dtstm["@iot.id"] +")/Sensor").then(res => res.json()).then(jj => jj.properties.deployment.coordinates.meters_depth),
-          });
+            "sensorDepth": await fetch("https://data.obsea.es/data-api/Datastreams("+ dtstm["@iot.id"] +")/Sensor").then(res => res.json()).then(jj => jj.properties.deployment.coordinates.meters_depth),
+          }
+          // ADCP currents
+          if (dtstm.name.includes('CSPD')){
+            dataStreamObj.depth = dtstm.properties["ADCP cell parameters"]["center depth"];
+          }
+
+          paramObj.datastreams.push(dataStreamObj);
         }
       }
       stationData[key].params.push(paramObj);
