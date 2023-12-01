@@ -337,21 +337,44 @@ export default {
         for (let j = 0; j < Object.keys(station.params).length; j++){
           let param = station.params[Object.keys(station.params)[j]];
           // Check if data already exists
-          // TODOOOOO
+          debugger;
+          let dataExists = false;
+          if (station.data[tmst] != undefined){
+            if (station.data[tmst][param.name] != undefined){
+              console.log("Skipping " + param.name + " on " + tmst);
+              dataExists = true;
+            } else
+              console.log("Realoding " + param.name);
+          }
+          
+          // TODO: what is happening here is that there is no track of what is being requested
+          // There must an obj that keeps track of the requested parameters at certain timestamps
+          // as there are holes in the dataset (e.g. there is data at 10:30 but not at 10).
+          // The selected date timestamp is used. Let's say that if it was already requested
+          // or it exists we should not ask any more data (i.e. a day before and after).
+          // The problem is that when entering a new date, half of the data requested will be
+          // already loaded. Playing with if's might be worth it (if forward date was requested
+          // it means that the following forward dates were resquested too. same with before date, as they
+          // belong to a 48h window request).
+          
           // Iterate datastreams
-          for (let k = 0; k < param.datastreams.length; k++){
-            let datastream = param.datastreams[k];
-            // Check latest data available
-            if (new Date(datastream.latestTmst) > sDate) {
-              // Fetch data
-              let streamURL = url.replace('{{datastream}}', datastream.id).replace('{{sDate}}', sDate.toISOString()).replace('{{eDate}}', eDate.toISOString());
-              console.log(streamURL);
-              fetch(streamURL).then(res => res.json()).then(r => {
-                this.parseAPIResult(station, param, datastream, r.value)
-                this.updateContent(station.id, tmst);
-              });
+          if (!dataExists){
+            for (let k = 0; k < param.datastreams.length; k++){
+              let datastream = param.datastreams[k];
+              // Check latest data available
+              if (new Date(datastream.latestTmst) > sDate) {
+                // Fetch data
+                let streamURL = url.replace('{{datastream}}', datastream.id).replace('{{sDate}}', sDate.toISOString()).replace('{{eDate}}', eDate.toISOString());
+                console.log(streamURL);
+                fetch(streamURL).then(res => res.json()).then(r => {
+                  console.log("Storing " + param.name);
+                  this.parseAPIResult(station, param, datastream, r.value)
+                  this.updateContent(station.id, tmst);
+                });
+              }
             }
           }
+          
         }
       }
 
@@ -377,6 +400,7 @@ export default {
         this.stationsData[stationId].data[key] = this.stations[stationId].data[tmst][key];
       });
       console.log(this.stationsData[stationId].data)
+      console.log(this.stations[stationId].data[tmst]);
     },
 
 
@@ -387,6 +411,10 @@ export default {
           station.data[tmst] = {};
 
         param.units = datastream.units;
+        if (station.data[tmst][param.name] != undefined){
+          console.warn("Overwritting data");
+          
+        }
         station.data[tmst][param.name] = data[i].result;
       }
     },
