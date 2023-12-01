@@ -15,8 +15,27 @@
 
         <!-- Station data -->
         <div v-if="stationsData[stationId].hasData">
+
+          <!-- Wind -->
+          <div v-if="Object.keys(stationsData[stationId].data).includes('WSPD')">
+            <span>
+              <strong>Wind: </strong>
+              {{stationsData[stationId].data['WSPD'].toFixed(1)}} {{stations[stationId].params['WSPD'].units}}, 
+              {{ bearing2compassRose(stationsData[stationId].data['WDIR']) }}
+              <span class="fa" :style="{transform: 'rotate('+ (stationsData[stationId].data['WDIR']-45+180) +'deg)' }">&#xf124;</span>
+            </span>
+          </div>
+          <!-- Currents -->
+          <div v-if="Object.keys(stationsData[stationId].data).includes('CSPD')">
+            <span>
+              <strong>Current: </strong>
+              {{stationsData[stationId].data['CSPD'].toFixed(1)}} {{stations[stationId].params['CSPD'].units}}, 
+              {{ bearing2compassRose(stationsData[stationId].data['CSPD']) }}
+              <span class="fa" :style="{transform: 'rotate('+ (stationsData[stationId].data['CSPD']-45) +'deg)' }">&#xf124;</span>
+            </span>
+          </div>
           <!-- Waves -->
-          <div v-if="stations[stationId].params.includes('Hm0')">
+          <div v-if="Object.keys(stationsData[stationId].data).includes('VHM0')">
             <span>
               <strong>Waves: </strong>
               {{stationsData[stationId].data['Hm0(m)'].toFixed(2)}} m, 
@@ -25,28 +44,10 @@
               <span class="fa" :style="{transform: 'rotate('+ (stationsData[stationId].data['MeanDir(º)']-45+180) +'deg)' }">&#xf124;</span>
             </span>
           </div>
-          <!-- Wind -->
-          <div v-if="stations[stationId].params.includes('WindSpeed')">
-            <span>
-              <strong>Wind: </strong>
-              {{stationsData[stationId].data['WindSpeed(m/s)'].toFixed(1)}} m/s, 
-              {{ bearing2compassRose(stationsData[stationId].data['WindDir(º)']) }}
-              <span class="fa" :style="{transform: 'rotate('+ (stationsData[stationId].data['WindDir(º)']-45+180) +'deg)' }">&#xf124;</span>
-            </span>
-          </div>
-          <!-- Currents -->
-          <div v-if="stations[stationId].params.includes('CurrentSpeed')">
-            <span>
-              <strong>Current: </strong>
-              {{stationsData[stationId].data['CurrentSpeed(cm/s)'].toFixed(1)}} cm/s, 
-              {{ bearing2compassRose(stationsData[stationId].data['CurrentDir(º)']) }}
-              <span class="fa" :style="{transform: 'rotate('+ (stationsData[stationId].data['CurrentDir(º)']-45) +'deg)' }">&#xf124;</span>
-            </span>
-          </div>
           
           <!-- Extra data -->
           <Transition>
-          <div v-show="stations[stationId].showAllData">
+          <div v-if="stations[stationId].showAllData">
             <!-- Wave max -->
             <div v-if="stations[stationId].params.includes('Hmax')">
               <span>
@@ -226,7 +227,7 @@ export default {
       
       
 
-      // Create data structure for vue
+      // Create data structure
       let stations = this.stations;
       for (let i = 0; i < Object.keys(sites).length; i++){
         let key = Object.keys(sites)[i];
@@ -234,10 +235,9 @@ export default {
         // Create station data object
         if (stations[key] == undefined) {
           stations[key] = {
-            hasData: false,
-            showInfo: true,
-            params: [],
-            location: key.split(",").reverse(),
+            id: key,
+            params: {},
+            location: key.split(","),
             data: {}, // tmst1: {WDIR: value, WSP: value...}, tmst2: {}...
           }
           // Params
@@ -250,6 +250,7 @@ export default {
               "name": paramData.name,
               "units": '',
             }
+            
             // Get datastream(s)
             paramObj.datastreams = [];
             for (let k = 0; k < site[param].sites.length; k++){
@@ -267,9 +268,10 @@ export default {
                 }
 
                 paramObj.datastreams.push(dataStreamObj);
+                
               }
             }
-            stations[key].params.push(paramObj);
+            stations[key].params[paramData.name] = paramObj;
           }
 
 
@@ -281,7 +283,7 @@ export default {
       // Create stationsData and add to map
       Object.keys(this.stations).forEach(stationId => {
         this.stationsData[stationId] = {"hasData": false, "showInfo": true};
-        this.stations[stationId].coord3857 = ol.proj.fromLonLat([this.stations[stationId].location[0], this.stations[stationId].location[1]]);
+        this.stations[stationId].coord3857 = ol.proj.fromLonLat([this.stations[stationId].location[1], this.stations[stationId].location[0]]);
       });
 
 
@@ -306,6 +308,7 @@ export default {
         });
 
         console.log("Added OBSEA stations");
+        this.selectedDateChanged(window.GUIManager.currentTmst);
       });
 
 
@@ -318,7 +321,7 @@ export default {
       let stations = this.stations;
       // Hide all data from stations
       Object.keys(stations).forEach(stationId => {
-        stations[stationId].hasData = false;
+        this.stationsData[stationId].hasData = false;
       });
 
       // Add one day before and after of the tmst
@@ -331,10 +334,10 @@ export default {
       for (let i = 0; i < Object.keys(stations).length; i++){
         let station = stations[Object.keys(stations)[i]];
         // Iterate parameters (temp, wind, etc...)
-        for (let j = 0; j < station.params.length; j++){
-          let param = station.params[j];
+        for (let j = 0; j < Object.keys(station.params).length; j++){
+          let param = station.params[Object.keys(station.params)[j]];
           // Check if data already exists
-          debugger;
+          // TODOOOOO
           // Iterate datastreams
           for (let k = 0; k < param.datastreams.length; k++){
             let datastream = param.datastreams[k];
@@ -342,10 +345,10 @@ export default {
             if (new Date(datastream.latestTmst) > sDate) {
               // Fetch data
               let streamURL = url.replace('{{datastream}}', datastream.id).replace('{{sDate}}', sDate.toISOString()).replace('{{eDate}}', eDate.toISOString());
-              //console.log(streamURL);
+              console.log(streamURL);
               fetch(streamURL).then(res => res.json()).then(r => {
                 this.parseAPIResult(station, param, datastream, r.value)
-                this.updateContent(station, tmst);
+                this.updateContent(station.id, tmst);
               });
             }
           }
@@ -358,19 +361,22 @@ export default {
 
     updateContent: function(stationId, tmst){
 
+      // No data in that timestamp
       if (this.stations[stationId].data[tmst] == undefined){
         this.stationsData[stationId].hasData = false;
         return;
       }
-
-      
+      // Has data
       this.stationsData[stationId].hasData = true;
-      this.stationsData[stationId].data = {};
+      // Create data obj if it does not exist
+      if (this.stationsData[stationId].data == undefined)
+        this.stationsData[stationId].data = {};
       
+      // Iterate params and assign to stationsData (vue uses this object)
       Object.keys(this.stations[stationId].data[tmst]).forEach(key => {
         this.stationsData[stationId].data[key] = this.stations[stationId].data[tmst][key];
       });
-      //console.log(this.stationsData[stationId].data)
+      console.log(this.stationsData[stationId].data)
     },
 
 
@@ -431,7 +437,7 @@ a {
   align-items: center;
 }
 
-.OBSEATitle {
+.stationTitle {
   display: flex;
   justify-content: space-between;
   align-items: center;
