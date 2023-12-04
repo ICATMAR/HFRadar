@@ -148,6 +148,7 @@ export default {
       isTooFar: false,
       stations: {},
       stationsData: {},
+      requestStatus: {}, // Stores requested timestamps
       // https://data.obsea.es/data-api/Datastreams(313)/Observations?$select=resultTime,result&$top=1000000&$filter=resultQuality/qc_flag%20eq%201%20and%20resultTime%20ge%202022-01-01T00:00:00.000Z%20and%20resultTime%20lt%202023-11-30T14:00:00.000Z&$orderBy=resultTime%20asc
       url: 'https://data.obsea.es/data-api/Datastreams({{datastream}})/Observations?$select=resultTime,result&$filter=resultQuality/qc_flag eq 1 and resultTime ge {{sDate}} and resultTime lt {{eDate}}&$orderBy=resultTime asc', 
     }
@@ -328,6 +329,16 @@ export default {
       let currentDate = new Date(tmst);
       let sDate = new Date(currentDate.getTime() - 24 * 60 * 60  * 1000);
       let eDate = new Date(currentDate.getTime() + 24 * 60 * 60  * 1000);
+
+      // Check if the tmst was requested
+      if (this.requestStatus[tmst]){
+        console.log("Data was requested at " + tmst);
+        return;
+      }
+
+      // TODO: REGISTER ALL TIMESTAMPS REQUESTED IN this.requestStatus
+
+
 
       let url = this.url;
       // Iterate data streams to fetch data
