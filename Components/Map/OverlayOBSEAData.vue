@@ -204,7 +204,7 @@ export default {
           delete observedProperties[prop];
         }
       });
-      console.warn("Deleted observed properties, as no station is collecting them or there is no 30 min average: " + deletedProps);
+      //console.warn("Deleted observed properties, as no station is collecting them or there is no 30 min average: " + deletedProps);
 
 
       // Reorganize data by sites
@@ -217,7 +217,7 @@ export default {
             sites[key] = {};
           }
           if (sites[key][prop] != undefined){
-            console.warn("This variable is collected twice in the same location? " + prop + " at " + key);
+            //console.warn("This OBSEA variable is collected twice in the same location? " + prop + " at " + key);
           }
           // In principle, no circularity
           sites[key][prop] = observedProperties[prop];
@@ -331,12 +331,34 @@ export default {
       let eDate = new Date(currentDate.getTime() + 24 * 60 * 60  * 1000);
 
       // Check if the tmst was requested
-      if (this.requestStatus[tmst]){
-        console.log("Data was requested at " + tmst);
+      if (this.requestStatus[tmst] != undefined){
+        //console.log("OBSEA data was already requested for timestamp " + tmst);
+        Object.keys(stations).forEach(stationId => {
+          this.updateContent(stationId, tmst);
+        });
         return;
       }
+      
 
-      // TODO: REGISTER ALL TIMESTAMPS REQUESTED IN this.requestStatus
+      // TODO: 
+      // The problem is that when entering a new date, half of the data requested will be
+      // already loaded. Playing with if's might be worth it (if forward date was requested
+      // it means that the following forward dates were resquested too. same with before date, as they
+      // belong to a 48h window request).
+
+      // Register requests
+      // Stations must be loaded
+      // WARN: could it be that this is exectued when only one station exists?
+      if (Object.keys(stations).length != 0){
+        let movingDate = new Date(sDate.getTime());
+        //console.log("Registering timestamps OBSEA")
+        for (let i = 0; i < 24*2; i++){
+          this.requestStatus[movingDate.toISOString()] = 1;
+          movingDate.setHours(movingDate.getHours() + 1);
+        }
+      }
+
+      
 
 
 
@@ -347,44 +369,25 @@ export default {
         // Iterate parameters (temp, wind, etc...)
         for (let j = 0; j < Object.keys(station.params).length; j++){
           let param = station.params[Object.keys(station.params)[j]];
-          // Check if data already exists
-          debugger;
-          let dataExists = false;
-          if (station.data[tmst] != undefined){
-            if (station.data[tmst][param.name] != undefined){
-              console.log("Skipping " + param.name + " on " + tmst);
-              dataExists = true;
-            } else
-              console.log("Realoding " + param.name);
-          }
-          
-          // TODO: what is happening here is that there is no track of what is being requested
-          // There must an obj that keeps track of the requested parameters at certain timestamps
-          // as there are holes in the dataset (e.g. there is data at 10:30 but not at 10).
-          // The selected date timestamp is used. Let's say that if it was already requested
-          // or it exists we should not ask any more data (i.e. a day before and after).
-          // The problem is that when entering a new date, half of the data requested will be
-          // already loaded. Playing with if's might be worth it (if forward date was requested
-          // it means that the following forward dates were resquested too. same with before date, as they
-          // belong to a 48h window request).
-          
+
+
           // Iterate datastreams
-          if (!dataExists){
-            for (let k = 0; k < param.datastreams.length; k++){
-              let datastream = param.datastreams[k];
-              // Check latest data available
-              if (new Date(datastream.latestTmst) > sDate) {
-                // Fetch data
-                let streamURL = url.replace('{{datastream}}', datastream.id).replace('{{sDate}}', sDate.toISOString()).replace('{{eDate}}', eDate.toISOString());
-                console.log(streamURL);
-                fetch(streamURL).then(res => res.json()).then(r => {
-                  console.log("Storing " + param.name);
-                  this.parseAPIResult(station, param, datastream, r.value)
-                  this.updateContent(station.id, tmst);
-                });
-              }
+          for (let k = 0; k < param.datastreams.length; k++){
+            let datastream = param.datastreams[k];
+
+            // Check latest data available
+            if (new Date(datastream.latestTmst) > sDate) {
+              // Fetch data
+              let streamURL = url.replace('{{datastream}}', datastream.id).replace('{{sDate}}', sDate.toISOString()).replace('{{eDate}}', eDate.toISOString());
+              //console.log(streamURL);
+              fetch(streamURL).then(res => res.json()).then(r => {
+                //console.log("Storing " + param.name);
+                this.parseAPIResult(station, param, datastream, r.value)
+                this.updateContent(station.id, tmst);
+              });
             }
           }
+          
           
         }
       }
@@ -410,8 +413,9 @@ export default {
       Object.keys(this.stations[stationId].data[tmst]).forEach(key => {
         this.stationsData[stationId].data[key] = this.stations[stationId].data[tmst][key];
       });
-      console.log(this.stationsData[stationId].data)
-      console.log(this.stations[stationId].data[tmst]);
+      // console.log(this.stationsData[stationId].data)
+      // console.log(this.stations[stationId].data[tmst]);
+      // console.log(this.stations);
     },
 
 
@@ -423,7 +427,7 @@ export default {
 
         param.units = datastream.units;
         if (station.data[tmst][param.name] != undefined){
-          console.warn("Overwritting data");
+          //console.warn("Overwritting data");
           
         }
         station.data[tmst][param.name] = data[i].result;
