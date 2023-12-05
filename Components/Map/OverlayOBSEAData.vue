@@ -43,7 +43,7 @@
           <div v-if="Object.keys(stationsData[stationId].data).includes('VHM0')">
             <span>
               <strong>Waves: </strong>
-              {{stationsData[stationId].data['Hm0(m)'].toFixed(2)}} m, 
+              {{stationsData[stationId].data['VHM0'].toFixed(1)}} {{stations[stationId].params['VHM0'].units}}, 
               {{stationsData[stationId].data['Tm02(s)'].toFixed(1)}} s, 
               {{ bearing2compassRose(stationsData[stationId].data['MeanDir(º)']) }}
               <span class="fa" :style="{transform: 'rotate('+ (stationsData[stationId].data['MeanDir(º)']-45+180) +'deg)' }">&#xf124;</span>
@@ -53,47 +53,60 @@
           <!-- Extra data -->
           <Transition>
           <div v-if="stations[stationId].showAllData">
-            <!-- Wave max -->
-            <div v-if="stations[stationId].params.includes('Hmax')">
+            <!-- Sea water temperature -->
+            <div v-if="Object.keys(stationsData[stationId].data).includes('TEMP')">
               <span>
-                <strong>Wave max: </strong>
-                {{stationsData[stationId].data['Hmax(m)'].toFixed(1)}} m, 
-                {{stationsData[stationId].data['Tp(s)'].toFixed(1)}} s
-                <template v-if="stationsData[stationId].data['MeanDirPeak(º)'] != undefined">,
-                  {{ bearing2compassRose(stationsData[stationId].data['MeanDirPeak(º)']) }}
-                  <span class="fa" :style="{transform: 'rotate('+ (stationsData[stationId].data['MeanDirPeak(º)']-45+180) +'deg)' }">&#xf124;</span>
-                </template>
+                <strong>Water temperature: </strong>
+                {{stationsData[stationId].data['TEMP'].toFixed(1)}} ºC, 
+              </span>
+            </div>
+            <!-- Sea water salinity -->
+            <div v-if="Object.keys(stationsData[stationId].data).includes('PSAL')">
+              <span>
+                <strong>Sea water salinity: </strong>
+                {{stationsData[stationId].data['PSAL'].toFixed(1)}} psu, 
               </span>
             </div>
 
-            <!-- Water temperature -->
-            <div v-if="stations[stationId].params.includes('WaterTemp')">
-              <span>
-                <strong>Water temperature: </strong>
-                {{stationsData[stationId].data['WaterTemp(ºC)'].toFixed(1)}} ºC
-              </span>
-            </div>
-            <!-- Salinity -->
-            <div v-if="stations[stationId].params.includes('Salinity')">
-              <span>
-                <strong>Salinity: </strong>
-                {{stationsData[stationId].data['Salinity(PSU)'].toFixed(1)}} psu
-              </span>
-            </div>
+
             <!-- Air temperature -->
-            <div v-if="stations[stationId].params.includes('AirTemp')">
+            <div v-if="Object.keys(stationsData[stationId].data).includes('AIRT')">
               <span>
                 <strong>Air temperature: </strong>
-                {{stationsData[stationId].data['AirTemp(ºC)'].toFixed(1)}} ºC
+                {{stationsData[stationId].data['AIRT'].toFixed(1)}} ºC, 
               </span>
             </div>
-            <!-- Air pressure -->
-            <div v-if="stations[stationId].params.includes('AirTemp')">
+            <!-- Relative humidity -->
+            <div v-if="Object.keys(stationsData[stationId].data).includes('RELH')">
               <span>
-                <strong>Air pressure: </strong>
-                {{stationsData[stationId].data['AirPressure(mb)'].toFixed(1)}} mb
+                <strong>Humidity: </strong>
+                {{stationsData[stationId].data['RELH'].toFixed(1)}} %, 
               </span>
             </div>
+            <!-- Atmospheric pressure -->
+            <div v-if="Object.keys(stationsData[stationId].data).includes('CAPH')">
+              <span>
+                <strong>Atms. pressure: </strong>
+                {{stationsData[stationId].data['CAPH'].toFixed(1)}} {{stations[stationId].params['CAPH'].units}},
+              </span>
+            </div>
+
+            <!-- Crude oil -->
+            <div v-if="Object.keys(stationsData[stationId].data).includes('COIL')">
+              <span>
+                <strong>Crude oil in water: </strong>
+                {{stationsData[stationId].data['COIL'].toFixed(1)}} {{stations[stationId].params['COIL'].units}},
+              </span>
+            </div>
+            <!-- Refined fuels -->
+            <div v-if="Object.keys(stationsData[stationId].data).includes('RFUL')">
+              <span>
+                <strong>Refined fuels in water: </strong>
+                {{stationsData[stationId].data['RFUL'].toFixed(1)}} {{stations[stationId].params['RFUL'].units}},
+              </span>
+            </div>
+            
+            
 
           </div>
           </Transition>
@@ -187,8 +200,8 @@ export default {
           // Iterate datastreams (streams that provide this data in different times and locations)
           res.value.forEach(el => {
             // Skip if it is not a 30 min average
-            if (!el.name.includes("30min_average"))
-              return;
+            // if (!el.name.includes("30min_average"))
+            //   return;
             // Skip if no phenomenon time
             if (el.phenomenonTime == undefined)
               return;
@@ -441,7 +454,7 @@ export default {
       });
       // console.log(this.stationsData[stationId].data)
       // console.log(this.stations[stationId].data[tmst]);
-      // console.log(this.stations);
+      //console.log(this.stations);
     },
 
 
