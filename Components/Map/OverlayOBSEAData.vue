@@ -106,7 +106,7 @@
 
 
       <!-- Station icon -->
-      <img class="icon-str icon-medium icon-img" @click="OBSEAIconClicked(stationId)" src="/HFRadar/Assets/Images/buoy.svg">
+      <img class="icon-str icon-medium icon-img obsea-icon" @click="OBSEAIconClicked(stationId)" src="/HFRadar/Assets/Images/buoy.svg">
 
 
     </div>
@@ -326,9 +326,9 @@ export default {
       });
 
       // Add one day before and after of the tmst
-      let currentDate = new Date(tmst);
-      let sDate = new Date(currentDate.getTime() - 24 * 60 * 60  * 1000);
-      let eDate = new Date(currentDate.getTime() + 24 * 60 * 60  * 1000);
+      let movingDate = new Date(tmst);
+      let sDate = new Date(movingDate.getTime() - 24 * 60 * 60  * 1000);
+      let eDate = new Date(movingDate.getTime() + 24 * 60 * 60  * 1000);
 
       // Check if the tmst was requested
       if (this.requestStatus[tmst] != undefined){
@@ -338,7 +338,28 @@ export default {
         });
         return;
       }
+
       
+      // Check if any part of the time period was already loaded
+      // End date
+      movingDate = new Date(tmst);
+      for (let i = 0; i < 24; i++){
+        movingDate.setHours(movingDate.getHours() + 1);
+        if (this.requestStatus[movingDate.toISOString()] != undefined){
+          eDate.setTime(movingDate.getTime()); // Set new ending date
+          i = 24; // Exit for
+        }
+      }
+      // Start date
+      movingDate = new Date(tmst);
+      for (let i = 0; i < 24; i++){
+        movingDate.setHours(movingDate.getHours() - 1);
+        if (this.requestStatus[movingDate.toISOString()] != undefined){
+          sDate.setTime(movingDate.getTime()); // Set new starting date
+          i = 24; // Exit for
+        }
+      }
+
 
       // TODO: 
       // The problem is that when entering a new date, half of the data requested will be
@@ -350,7 +371,7 @@ export default {
       // Stations must be loaded
       // WARN: could it be that this is exectued when only one station exists?
       if (Object.keys(stations).length != 0){
-        let movingDate = new Date(sDate.getTime());
+        movingDate = new Date(sDate.getTime());
         //console.log("Registering timestamps OBSEA")
         for (let i = 0; i < 24*2; i++){
           this.requestStatus[movingDate.toISOString()] = 1;
@@ -480,6 +501,10 @@ a {
   align-items: center;
 }
 
+.obsea-icon {
+  margin-right: -15px;
+}
+
 .stationTitle {
   display: flex;
   justify-content: space-between;
@@ -487,7 +512,6 @@ a {
   border-bottom: solid 2px white;
 }
 .stationPanel {
-  margin-right: 20px;
   background: rgb(15 48 98 / 71%);/*var(--darkBlue);*/
   padding: 10px;
   border-radius: 17px;

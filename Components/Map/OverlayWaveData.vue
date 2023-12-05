@@ -264,7 +264,6 @@ a {
   margin-right: -17.5px; /* half of its width */
 }
 .wavepanel {
-  margin-right: 20px;
   background: rgb(15 48 98 / 71%);/*var(--darkBlue);*/
   padding: 10px;
   border-radius: 17px;
