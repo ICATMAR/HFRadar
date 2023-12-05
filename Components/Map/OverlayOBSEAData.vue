@@ -3,10 +3,15 @@
   <div id="overlay-OBSEA-data" ref="containerOBSEAInfo">
   <!-- Container -->
     <!-- <div v-for="stationId in Object.keys(stationsData)" :id="stationId" :ref="stationId" class="OBSEAContainer" :class="[!isTooFar && isAdvancedInterfaceOnOff ? 'show' : 'hide']"> -->
-    <div v-for="stationId in Object.keys(stationsData)" :id="stationId" :ref="stationId" class="OBSEAContainer">
+    <div v-for="(stationId, index) in Object.keys(stationsData)" :id="stationId" :ref="stationId" class="OBSEAContainer">
+
+      <!-- Station icon -->
+      <img v-if="index%2 == 1" class="icon-str icon-medium icon-img obsea-icon-left" @click="OBSEAIconClicked(stationId)" src="/HFRadar/Assets/Images/buoy.svg">
+
+
       <!-- Station panel -->
       <Transition>
-      <div class="stationPanel" v-if="stationsData[stationId].showInfo">
+      <div class="stationPanel" v-if="stationsData[stationId].showInfo && !isTooFar">
         <!-- Site -->
         <div class="stationTitle">
           <span><strong>OBSEA station</strong></span>
@@ -106,7 +111,7 @@
 
 
       <!-- Station icon -->
-      <img class="icon-str icon-medium icon-img obsea-icon" @click="OBSEAIconClicked(stationId)" src="/HFRadar/Assets/Images/buoy.svg">
+      <img v-if="index%2 == 0" class="icon-str icon-medium icon-img obsea-icon-right" @click="OBSEAIconClicked(stationId)" src="/HFRadar/Assets/Images/buoy.svg">
 
 
     </div>
@@ -297,11 +302,11 @@ export default {
         }
         
         // Relate overlay with map
-        Object.keys(this.stations).forEach(stationId => {
+        Object.keys(this.stations).forEach((stationId, index) => {
           // Station info
           const stationInfo = new ol.Overlay({
             position: this.stations[stationId].coord3857,
-            positioning: 'center-right',
+            positioning: index%2 == 0 ? 'center-right' : 'center-left',
             element: this.$refs[stationId],
             stopEvent: false,
           });
@@ -501,7 +506,10 @@ a {
   align-items: center;
 }
 
-.obsea-icon {
+.obsea-icon-left {
+  margin-left: -15px;
+}
+.obsea-icon-right {
   margin-right: -15px;
 }
 
