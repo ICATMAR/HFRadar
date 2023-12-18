@@ -3,7 +3,7 @@
   <div id="overlay-OBSEA-data" ref="containerOBSEAInfo">
   <!-- Container -->
     <!-- <div v-for="stationId in Object.keys(stationsData)" :id="stationId" :ref="stationId" class="OBSEAContainer" :class="[!isTooFar && isAdvancedInterfaceOnOff ? 'show' : 'hide']"> -->
-    <div v-for="(stationId, index) in Object.keys(stationsData)" :id="stationId" :ref="stationId" class="OBSEAContainer">
+    <div v-for="(stationId, index) in Object.keys(stationsData)" :id="stationId" :ref="stationId" class="OBSEAContainer" :class="[!isTooFar && isAdvancedInterfaceOnOff ? 'show' : 'hide']">
 
       <!-- Station icon -->
       <img v-if="index%2 == 1" class="icon-str icon-medium icon-img obsea-icon-left" @click="OBSEAIconClicked(stationId)" src="/HFRadar/Assets/Images/buoy.svg">
@@ -11,7 +11,7 @@
 
       <!-- Station panel -->
       <Transition>
-      <div class="stationPanel" v-if="stationsData[stationId].showInfo && !isTooFar">
+      <div class="stationPanel" v-if="stationsData[stationId].showInfo">
         <!-- Site -->
         <div class="stationTitle">
           <span><strong>OBSEA station</strong></span>
