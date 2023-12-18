@@ -166,6 +166,7 @@ export default {
       isTooFar: false,
       stations: {},
       stationsData: {},
+      hideStationId: '41.22342,1.73637',
       requestStatus: {}, // Stores requested timestamps
       // https://data.obsea.es/data-api/Datastreams(313)/Observations?$select=resultTime,result&$top=1000000&$filter=resultQuality/qc_flag%20eq%201%20and%20resultTime%20ge%202022-01-01T00:00:00.000Z%20and%20resultTime%20lt%202023-11-30T14:00:00.000Z&$orderBy=resultTime%20asc
       url: 'https://data.obsea.es/data-api/Datastreams({{datastream}})/Observations?$select=resultTime,result&$filter=resultQuality/qc_flag eq 1 and resultTime ge {{sDate}} and resultTime lt {{eDate}}&$orderBy=resultTime asc', 
@@ -230,6 +231,9 @@ export default {
       Object.keys(observedProperties).forEach(prop => {
         observedProperties[prop].sites.forEach(site => {
           let key = site.observedArea.coordinates[0] + "," + site.observedArea.coordinates[1];
+          // Skip predetermined land station
+          if (key == this.hideStationId)
+            return;
           // If it does not exist, create
           if (sites[key] == undefined){
             sites[key] = {};
