@@ -322,7 +322,7 @@ export default {
         } else {
           buoy.data[tmst] = {}
           for (let i = 1; i < header.length; i++){
-            buoy.data[tmst][header[i]] = c[i][0];
+            buoy.data[tmst][header[i]] = parseFloat(c[i][0]);
           }
         }
       })
