@@ -143,7 +143,7 @@ export default {
   created(){},
   mounted() {
     // Get OBSEA sites
-    this.loadOBSEAAPI();
+    //this.loadOBSEAAPI();
 
 
     // EVENTS
@@ -159,6 +159,11 @@ export default {
     // Advanced interface
     window.eventBus.on("AdvancedInterfaceOnOff", state => {
       this.isAdvancedInterfaceOnOff = state;
+      // Get OBSEA sites and load data
+      if (this.once == undefined && state == true){
+        this.once = true;
+        this.loadOBSEAAPI();
+      }
     });
   },
   data () {
@@ -247,7 +252,6 @@ export default {
                     this.$nextTick(()=> {
                       if (this.$refs[stationKey] == undefined){
                         addStationToMap();
-                        console.log("recursisve");
                         return;
                       }
                       // Get map
@@ -264,7 +268,7 @@ export default {
                       });
                       this.map.addOverlay(stationInfo);
                       console.log("Added OBSEA station");
-                      this.selectedDateChanged(window.GUIManager.currentTmst);
+                      this.selectedDateChanged(window.GUIManager.currentTmst, true);
                     })
                   }
                   addStationToMap();
@@ -293,9 +297,10 @@ export default {
                   "units": ds.unitOfMeasurement.symbol,
                   "sensorDepth": '',
                 };
-                fetch("https://data.obsea.es/data-api/Datastreams("+ ds["@iot.id"] +")/Sensor").then(res => res.json()).then(jj => {
-                  dsObj.sensorDepth = jj.properties.deployment.coordinates.meters_depth;
-                });
+                // This fetch creates many requests
+                // fetch("https://data.obsea.es/data-api/Datastreams("+ ds["@iot.id"] +")/Sensor").then(res => res.json()).then(jj => {
+                //   dsObj.sensorDepth = jj.properties.deployment.coordinates.meters_depth;
+                // });
                 // ADCP currents
                 if (ds.name.includes('CSPD')){
                   dsObj.depth = ds.properties["ADCP cell parameters"]["center depth"];
@@ -309,11 +314,10 @@ export default {
                   this.stationsData[stationKey] = {"hasData": false, "showInfo": true, "isLoading": false};
                   this.stations[stationKey].coord3857 = ol.proj.fromLonLat([this.stations[stationKey].location[1], this.stations[stationKey].location[0]]);
                 }
-                
                 // Load data everytime a new datastream is received
-                this.selectedDateChanged(window.GUIManager.currentTmst);
+                this.selectedDateChanged(window.GUIManager.currentTmst, true);
 
-                
+
               });
             
             }
@@ -326,15 +330,14 @@ export default {
     
 
 
-    selectedDateChanged: function(tmst){
-      if (tmst == undefined)
+    selectedDateChanged: function(tmst, doNotRegisterRequest){
+      if (tmst == undefined || this.once == undefined)
         return;
 
       let stations = this.stations;
       // Hide all data from stations
       Object.keys(stations).forEach(stationId => {
         this.stationsData[stationId].hasData = false;
-        //this.stationsData[stationId].isLoading = false;
       });
 
       // Add one day before and after of the tmst
@@ -342,54 +345,59 @@ export default {
       let sDate = new Date(movingDate.getTime() - 24 * 60 * 60  * 1000);
       let eDate = new Date(movingDate.getTime() + 24 * 60 * 60  * 1000);
 
-      // Check if the tmst was requested
-      if (this.requestStatus[tmst] != undefined){
-        //console.log("OBSEA data was already requested for timestamp " + tmst);
-        Object.keys(stations).forEach(stationId => {
-          this.updateContent(stationId, tmst);
-        });
-        return;
-      }
-
-      
-      // Check if any part of the time period was already loaded
-      // End date
-      movingDate = new Date(tmst);
-      for (let i = 0; i < 24; i++){
-        movingDate.setHours(movingDate.getHours() + 1);
-        if (this.requestStatus[movingDate.toISOString()] != undefined){
-          eDate.setTime(movingDate.getTime()); // Set new ending date
-          i = 24; // Exit for
+      // Register requested timestamps. This should only happen when all the datastreams and stations are loaded
+      if (doNotRegisterRequest == undefined || doNotRegisterRequest == false){
+        // Check if the tmst was requested
+        if (this.requestStatus[tmst] != undefined){
+          //console.log("OBSEA data was already requested for timestamp " + tmst);
+          Object.keys(stations).forEach(stationId => {
+            this.updateContent(stationId, tmst);
+          });
+          return;
         }
-      }
-      // Start date
-      movingDate = new Date(tmst);
-      for (let i = 0; i < 24; i++){
-        movingDate.setHours(movingDate.getHours() - 1);
-        if (this.requestStatus[movingDate.toISOString()] != undefined){
-          sDate.setTime(movingDate.getTime()); // Set new starting date
-          i = 24; // Exit for
-        }
-      }
 
-
-      // TODO: 
-      // The problem is that when entering a new date, half of the data requested will be
-      // already loaded. Playing with if's might be worth it (if forward date was requested
-      // it means that the following forward dates were resquested too. same with before date, as they
-      // belong to a 48h window request).
-
-      // Register requests
-      // Stations must be loaded
-      // WARN: could it be that this is exectued when only one station exists?
-      if (Object.keys(stations).length != 0){
-        movingDate = new Date(sDate.getTime());
-        //console.log("Registering timestamps OBSEA")
-        for (let i = 0; i < 24*2; i++){
-          this.requestStatus[movingDate.toISOString()] = 1;
+        
+        // Check if any part of the time period was already loaded
+        // End date
+        movingDate = new Date(tmst);
+        for (let i = 0; i < 24; i++){
           movingDate.setHours(movingDate.getHours() + 1);
+          if (this.requestStatus[movingDate.toISOString()] != undefined){
+            eDate.setTime(movingDate.getTime()); // Set new ending date
+            i = 24; // Exit for
+          }
         }
+        // Start date
+        movingDate = new Date(tmst);
+        for (let i = 0; i < 24; i++){
+          movingDate.setHours(movingDate.getHours() - 1);
+          if (this.requestStatus[movingDate.toISOString()] != undefined){
+            sDate.setTime(movingDate.getTime()); // Set new starting date
+            i = 24; // Exit for
+          }
+        }
+
+
+        // TODO: 
+        // The problem is that when entering a new date, half of the data requested will be
+        // already loaded. Playing with if's might be worth it (if forward date was requested
+        // it means that the following forward dates were resquested too. same with before date, as they
+        // belong to a 48h window request).
+
+        // Register requests
+        // Stations must be loaded
+        // WARN: could it be that this is exectued when only one station exists?
+        if (Object.keys(stations).length != 0){
+          movingDate = new Date(sDate.getTime());
+          //console.log("Registering timestamps OBSEA")
+          for (let i = 0; i < 24*2; i++){
+            this.requestStatus[movingDate.toISOString()] = 1;
+            movingDate.setHours(movingDate.getHours() + 1);
+          }
+        }
+
       }
+      
 
       
 
@@ -400,6 +408,7 @@ export default {
       for (let i = 0; i < Object.keys(stations).length; i++){
         let station = stations[Object.keys(stations)[i]];
         this.stationsData[station.id].isLoading = true;
+        //console.log("LOADING...");
 
         // Loading keepup
         let requested = 0;
@@ -417,18 +426,34 @@ export default {
             if (new Date(datastream.latestTmst) > sDate) {
               // Fetch data
               let streamURL = url.replace('{{datastream}}', datastream.id).replace('{{sDate}}', sDate.toISOString()).replace('{{eDate}}', eDate.toISOString());
-              //console.log(streamURL);
-              requested++;
-              fetch(streamURL).then(res => res.json()).then(r => {
-                //console.log("Storing " + param.name);
-                this.parseAPIResult(station, param, datastream, r.value)
-                this.updateContent(station.id, tmst);
+              
+              // Keep track of requested URLs
+              // During loading stations and datastreams, once a datastream is loaded
+              // it is automatically requestd. This keeps track of the requested urls,
+              // as during loading they could be requested everytime a new datastream
+              // is loaded
+              if (this.requestedURLs == undefined){
+                this.requestedURLs = []; 
+              }
+              // URL was not requested
+              if (!this.requestedURLs.includes(streamURL)){
+                this.requestedURLs.push(streamURL)
+                //console.log(datastream.id + ", " + param.name + ", "+ station.id.substring(5));
+                requested++;
 
-                loaded++;
-                if (loaded == requested){
-                  this.stationsData[station.id].isLoading = false;
-                }
-              });
+                fetch(streamURL).then(res => res.json()).then(r => {
+                  //console.log("Storing " + param.name);
+                  this.parseAPIResult(station, param, datastream, r.value)
+                  this.updateContent(station.id, tmst);
+
+                  loaded++;
+                  if (loaded == requested){
+                    this.stationsData[station.id].isLoading = false;
+                    //console.log("LOADED");
+                  }
+                });
+              }
+              
             } 
           }
           
@@ -437,6 +462,7 @@ export default {
         // If nothing was requested
         if (requested == 0) {
           this.stationsData[station.id].isLoading = false;
+          //console.log("LOADED (no data to load)")
         }
       }
 
