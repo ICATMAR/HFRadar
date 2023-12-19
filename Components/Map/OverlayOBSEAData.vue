@@ -334,7 +334,7 @@ export default {
       // Hide all data from stations
       Object.keys(stations).forEach(stationId => {
         this.stationsData[stationId].hasData = false;
-        this.stationsData[stationId].isLoading = false;
+        //this.stationsData[stationId].isLoading = false;
       });
 
       // Add one day before and after of the tmst
