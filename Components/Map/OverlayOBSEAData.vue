@@ -25,7 +25,7 @@
           <div v-if="Object.keys(stationsData[stationId].data).includes('WSPD')">
             <span>
               <strong>Wind: </strong>
-              {{stationsData[stationId].data['WSPD'].toFixed(1)}} {{stations[stationId].params['WSPD'].units}}, 
+              {{stationsData[stationId].data['WSPD'].toFixed(1)}} {{stations[stationId].props['WSPD'].units}}, 
               {{ bearing2compassRose(stationsData[stationId].data['WDIR']) }}
               <span class="fa" :style="{transform: 'rotate('+ (stationsData[stationId].data['WDIR']-45+180) +'deg)' }">&#xf124;</span>
             </span>
@@ -34,7 +34,7 @@
           <div v-if="Object.keys(stationsData[stationId].data).includes('CSPD')">
             <span>
               <strong>Current: </strong>
-              {{stationsData[stationId].data['CSPD'].toFixed(1)}} {{stations[stationId].params['CSPD'].units}}, 
+              {{stationsData[stationId].data['CSPD'].toFixed(1)}} {{stations[stationId].props['CSPD'].units}}, 
               {{ bearing2compassRose(stationsData[stationId].data['CSPD']) }}
               <span class="fa" :style="{transform: 'rotate('+ (stationsData[stationId].data['CSPD']-45) +'deg)' }">&#xf124;</span>
             </span>
@@ -43,7 +43,7 @@
           <div v-if="Object.keys(stationsData[stationId].data).includes('VHM0')">
             <span>
               <strong>Waves: </strong>
-              {{stationsData[stationId].data['VHM0'].toFixed(1)}} {{stations[stationId].params['VHM0'].units}}, 
+              {{stationsData[stationId].data['VHM0'].toFixed(1)}} {{stations[stationId].props['VHM0'].units}}, 
               {{stationsData[stationId].data['Tm02(s)'].toFixed(1)}} s, 
               {{ bearing2compassRose(stationsData[stationId].data['MeanDir(º)']) }}
               <span class="fa" :style="{transform: 'rotate('+ (stationsData[stationId].data['MeanDir(º)']-45+180) +'deg)' }">&#xf124;</span>
@@ -87,7 +87,7 @@
             <div v-if="Object.keys(stationsData[stationId].data).includes('CAPH')">
               <span>
                 <strong>Atms. pressure: </strong>
-                {{stationsData[stationId].data['CAPH'].toFixed(1)}} {{stations[stationId].params['CAPH'].units}}
+                {{stationsData[stationId].data['CAPH'].toFixed(1)}} {{stations[stationId].props['CAPH'].units}}
               </span>
             </div>
 
@@ -95,14 +95,14 @@
             <div v-if="Object.keys(stationsData[stationId].data).includes('COIL')">
               <span>
                 <strong>Crude oil in water: </strong>
-                {{stationsData[stationId].data['COIL'].toFixed(1)}} {{stations[stationId].params['COIL'].units}}
+                {{stationsData[stationId].data['COIL'].toFixed(1)}} {{stations[stationId].props['COIL'].units}}
               </span>
             </div>
             <!-- Refined fuels -->
             <div v-if="Object.keys(stationsData[stationId].data).includes('RFUL')">
               <span>
                 <strong>Refined fuels in water: </strong>
-                {{stationsData[stationId].data['RFUL'].toFixed(1)}} {{stations[stationId].params['RFUL'].units}}
+                {{stationsData[stationId].data['RFUL'].toFixed(1)}} {{stations[stationId].props['RFUL'].units}}
               </span>
             </div>
             
@@ -184,162 +184,147 @@ export default {
       // https://data.obsea.es/data-api/ObservedProperties
       // Get observed properties
       let observedProperties = {};
+      let locations = {};
       await fetch('https://data.obsea.es/data-api/ObservedProperties').then(r => r.json()).then(res => {
-        
-        res.value.forEach(el => {
-          observedProperties[el.name] = el;
-        });
-      });
 
-      // Each observed property can have different locations. Get sites per property
-      for (let i = 0; i < Object.keys(observedProperties).length; i++){
-        let prop = Object.keys(observedProperties)[i];
-      //Object.keys(observedProperties).forEach(prop => {
-        
-        await fetch(observedProperties[prop]["Datastreams@iot.navigationLink"]).then(r => r.json()).then(res => {
-          observedProperties[prop].sites = [];
-          // Iterate datastreams (streams that provide this data in different times and locations)
-          res.value.forEach(el => {
-            // Skip if it is not a 30 min average
-            // if (!el.name.includes("30min_average"))
-            //   return;
-            // Skip if no phenomenon time
-            if (el.phenomenonTime == undefined)
-              return;
-            // Assign to sites
-            observedProperties[prop].sites.push(el);
-          });
-        });
-      };
+        // Iterate observed properties
+        for (let i = 0; i < res.value.length; i++){
+          let prop = res.value[i];
+          prop.datastreams = [];
 
-      // Delete observedProperties without sites
-      let deletedProps = [];
-      Object.keys(observedProperties).forEach(prop => {
-        if (prop == undefined){
-          console.log("prop undefined")
-        }
-        if (observedProperties[prop].sites.length == 0){
-          deletedProps.push(observedProperties[prop].name)
-          delete observedProperties[prop];
-        }
-      });
-      //console.warn("Deleted observed properties, as no station is collecting them or there is no 30 min average: " + deletedProps);
+          // Get the datastreams of each observed property (e.g. https://data.obsea.es/FROST-Server//v1.1/ObservedProperties(1)/Datastreams)
+          fetch(prop["Datastreams@iot.navigationLink"]).then(r => r.json()).then(resDS => {
+            // Iterate datastreams
+            for (let j = 0; j < resDS.value.length; j++){
+              let ds = resDS.value[j];
+              // Skip if it is not a 30 min average
+              // if (!ds.name.includes("30min_average"))
+              //   continue;
+              // Skip if no phenomenon time
+              if (ds.phenomenonTime == undefined)
+                continue;
+
+              // Store property and datastream
+              prop.datastreams.push(ds);
+              // ?
 
 
-      // Reorganize data by sites
-      let sites = {};
-      Object.keys(observedProperties).forEach(prop => {
-        observedProperties[prop].sites.forEach(site => {
-          let key = site.observedArea.coordinates[0] + "," + site.observedArea.coordinates[1];
-          // Skip predetermined land station
-          if (key == this.hideStationId)
-            return;
-          // If it does not exist, create
-          if (sites[key] == undefined){
-            sites[key] = {};
-          }
-          if (sites[key][prop] != undefined){
-            //console.warn("This OBSEA variable is collected twice in the same location? " + prop + " at " + key);
-          }
-          // In principle, no circularity
-          sites[key][prop] = observedProperties[prop];
-
-        })
-      });
-
-      
-      
-
-      // Create data structure
-      let stations = this.stations;
-      for (let i = 0; i < Object.keys(sites).length; i++){
-        let key = Object.keys(sites)[i];
-        let site = sites[key]
-        // Create station data object
-        if (stations[key] == undefined) {
-          stations[key] = {
-            id: key,
-            params: {},
-            location: key.split(","),
-            data: {}, // tmst1: {WDIR: value, WSP: value...}, tmst2: {}...
-          }
-          // Params
-          for (let j = 0; j < Object.keys(site).length; j++){
-            let param = Object.keys(site)[j];
-            let paramData = site[param];
-
-            let paramObj = {
-              "description": paramData.description,
-              "name": paramData.name,
-              "units": '',
-            }
-            
-            // Get datastream(s)
-            paramObj.datastreams = [];
-            for (let k = 0; k < site[param].sites.length; k++){
-              let dtstm = site[param].sites[k];
-              if (dtstm.observedArea.coordinates[0] == stations[key].location[0]){
-                let dataStreamObj = {
-                  "id": dtstm["@iot.id"],
-                  "latestTmst": dtstm.phenomenonTime.split("/")[1],
-                  "units": dtstm.unitOfMeasurement.symbol,
-                  "sensorDepth": await fetch("https://data.obsea.es/data-api/Datastreams("+ dtstm["@iot.id"] +")/Sensor").then(res => res.json()).then(jj => jj.properties.deployment.coordinates.meters_depth),
-                }
-                // ADCP currents
-                if (dtstm.name.includes('CSPD')){
-                  dataStreamObj.depth = dtstm.properties["ADCP cell parameters"]["center depth"];
+              // Get location of the station
+              fetch(ds["Thing@iot.navigationLink"] + '/Locations').then(r => r.json()).then(resLoc => {
+                let loc = resLoc.value[0];
+                if (resLoc.value.length > 1){
+                  console.warn("More than one location for a station");
+                  debugger;
                 }
 
-                paramObj.datastreams.push(dataStreamObj);
+                let stationKey = loc.location.coordinates[0] + "," + loc.location.coordinates[1];
+                // If it does not exist, create
+                if (locations[stationKey] == undefined){
+                  locations[stationKey] = {};
+                }
+                if (locations[stationKey][prop] != undefined){
+                  console.warn("This OBSEA variable is collected twice in the same location? " + prop.name + " at " + loc.name + stationKey);
+                }
+                // In principle, no circularity
+                locations[stationKey][prop.name] = prop;
+
+
+
+                // Create vue data structure
+                //this.updateStations(stationKey, prop, ds, loc);
+                // Create station data object
+                let stations = this.stations;
+                if (stations[stationKey] == undefined) {
+                  stations[stationKey] = {
+                    id: stationKey,
+                    props: {},
+                    location: stationKey.split(","),
+                    data: {}, // tmst1: {WDIR: value, WSP: value...}, tmst2: {}...
+                  }
+                  // Add station to map
+                  let addStationToMap = ()=> {
+                    this.$nextTick(()=> {
+                      if (this.$refs[stationKey] == undefined){
+                        addStationToMap();
+                        console.log("recursisve");
+                        return;
+                      }
+                      // Get map
+                      if (this.map == undefined){
+                        this.map = this.$parent.map;
+                      }
+                      // Relate overlay with map
+                      // Station info
+                      const stationInfo = new ol.Overlay({
+                        position: this.stations[stationKey].coord3857,
+                        positioning: Object.keys(this.stations).length%2 == 1 ? 'center-right' : 'center-left',
+                        element: this.$refs[stationKey],
+                        stopEvent: false,
+                      });
+                      this.map.addOverlay(stationInfo);
+                      console.log("Added OBSEA station");
+                      this.selectedDateChanged(window.GUIManager.currentTmst);
+                    })
+                  }
+                  addStationToMap();
+                }
+
+                // Create props object
+                let propObj;
+                if (stations[stationKey].props[prop.name] == undefined){
+                  propObj =  {
+                    "description": prop.description,
+                    "name": prop.name,
+                    "units": '',
+                    // Create datastreams array
+                    "datastreams": [],
+                  }
+                } else {
+                  propObj = stations[stationKey].props[prop.name];
+                }
                 
-              }
+
+                // Create datastream object
+                let dsObj = {
+                  "id": ds["@iot.id"],
+                  //"description": ds.description, 
+                  "latestTmst": ds.phenomenonTime.split("/")[1],
+                  "units": ds.unitOfMeasurement.symbol,
+                  "sensorDepth": '',
+                };
+                fetch("https://data.obsea.es/data-api/Datastreams("+ ds["@iot.id"] +")/Sensor").then(res => res.json()).then(jj => {
+                  dsObj.sensorDepth = jj.properties.deployment.coordinates.meters_depth;
+                });
+                // ADCP currents
+                if (ds.name.includes('CSPD')){
+                  dsObj.depth = ds.properties["ADCP cell parameters"]["center depth"];
+                }
+
+                propObj.datastreams.push(dsObj);
+                stations[stationKey].props[prop.name] = propObj;
+                  
+
+                this.stationsData[stationKey] = {"hasData": false, "showInfo": true};
+                this.stations[stationKey].coord3857 = ol.proj.fromLonLat([this.stations[stationKey].location[1], this.stations[stationKey].location[0]]);
+                // Load data everytime a new datastream is received
+                this.selectedDateChanged(window.GUIManager.currentTmst);
+
+                
+              });
+            
             }
-            stations[key].params[paramData.name] = paramObj;
-          }
 
-
-        }
-      }
-
-
-
-      // Create stationsData and add to map
-      Object.keys(this.stations).forEach(stationId => {
-        this.stationsData[stationId] = {"hasData": false, "showInfo": true};
-        this.stations[stationId].coord3857 = ol.proj.fromLonLat([this.stations[stationId].location[1], this.stations[stationId].location[0]]);
-      });
-
-
-
-      // In next tick the objects should already exist, thus add to map overlay
-      this.$nextTick(() => {
-        // Get map
-        if (this.map == undefined){
-          this.map = this.$parent.map;
-        }
-        
-        // Relate overlay with map
-        Object.keys(this.stations).forEach((stationId, index) => {
-          // Station info
-          const stationInfo = new ol.Overlay({
-            position: this.stations[stationId].coord3857,
-            positioning: index%2 == 0 ? 'center-right' : 'center-left',
-            element: this.$refs[stationId],
-            stopEvent: false,
           });
-          this.map.addOverlay(stationInfo);
-        });
-
-        console.log("Added OBSEA stations");
-        this.selectedDateChanged(window.GUIManager.currentTmst);
+        }
       });
-
-
+      console.log(this.stations)
     },
     
 
 
     selectedDateChanged: function(tmst){
+      if (tmst == undefined)
+        return;
 
       let stations = this.stations;
       // Hide all data from stations
@@ -410,8 +395,8 @@ export default {
       for (let i = 0; i < Object.keys(stations).length; i++){
         let station = stations[Object.keys(stations)[i]];
         // Iterate parameters (temp, wind, etc...)
-        for (let j = 0; j < Object.keys(station.params).length; j++){
-          let param = station.params[Object.keys(station.params)[j]];
+        for (let j = 0; j < Object.keys(station.props).length; j++){
+          let param = station.props[Object.keys(station.props)[j]];
 
 
           // Iterate datastreams
@@ -448,11 +433,10 @@ export default {
       }
       // Has data
       this.stationsData[stationId].hasData = true;
-      // Create data obj if it does not exist
-      if (this.stationsData[stationId].data == undefined)
-        this.stationsData[stationId].data = {};
+      // Empty observed properties
+      this.stationsData[stationId].data = {};
       
-      // Iterate params and assign to stationsData (vue uses this object)
+      // Iterate props and assign to stationsData (vue uses this object)
       Object.keys(this.stations[stationId].data[tmst]).forEach(key => {
         this.stationsData[stationId].data[key] = this.stations[stationId].data[tmst][key];
       });
@@ -482,7 +466,7 @@ export default {
     // Bearing to direction
     bearing2compassRose(bearing){
       if (bearing == undefined)
-        debugger;
+        return '';
       // Define directional ranges in degrees
       const directions = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW', 'N'];
       const ranges = [22.5, 67.5, 112.5, 157.5, 202.5, 247.5, 292.5, 337.5, 360];
