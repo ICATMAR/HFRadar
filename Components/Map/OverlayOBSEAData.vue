@@ -14,6 +14,7 @@
       <div class="stationPanel" v-if="stationsData[stationId].showInfo">
         <!-- Site -->
         <div class="stationTitle">
+          <div v-show="stationsData[stationId].isLoading" class="lds-ring"><div></div><div></div><div></div><div></div></div>
           <span><strong>OBSEA station</strong></span>
           <a href="https://obsea.es/" target="_blank" rel="noopener noreferrer" class="icon-str">i</a>
         </div>
@@ -302,10 +303,13 @@ export default {
 
                 propObj.datastreams.push(dsObj);
                 stations[stationKey].props[prop.name] = propObj;
-                  
-
-                this.stationsData[stationKey] = {"hasData": false, "showInfo": true};
-                this.stations[stationKey].coord3857 = ol.proj.fromLonLat([this.stations[stationKey].location[1], this.stations[stationKey].location[0]]);
+                
+                // Create vue object
+                if (this.stationsData[stationKey] == undefined){
+                  this.stationsData[stationKey] = {"hasData": false, "showInfo": true, "isLoading": false};
+                  this.stations[stationKey].coord3857 = ol.proj.fromLonLat([this.stations[stationKey].location[1], this.stations[stationKey].location[0]]);
+                }
+                
                 // Load data everytime a new datastream is received
                 this.selectedDateChanged(window.GUIManager.currentTmst);
 
@@ -317,7 +321,7 @@ export default {
           });
         }
       });
-      console.log(this.stations)
+      //console.log(this.stations)
     },
     
 
@@ -330,6 +334,7 @@ export default {
       // Hide all data from stations
       Object.keys(stations).forEach(stationId => {
         this.stationsData[stationId].hasData = false;
+        this.stationsData[stationId].isLoading = false;
       });
 
       // Add one day before and after of the tmst
@@ -394,6 +399,11 @@ export default {
       // Iterate data streams to fetch data
       for (let i = 0; i < Object.keys(stations).length; i++){
         let station = stations[Object.keys(stations)[i]];
+        this.stationsData[station.id].isLoading = true;
+
+        // Loading keepup
+        let requested = 0;
+        let loaded = 0;
         // Iterate parameters (temp, wind, etc...)
         for (let j = 0; j < Object.keys(station.props).length; j++){
           let param = station.props[Object.keys(station.props)[j]];
@@ -408,15 +418,25 @@ export default {
               // Fetch data
               let streamURL = url.replace('{{datastream}}', datastream.id).replace('{{sDate}}', sDate.toISOString()).replace('{{eDate}}', eDate.toISOString());
               //console.log(streamURL);
+              requested++;
               fetch(streamURL).then(res => res.json()).then(r => {
                 //console.log("Storing " + param.name);
                 this.parseAPIResult(station, param, datastream, r.value)
                 this.updateContent(station.id, tmst);
+
+                loaded++;
+                if (loaded == requested){
+                  this.stationsData[station.id].isLoading = false;
+                }
               });
-            }
+            } 
           }
           
           
+        }
+        // If nothing was requested
+        if (requested == 0) {
+          this.stationsData[station.id].isLoading = false;
         }
       }
 
@@ -551,6 +571,45 @@ a {
 .show {
   opacity: 1;
   transition: all 1s;
+}
+
+
+
+/* https://loading.io/css/ */
+.lds-ring {
+  display: inline-block;
+  position: relative;
+  width: 20px;
+  height: 20px;
+}
+.lds-ring div {
+  box-sizing: border-box;
+  display: block;
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  margin: 2px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  animation: lds-ring 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+  border-color: #fff transparent transparent transparent;
+}
+.lds-ring div:nth-child(1) {
+  animation-delay: -0.45s;
+}
+.lds-ring div:nth-child(2) {
+  animation-delay: -0.3s;
+}
+.lds-ring div:nth-child(3) {
+  animation-delay: -0.15s;
+}
+@keyframes lds-ring {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 
