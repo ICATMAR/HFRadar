@@ -26,8 +26,11 @@
       <!-- Overlay wave data -->
       <overlay-wave-data ref="overlayWaveData"></overlay-wave-data>
 
-      <!-- Overlay wave data -->
+      <!-- Overlay puertos del estado buoys data -->
       <overlay-buoy-data ref="overlayBuoyData"></overlay-buoy-data>
+
+      <!-- Overlay obsea buoys data -->
+      <overlay-obsea-data ref="overlayOBSEAData"></overlay-obsea-data>
 
       <!-- <time-slider></time-slider> -->
 
@@ -61,6 +64,7 @@ import ClimaDirectionCanvas from "./ClimaDirectionCanvas.vue";
 import BottomSection from "../BottomSection/BottomSection.vue";
 import OverlayWaveData from "./OverlayWaveData.vue";
 import OverlayBuoyData from "./OverlayBuoyData.vue";
+import OverlayOBSEAData from "./OverlayOBSEAData.vue";
 
 export default {
   name: 'app-map',
@@ -752,6 +756,10 @@ export default {
       if (this.$refs.overlayBuoyData){
         this.$refs.overlayBuoyData.updatePanel(zoomLevel);
       }
+      // Hide/show obsea info
+      if (this.$refs.overlayOBSEAData){
+        this.$refs.overlayOBSEAData.updatePanel(zoomLevel);
+      }
 
     },
     onMapMoveStart: function(){
@@ -1053,6 +1061,7 @@ export default {
     "bottom-section": BottomSection,
     "overlay-wave-data": OverlayWaveData,
     "overlay-buoy-data": OverlayBuoyData,
+    "overlay-obsea-data": OverlayOBSEAData,
 },
   computed: {
       //foo: function () {}

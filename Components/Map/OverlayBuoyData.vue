@@ -322,7 +322,7 @@ export default {
         } else {
           buoy.data[tmst] = {}
           for (let i = 1; i < header.length; i++){
-            buoy.data[tmst][header[i]] = c[i][0];
+            buoy.data[tmst][header[i]] = parseFloat(c[i][0]);
           }
         }
       })
@@ -380,7 +380,6 @@ a {
   border-bottom: solid 2px white;
 }
 .wavepanel {
-  margin-right: 20px;
   background: rgb(15 48 98 / 71%);/*var(--darkBlue);*/
   padding: 10px;
   border-radius: 17px;

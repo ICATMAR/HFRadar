@@ -9,7 +9,7 @@
         <!-- Site -->
         <div class="radarTitle">
           <span><strong>{{ radarData[key].site }}</strong></span>
-          <a href="https://www.icatmar.cat" target="_blank" rel="noopener noreferrer" class="icon-str">i</a>
+          <a href="https://www.icatmar.cat/visors/xarxa-observacional" target="_blank" rel="noopener noreferrer" class="icon-str">i</a>
         </div>
         <!-- Data -->
         <div v-if="radarData[key].hasData">
@@ -264,7 +264,6 @@ a {
   margin-right: -17.5px; /* half of its width */
 }
 .wavepanel {
-  margin-right: 20px;
   background: rgb(15 48 98 / 71%);/*var(--darkBlue);*/
   padding: 10px;
   border-radius: 17px;
