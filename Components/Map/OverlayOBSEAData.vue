@@ -444,14 +444,17 @@ export default {
                 fetch(streamURL).then(res => res.json()).then(r => {
                   //console.log("Storing " + param.name);
                   this.parseAPIResult(station, param, datastream, r.value)
-                  this.updateContent(station.id, tmst);
-
+                  this.updateContent(station.id, window.GUIManager.currentTmst); // It can happen that the user changed dates and that the current timestamp is not the same as requested. Therefore use GUI.currentTmst instead of tmst
                   loaded++;
                   if (loaded == requested){
                     this.stationsData[station.id].isLoading = false;
                     //console.log("LOADED");
                   }
                 });
+              }
+              // URL was already requested, try updating content
+              else {
+                this.updateContent(station.id, tmst);
               }
               
             } 
