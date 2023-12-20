@@ -266,6 +266,7 @@ export default {
                         element: this.$refs[stationKey],
                         stopEvent: false,
                       });
+                      stationInfo.element.style['pointerEvents'] = 'none';// Remove pointer events, container takes more space than necessary and blocks visible icons
                       this.map.addOverlay(stationInfo);
                       console.log("Added OBSEA station");
                       this.selectedDateChanged(window.GUIManager.currentTmst, true);
@@ -573,6 +574,7 @@ a {
   background: rgb(15 48 98 / 71%);/*var(--darkBlue);*/
   padding: 10px;
   border-radius: 17px;
+  pointer-events: all;
 
   transition: all 1s;
 }
