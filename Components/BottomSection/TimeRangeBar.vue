@@ -622,30 +622,30 @@ export default {
         if (totalYears != 0){
           
           this.years = [{ num: startYear, wght: (11 - startMonth + (daysInFirstMonth - startDay) / daysInFirstMonth)/12}];
-          // this.months = [{ num: startMonth, wght: (daysInFirstMonth - startDay) / daysInFirstMonth, key: startMonth + "-" + startYear, year: startYear, name: this.monthNum2Str(startMonth)}];
+          this.months = [{ num: startMonth, wght: (daysInFirstMonth - startDay) / daysInFirstMonth, key: startMonth + "-" + startYear, year: startYear, name: this.monthNum2Str(startMonth)}];
 
           // Fill months from first year
-          // for (let i = startMonth + 1; i < 12; i++){
-          //   this.months.push({num: i, wght: 1, key: i + "-" + startYear, year: startYear, name: this.monthNum2Str(i)});
-          // }
+          for (let i = startMonth + 1; i < 12; i++){
+            this.months.push({num: i, wght: 1, key: i + "-" + startYear, year: startYear, name: this.monthNum2Str(i)});
+          }
 
           // Fill years
           for (let i = 1; i<=totalYears; i++){
             if (startYear + i != endYear){
               this.years.push({num: startYear + i, wght: 1});
               // Fill months
-              // for (let j = 0; j<12; j++){
-              //   this.months.push({num: j, wght: 1, key: j + "-" + (startYear+i), year: (startYear + i), name: this.monthNum2Str(j)});
-              // }
+              for (let j = 0; j<12; j++){
+                this.months.push({num: j, wght: 1, key: j + "-" + (startYear+i), year: (startYear + i), name: this.monthNum2Str(j)});
+              }
             } else { // Last year is not necessarily complete
               this.years.push({ num: endYear, wght: (endMonth + endDay / daysInLastMonth)/12});// Todo: number of days is relative to the month
               // Fill months last year
-              // for (let j = 0; j<=endMonth; j++){
-              //   if (j != endMonth)
-              //     this.months.push({num: j, wght: 1, key: j + "-" + (endYear), year: endYear,  name: this.monthNum2Str(j)});
-              //   else
-              //     this.months.push({ num: j, wght: endDay / daysInLastMonth, key: j + "-" + (endYear), year: endYear, name: this.monthNum2Str(j)});
-              // } 
+              for (let j = 0; j<=endMonth; j++){
+                if (j != endMonth)
+                  this.months.push({num: j, wght: 1, key: j + "-" + (endYear), year: endYear,  name: this.monthNum2Str(j)});
+                else
+                  this.months.push({ num: j, wght: endDay / daysInLastMonth, key: j + "-" + (endYear), year: endYear, name: this.monthNum2Str(j)});
+              } 
             }
           }
         } 
@@ -653,12 +653,12 @@ export default {
         else {
           this.years = [{ num: startYear, wght: ((endMonth + endDay / daysInLastMonth) - (11 - startMonth + (daysInFirstMonth - startDay) / daysInFirstMonth)) / 12}];
           // Fill months
-          // for (let i = startMonth; i <= endMonth; i++){
-          //   if (i != endMonth)
-          //     this.months.push({num: i, wght: 1, key: i + "-" + (endYear), year: endYear,  name: this.monthNum2Str(i)});
-          //   else
-          //     this.months.push({ num: i, wght: endDay / daysInLastMonth, key: i + "-" + (endYear), year: endYear, name: this.monthNum2Str(i)});
-          // }
+          for (let i = startMonth; i <= endMonth; i++){
+            if (i != endMonth)
+              this.months.push({num: i, wght: 1, key: i + "-" + (endYear), year: endYear,  name: this.monthNum2Str(i)});
+            else
+              this.months.push({ num: i, wght: endDay / daysInLastMonth, key: i + "-" + (endYear), year: endYear, name: this.monthNum2Str(i)});
+          }
         }
 
 
@@ -741,14 +741,7 @@ export default {
         let endDay = this.endDate.getUTCDate();
         let endHour = this.endDate.getUTCHours();
 
-        // Initialize months
-        this.months = [];
-        for (let i = startMonth; i <= endMonth; i++){
-          if (i != endMonth)
-            this.months.push({num: i, wght: 0, key: i + "-" + (endYear), year: endYear,  name: this.monthNum2Str(i)});
-          else
-            this.months.push({ num: i, wght: 0, key: i + "-" + (endYear), year: endYear, name: this.monthNum2Str(i)});
-        }
+
         // Find reactive array indexes
         let sIdxMonths;
         let sIdxYears;
