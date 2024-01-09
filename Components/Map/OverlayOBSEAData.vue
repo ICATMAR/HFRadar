@@ -3,7 +3,7 @@
   <div id="overlay-OBSEA-data" ref="containerOBSEAInfo">
   <!-- Container -->
     <!-- <div v-for="stationId in Object.keys(stationsData)" :id="stationId" :ref="stationId" class="OBSEAContainer" :class="[!isTooFar && isAdvancedInterfaceOnOff ? 'show' : 'hide']"> -->
-    <div v-for="(stationId, index) in Object.keys(stationsData)" :id="stationId" :ref="stationId" class="OBSEAContainer" :class="[!isTooFar && isAdvancedInterfaceOnOff ? 'show' : 'hide']">
+    <div v-for="(stationId, index) in Object.keys(stationsData)" :id="stationId" :ref="stationId" class="OBSEAContainer" :class="[!isTooFar && isAdvancedInterfaceOnOff && isExternalObsVisible? 'show' : 'hide']">
 
       <!-- Station icon -->
       <img v-if="index%2 == 1" class="icon-str icon-medium icon-img obsea-icon-left" @click="OBSEAIconClicked(stationId)" src="/HFRadar/Assets/Images/buoy.svg">
@@ -165,9 +165,14 @@ export default {
         this.loadOBSEAAPI();
       }
     });
+    // External observations visible
+    window.eventBus.on("WidgetMapOptions_ExternalObsVisibilityChanged", state => {
+      this.isExternalObsVisible = state;
+    });
   },
   data () {
     return {
+      isExternalObsVisible: false,
       isAdvancedInterfaceOnOff: false,
       isTooFar: false,
       stations: {},
