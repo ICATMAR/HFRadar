@@ -64,9 +64,7 @@ export default {
     // HFRadarLoaded
     window.eventBus.on('HFRadarDataLoaded', tmst => {
       // Create radar data object
-      if (Object.keys(this.radarData).length == 0){
-        this.createRadarDataObject();
-      }
+      this.createRadarDataObject();
       
       if (tmst)
         this.updateContent(tmst);
@@ -105,6 +103,12 @@ export default {
       let radars = window.DataManager.HFRadars;
       Object.keys(radars).forEach(key => {
         let radar = radars[key];
+
+        // If radar was already created continue loop
+        if (this.radarData[radar.UUID] != undefined)
+          return;
+
+        // Create radar data object
         if (radar.constructor.name == "HFRadar"){
           // Determine file status
           let tmst = window.GUIManager.currentTmst;
