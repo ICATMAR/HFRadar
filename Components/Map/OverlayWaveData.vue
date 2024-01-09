@@ -192,9 +192,13 @@ export default {
               }
             }
           }
-
+          // File did not start loading
+          if (radar.data == undefined){
+            // Wave file loaded before current file
+            // Do nothing
+          }
           // File exists and it is loaded
-          if (radar.data[tmst] != undefined){
+          else if (radar.data[tmst] != undefined){
             this.radarData[radar.UUID].fileStatus = 2;
           } 
           // File is loading
