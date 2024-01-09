@@ -564,8 +564,12 @@ export default {
     updateHFRadarPointsVisibility: function(radar){
       let radarPointsLayerName = 'HFPoints' + radar.UUID;
       let guiState = radar.constructor.name == "HFRadar" ? window.GUIManager.widgetHFRadars : window.GUIManager.widgetCombinedRadars;
-      
-      if (!guiState.isVisible || !guiState.arePointsVisible || radar.data[window.GUIManager.currentTmst] == undefined){
+      // Remove layer
+      if (radar.data == undefined){
+        if (this.getMapLayer(radarPointsLayerName)) this.map.removeLayer(this.getMapLayer(radarPointsLayerName));
+        if (this.getMapLayer('HFSelPoint')) this.map.removeLayer(this.getMapLayer('HFSelPoint'));
+      }
+      else if (!guiState.isVisible || !guiState.arePointsVisible || radar.data[window.GUIManager.currentTmst] == undefined){
         // Remove layer
         if (this.getMapLayer(radarPointsLayerName)) this.map.removeLayer(this.getMapLayer(radarPointsLayerName));
         if (this.getMapLayer('HFSelPoint')) this.map.removeLayer(this.getMapLayer('HFSelPoint'));

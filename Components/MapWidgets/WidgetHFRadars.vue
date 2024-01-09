@@ -107,7 +107,7 @@ export default {
             this.radars[key] = {
               UUID: key, 
               Site: radar.Site,
-              isActivated: true,
+              isActivated: false,
               hasDataOnTimestamp: true,
             }
           }
@@ -139,7 +139,10 @@ export default {
       Object.keys(window.DataManager.HFRadars).forEach(key => {
         let radar = window.DataManager.HFRadars[key];
         if (radar.constructor.name === "HFRadar")
-          this.radars[radar.UUID].hasDataOnTimestamp = radar.data[tmst] != undefined;
+          if (radar.data != undefined)
+            this.radars[radar.UUID].hasDataOnTimestamp = radar.data[tmst] != undefined;
+          else
+          this.radars[radar.UUID].hasDataOnTimestamp = false;
       });
     });
 
@@ -213,10 +216,13 @@ export default {
       Object.keys(window.DataManager.HFRadars).forEach(key => {
         let radar = window.DataManager.HFRadars[key];
         if (radar.constructor.name == "HFRadar"){
-          this.updateRadarState(radar); // Datamanager
+          //this.updateRadarState(radar); // Datamanager
           this.updateRadarState(this.radars[radar.UUID]); // this widget
         }
-      })
+      });
+
+     
+
       window.eventBus.emit("WidgetHFRadars_VisibilityChanged", e.target.checked);
     },
     infoClicked: function(e){
@@ -234,14 +240,19 @@ export default {
     // HF Radars
     updateRadarState: function(rr){
       // Check if there is data
+      if (window.DataManager.HFRadars[rr.UUID].data == undefined){
+        rr.hasDataOnTimestamp = false;
+        console.log("Radar "+ rr.Site +" does not have data")
+        return;
+      }
       let dd = window.DataManager.HFRadars[rr.UUID].data[window.GUIManager.currentTmst];
       if (dd == undefined) {
-        rr.isActivated = false;
         rr.hasDataOnTimestamp = false;
       } else {
         // Change state
         rr.isActivated = !rr.isActivated;
         rr.hasDataOnTimestamp = true;
+        console.log("Radar " + rr.Site + " has data on timestamp");
         // Change GUIManager state
         let site = rr.Site;
         window.GUIManager.widgetHFRadars.radarsVisible[site] = rr.isActivated;
