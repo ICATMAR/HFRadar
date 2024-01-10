@@ -26,7 +26,7 @@
       <div id="externalObsContainer" class="titleContainer" v-show="true">
         <div class="clickable menuElement">
           <onOffButton ref="externalObsOnOff" :checked="false" :inSize="'14px'" @change="externalObsOnOff($event)"></onOffButton>
-          <span @click="externalObsOnOff">3rd party observations</span>
+          <span @click="externalObsOnOff">In-situ observations</span>
         </div>
       </div>
 
@@ -35,8 +35,8 @@
       <div class="titleContainer">
         <div class="clickable menuElement">
           <onOffButton ref="weatherOnOffButton" :checked="false" :inSize="'14px'" @change="weatherLayerOnOff($event)"></onOffButton>
-          <span class="visibleInMobile fa" :title="$t('Weather and sea conditions')">&#xf2c9;, C<sub>hl</sub>, ‰, &#xf72e;, &#xf773;</span>
-          <span class="hiddenInMobile" @click="weatherLayerOnOff">{{$t('Weather and sea conditions')}}</span>
+          <span class="visibleInMobile fa" :title="$t('Weather and sea models')">&#xf2c9;, C<sub>hl</sub>, ‰, &#xf72e;, &#xf773;</span>
+          <span class="hiddenInMobile" @click="weatherLayerOnOff">{{$t('Weather and sea models')}}</span>
         </div>
       </div>
       <!-- Weather Layers -->
