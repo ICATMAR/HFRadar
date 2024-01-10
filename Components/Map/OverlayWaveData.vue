@@ -9,7 +9,7 @@
         <!-- Site -->
         <div class="radarTitle">
           <span><strong>{{ radarData[key].site }}</strong></span>
-          <a href="https://www.icatmar.cat" target="_blank" rel="noopener noreferrer" class="icon-str">i</a>
+          <a href="https://www.icatmar.cat/visors/xarxa-observacional" target="_blank" rel="noopener noreferrer" class="icon-str">i</a>
         </div>
         <!-- Data -->
         <div v-if="radarData[key].hasData">
@@ -64,9 +64,7 @@ export default {
     // HFRadarLoaded
     window.eventBus.on('HFRadarDataLoaded', tmst => {
       // Create radar data object
-      if (Object.keys(this.radarData).length == 0){
-        this.createRadarDataObject();
-      }
+      this.createRadarDataObject();
       
       if (tmst)
         this.updateContent(tmst);
@@ -105,6 +103,12 @@ export default {
       let radars = window.DataManager.HFRadars;
       Object.keys(radars).forEach(key => {
         let radar = radars[key];
+
+        // If radar was already created continue loop
+        if (this.radarData[radar.UUID] != undefined)
+          return;
+
+        // Create radar data object
         if (radar.constructor.name == "HFRadar"){
           // Determine file status
           let tmst = window.GUIManager.currentTmst;
@@ -188,9 +192,13 @@ export default {
               }
             }
           }
-
+          // File did not start loading
+          if (radar.data == undefined){
+            // Wave file loaded before current file
+            // Do nothing
+          }
           // File exists and it is loaded
-          if (radar.data[tmst] != undefined){
+          else if (radar.data[tmst] != undefined){
             this.radarData[radar.UUID].fileStatus = 2;
           } 
           // File is loading
@@ -264,7 +272,6 @@ a {
   margin-right: -17.5px; /* half of its width */
 }
 .wavepanel {
-  margin-right: 20px;
   background: rgb(15 48 98 / 71%);/*var(--darkBlue);*/
   padding: 10px;
   border-radius: 17px;

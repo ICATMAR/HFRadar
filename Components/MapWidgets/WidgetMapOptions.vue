@@ -22,6 +22,14 @@
         <span>Isobaths</span>
       </div>
 
+      <!-- External observations -->
+      <div id="externalObsContainer" class="titleContainer" v-show="true">
+        <div class="clickable menuElement">
+          <onOffButton ref="externalObsOnOff" :checked="false" :inSize="'14px'" @change="externalObsOnOff($event)"></onOffButton>
+          <span @click="externalObsOnOff">3rd party observations</span>
+        </div>
+      </div>
+
 
       <!-- Weather and sea -->
       <div class="titleContainer">
@@ -78,6 +86,7 @@
         baseLayers: [],
         isWeatherMenuVisible: false,
         isMouseOver: false,
+        isExternalObsVisible: false,
       }
     },
     methods: {
@@ -86,6 +95,19 @@
         this.isMouseOver = false;
         this.baseLayerIconSrc = this.baseLayers[index].img.src;
         window.eventBus.emit("WidgetMapOptions_BaseLayerClicked", this.baseLayers[index].name);
+      },
+
+      externalObsOnOff: function(e){
+        // OnOff Button was clicked
+        if (e.target.value != undefined){
+          this.isExternalObsVisible = e.target.checked;
+          // Emit
+          window.eventBus.emit("WidgetMapOptions_ExternalObsVisibilityChanged", e.target.checked);
+        } 
+        // Text was clicked --> Invoke click on the element, which calls again this function
+        else {
+          this.$refs.externalObsOnOff.setChecked(!this.isExternalObsVisible);
+        }
       },
 
       // Weather sea on off

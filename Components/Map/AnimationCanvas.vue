@@ -254,8 +254,12 @@ export default {
           if (radarType == "HFRadar"){
             // GUI Info
             let isRadarActivated = window.GUIManager.widgetHFRadars.radarsVisible[radar.Site]  && window.GUIManager.widgetHFRadars.areParticlesVisible;
+            // No data
+            if (radar.data == undefined){
+              // TODO WARN: do nothing?
+            }
             // Visible
-            if (areVisible && isRadarActivated && radar.animEngine && radar.data[tmst] != undefined){
+            else if (areVisible && isRadarActivated && radar.animEngine && radar.data[tmst] != undefined){
               radar.animEngine.setHFRadarData(radar.data[tmst]);
               radar.animEngine.isStopped = false;
               radar.animEngine.update();
@@ -280,7 +284,13 @@ export default {
           }
 
           // Not visible
-          if (!areVisible || radar.data[tmst] == undefined){
+          if (radar.data == undefined){
+            if (radar.animEngine){
+              radar.animEngine.isStopped = true;
+              radar.animEngine.clearCanvas();
+            }
+          }
+          else if (!areVisible || radar.data[tmst] == undefined){
             if (radar.animEngine){
               radar.animEngine.isStopped = true;
               radar.animEngine.clearCanvas();

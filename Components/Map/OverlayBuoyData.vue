@@ -2,7 +2,7 @@
   
   <div id="overlay-buoy-data" ref="containerbuoyInfo">
   <!-- Container -->
-    <div v-for="buoyName in Object.keys(buoysData)" :id="buoyName" :ref="buoyName" class="buoyContainer" :class="[!isTooFar && isAdvancedInterfaceOnOff ? 'show' : 'hide']">
+    <div v-for="buoyName in Object.keys(buoysData)" :id="buoyName" :ref="buoyName" class="buoyContainer" :class="[!isTooFar && isAdvancedInterfaceOnOff && isExternalObsVisible ? 'show' : 'hide']">
       <!-- Buoy icon -->
       <!-- <div style="padding: 10px; border-radius:5px; background-color: red">Boya</div> -->
       <img class="icon-str icon-medium icon-img" @click="buoyIconClicked(buoyName)" src="/HFRadar/Assets/Images/buoy.svg">
@@ -140,11 +140,16 @@ export default {
     window.eventBus.on("AdvancedInterfaceOnOff", state => {
       this.isAdvancedInterfaceOnOff = state;
     });
+    // External observations visible
+    window.eventBus.on("WidgetMapOptions_ExternalObsVisibilityChanged", state => {
+      this.isExternalObsVisible = state;
+    });
   },
   data () {
     return {
       once: false,
       isAdvancedInterfaceOnOff: false,
+      isExternalObsVisible: false,
       buoysData: {},
       isTooFar: false,
       // https://portus.puertos.es/
@@ -322,7 +327,7 @@ export default {
         } else {
           buoy.data[tmst] = {}
           for (let i = 1; i < header.length; i++){
-            buoy.data[tmst][header[i]] = c[i][0];
+            buoy.data[tmst][header[i]] = parseFloat(c[i][0]);
           }
         }
       })
@@ -380,7 +385,6 @@ a {
   border-bottom: solid 2px white;
 }
 .wavepanel {
-  margin-right: 20px;
   background: rgb(15 48 98 / 71%);/*var(--darkBlue);*/
   padding: 10px;
   border-radius: 17px;

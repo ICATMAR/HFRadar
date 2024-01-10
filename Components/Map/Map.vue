@@ -26,8 +26,11 @@
       <!-- Overlay wave data -->
       <overlay-wave-data ref="overlayWaveData"></overlay-wave-data>
 
-      <!-- Overlay wave data -->
+      <!-- Overlay puertos del estado buoys data -->
       <overlay-buoy-data ref="overlayBuoyData"></overlay-buoy-data>
+
+      <!-- Overlay obsea buoys data -->
+      <overlay-obsea-data ref="overlayOBSEAData"></overlay-obsea-data>
 
       <!-- <time-slider></time-slider> -->
 
@@ -61,6 +64,7 @@ import ClimaDirectionCanvas from "./ClimaDirectionCanvas.vue";
 import BottomSection from "../BottomSection/BottomSection.vue";
 import OverlayWaveData from "./OverlayWaveData.vue";
 import OverlayBuoyData from "./OverlayBuoyData.vue";
+import OverlayOBSEAData from "./OverlayOBSEAData.vue";
 
 export default {
   name: 'app-map',
@@ -560,8 +564,12 @@ export default {
     updateHFRadarPointsVisibility: function(radar){
       let radarPointsLayerName = 'HFPoints' + radar.UUID;
       let guiState = radar.constructor.name == "HFRadar" ? window.GUIManager.widgetHFRadars : window.GUIManager.widgetCombinedRadars;
-      
-      if (!guiState.isVisible || !guiState.arePointsVisible || radar.data[window.GUIManager.currentTmst] == undefined){
+      // Remove layer
+      if (radar.data == undefined){
+        if (this.getMapLayer(radarPointsLayerName)) this.map.removeLayer(this.getMapLayer(radarPointsLayerName));
+        if (this.getMapLayer('HFSelPoint')) this.map.removeLayer(this.getMapLayer('HFSelPoint'));
+      }
+      else if (!guiState.isVisible || !guiState.arePointsVisible || radar.data[window.GUIManager.currentTmst] == undefined){
         // Remove layer
         if (this.getMapLayer(radarPointsLayerName)) this.map.removeLayer(this.getMapLayer(radarPointsLayerName));
         if (this.getMapLayer('HFSelPoint')) this.map.removeLayer(this.getMapLayer('HFSelPoint'));
@@ -751,6 +759,10 @@ export default {
       // Hide/show buoy info
       if (this.$refs.overlayBuoyData){
         this.$refs.overlayBuoyData.updatePanel(zoomLevel);
+      }
+      // Hide/show obsea info
+      if (this.$refs.overlayOBSEAData){
+        this.$refs.overlayOBSEAData.updatePanel(zoomLevel);
       }
 
     },
@@ -1053,6 +1065,7 @@ export default {
     "bottom-section": BottomSection,
     "overlay-wave-data": OverlayWaveData,
     "overlay-buoy-data": OverlayBuoyData,
+    "overlay-obsea-data": OverlayOBSEAData,
 },
   computed: {
       //foo: function () {}

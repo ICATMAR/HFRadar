@@ -1369,6 +1369,7 @@ class ParticleCombinedRadar extends Particle {
     let pixelCoord = this.particleSystem.map.getPixelFromCoordinate(coord);
     if (pixelCoord == null){
       debugger;
+      pixelCoord = [-10, -10];
     }
     // Assign to point
     point[0] = pixelCoord[0];

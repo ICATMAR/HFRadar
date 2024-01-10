@@ -54,12 +54,15 @@ class DataManager {
   addHFRadarData(HFRadarData){
 
     
-    // Combined files do not have PatternUUID. Some radials do not have PatternUUID
-    if (HFRadarData.header.PatternUUID == undefined){
-      HFRadarData.header.PatternUUID = 'noUUID' + HFRadarData.header.Site;
-    }
+    // // Combined files do not have PatternUUID. Some radials do not have PatternUUID
+    // if (HFRadarData.header.PatternUUID == undefined){
+    //   HFRadarData.header.PatternUUID = 'noUUID' + HFRadarData.header.Site;
+    // }
     // Find UUID
-    let UUID = HFRadarData.header.PatternUUID.replaceAll(" ", "");
+    //let UUID = HFRadarData.header.PatternUUID.replaceAll(" ", "");
+    // UUID does not work for wave data, it seems maybe using the site is better as ID
+    let site = HFRadarData.header.Site.replace(' ""', '').replaceAll(" ", "").replaceAll("\r", "");
+    let UUID = site;
 
     // Empty data
     if (HFRadarData.data.length == 0){
@@ -424,7 +427,7 @@ class DataManager {
           
           for (let j = 0; j < filesOnDatePromiseResult.value.length; j++){
             let promiseResult = filesOnDatePromiseResult.value[j];
-            if (promiseResult.status == 'fulfilled'){
+            if (promiseResult.status == 'fulfilled' && promiseResult.value != undefined){
               lastHFRadar = this.addHFRadarData(promiseResult.value);
               if (lastHFRadar.data == undefined)
                 lastHFRadar = undefined;
@@ -560,7 +563,7 @@ class HFRadar {
     }
 
     // UUID
-    this.UUID = HFRadarData.header.PatternUUID.replaceAll(" ", "");
+    this.UUID = HFRadarData.header.Site; //HFRadarData.header.PatternUUID.replaceAll(" ", "");
 
     // Store data
     this.addRadarData(HFRadarData);
