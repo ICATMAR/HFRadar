@@ -2,7 +2,8 @@
   
   <div id="overlay-buoy-data" ref="containerbuoyInfo">
   <!-- Container -->
-    <div v-for="buoyName in Object.keys(buoysData)" :id="buoyName" :ref="buoyName" class="buoyContainer" :class="[!isTooFar && isAdvancedInterfaceOnOff && isExternalObsVisible ? 'show' : 'hide']">
+    <div v-for="buoyName in Object.keys(buoysData)" :id="buoyName" :ref="buoyName" class="buoyContainer"
+      :class="[!isTooFar && isAdvancedInterfaceOnOff && isExternalObsVisible ? 'showOverlayMap' : 'hideOverlayMap']">
       <!-- Buoy icon -->
       <!-- <div style="padding: 10px; border-radius:5px; background-color: red">Boya</div> -->
       <img class="icon-str icon-medium icon-img" @click="buoyIconClicked(buoyName)" src="/HFRadar/Assets/Images/buoy.svg">
@@ -407,16 +408,6 @@ a {
 .more-data-button:hover{
   background: var(--lightBlue);
 }
-
-.hide {
-  opacity: 0;
-  transition: all 1s;
-}
-.show {
-  opacity: 1;
-  transition: all 1s;
-}
-
 
 
 .v-enter-active,

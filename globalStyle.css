@@ -289,6 +289,27 @@ h4 {
 
 
 
+
+/* OVERLAY ON MAP */
+.hideOverlayMap {
+  opacity: 0;
+  transition: all 1s;
+  visibility: hidden;
+  /* display: none; */
+  /* pointer-events: none !important; */
+}
+.showOverlayMap {
+  opacity: 1;
+  visibility: visible;
+  transition: all 1s;
+}
+
+
+
+
+
+
+
 /* SCROLLBAR */
 /* Works on Firefox */
 * {

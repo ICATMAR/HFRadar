@@ -2,8 +2,9 @@
   
   <div id="overlay-OBSEA-data" ref="containerOBSEAInfo">
   <!-- Container -->
-    <!-- <div v-for="stationId in Object.keys(stationsData)" :id="stationId" :ref="stationId" class="OBSEAContainer" :class="[!isTooFar && isAdvancedInterfaceOnOff ? 'show' : 'hide']"> -->
-    <div v-for="(stationId, index) in Object.keys(stationsData)" :id="stationId" :ref="stationId" class="OBSEAContainer" :class="[!isTooFar && isAdvancedInterfaceOnOff && isExternalObsVisible? 'show' : 'hide']">
+    <!-- <div v-for="stationId in Object.keys(stationsData)" :id="stationId" :ref="stationId" class="OBSEAContainer" :class="[!isTooFar && isAdvancedInterfaceOnOff ? 'show' : 'hideOverlayMap']"> -->
+    <div v-for="(stationId, index) in Object.keys(stationsData)" :id="stationId" :ref="stationId" class="OBSEAContainer" 
+      :class="[!isTooFar && isAdvancedInterfaceOnOff && isExternalObsVisible? 'showOverlayMap' : 'hideOverlayMap']">
 
       <!-- Station icon -->
       <img v-if="index%2 == 1" class="icon-str icon-medium icon-img obsea-icon-left" @click="OBSEAIconClicked(stationId)" src="/HFRadar/Assets/Images/buoy.svg">
@@ -599,16 +600,6 @@ a {
 .more-data-button:hover{
   background: var(--lightBlue);
 }
-
-.hide {
-  opacity: 0;
-  transition: all 1s;
-}
-.show {
-  opacity: 1;
-  transition: all 1s;
-}
-
 
 
 /* https://loading.io/css/ */

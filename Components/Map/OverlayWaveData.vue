@@ -5,7 +5,7 @@
     <div v-for="key in Object.keys(radarData)" :id="key" :ref="key" class="radarPanelContainer">
 
       <!-- Wave panel -->
-      <div class="wavepanel" :class="[!isTooFar && radarData[key].showInfo ? 'show' : 'hide']">
+      <div class="wavepanel" :class="[!isTooFar && radarData[key].showInfo ? 'showOverlayMap' : 'hideOverlayMap']">
         <!-- Site -->
         <div class="radarTitle">
           <span><strong>{{ radarData[key].site }}</strong></span>
@@ -293,12 +293,4 @@ a {
   100% {background: rgb(255, 255, 104);}
 }
 
-.hide {
-  opacity: 0;
-  transition: all 1s;
-}
-.show {
-  opacity: 1;
-  transition: all 1s;
-}
 </style>
