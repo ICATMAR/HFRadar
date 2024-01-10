@@ -601,18 +601,18 @@ export default {
 
       // Creates the years and months arrays (HTML elements by vue) according to end and start date
       createHTMLTimeline: function(){
-        let startMonth = this.startDate.getUTCMonth();
-        let startDay = this.startDate.getUTCDate();
-        let startHour = this.startDate.getUTCHours();
-        let endMonth = this.endDate.getUTCMonth();
-        let endDay = this.endDate.getUTCDate();
-        let endHour = this.endDate.getUTCHours();
+        let startMonth = this.limStartDate.getUTCMonth();
+        let startDay = this.limStartDate.getUTCDate();
+        let startHour = this.limStartDate.getUTCHours();
+        let endMonth = this.limEndDate.getUTCMonth();
+        let endDay = this.limEndDate.getUTCDate();
+        let endHour = this.limEndDate.getUTCHours();
         
         // Calculate how many years (and a percentage of the year too)
         // Calculate how many months are between end and start date
         // Calculate how many days
-        let startYear = this.startDate.getUTCFullYear();
-        let endYear = this.endDate.getUTCFullYear();
+        let startYear = this.limStartDate.getUTCFullYear();
+        let endYear = this.limEndDate.getUTCFullYear();
         let totalYears = endYear - startYear;
 
         let daysInFirstMonth = this.getDaysInMonth(startYear, startMonth + 1);
