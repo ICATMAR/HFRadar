@@ -14,7 +14,7 @@ class GUIManager {
   widgetHFRadars = {
     isVisible: false,
     areParticlesVisible: true,
-    arePointsVisible: true,
+    arePointsVisible: false,
     radarsVisible: {
       'BEGU': true,
       'CREU': true,

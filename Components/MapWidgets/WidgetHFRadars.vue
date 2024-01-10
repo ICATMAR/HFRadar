@@ -15,7 +15,7 @@
     <div v-show="isVisible">
       <!-- Existing radars -->
       <div id="existingRadarsContainer">
-        <div v-for="radar in radars">
+        <div v-for="radar in radarsVue">
           <button 
             :class="{'widgetButtonHFRadar-active': radar.isActivated && radar.hasDataOnTimestamp, 'widgetButtonHFRadar-unavailable': !radar.hasDataOnTimestamp}" class="widgetButtonHFRadar"  
             @click="radarActivatedChanged(radar)">
@@ -103,8 +103,8 @@ export default {
       Object.keys(window.DataManager.HFRadars).forEach(key => {
         let radar = window.DataManager.HFRadars[key];
         if (radar.constructor.name == "HFRadar"){
-          if (this.radars[key] == undefined){
-            this.radars[key] = {
+          if (this.radarsVue[key] == undefined){
+            this.radarsVue[key] = {
               UUID: key, 
               Site: radar.Site,
               isActivated: false,
@@ -120,7 +120,7 @@ export default {
       Object.keys(radars).forEach(i => {
         let radar = radars[i];
         if (radar.constructor.name == "HFRadar")
-          this.radars[radar.UUID].hasDataOnTimestamp = true;
+          this.radarsVue[radar.UUID].hasDataOnTimestamp = true;
       });
     });
     // When mouse clicks a data point
@@ -140,9 +140,9 @@ export default {
         let radar = window.DataManager.HFRadars[key];
         if (radar.constructor.name === "HFRadar")
           if (radar.data != undefined)
-            this.radars[radar.UUID].hasDataOnTimestamp = radar.data[tmst] != undefined;
+            this.radarsVue[radar.UUID].hasDataOnTimestamp = radar.data[tmst] != undefined;
           else
-          this.radars[radar.UUID].hasDataOnTimestamp = false;
+            this.radarsVue[radar.UUID].hasDataOnTimestamp = false;
       });
     });
 
@@ -166,7 +166,7 @@ export default {
       defaultUnits: 'cm/s',
       selectedLegends: ['BlueWhiteRed.png', 'GreenBlueWhiteOrangeRed.png', 'ModifiedOccam.png', 'DarkScaleColors.png' ],
       isVisible: false,
-      radars: {},
+      radarsVue: {},
     }
   },
   methods: {
@@ -212,16 +212,24 @@ export default {
       this.isVisible = e.target.checked;
       window.GUIManager.widgetHFRadars.isVisible = e.target.checked;
       window.GUIManager.isDataPointSelected = false;
-      // Update radar states
-      Object.keys(window.DataManager.HFRadars).forEach(key => {
-        let radar = window.DataManager.HFRadars[key];
-        if (radar.constructor.name == "HFRadar"){
-          //this.updateRadarState(radar); // Datamanager
-          this.updateRadarState(this.radars[radar.UUID]); // this widget
-        }
-      });
-
-     
+      // Activate all radars when visible
+      if (this.isVisible){
+        Object.keys(this.radarsVue).forEach(key => {
+          let radar = this.radarsVue[key];
+          radar.isActivated = true;
+          window.GUIManager.widgetHFRadars.radarsVisible[key] = radar.isActivated;
+          // Check if radar has data
+          let DMRadar = window.DataManager.HFRadars[key];
+          if (DMRadar.data == undefined) // No data structure (wave file is loaded before radar file)
+            radar.hasDataOnTimestamp = false;
+          else{
+            if (DMRadar.data[window.GUIManager.currentTmst] == undefined)
+              radar.hasDataOnTimestamp = false;
+            else 
+              radar.hasDataOnTimestamp = true;
+          }
+        });
+      }
 
       window.eventBus.emit("WidgetHFRadars_VisibilityChanged", e.target.checked);
     },
@@ -237,30 +245,21 @@ export default {
       window.GUIManager.isDataPointSelected = e.target.checked;
       window.eventBus.emit('WidgetHFRadars_PointsActiveChanged', e.target.checked);
     },
-    // HF Radars
-    updateRadarState: function(rr){
-      // Check if there is data
-      if (window.DataManager.HFRadars[rr.UUID].data == undefined){
-        rr.hasDataOnTimestamp = false;
-        console.log("Radar "+ rr.Site +" does not have data")
-        return;
-      }
-      let dd = window.DataManager.HFRadars[rr.UUID].data[window.GUIManager.currentTmst];
-      if (dd == undefined) {
-        rr.hasDataOnTimestamp = false;
-      } else {
-        // Change state
-        rr.isActivated = !rr.isActivated;
-        rr.hasDataOnTimestamp = true;
-        console.log("Radar " + rr.Site + " has data on timestamp");
-        // Change GUIManager state
-        let site = rr.Site;
-        window.GUIManager.widgetHFRadars.radarsVisible[site] = rr.isActivated;
-      }
-    },
+
     radarActivatedChanged: function(rr){
-      this.updateRadarState(rr);
-      // Check if there is data
+      rr.isActivated = !rr.isActivated;
+      window.GUIManager.widgetHFRadars.radarsVisible[rr.UUID] = radar.isActivated;
+      // Check if radar has data
+      let DMRadar = window.DataManager.HFRadars[rr.UUID];
+      if (DMRadar.data == undefined) // No data structure (wave file is loaded before radar file)
+        radar.hasDataOnTimestamp = false;
+      else{
+        if (DMRadar.data[window.GUIManager.currentTmst] == undefined)
+          radar.hasDataOnTimestamp = false;
+        else 
+          radar.hasDataOnTimestamp = true;
+      }
+      // If there is data, emit an event
       if (rr.hasDataOnTimestamp){
         // Emit
         window.eventBus.emit('WidgetHFRadars_RadarActiveChange', window.DataManager.HFRadars[rr.UUID]);
