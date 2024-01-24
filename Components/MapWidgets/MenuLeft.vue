@@ -43,6 +43,16 @@
           this.isAdvancedInterfaceOnOff = e.target.checked;
           // Emit
           window.eventBus.emit("AdvancedInterfaceOnOff", e.target.checked);
+
+
+          //https://developers.google.com/analytics/devguides/collection/ga4/events?client_type=gtag
+          //https://developers.google.com/analytics/devguides/collection/ga4/event-parameters?client_type=gtag
+          //https://support.google.com/analytics/answer/9267568#mark
+          gtag("event", "download_trawling_test", {
+              "file_type": "csv",
+              "aggregation_type": "port",
+              "myCustomVariable": "gerard",
+          });
         } 
         // Text was clicked --> Invoke click on the element, which calls again this function
         else {
