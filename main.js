@@ -14,6 +14,7 @@ import CreateImage from './Assets/Scripts/createImage.js';
 import FileManager from './Assets/Scripts/FileManager.js';
 import DataManager from './Assets/Scripts/DataManager.js';
 import GUIManager from './Assets/Scripts/GUIManager.js';
+import GAnalyticsManager from './Assets/Scripts/GAnalyticsManager.js';
 import AnimationEngine from './Assets/Scripts/AnimationEngine.js';
 
 
@@ -30,6 +31,7 @@ window.createImage = CreateImage;
 window.FileManager = new FileManager();
 window.DataManager = new DataManager();
 window.GUIManager = new GUIManager();
+window.GAnalyticsManager = new GAnalyticsManager();
 window.AnimationEngine = AnimationEngine;
 
 
