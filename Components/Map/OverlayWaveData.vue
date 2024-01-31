@@ -26,7 +26,7 @@
         </div>
 
         <!-- No wind-wave data, but file exists-->
-        <div v-else-if="radarData[key].fileStatus == 2"><span>No wave or wind data</span></div>
+        <!-- <div v-else-if="radarData[key].fileStatus == 2"><span>No wave or wind data</span></div> -->
         
         
         <!-- Loading -->
