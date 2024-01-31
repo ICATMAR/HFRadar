@@ -496,8 +496,8 @@ export default {
       
 
       // Center on latest radar location
-      let location = radar.getRadarOrigin();
-      this.centerOnCoord(location);
+      //let location = radar.getRadarOrigin();
+      //this.centerOnCoord(location);
 
       
       // Vector - Features layer
