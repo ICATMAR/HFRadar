@@ -800,6 +800,9 @@ class CombinedRadars extends HFRadar {
   constructor (CombinedRadarData){
     
     super(CombinedRadarData);
+    // WARN, HACK, TODO: for some reason when calling super, the addRadarData from CombinedRadars is called but
+    // the data structure is not store, e.g. this.dataGrid is empty. addRadarData needs to be called again. This only happens
+    // once when the CombinedRadar is created: new CombinedRadars();
     this.addRadarData(CombinedRadarData, 100, 200); // Consider using power of two numbers to create image and upsample later
   }
 
