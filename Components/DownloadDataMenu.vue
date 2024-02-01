@@ -73,7 +73,7 @@
 export default {
   name: "DownloadDataMenu",
   mounted(){
-    this.isVisible = true;
+    //this.isVisible = true;
 
     window.eventBus.on('HFRadarDataLoaded', () => {
       this.canDownload = true;
