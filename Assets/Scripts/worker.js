@@ -40,6 +40,7 @@ onmessage = async (e) => {
 
     self.postMessage(['requestedFiles', workerFunctions.getRequestedFiles()]);
     self.postMessage(['loadDataFromRepository', hfRadarData]);
+    self.postMessage(['loadedFilesLog', workerFunctions.getLoadedFilesLog()]);
   }
 
 
@@ -51,6 +52,7 @@ onmessage = async (e) => {
     let hfRadarData = await workerFunctions.loadStaticFilesRepository(...message[1]);
     self.postMessage(['requestedFiles', workerFunctions.getRequestedFiles()]);
     self.postMessage(['loadStaticFilesRepository', hfRadarData]);
+    self.postMessage(['loadedFilesLog', workerFunctions.getLoadedFilesLog()]);
   }
 
 }

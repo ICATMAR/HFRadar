@@ -32,6 +32,9 @@
 
     <!-- Cookie banner -->
     <cookie-banner></cookie-banner>
+
+    <!-- Download data menu -->
+    <download-data-menu></download-data-menu>
   </div>
 </template>
 
@@ -46,6 +49,7 @@ import SidePanel from "./SidePanel.vue";
 import MenuLeft from "./MapWidgets/MenuLeft.vue";
 import CentralPanel from "./Panels/CentralPanel.vue";
 import CookieBanner from "./CookieBanner.vue";
+import DownloadDataMenu from "./DownloadDataMenu.vue";
 
 
 export default {
@@ -134,6 +138,7 @@ export default {
     "menu-left": MenuLeft,
     "central-panel": CentralPanel,
     "cookie-banner": CookieBanner,
+    "download-data-menu": DownloadDataMenu,
   }
 }
 </script>
