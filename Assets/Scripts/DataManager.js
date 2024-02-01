@@ -800,6 +800,9 @@ class CombinedRadars extends HFRadar {
   constructor (CombinedRadarData){
     
     super(CombinedRadarData);
+    // WARN, HACK, TODO: for some reason when calling super, the addRadarData from CombinedRadars is called but
+    // the data structure is not store, e.g. this.dataGrid is empty. addRadarData needs to be called again. This only happens
+    // once when the CombinedRadar is created: new CombinedRadars();
     this.addRadarData(CombinedRadarData, 100, 200); // Consider using power of two numbers to create image and upsample later
   }
 
@@ -847,8 +850,9 @@ class CombinedRadars extends HFRadar {
       }
     }
     // Calculate distance between two adjacent points
-    distances.sort();
-    let distanceLimit = distances[Math.floor(distances.length/2)];
+    // WARN: in erroneous files this might fail.
+    distances.sort(); // Sort the distances
+    let distanceLimit = distances[Math.floor(distances.length/2)]; // Take the median (most points are adjacent)
 
   
   
@@ -857,7 +861,8 @@ class CombinedRadars extends HFRadar {
     minLat -= 0.013;
     maxLong += 0.017;
     minLong -= 0.017;
-  
+    // TODO: make it regular for temporal animation? i.e. each timestamp has different a dataGrid. This adds an extra step when
+    // interpolating dataGrids (the index of the cell grid has to be calculated again)
     let rangeLat = maxLat - minLat;
     let rangeLong = maxLong - minLong;
 
@@ -867,24 +872,33 @@ class CombinedRadars extends HFRadar {
     let stepLong = rangeLong / resLong;
 
 
-    // Create grid for fast look-up
-    // TODO: make it regular for temporal animation?
-    //console.log("min long-lat: " + minLong + ", " + minLat + "-- max long-lat: " + maxLong + ", " + maxLat);
-    const MINLONG = 3.0;
-    const MAXLONG = 4.5;
-    const MINLAT = 41.0;
-    const MAXLAT = 43.5;
-    const GRIDRESOLUTION = Math.max(resLat, resLong)/10;
-    let numCols = Math.round((MAXLONG - MINLONG) * GRIDRESOLUTION);
-    let numRows = Math.round((MAXLAT - MINLAT) * GRIDRESOLUTION);
-    let numGridCells = numCols * numRows;
-    let grid = new Array(numGridCells); // TODO: PREALLOCATE MEMORY?
+    // Create grid for fast look-up of distances
+    // The cell size is related to the distance between adjacent points (distanceLimit) and
+    // the range in lat or long. We want to minimize the number of data points per cell (ideally 1) because
+    // the computation expense comes from calculating distances between the dataGrid point (for animation) and the original data points.
+
+    // WARN: in erroneous files it might be better to have a predefined grid?
+    const GRIDRESOLUTION = Math.ceil(Math.max(rangeLat, rangeLong)/distanceLimit);
+    let numCols = GRIDRESOLUTION;
+
+    // Predefined grid
+    // const MINLONG = 3.0;
+    // const MAXLONG = 3.2;
+    // const MINLAT = 41.0;
+    // const MAXLAT = 41.5;
+    // const GRIDRESOLUTION = Math.max(resLat, resLong)/10; // Predefined grid
+    // let numCols = Math.round((MAXLONG - MINLONG) * GRIDRESOLUTION);
+    // let numRows = Math.round((MAXLAT - MINLAT) * GRIDRESOLUTION);
+    // let numGridCells = numCols * numRows;
+    let grid = new Array(); // TODO: PREALLOCATE MEMORY?
     // Fill grid with point indices
     for (let i = 0; i < data.length; i++){
       let long =  data[i]['Longitude (deg)'];
       let lat = data[i]['Latitude (deg)'];
-      let colIndex = Math.floor((long - MINLONG) * GRIDRESOLUTION);
-      let rowIndex = Math.floor((lat - MINLAT) * GRIDRESOLUTION);
+      // let colIndex = Math.floor((long - MINLONG) * GRIDRESOLUTION); // Predefined grid
+      // let rowIndex = Math.floor((lat - MINLAT) * GRIDRESOLUTION); // Predefined grid
+      let colIndex = Math.floor((long - minLong) * GRIDRESOLUTION);
+      let rowIndex = Math.floor((lat - minLat) * GRIDRESOLUTION);
       // Store grid indices of cells
       let gridCellIndex = rowIndex * numCols + colIndex; 
       if (grid[gridCellIndex] == undefined)
@@ -897,7 +911,7 @@ class CombinedRadars extends HFRadar {
   
     // Create typed array
     let dataGrid = new Float32Array(resLat * resLong * 2);
-
+    // let debug_numberOfIterationsPerDataGridPoint = 0;
     for (let ii = 0; ii < dataGrid.length / 2; ii++){
 
       let i = Math.floor( ii / resLong); // Lat index
@@ -920,8 +934,10 @@ class CombinedRadars extends HFRadar {
       // Interpolation
       // Find four closest points using the grid
       let dataPointDistances = []; // TODO OPTIMIZE MEMORY
-      let colIndex = Math.floor((long - MINLONG) * GRIDRESOLUTION);
-      let rowIndex = Math.floor((lat - MINLAT) * GRIDRESOLUTION);
+      // let colIndex = Math.floor((long - MINLONG) * GRIDRESOLUTION); // Predefined grid
+      // let rowIndex = Math.floor((lat - MINLAT) * GRIDRESOLUTION); // Predefined grid
+      let colIndex = Math.floor((long - minLong) * GRIDRESOLUTION);
+      let rowIndex = Math.floor((lat - minLat) * GRIDRESOLUTION);
       let gridCellIndex = rowIndex * numCols + colIndex;
       
 
@@ -941,6 +957,7 @@ class CombinedRadars extends HFRadar {
             let indexData = gridCell[kk];
             // Calculate distance
             let dd = this.calcDistance(long, lat, data[indexData]['Longitude (deg)'], data[indexData]['Latitude (deg)']);
+            //debug_numberOfIterationsPerDataGridPoint++;
             if (dd < distanceLimit){
               dataPointDistances.push([dd, indexData]);
             }
@@ -991,7 +1008,7 @@ class CombinedRadars extends HFRadar {
       dataGrid[ii * 2] = UValue;
       dataGrid[ii * 2 + 1] = VValue;
     }
-
+    //console.log("numberOfIterationsPerDataGridPoint: " + debug_numberOfIterationsPerDataGridPoint/dataGrid.length);
     
     this.dataGrid[timestamp] = {
       dataGrid,

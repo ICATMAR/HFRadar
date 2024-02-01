@@ -56,10 +56,28 @@
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-FJQW9S0ZKR"></script>
   <script>
+    // https://support.google.com/analytics/answer/9976101
+    // https://developers.google.com/tag-platform/gtagjs/reference
+    // https://github.com/yaiks/vue-cookie-comply/
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
-  
+    // Check if analyitic preferences were stored
+    let params = {};
+    if (localStorage.getItem('cookie-analytics')){
+      let paramsStr = localStorage.getItem('cookie-analytics');
+      params = JSON.parse(paramsStr);
+    } else {
+      params = {
+        ad_storage: 'denied',
+        ads_data_redaction: 'false',
+        ad_user_data: 'denied',
+        ad_personalization: 'denied',
+        analytics_storage: 'denied',
+      };   
+      localStorage.setItem('cookie-analytics', JSON.stringify(params));
+    }
+    gtag('consent', 'default', params);
     gtag('config', 'G-FJQW9S0ZKR');
   </script>
 

@@ -26,7 +26,7 @@
         </div>
 
         <!-- No wind-wave data, but file exists-->
-        <div v-else-if="radarData[key].fileStatus == 2"><span>No wave or wind data</span></div>
+        <!-- <div v-else-if="radarData[key].fileStatus == 2"><span>No wave or wind data</span></div> -->
         
         
         <!-- Loading -->
@@ -267,9 +267,9 @@ a {
 }
 
 .radarIcon {
-  width: 35px;
-  height: 35px;
-  margin-right: -17.5px; /* half of its width */
+  width: 1.6em;
+  height: 1.6em;
+  margin-right: -0.8em; /* half of its width */
 }
 .wavepanel {
   background: rgb(15 48 98 / 71%);/*var(--darkBlue);*/

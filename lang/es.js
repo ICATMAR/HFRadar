@@ -153,4 +153,11 @@ export default es = {
   
 
   "Data": "Datos",
+
+  "Cookies title": "Valoramos tu privacidad",
+  "Cookies text": `Usamos tecnología como las galletas en nuestro sitio web para mejorar la
+  experiencia de usuario y analizar el tráfico. Haz click en "Acepto" para dar consentimiento.
+  Puedes cambiar tu elección en cualquier momento a través de este menú.`,
+  "Cookies accept": "Aceptar",
+  "Cookies deny": "Denegar",
 }
