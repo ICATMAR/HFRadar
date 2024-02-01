@@ -29,6 +29,7 @@ class FileManager {
   ];
 
   requestedFiles = [];
+  loadedFilesLog = [];
 
 
 
@@ -53,6 +54,11 @@ class FileManager {
         else if (result[0] == 'requestedFiles'){
           let reqFiles = result[1];
           this.requestedFiles.push(...reqFiles);
+        }
+        // Keep track of loaded files
+        else if (result[0] == 'loadedFilesLog'){
+          let loadedLog = result[1];
+          this.loadedFilesLog.push(...loadedLog);
         }
       }
     }
@@ -151,7 +157,7 @@ class FileManager {
     }
 
     // TODO: COMBINED RADAR DATA DOES NOT HAVE PATTERNUUID. IT HAS AN EXTRA TABLE WITH THE LOCATION OF THE RADARS. SHOULD ADD..
-    return {header, 'data': out};
+    return {header, 'data': out, rawText};
   }
 
 
@@ -222,7 +228,7 @@ class FileManager {
       header[itemName] = rowText.split(':')[1].trim();
     }
 
-    return {header, data};
+    return {header, data, rawText};
   }
 
 
@@ -295,6 +301,7 @@ class FileManager {
           .then (res => {
             if (res[0] == '<')
               throw new Error('File not found: ' + urls[i]);
+            this.loadedFilesLog.push({"url": urls[i], "txt": res});
             return parseText(res);
           })
         );

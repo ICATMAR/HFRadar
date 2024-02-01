@@ -1,6 +1,7 @@
 // This functions are used by the worker. They are defined here so they can be used by the main thread in case that web workers do not work.
 
 requestedFiles = [];
+loadedFilesLog =  [];
 
   parseText = function(rawText){
     // Get FileType
@@ -92,7 +93,7 @@ requestedFiles = [];
     }
 
     // TODO: COMBINED RADAR DATA DOES NOT HAVE PATTERNUUID. IT HAS AN EXTRA TABLE WITH THE LOCATION OF THE RADARS. SHOULD ADD..
-    return {header, 'data': out};
+    return {header, 'data': out, rawText};
   }
 
 
@@ -164,7 +165,7 @@ requestedFiles = [];
     }
 
 
-    return {header, data};
+    return {header, data, rawText};
   }
 
 
@@ -225,6 +226,7 @@ requestedFiles = [];
           .then (res => {
             if (res[0] == '<')
               throw new Error('File not found: ' + urls[i])
+            loadedFilesLog.push({"url": urls[i], "txt": res});
             return parseText(res);
           })
         );
@@ -300,6 +302,10 @@ requestedFiles = [];
   getRequestedFiles = function(){
     return requestedFiles;
   }
+  // Get loaded files log
+  getLoadedFilesLog = function(){
+    return loadedFilesLog;
+  }
 
 
 
@@ -315,5 +321,6 @@ if (typeof self !== 'undefined'){
     loadDataFromRepository,
     parseText,
     getRequestedFiles,
+    getLoadedFilesLog,
   }
 }
