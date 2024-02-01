@@ -41,15 +41,15 @@
         <!-- Button group -->
         <div class="button-group">
           <button class="clickable" :class="[selTimespan == 'selected' ? 'button-active' : '']" @click="selTimespan = 'selected'"><span>Selected time</span></button>
-          <button class="unavailable" :class="[selTimespan == 'lastDay' ? 'button-active' : '']" @click="selTimespan = 'lastDay'"><span>Last 24h</span></button>
-          <button class="unavailable" :class="[selTimespan == 'lastWeek' ? 'button-active' : '']" @click="selTimespan = 'lastWeek'"><span>Last week</span></button>
+          <button class="clickable" :class="[selTimespan == 'lastDay' ? 'button-active' : '']" @click="selTimespan = 'lastDay'"><span>Last 24h</span></button>
+          <button class="clickable" :class="[selTimespan == 'last3days' ? 'button-active' : '']" @click="selTimespan = 'last3days'"><span>Last 3 days</span></button>
         </div>
       </div>
       
 
       <!-- Text -->
       <div class="container-text">
-        <span>Estimated file size: {{ selTimespan == 'selected' ? estimatedSize : selTimespan == 'lastDay' ? Math.round(estimedSize*24) : Math.round(estimatedSize* 24*7) }} MB
+        <span>Estimated file size: {{ selTimespan == 'selected' ? estimatedSize : selTimespan == 'lastDay' ? Math.round(estimatedSize*24) : Math.round(estimatedSize* 24*7) }} MB
         </span>
       </div>
       
@@ -92,9 +92,28 @@ export default {
     // USER INTERACTION
     // Information about cookies settings is in index.html
     downloadClicked: function(e){
+      // Check the time span selected
+      // Download single file
+      if (this.selTimespan == 'selected'){
+        this.downloadSelectedTmst();
+      }
+      // Last 24h
+      else if (this.selTimespan == 'lastDay'){
+        this.downloadLast24h();
+      }
+      // Last 3 days
+      else if (this.selTimespan == 'last3days'){
+        this.downloadLast3days();
+      }
       // TODO
-      // If multiple files, need to zip them into a folder
-      // Also need to prepare the URL
+      // If we want a week, these files need to be loaded first. FileManager.requested files can be used
+      
+      //this.isVisible = false;
+    },
+
+    // Download single file
+    downloadSelectedTmst: function(){
+      // If timestamp is defined continue
       let tmst = GUIManager.currentTmst;
       if (tmst == undefined) {
         debugger;
@@ -118,14 +137,72 @@ export default {
       link.href = url;
       link.click();
       link.delete;
-
-
-      
-
-
-
-      //this.isVisible = false;
     },
+
+    // Download last 24h
+    downloadLast24h: function(){
+      this.donwloadLatestMultipleFiles(24, 'latest24h');
+    },
+    // Download last 3 days
+    downloadLast3days: function(){
+      this.donwloadLatestMultipleFiles(24*7, 'latest3days');
+    },
+
+    // Download multiple files
+    donwloadLatestMultipleFiles: function(hours, filename){
+      // Get current date
+      let movingDate = new Date();
+
+      let latestTmst = DataManager.latestDataTmst;
+      if (latestTmst == undefined){
+        debugger;
+        return;
+      }
+
+      // Create JSZip
+      let zip = new JSZip();
+
+      // Iterate all files
+      for (let i = 0; i < hours; i++){
+        let movingDate = new Date(latestTmst);
+        movingDate.setHours(movingDate.getHours() - i);
+        // Get ISO string
+        let tmpStr = movingDate.toISOString();
+        tmpStr = tmpStr.replaceAll('-','_');
+        // Generate key that is the same as the tmst in the file name
+        // /data/observational/hf_radar/currents/L3/tuv/2024/01/TOTL_ROSE_2024_01_31_0900.tuv
+        let keyStr = tmpStr.substring(0,10) + '_' + tmpStr.substring(11,13) + '00.tuv';
+        // Find the file
+        // TODO: consider optimizing this search (only done when downloading...)
+        for (let j = 0; j < FileManager.loadedFilesLog.length; j++){
+          let log = FileManager.loadedFilesLog[j];
+          if (log.url.includes(keyStr)){
+            // Create filename
+            // Respect original name?
+            let strParts = log.url.split('/');
+            let filename = 'ICATMAR_' + strParts[strParts.length - 1];
+            zip.file(filename, log.txt);
+
+            // Exit search loop
+            j = FileManager.loadedFilesLog.length;
+          }
+        }
+
+      }
+      // Generate zip and download
+      zip.generateAsync({type:"blob"})
+      .then(function(content) {
+        let blobUrl = URL.createObjectURL(content);
+        let link = document.createElement('a');
+        link.download = 'ICATMAR_'+ filename +'.zip';
+        link.href = blobUrl;
+        link.click();
+        link.delete;
+      });
+    }
+
+
+
   }
 }
 
@@ -206,7 +283,8 @@ export default {
 }
 
 .container-text {
-  padding-bottom: 20px
+  padding-bottom: 20px;
+  text-align: center;
 }
 
 .buttons-container {
