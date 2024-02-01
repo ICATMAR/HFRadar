@@ -381,7 +381,9 @@ class DataManager {
     if (hfRadar != undefined)
       console.log('Data is delayed by ' + counter + ' hours.');
     else
-      console.log('Data is delayed by more than 25 hours.');
+      console.log('Data is delayed by more than '+ (SEARCHHOURS) +' hours.');
+
+    this.latestDataTmst = hfRadar.lastLoadedTimestamp;
 
     return hfRadar;
   }
