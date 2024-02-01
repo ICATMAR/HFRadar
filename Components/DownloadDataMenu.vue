@@ -11,7 +11,12 @@
 
       <!-- Title -->
       <div class="container-title">
-        <span>Download data</span>
+        <span>Download settings</span>
+      </div>
+
+      <!-- Subtitle -->
+      <div class="container-subtitle">
+        <span>Sea surface velocities</span>
       </div>
 
 
@@ -51,10 +56,13 @@
       <!-- Download buttons -->
       <div class="buttons-container">
         <!-- Download -->
-        <button class="btn-download clickable" @click="downloadClicked">Download</button>
+        <button class="btn-download" :class="[canDownload ? 'clickable' : 'unavailable']" @click="downloadClicked">Download</button>
         <!-- Close -->
         <button class="btn-cancel clickable" @click="isVisible = false">Cancel</button>
       </div>
+
+      <!-- Warning no data available -->
+      <span v-if="!canDownload">Waiting until most recent data is loaded...</span>
     </div>
   </Transition>
 </template>
@@ -66,10 +74,15 @@ export default {
   name: "DownloadDataMenu",
   mounted(){
     this.isVisible = true;
+
+    window.eventBus.on('HFRadarDataLoaded', () => {
+      this.canDownload = true;
+    })
   },
   data() {
     return {
       isVisible: false,
+      canDownload: false,
       selFormat: 'tuv',
       selTimespan: 'selected',
       estimatedSize: 0.078,
@@ -82,9 +95,36 @@ export default {
       // TODO
       // If multiple files, need to zip them into a folder
       // Also need to prepare the URL
+      let tmst = GUIManager.currentTmst;
+      if (tmst == undefined) {
+        debugger;
+        return;
+      }
+
+      let baseURL = '/data/observational/hf_radar/currents/';
+      let date = new Date(tmst);
+      let dateISO = date.toISOString();
+      dateISO = dateISO.substring(0, 14) + '00:00.000Z'; // Hourly
+      let year = dateISO.substring(0,4);
+      let month = dateISO.substring(5,7);
+      let day = dateISO.substring(8,10);
+      let hour = dateISO.substring(11,13);
+
+      let url = baseURL + 'L3/tuv/' + year + '/' + month + '/TOTL_ROSE_' + year + '_' + month + '_' + day + '_' + hour + '00.tuv';
+
+      // Download file
+      let link = document.createElement('a');
+      link.download = 'ICATMAR_Currents_' + dateISO + '.tuv';
+      link.href = url;
+      link.click();
+      link.delete;
 
 
-      this.isVisible = false;
+      
+
+
+
+      //this.isVisible = false;
     },
   }
 }
@@ -136,6 +176,14 @@ export default {
 
 .container-title > span {
   font-size: large;
+}
+
+.container-subtitle {
+
+}
+
+.container-subtitle > span {
+  font-size: medium;
 }
 
 .option-container {
