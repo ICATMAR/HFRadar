@@ -86,8 +86,6 @@ dataTypes = {
       domainURL: 'https://nrt.cmems-du.eu/thredds/wms/',
       version: '1.3.0',
       doi: "https://doi.org/10.48670/moi-00172",
-      timeScaleCorrection:
-        {d: {min: 0, h: 12}},
     }
   },
   "Sea bottom temperature": {
