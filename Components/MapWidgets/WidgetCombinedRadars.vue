@@ -89,10 +89,10 @@ export default {
     
 
     // EVENTS
-    // When new data loads, usually the widget also should be shown (with particles on)
-    window.eventBus.on('HFRadarDataLoaded', tmst => {
-      this.currentsOnOffButtonClicked({target: {checked: true}});
-    });
+    // When new data loads, usually the widget also should be shown (with particles on) --> not necessarily?
+    // window.eventBus.on('HFRadarDataLoaded', tmst => {
+    //   this.currentsOnOffButtonClicked({target: {checked: true}});
+    // });
 
 
     // When mouse clicks a data point

@@ -78,6 +78,8 @@ export default {
     })
     // Load the rest of the files
     .then((tmst) =>{
+      // Add wave files that will create radar objects
+      fileTypes.push('wls');
       // Reduce tmst by 1h, as this timestamp is already loaded.
       if (tmst != undefined){
         let tmp = new Date(tmst);
@@ -86,18 +88,26 @@ export default {
       }
       // Load data
       let useWorker = true;
-      // Add wave files that will create radar objects
-      fileTypes.push('wls');
+      
       // Use web worker to load the rest of the files
       if (window.DataWorker && useWorker){
         window.DataWorker.postMessage(['loadStaticFilesRepository', [undefined, tmst, fileTypes]]);
+        // Callback, only happens at initalization
+        window.eventBus.on('FileManager_Worker_HFRadarDataLoaded', () => {
+          window.GUIManager.intialLoadDone = true;
+          window.eventBus.emit('HFRadarDataLoaded');
+        })
+
       } 
       // Fallback option
       else {
         window.DataManager.loadStaticFilesRepository(undefined, tmst, fileTypes).then((hfRadar) => {
+        window.GUIManager.intialLoadDone = true;
         if (hfRadar != undefined)
           window.eventBus.emit('HFRadarDataLoaded');
         });
+        
+        
       }
       
     })
