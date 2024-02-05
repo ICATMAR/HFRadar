@@ -86,6 +86,8 @@ export default {
       }
       // Load data
       let useWorker = true;
+      // Add wave files that will create radar objects
+      fileTypes.push('wls');
       // Use web worker to load the rest of the files
       if (window.DataWorker && useWorker){
         window.DataWorker.postMessage(['loadStaticFilesRepository', [undefined, tmst, fileTypes]]);
