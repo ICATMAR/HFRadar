@@ -187,7 +187,8 @@ loadedFilesLog =  [];
     
 
     //let baseURL = 'https://icatmar.github.io/HFRadarData/'
-    let baseURL = '/data/observational/hf_radar/currents/'
+    let baseURL = '/data/observational/hf_radar/currents/';
+    let wavesBaseURL = '/data/observational/hf_radar/waves/';
 
     let date = new Date(timestamp);
     //date = firstDate; // HACK
