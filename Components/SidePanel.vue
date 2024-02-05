@@ -104,9 +104,8 @@ export default {
   },
   mounted() {
     // EVENT LISTENERS
-    window.eventBus.on('HFRadarDataLoaded', (tmst) => {
-      if (tmst != undefined)
-        this.updateInformation(tmst);
+    window.eventBus.on('HFRadarDataLoaded', () => {
+        this.updateInformation();
     });
 
     window.eventBus.on('Widget_InfoClicked', () => {
@@ -205,10 +204,11 @@ export default {
 
     // INTERNAL EVENTS
     updateInformation(tmst){
-      // Get current active radars on that date
-      let activeRadars = window.DataManager.getRadarsDataOn(tmst);
-      this.currentTmst = tmst;
       this.visibleRadars = [];
+      // Get current active radars on that date
+      this.currentTmst = tmst || window.GUIManager.currentTmst;
+      let activeRadars = window.DataManager.getRadarsDataOn(this.currentTmst);
+      
       if (activeRadars.length != 0 ){
         for (let i = 0; i < activeRadars.length; i++){
           let HFRadar = activeRadars[i];
