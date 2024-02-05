@@ -183,7 +183,8 @@ loadedFilesLog =  [];
 
 
 
-  loadDataFromRepository = function(timestamp){
+  loadDataFromRepository = function(timestamp, fileTypes){
+    
 
     //let baseURL = 'https://icatmar.github.io/HFRadarData/'
     let baseURL = '/data/observational/hf_radar/currents/'
@@ -199,20 +200,40 @@ loadedFilesLog =  [];
 
 
     let promises = [];
-    let urls = [
-      // Begur
-      baseURL + 'L2/BEGU/' + year + '/' + month + '/RDLm_BEGU_' + year + '_' + month + '_' + day + '_' + hour + '00_l2b.ruv',
-      //  Creus
-      baseURL + 'L2/CREU/' + year + '/' + month + '/RDLm_CREU_' + year + '_' + month + '_' + day + '_' + hour + '00_l2b.ruv',
-      // Arenys
-      baseURL + 'L2/AREN/' + year + '/' + month + '/RDLm_AREN_' + year + '_' + month + '_' + day + '_' + hour + '00.ruv',
-      // Port de Barcelona
-      baseURL + 'L2/PBCN/' + year + '/' + month + '/RDLm_PBCN_' + year + '_' + month + '_' + day + '_' + hour + '00.ruv',
-      // Port Ginesta
-      baseURL + 'L2/GNST/' + year + '/' + month + '/RDLm_GNST_' + year + '_' + month + '_' + day + '_' + hour + '00.ruv',
+    let urls = [];
+    
+    // Currents
+    if (fileTypes.includes('tuv')){
       // Totals Roses
-      baseURL + 'L3/tuv/' + year + '/' + month + '/TOTL_ROSE_' + year + '_' + month + '_' + day + '_' + hour + '00.tuv',
-    ];
+      urls.push(baseURL + 'L3/tuv/' + year + '/' + month + '/TOTL_ROSE_' + year + '_' + month + '_' + day + '_' + hour + '00.tuv');
+    }
+    // Radials
+    if (fileTypes.includes('ruv')){
+      // Begur
+      urls.push(baseURL + 'L2/BEGU/' + year + '/' + month + '/RDLm_BEGU_' + year + '_' + month + '_' + day + '_' + hour + '00_l2b.ruv');
+      //  Creus
+      urls.push(baseURL + 'L2/CREU/' + year + '/' + month + '/RDLm_CREU_' + year + '_' + month + '_' + day + '_' + hour + '00_l2b.ruv');
+      // Arenys
+      urls.push(baseURL + 'L2/AREN/' + year + '/' + month + '/RDLm_AREN_' + year + '_' + month + '_' + day + '_' + hour + '00.ruv');
+      // Port de Barcelona
+      urls.push(baseURL + 'L2/PBCN/' + year + '/' + month + '/RDLm_PBCN_' + year + '_' + month + '_' + day + '_' + hour + '00.ruv');
+      // Port Ginesta
+      urls.push(baseURL + 'L2/GNST/' + year + '/' + month + '/RDLm_GNST_' + year + '_' + month + '_' + day + '_' + hour + '00.ruv');
+    }
+    // Waves and wind
+    if (fileTypes.includes('wls')){
+      // Waves Begur
+      urls.push(wavesBaseURL + 'BEGU/' + year + '/WVLM_BEGU_' + year + '_' + month + '_01_0000.wls');
+      // Waves Creus
+      urls.push(wavesBaseURL + 'CREU/' + year + '/WVLM_CREU_' + year + '_' + month + '_01_0000.wls');
+      // Waves Arenys
+      urls.push(wavesBaseURL + 'AREN/' + year + '/WVLM_AREN_' + year + '_' + month + '_01_0000.wls');
+      // Waves Port de Barcelona
+      urls.push(wavesBaseURL + 'PBCN/' + year + '/WVLM_PBCN_' + year + '_' + month + '_01_0000.wls');
+      // Waves Port Ginesta
+      urls.push(wavesBaseURL + 'GNST/' + year + '/WVLM_GNST_' + year + '_' + month + '_01_0000.wls');
+    }
+
 
     for (let i = 0; i < urls.length; i++){
       // Check if this file was already requested
@@ -244,7 +265,7 @@ loadedFilesLog =  [];
   const firstDate = new Date('2023-01-26T06:00Z');
   const lastDate = new Date('2023-02-02T06:00Z');
   const DAYSTOLOAD = 3;
-  loadStaticFilesRepository = async function(startDate, endDate){
+  loadStaticFilesRepository = async function(startDate, endDate, fileTypes){
     
     // Find dates
     let now = new Date();
@@ -270,7 +291,7 @@ loadedFilesLog =  [];
     let promises = [];
     while(movingDate <= now){
       // Request radar files on date
-      promises.push(this.loadDataFromRepository(movingDate.toISOString()));
+      promises.push(this.loadDataFromRepository(movingDate.toISOString(), fileTypes));
       // Add 1h
       movingDate.setUTCHours(movingDate.getUTCHours() + 1);
     }

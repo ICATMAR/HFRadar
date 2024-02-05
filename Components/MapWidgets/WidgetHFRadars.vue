@@ -138,7 +138,7 @@ export default {
       // Iterate radars
       Object.keys(window.DataManager.HFRadars).forEach(key => {
         let radar = window.DataManager.HFRadars[key];
-        if (radar.constructor.name === "HFRadar")
+        if (radar.constructor.name === "HFRadar" && this.radarsVue[radar.UUID] != undefined)
           if (radar.data != undefined)
             this.radarsVue[radar.UUID].hasDataOnTimestamp = radar.data[tmst] != undefined;
           else

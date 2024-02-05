@@ -110,46 +110,47 @@ export default {
       Object.keys(window.DataManager.HFRadars).forEach(key => {
         let radar = window.DataManager.HFRadars[key];
         // If it is visible and has data, update data and start animation
-        if (radar.data[tmst] != undefined){
-          // Create animation engine if it does not exist
-          if (radar.animEngine == undefined) {
-            this.createAnimationEngine(radar, tmst); // TODO: DOES THIS CREATE AN ANIMATION THAT IS AUTOMATICALLY VISIBLE? PROBABLY YES, need to check!
-            // Halt animation just in case
-            radar.animEngine.isStopped = true;
-            radar.animEngine.clearCanvas();
-          }
+        if (radar.data){
+          if (radar.data[tmst] != undefined){
+            // Create animation engine if it does not exist
+            if (radar.animEngine == undefined) {
+              this.createAnimationEngine(radar, tmst); // TODO: DOES THIS CREATE AN ANIMATION THAT IS AUTOMATICALLY VISIBLE? PROBABLY YES, need to check!
+              // Halt animation just in case
+              radar.animEngine.isStopped = true;
+              radar.animEngine.clearCanvas();
+            }
 
-          // Update radar data and visibility
-          // For HFRadar
-          if (radar.constructor.name == "HFRadar"){
-            // Show widget
-            this.radarsExist = true;
-            // Update data
-            radar.animEngine.setHFRadarData(radar.data[tmst]);
-            // TODO: DECIDE IF TO SHOW RADAR DATA OR NOT ACCORDING TO GUIMANAGER
-            let guiState = window.GUIManager.widgetHFRadars;
-            let shouldAnimate = guiState.isVisible && guiState.areParticlesVisible && guiState.radarsVisible[radar.Site];
-            
-            // Start animation
-            if (radar.animEngine.isStopped && shouldAnimate){
-              radar.animEngine.isStopped = false;
-              radar.animEngine.update();
+            // Update radar data and visibility
+            // For HFRadar
+            if (radar.constructor.name == "HFRadar"){
+              // Show widget
+              this.radarsExist = true;
+              // Update data
+              radar.animEngine.setHFRadarData(radar.data[tmst]);
+              // TODO: DECIDE IF TO SHOW RADAR DATA OR NOT ACCORDING TO GUIMANAGER
+              let guiState = window.GUIManager.widgetHFRadars;
+              let shouldAnimate = guiState.isVisible && guiState.areParticlesVisible && guiState.radarsVisible[radar.Site];
+              
+              // Start animation
+              if (radar.animEngine.isStopped && shouldAnimate){
+                radar.animEngine.isStopped = false;
+                radar.animEngine.update();
+              }
+            }// For combined
+            else if (radar.constructor.name == "CombinedRadars"){
+              // Show widget
+              this.combinedRadarsExist = true;
+              // Update data
+              radar.animEngine.setCombinedRadarData(radar.dataGrid[tmst]);
+              // Start animation
+              if (radar.animEngine.isStopped && window.GUIManager.widgetCombinedRadars.isVisible && window.GUIManager.widgetCombinedRadars.areParticlesVisible) {
+                radar.animEngine.isStopped = false;
+                radar.animEngine.update();
+              }
             }
-          }// For combined
-          else if (radar.constructor.name == "CombinedRadars"){
-            // Show widget
-            this.combinedRadarsExist = true;
-            // Update data
-            radar.animEngine.setCombinedRadarData(radar.dataGrid[tmst]);
-            // Start animation
-            if (radar.animEngine.isStopped && window.GUIManager.widgetCombinedRadars.isVisible && window.GUIManager.widgetCombinedRadars.areParticlesVisible) {
-              radar.animEngine.isStopped = false;
-              radar.animEngine.update();
-            }
-          }
-          
-          
-        }
+          } // radar.data[tmst]
+        } // radar.data
+        
         // Otherwise, stop animation
         else if (radar.animEngine){
           radar.animEngine.isStopped = true;

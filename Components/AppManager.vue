@@ -66,9 +66,9 @@ export default {
     }; 
 
     // Load data
-    //window.DataManager.loadStaticFiles();
     // First files of real-time data --> load them first to show something on the website
-    window.DataManager.loadLatestStaticFilesRepository().then(hfRadar => {
+    let fileTypes = ['tuv']; // Only load tuv files at the beginning
+    window.DataManager.loadLatestStaticFilesRepository(fileTypes).then(hfRadar => {
       let tmst;
       if (hfRadar != undefined){
         tmst = hfRadar.lastLoadedTimestamp;
@@ -88,11 +88,11 @@ export default {
       let useWorker = true;
       // Use web worker to load the rest of the files
       if (window.DataWorker && useWorker){
-        window.DataWorker.postMessage(['loadStaticFilesRepository', [undefined, tmst]]);
+        window.DataWorker.postMessage(['loadStaticFilesRepository', [undefined, tmst, fileTypes]]);
       } 
       // Fallback option
       else {
-        window.DataManager.loadStaticFilesRepository(undefined, tmst).then((hfRadar) => {
+        window.DataManager.loadStaticFilesRepository(undefined, tmst, fileTypes).then((hfRadar) => {
         if (hfRadar != undefined)
           window.eventBus.emit('HFRadarDataLoaded');
         });

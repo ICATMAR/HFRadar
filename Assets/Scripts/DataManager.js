@@ -162,8 +162,16 @@ class DataManager {
     // Data is currently being loaded
     if (this.hourlyDataAvailability[key][keys[0]] == 3)
       return;
+
+    // Decide if to load radials according to the GUIManager
+    let fileTypes = ['tuv', 'wls'];
+    if (GUIManager.isAdvancedInterface){
+      if (GUIManager.widgetHFRadars.isVisible){
+        fileTypes.push('ruv');
+      }
+    }
     // First load current file
-    this.loadStaticFilesRepository(tmst, tmst).then(hfRadar => {
+    this.loadStaticFilesRepository(tmst, tmst, fileTypes).then(hfRadar => {
       if (hfRadar != undefined){
         window.eventBus.emit('HFRadarDataLoaded', hfRadar.lastLoadedTimestamp);
       }
@@ -204,7 +212,7 @@ class DataManager {
       this.isLoading = true;
     }
 
-    this.loadDatedStaticFilesRepository(arrayDates).then(hfRadar => {
+    this.loadDatedStaticFilesRepository(arrayDates, fileTypes).then(hfRadar => {
       this.isLoading = false;
       if (hfRadar != undefined)
         window.eventBus.emit('HFRadarDataLoaded'); });
@@ -354,7 +362,8 @@ class DataManager {
 
 
   // Tries to load the most recent file by using the current date and searching backwards until a file is found. Returns a HFRadar.
-  async loadLatestStaticFilesRepository(){
+  // File types are the kind of files to load: ['tuv','ruv','wls'] --> currents, radials, waves
+  async loadLatestStaticFilesRepository(fileTypes){
     // Hourly
     let now = new Date();
     let str = now.toISOString();
@@ -364,7 +373,7 @@ class DataManager {
     now.setUTCHours(now.getUTCHours() - 1); // Most recent data is from 1h ago. Currents are calculated with +1h, 0h, -1h files, thus there is a delay of 1h always.
     let lastDate = now.toISOString();
     // Petition latest dataset
-    let hfRadar = await this.loadStaticFilesRepository(lastDate, lastDate);
+    let hfRadar = await this.loadStaticFilesRepository(lastDate, lastDate, fileTypes);
 
     if (hfRadar != undefined)
       return hfRadar;
@@ -375,7 +384,7 @@ class DataManager {
       // Reduce time one hour
       now.setUTCHours(now.getUTCHours() - 1);
       counter++;
-      hfRadar = await this.loadStaticFilesRepository(now.toISOString(), now.toISOString());
+      hfRadar = await this.loadStaticFilesRepository(now.toISOString(), now.toISOString(), fileTypes);
     }
 
     if (hfRadar != undefined)
@@ -389,7 +398,8 @@ class DataManager {
   }
 
   // Load files from a repository given a start and ending dates. Returns a promise
-  loadStaticFilesRepository(startDate, endDate){
+  // File types are the kind of files to load: ['tuv','ruv','wls'] --> currents, radials, waves
+  loadStaticFilesRepository(startDate, endDate, fileTypes){
     
     // Find dates
     let now = new Date();
@@ -414,7 +424,7 @@ class DataManager {
     // Array of promises
     let promises = [];
     while(movingDate <= now){
-      promises.push(window.FileManager.loadDataFromRepository(movingDate.toISOString()));
+      promises.push(window.FileManager.loadDataFromRepository(movingDate.toISOString(), fileTypes));
       // Add 1h
       movingDate.setUTCHours(movingDate.getUTCHours() + 1);
     }
@@ -431,8 +441,6 @@ class DataManager {
             let promiseResult = filesOnDatePromiseResult.value[j];
             if (promiseResult.status == 'fulfilled' && promiseResult.value != undefined){
               lastHFRadar = this.addHFRadarData(promiseResult.value);
-              if (lastHFRadar.data == undefined)
-                lastHFRadar = undefined;
             }
           }
         }
@@ -444,12 +452,13 @@ class DataManager {
   }
 
   // Given an array of dates (ISOString), load those dates. Returns a promise
-  loadDatedStaticFilesRepository(arrayDates){
+  // File types are the kind of files to load: ['tuv','ruv','wls'] --> currents, radials, waves
+  loadDatedStaticFilesRepository(arrayDates, fileTypes){
 
     // Array of promises
     let promises = [];
     for (let i = 0; i < arrayDates.length; i++) {
-      promises.push(window.FileManager.loadDataFromRepository(arrayDates[i]));
+      promises.push(window.FileManager.loadDataFromRepository(arrayDates[i], fileTypes));
     }
 
     let lastHFRadar;
@@ -473,27 +482,7 @@ class DataManager {
   }
 
 
-  // Load static files
-  loadStaticFiles(){
-    // Create promises array
-    let movingDate = new Date(firstDate.toISOString());
-    let promises = [];
-    while (movingDate <= lastDate){
-      promises.push(window.FileManager.loadData(movingDate.toISOString()));
-      // Add 1h
-      movingDate.setUTCHours(movingDate.getUTCHours() + 1);
-    }
 
-    Promise.all(promises).then(values => {
-
-      let lastHFRadar;
-      for (let i = 0; i < values.length; i++){
-        lastHFRadar = this.addHFRadarData(values[i]);
-      }
-      
-      window.eventBus.emit('HFRadarDataLoaded', lastHFRadar.lastLoadedTimestamp);
-    });
-  }
 
 
   // Load files that were dropped
