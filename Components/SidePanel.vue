@@ -16,7 +16,7 @@
           <div :ref="'HFRadar' + index" :id="'bodySectionOne' + index" class="accordion-collapse collapse show"
             :aria-labelledby="'headingSectionOne' + index">
             <div class="accordion-body">
-              <p v-for="(hItem, key) in radar.header">
+              <p v-for="(hItem, key) in radar.headers[currentTmst]">
                 <strong>{{key}}: </strong>{{ hItem }}
                 <br>
               </p>
@@ -207,6 +207,7 @@ export default {
     updateInformation(tmst){
       // Get current active radars on that date
       let activeRadars = window.DataManager.getRadarsDataOn(tmst);
+      this.currentTmst = tmst;
       this.visibleRadars = [];
       if (activeRadars.length != 0 ){
         for (let i = 0; i < activeRadars.length; i++){
