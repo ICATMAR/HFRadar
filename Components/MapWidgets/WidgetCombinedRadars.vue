@@ -108,6 +108,11 @@ export default {
       this.$refs.legendGUI.setCurrentValue(currentValue);
     });
 
+    // User moves mouse on map
+    window.eventBus.on('GUIManager_MouseMovingCurrentsValue', magnitude => {
+      this.$refs.legendGUI.setCurrentValue(magnitude);
+    });
+
 
     // Advanced interface
     window.eventBus.on("AdvancedInterfaceOnOff", state => {

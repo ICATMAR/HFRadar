@@ -76,11 +76,6 @@ export default {
       this.currentValue = '';
     });
 
-    // User moves mouse on map
-    window.eventBus.on('GUIManager_MouseMovingCurrentsValue', magnitude => {
-      this.setCurrentValue(magnitude);
-    });
-
     // Advanced interface
     window.eventBus.on('AdvancedInterfaceOnOff', state => this.isAdvancedInterfaceOnOff = state);
 
