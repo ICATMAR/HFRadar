@@ -151,17 +151,17 @@ class DataManager {
   // Checks if to load data when the user or the app interacts with the interface
   loadOnInteraction(tmst){
     // Check if data is loaded, otherwise load
-    let key = tmst.substring(0,13) + 'Z';
-    // No data exists on that date
-    if (this.hourlyDataAvailability[key] == undefined)
-      return;
-    // Data exists and its loaded
-    let keys = Object.keys(this.hourlyDataAvailability[key]);
-    if (this.hourlyDataAvailability[key][keys[0]] == 2)
-      return;
-    // Data is currently being loaded
-    if (this.hourlyDataAvailability[key][keys[0]] == 3)
-      return;
+    // let key = tmst.substring(0,13) + 'Z';
+    // // No data exists on that date
+    // if (this.hourlyDataAvailability[key] == undefined)
+    //   return;
+    // // Data exists and its loaded
+    // let keys = Object.keys(this.hourlyDataAvailability[key]);
+    // if (this.hourlyDataAvailability[key][keys[0]] == 2)
+    //   return;
+    // // Data is currently being loaded
+    // if (this.hourlyDataAvailability[key][keys[0]] == 3)
+    //   return;
 
     // Decide if to load radials according to the GUIManager
     let fileTypes = ['tuv', 'wls'];
@@ -189,21 +189,22 @@ class DataManager {
     let movingDate = new Date(sD.toISOString());
     while (movingDate < eD){
       // Check if the date exists or is already loaded
-      let key = movingDate.toISOString().substring(0,13) + 'Z';
-      // Data exists on date
-      if (this.hourlyDataAvailability[key] != undefined){
-        // Radar files are not loaded
-        let keys = Object.keys(this.hourlyDataAvailability[key]);
-        if (this.hourlyDataAvailability[key][keys[0]] == true){
-          arrayDates.push(movingDate.toISOString());
-          // Set the state to loading
-          Object.keys(this.hourlyDataAvailability[key]).forEach(kk => {
-            this.hourlyDataAvailability[key][kk] = 3;
-          });
-        }
-      }
+      // let key = movingDate.toISOString().substring(0,13) + 'Z';
+      // // Data exists on date
+      // if (this.hourlyDataAvailability[key] != undefined){
+      //   // Radar files are not loaded
+      //   let keys = Object.keys(this.hourlyDataAvailability[key]);
+      //   if (this.hourlyDataAvailability[key][keys[0]] == true){
+      //     arrayDates.push(movingDate.toISOString());
+      //     // Set the state to loading
+      //     Object.keys(this.hourlyDataAvailability[key]).forEach(kk => {
+      //       this.hourlyDataAvailability[key][kk] = 3;
+      //     });
+      //   }
+      // }
 
       // Add 1h
+      arrayDates.push(movingDate.toISOString());
       movingDate.setUTCHours(movingDate.getUTCHours() + 1);
 
     }

@@ -12,7 +12,7 @@
     </div>
 
     <Transition>
-    <div v-show="isVisible && !isLoading">
+    <div v-show="isVisible && activeLoadingRequests == 0">
       <!-- Existing radars -->
       <div id="existingRadarsContainer">
         <div v-for="radar in radarsVue">
@@ -56,7 +56,7 @@
     </div>
     </Transition>
 
-    <div v-show="isVisible && isLoading">
+    <div v-show="isVisible && activeLoadingRequests > 0">
       <span>LOADING...</span>
     </div>
 
@@ -126,6 +126,10 @@ export default {
         if (radar.constructor.name == "HFRadar")
           this.radarsVue[radar.UUID].hasDataOnTimestamp = true;
       });
+
+      if (window.DataManager.isLoading == false){
+        this.activeLoadingRequests = 0;
+      }
     });
     // When mouse clicks a data point
     window.eventBus.on('Map_ClickedDataPoint', e => {
@@ -139,15 +143,40 @@ export default {
     })
     // When selected date changes
     window.eventBus.on('DataStreamsBar_SelectedDateChanged', tmst => {
+      if (!this.isVisible)
+        return;
+      
       // Iterate radars
-      Object.keys(window.DataManager.HFRadars).forEach(key => {
-        let radar = window.DataManager.HFRadars[key];
-        if (radar.constructor.name === "HFRadar" && this.radarsVue[radar.UUID] != undefined)
-          if (radar.data != undefined)
-            this.radarsVue[radar.UUID].hasDataOnTimestamp = radar.data[tmst] != undefined;
-          else
-            this.radarsVue[radar.UUID].hasDataOnTimestamp = false;
-      });
+      let keys = Object.keys(window.DataManager.HFRadars);
+      for (let i = 0; i < keys.length; i++) {
+        let key = keys[i];
+        let DMRadar = window.DataManager.HFRadars[key];
+        if (DMRadar.constructor.name == "HFRadar"){
+          // No data on radar, i.e., it was never loaded. Data manager loads the data
+          if (DMRadar.data === undefined){
+            i = keys.length; // Exit loop --> DataManager already loads data (loadOnInteraction)
+          }
+          // Data exists, check if it has data on timestamp
+          else {
+            this.radarsVue[DMRadar.UUID].hasDataOnTimestamp = DMRadar.data[tmst] != undefined
+          }
+        }
+      };
+      // Keep track of data manager loading process
+      // WARNING: DataStreamsBar_SelectedDateChanged event arrives before to DataManager just by luck? Maybe do a settimeout here?
+      // E.g.: event DataStreamsBar...> DataManager starts loading > WidgetHFRadars shows loading button
+      // TODO: this a very dirty HACK. 
+      // OPTIONS
+      // Create an event when DataManager finishes/starts loading
+      // This could activate the animations of loading in several places
+      // Loading WMS should also be displayed somehow, but in a different way
+      
+      setTimeout(() => {
+        if (window.DataManager.isLoading){
+          this.activeLoadingRequests++;
+        } else
+          this.activeLoadingRequests = 0;
+      }, 300);
     });
 
 
@@ -170,7 +199,7 @@ export default {
       defaultUnits: 'cm/s',
       selectedLegends: ['BlueWhiteRed.png', 'GreenBlueWhiteOrangeRed.png', 'ModifiedOccam.png', 'DarkScaleColors.png' ],
       isVisible: false,
-      isLoading: false,
+      activeLoadingRequests: 0,
       radarsVue: {},
     }
   },
@@ -218,7 +247,7 @@ export default {
       window.GUIManager.widgetHFRadars.isVisible = e.target.checked;
       window.GUIManager.isDataPointSelected = false;
       // Exit if loading
-      if (this.isLoading){
+      if (this.activeLoadingRequests > 0){
         window.eventBus.emit("WidgetHFRadars_VisibilityChanged", e.target.checked);
         return;
       }
@@ -238,16 +267,15 @@ export default {
           //   if (hfRadar != undefined)
           //     window.eventBus.emit('HFRadarDataLoaded');
           // });
-          if (DMRadar.data == undefined && this.isLoading == false){
+          if (DMRadar.data == undefined && this.activeLoadingRequests == 0){
             // Load data
-            this.isLoading = true;
+            this.activeLoadingRequests++;
             i = keys.length; // Exit loop
-            window.DataManager.loadStaticFilesRepository(undefined, window.GUIManager.currentTmst, ['tuv','ruv','wls']).then(() => {
-              this.isLoading = false;
-              console.log("HERE");
+            window.DataManager.loadStaticFilesRepository(window.GUIManager.currentTmst, window.GUIManager.currentTmst, ['tuv','ruv','wls']).then(() => {
+              this.activeLoadingRequests--;
               window.eventBus.emit('HFRadarDataLoaded');
             });
-          } else if (this.isLoading == false) {
+          } else if (this.activeLoadingRequests == 0) {
             if (DMRadar.data[window.GUIManager.currentTmst] == undefined)
               radar.hasDataOnTimestamp = false;
             else 
