@@ -47,17 +47,16 @@ export default {
       Object.keys(window.DataManager.HFRadars).forEach(key => {
         let radar = window.DataManager.HFRadars[key];
         // Check if there is radar data (waveData can be loaded first)
+        // Activate widget
+        if (radar.constructor.name == "CombinedRadars")
+          this.combinedRadarsExist = true;
+        else if (radar.constructor.name == "HFRadar")
+          this.radarsExist = true;
 
         // Check if there is radar data on that tmst
         if (radar.data){ //|| radar.waveData
           if (radar.data[tmst] != undefined){
     
-            // Activate widget
-            if (radar.constructor.name == "CombinedRadars")
-              this.combinedRadarsExist = true;
-            else if (radar.constructor.name == "HFRadar")
-              this.radarsExist = true;
-            
             // Create animation for radar
             // If canvas does not have animation engine
             if (radar.animEngine == undefined){
@@ -109,6 +108,12 @@ export default {
       // Iterate all radars
       Object.keys(window.DataManager.HFRadars).forEach(key => {
         let radar = window.DataManager.HFRadars[key];
+        // Show widget
+        if (radar.constructor.name == "HFRadar")
+          this.radarsExist = true;
+        else if (radar.constructor.name == "CombinedRadars")
+          this.combinedRadarsExist = true;
+
         // If it is visible and has data, update data and start animation
         if (radar.data){
           if (radar.data[tmst] != undefined){
@@ -123,8 +128,6 @@ export default {
             // Update radar data and visibility
             // For HFRadar
             if (radar.constructor.name == "HFRadar"){
-              // Show widget
-              this.radarsExist = true;
               // Update data
               radar.animEngine.setHFRadarData(radar.data[tmst]);
               // TODO: DECIDE IF TO SHOW RADAR DATA OR NOT ACCORDING TO GUIMANAGER
@@ -138,8 +141,6 @@ export default {
               }
             }// For combined
             else if (radar.constructor.name == "CombinedRadars"){
-              // Show widget
-              this.combinedRadarsExist = true;
               // Update data
               radar.animEngine.setCombinedRadarData(radar.dataGrid[tmst]);
               // Start animation
