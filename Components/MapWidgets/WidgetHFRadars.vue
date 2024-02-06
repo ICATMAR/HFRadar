@@ -217,6 +217,12 @@ export default {
       this.isVisible = e.target.checked;
       window.GUIManager.widgetHFRadars.isVisible = e.target.checked;
       window.GUIManager.isDataPointSelected = false;
+      // Exit if loading
+      if (this.isLoading){
+        window.eventBus.emit("WidgetHFRadars_VisibilityChanged", e.target.checked);
+        return;
+      }
+
       // Activate all radars when visible
       if (this.isVisible){
         let keys = Object.keys(this.radarsVue);
@@ -232,7 +238,7 @@ export default {
           //   if (hfRadar != undefined)
           //     window.eventBus.emit('HFRadarDataLoaded');
           // });
-          if (DMRadar.data == undefined){
+          if (DMRadar.data == undefined && this.isLoading == false){
             // Load data
             this.isLoading = true;
             i = keys.length; // Exit loop
@@ -250,19 +256,6 @@ export default {
 
           radar.isActivated = true;
           window.GUIManager.widgetHFRadars.radarsVisible[key] = radar.isActivated;
-          
-          return;
-
-
-
-          if (DMRadar.data == undefined) // No data structure (wave file is loaded before radar file)
-            radar.hasDataOnTimestamp = false;
-          else{
-            if (DMRadar.data[window.GUIManager.currentTmst] == undefined)
-              radar.hasDataOnTimestamp = false;
-            else 
-              radar.hasDataOnTimestamp = true;
-          }
         };
       }
 
