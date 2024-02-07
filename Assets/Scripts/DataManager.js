@@ -26,18 +26,25 @@ class DataManager {
     window.eventBus.on('DataStreamsBar_SelectedDateChanged', tmst => {
       this.loadOnInteraction(tmst);
     });
+    // User clicked to view radials
+    window.eventBus.on("WidgetHFRadars_VisibilityChanged", radialsVisible => {
+      if (radialsVisible)
+        this.loadOnInteraction(window.GUIManager.currentTmst);
+    });
 
 
     // Status
-    this.isLoading = false;
+    this.pendingRequests = 0;
 
 
     // Load data availability
     if (window.FileManager){
-      this.isLoading = true;
+      this.pendingRequests++;
+      window.eventBus.emit("DataManager_pendingRequestsChange", this.pendingRequests);
       window.FileManager.loadDataAvailability()
         .then(r => {
-          this.isLoading = false;
+          this.pendingRequests--;
+          window.eventBus.emit("DataManager_pendingRequestsChange", this.pendingRequests);
           this.hourlyDataAvailability = r;
           this.generateDailyDataAvailability(r);
           window.eventBus.emit('DataManager_HourlyDataAvailabilityLoaded');
@@ -209,12 +216,8 @@ class DataManager {
 
     }
     
-    if (arrayDates.length != 0){
-      this.isLoading = true;
-    }
 
     this.loadDatedStaticFilesRepository(arrayDates, fileTypes).then(hfRadar => {
-      this.isLoading = false;
       if (hfRadar != undefined)
         window.eventBus.emit('HFRadarDataLoaded'); });
 
@@ -401,7 +404,9 @@ class DataManager {
   // Load files from a repository given a start and ending dates. Returns a promise
   // File types are the kind of files to load: ['tuv','ruv','wls'] --> currents, radials, waves
   loadStaticFilesRepository(startDate, endDate, fileTypes){
-    
+    this.pendingRequests++;
+    window.eventBus.emit("DataManager_pendingRequestsChange", this.pendingRequests);
+
     // Find dates
     let now = new Date();
     let str = now.toISOString();
@@ -447,6 +452,9 @@ class DataManager {
         }
       }
 
+      this.pendingRequests--;
+      window.eventBus.emit("DataManager_pendingRequestsChange", this.pendingRequests);
+
       return lastHFRadar;
     })
 
@@ -455,6 +463,8 @@ class DataManager {
   // Given an array of dates (ISOString), load those dates. Returns a promise
   // File types are the kind of files to load: ['tuv','ruv','wls'] --> currents, radials, waves
   loadDatedStaticFilesRepository(arrayDates, fileTypes){
+    this.pendingRequests++;
+    window.eventBus.emit("DataManager_pendingRequestsChange", this.pendingRequests);
 
     // Array of promises
     let promises = [];
@@ -478,6 +488,10 @@ class DataManager {
           }
         }
       }
+
+      this.pendingRequests--;
+      window.eventBus.emit("DataManager_pendingRequestsChange", this.pendingRequests);
+
       return lastHFRadar;
     })
   }

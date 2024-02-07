@@ -336,7 +336,7 @@ export default {
 
 
       // If DataManager is loading, make an effect in the canvas
-      if (window.DataManager.isLoading){
+      if (window.DataManager.pendingRequests != 0){
         setTimeout(this.updateCanvas, 40);
       }
     },

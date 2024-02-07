@@ -12,7 +12,7 @@
     </div>
 
     <Transition>
-    <div v-show="isVisible && activeLoadingRequests == 0">
+    <div v-show="isVisible && !isDataManagerLoading">
       <!-- Existing radars -->
       <div id="existingRadarsContainer">
         <div v-for="radar in radarsVue">
@@ -56,9 +56,11 @@
     </div>
     </Transition>
 
-    <div v-show="isVisible && activeLoadingRequests > 0">
-      <span>LOADING...</span>
-    </div>
+    <Transition name="fade">
+      <div v-show="isVisible && isDataManagerLoading">
+        <span>LOADING...</span>
+      </div>
+    </Transition>
 
   </div>
   
@@ -127,9 +129,6 @@ export default {
           this.radarsVue[radar.UUID].hasDataOnTimestamp = true;
       });
 
-      if (window.DataManager.isLoading == false){
-        this.activeLoadingRequests = 0;
-      }
     });
     // When mouse clicks a data point
     window.eventBus.on('Map_ClickedDataPoint', e => {
@@ -152,31 +151,12 @@ export default {
         let key = keys[i];
         let DMRadar = window.DataManager.HFRadars[key];
         if (DMRadar.constructor.name == "HFRadar"){
-          // No data on radar, i.e., it was never loaded. Data manager loads the data
-          if (DMRadar.data === undefined){
-            i = keys.length; // Exit loop --> DataManager already loads data (loadOnInteraction)
-          }
-          // Data exists, check if it has data on timestamp
-          else {
-            this.radarsVue[DMRadar.UUID].hasDataOnTimestamp = DMRadar.data[tmst] != undefined
+          // If it was loaded, update if it has data on timestamp
+          if (DMRadar.data != undefined){
+            this.radarsVue[DMRadar.UUID].hasDataOnTimestamp = DMRadar.data[tmst] != undefined;
           }
         }
       };
-      // Keep track of data manager loading process
-      // WARNING: DataStreamsBar_SelectedDateChanged event arrives before to DataManager just by luck? Maybe do a settimeout here?
-      // E.g.: event DataStreamsBar...> DataManager starts loading > WidgetHFRadars shows loading button
-      // TODO: this a very dirty HACK. 
-      // OPTIONS
-      // Create an event when DataManager finishes/starts loading
-      // This could activate the animations of loading in several places
-      // Loading WMS should also be displayed somehow, but in a different way
-      
-      setTimeout(() => {
-        if (window.DataManager.isLoading){
-          this.activeLoadingRequests++;
-        } else
-          this.activeLoadingRequests = 0;
-      }, 300);
     });
 
 
@@ -190,6 +170,11 @@ export default {
         this.$refs.onOffPoints.setChecked(window.GUIManager.widgetHFRadars.arePointsVisible);
       }
     });
+
+    // DataManager loading requests
+    window.eventBus.on("DataManager_pendingRequestsChange", pendingRequests => {
+      this.isDataManagerLoading = pendingRequests > 0;
+    })
     
   },
   data (){
@@ -199,7 +184,7 @@ export default {
       defaultUnits: 'cm/s',
       selectedLegends: ['BlueWhiteRed.png', 'GreenBlueWhiteOrangeRed.png', 'ModifiedOccam.png', 'DarkScaleColors.png' ],
       isVisible: false,
-      activeLoadingRequests: 0,
+      isDataManagerLoading: false,
       radarsVue: {},
     }
   },
@@ -246,11 +231,6 @@ export default {
       this.isVisible = e.target.checked;
       window.GUIManager.widgetHFRadars.isVisible = e.target.checked;
       window.GUIManager.isDataPointSelected = false;
-      // Exit if loading
-      if (this.activeLoadingRequests > 0){
-        window.eventBus.emit("WidgetHFRadars_VisibilityChanged", e.target.checked);
-        return;
-      }
 
       // Activate all radars when visible
       if (this.isVisible){
@@ -260,30 +240,13 @@ export default {
           let radar = this.radarsVue[key];
           // Check if radar has data
           let DMRadar = window.DataManager.HFRadars[key];
-          // Check file status (was it requested, is it loading, etc)
-          //let fileStatus = window.DataManager.hourlyDataAvailability[tmst.substring(0,13) + 'Z'][radar.Site];
-          // window.DataManager.loadStaticFilesRepository(undefined, tmst, fileTypes).then((hfRadar) => {
-          //   window.GUIManager.intialLoadDone = true;
-          //   if (hfRadar != undefined)
-          //     window.eventBus.emit('HFRadarDataLoaded');
-          // });
-          if (DMRadar.data == undefined && this.activeLoadingRequests == 0){
-            // Load data
-            this.activeLoadingRequests++;
-            i = keys.length; // Exit loop
-            window.DataManager.loadStaticFilesRepository(window.GUIManager.currentTmst, window.GUIManager.currentTmst, ['tuv','ruv','wls']).then(() => {
-              this.activeLoadingRequests--;
-              window.eventBus.emit('HFRadarDataLoaded');
-            });
-          } else if (this.activeLoadingRequests == 0) {
-            if (DMRadar.data[window.GUIManager.currentTmst] == undefined)
-              radar.hasDataOnTimestamp = false;
-            else 
-              radar.hasDataOnTimestamp = true;
-          }
 
-          radar.isActivated = true;
-          window.GUIManager.widgetHFRadars.radarsVisible[key] = radar.isActivated;
+          if (DMRadar.data != undefined) {
+            radar.hasDataOnTimestamp = DMRadar.data[window.GUIManager.currentTmst] != undefined;
+
+            radar.isActivated = true;
+            window.GUIManager.widgetHFRadars.radarsVisible[key] = radar.isActivated;
+          }
         };
       }
 
@@ -307,20 +270,22 @@ export default {
       window.GUIManager.widgetHFRadars.radarsVisible[rr.UUID] = rr.isActivated;
       // Check if radar has data
       let DMRadar = window.DataManager.HFRadars[rr.UUID];
-      if (DMRadar.data == undefined) // No data structure (wave file is loaded before radar file)
-        rr.hasDataOnTimestamp = false;
-      else{
-        if (DMRadar.data[window.GUIManager.currentTmst] == undefined)
-          rr.hasDataOnTimestamp = false;
-        else 
-          rr.hasDataOnTimestamp = true;
+      if (DMRadar.data != undefined){
+        rr.hasDataOnTimestamp = DMRadar.data[window.GUIManager.currentTmst] != undefined;
       }
+      
       // If there is data, emit an event
       if (rr.hasDataOnTimestamp){
         // Emit
         window.eventBus.emit('WidgetHFRadars_RadarActiveChange', window.DataManager.HFRadars[rr.UUID]);
       }
     },
+
+    // INTERNAL
+    // Update widget
+    updateWidget: function(){
+      
+    }
 
   },
   components: {

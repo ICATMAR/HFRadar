@@ -35,6 +35,11 @@
 
     <!-- Download data menu -->
     <download-data-menu></download-data-menu>
+
+    <!-- Loading circle -->
+    <Transition name="fade">
+        <div class="loading-circle" v-show="dataManagerIsLoading"></div>
+    </Transition>
   </div>
 </template>
 
@@ -90,6 +95,7 @@ export default {
       let useWorker = true;
       
       // Use web worker to load the rest of the files
+      // TODO: with web worker is hard to track pending requests? should this be managed from DataManager instead of here?
       if (window.DataWorker && useWorker){
         window.DataWorker.postMessage(['loadStaticFilesRepository', [undefined, tmst, fileTypes]]);
         // Callback, only happens at initalization
@@ -135,10 +141,15 @@ export default {
         window.eventBus.emit('SidePanelSizechanged', this.showPanel);
       this.isAdvancedInterfaceOnOff = state;
     });
+    // DataManager is loading
+    window.eventBus.on("DataManager_pendingRequestsChange", pendingRequests => {
+      this.dataManagerIsLoading = pendingRequests > 0;
+    });
   },
   data (){
     return {
       isAdvancedInterfaceOnOff: false,
+      dataManagerIsLoading: false,
     }
   },
   methods: {
