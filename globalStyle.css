@@ -45,6 +45,51 @@ span {
 }
 
 
+/* LOADING ELEMENT */
+.loading-circle {
+  position: fixed;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100px;
+  height: 100px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index:20;
+  /* user-select: all;
+  pointer-events: all; */
+}
+.loading-circle::before,
+.loading-circle::after {
+  content: '';
+  display: block;
+  background-color: rgb(82 181 217 / 70%);
+  border-radius: 50%;
+  position: absolute;
+  animation: loading-anim 0.5s infinite cubic-bezier(0.165, 0.84, 0.44, 1) alternate;
+}
+.loading-circle::after {
+  width: 100%;
+  height: 100%; 
+}
+.loading-circle::before {
+  width: 50%;
+  height: 50%;
+  animation-direction: alternate-reverse;
+}
+
+@keyframes loading-anim {
+  0% {
+    transform: scale(0.5);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+
+
 
 /* BUTTONS GENERAL STYLE */
 button {
@@ -264,12 +309,15 @@ h4 {
   background-color: var(--red);
   border: 2px solid rgb(255, 90, 90);
   cursor: pointer;
+  color: white;
 }
+  
 
 .widgetButtonHFRadar-active:hover {
   background-color: var(--red);
   border: 2px solid rgb(255, 199, 199);
   cursor: pointer;
+  color: white;
 }
 
 .widgetButtonHFRadar-unavailable {
@@ -277,6 +325,7 @@ h4 {
   border: 2px solid gray;
   pointer-events: none;
   cursor:auto;
+  color: darkgray;
 }
 
 .widgetButtonHFRadar-unavailable:hover {
