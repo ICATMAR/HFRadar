@@ -89,10 +89,10 @@ export default {
     
 
     // EVENTS
-    // When new data loads, usually the widget also should be shown (with particles on)
-    window.eventBus.on('HFRadarDataLoaded', tmst => {
-      this.currentsOnOffButtonClicked({target: {checked: true}});
-    });
+    // When new data loads, usually the widget also should be shown (with particles on) --> not necessarily?
+    // window.eventBus.on('HFRadarDataLoaded', tmst => {
+    //   this.currentsOnOffButtonClicked({target: {checked: true}});
+    // });
 
 
     // When mouse clicks a data point
@@ -106,6 +106,11 @@ export default {
         currentValue = dataPoint['Velocity (cm/s)'].toFixed(1);
       }
       this.$refs.legendGUI.setCurrentValue(currentValue);
+    });
+
+    // User moves mouse on map
+    window.eventBus.on('GUIManager_MouseMovingCurrentsValue', magnitude => {
+      this.$refs.legendGUI.setCurrentValue(magnitude);
     });
 
 

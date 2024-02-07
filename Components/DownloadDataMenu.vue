@@ -76,7 +76,8 @@ export default {
     //this.isVisible = true;
 
     window.eventBus.on('HFRadarDataLoaded', () => {
-      this.canDownload = true;
+      if (window.GUIManager.intialLoadDone) // Just avoids a first initial load of the latest current file
+        this.canDownload = true;
     })
   },
   data() {

@@ -35,6 +35,11 @@
 
     <!-- Download data menu -->
     <download-data-menu></download-data-menu>
+
+    <!-- Loading circle -->
+    <Transition name="fade">
+        <div class="loading-circle" v-show="dataManagerIsLoading"></div>
+    </Transition>
   </div>
 </template>
 
@@ -66,9 +71,9 @@ export default {
     }; 
 
     // Load data
-    //window.DataManager.loadStaticFiles();
     // First files of real-time data --> load them first to show something on the website
-    window.DataManager.loadLatestStaticFilesRepository().then(hfRadar => {
+    let fileTypes = ['tuv']; // Only load tuv files at the beginning
+    window.DataManager.loadLatestStaticFilesRepository(fileTypes).then(hfRadar => {
       let tmst;
       if (hfRadar != undefined){
         tmst = hfRadar.lastLoadedTimestamp;
@@ -78,6 +83,8 @@ export default {
     })
     // Load the rest of the files
     .then((tmst) =>{
+      // Add wave files that will create radar objects
+      fileTypes.push('wls');
       // Reduce tmst by 1h, as this timestamp is already loaded.
       if (tmst != undefined){
         let tmp = new Date(tmst);
@@ -86,16 +93,27 @@ export default {
       }
       // Load data
       let useWorker = true;
+      
       // Use web worker to load the rest of the files
+      // TODO: with web worker is hard to track pending requests? should this be managed from DataManager instead of here?
       if (window.DataWorker && useWorker){
-        window.DataWorker.postMessage(['loadStaticFilesRepository', [undefined, tmst]]);
+        window.DataWorker.postMessage(['loadStaticFilesRepository', [undefined, tmst, fileTypes]]);
+        // Callback, only happens at initalization
+        window.eventBus.on('FileManager_Worker_HFRadarDataLoaded', () => {
+          window.GUIManager.intialLoadDone = true;
+          window.eventBus.emit('HFRadarDataLoaded');
+        })
+
       } 
       // Fallback option
       else {
-        window.DataManager.loadStaticFilesRepository(undefined, tmst).then((hfRadar) => {
+        window.DataManager.loadStaticFilesRepository(undefined, tmst, fileTypes).then((hfRadar) => {
+        window.GUIManager.intialLoadDone = true;
         if (hfRadar != undefined)
           window.eventBus.emit('HFRadarDataLoaded');
         });
+        
+        
       }
       
     })
@@ -123,10 +141,15 @@ export default {
         window.eventBus.emit('SidePanelSizechanged', this.showPanel);
       this.isAdvancedInterfaceOnOff = state;
     });
+    // DataManager is loading
+    window.eventBus.on("DataManager_pendingRequestsChange", pendingRequests => {
+      this.dataManagerIsLoading = pendingRequests > 0;
+    });
   },
   data (){
     return {
       isAdvancedInterfaceOnOff: false,
+      dataManagerIsLoading: false,
     }
   },
   methods: {

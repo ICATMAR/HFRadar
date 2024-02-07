@@ -26,18 +26,25 @@ class DataManager {
     window.eventBus.on('DataStreamsBar_SelectedDateChanged', tmst => {
       this.loadOnInteraction(tmst);
     });
+    // User clicked to view radials
+    window.eventBus.on("WidgetHFRadars_VisibilityChanged", radialsVisible => {
+      if (radialsVisible)
+        this.loadOnInteraction(window.GUIManager.currentTmst);
+    });
 
 
     // Status
-    this.isLoading = false;
+    this.pendingRequests = 0;
 
 
     // Load data availability
     if (window.FileManager){
-      this.isLoading = true;
+      this.pendingRequests++;
+      window.eventBus.emit("DataManager_pendingRequestsChange", this.pendingRequests);
       window.FileManager.loadDataAvailability()
         .then(r => {
-          this.isLoading = false;
+          this.pendingRequests--;
+          window.eventBus.emit("DataManager_pendingRequestsChange", this.pendingRequests);
           this.hourlyDataAvailability = r;
           this.generateDailyDataAvailability(r);
           window.eventBus.emit('DataManager_HourlyDataAvailabilityLoaded');
@@ -151,19 +158,27 @@ class DataManager {
   // Checks if to load data when the user or the app interacts with the interface
   loadOnInteraction(tmst){
     // Check if data is loaded, otherwise load
-    let key = tmst.substring(0,13) + 'Z';
-    // No data exists on that date
-    if (this.hourlyDataAvailability[key] == undefined)
-      return;
-    // Data exists and its loaded
-    let keys = Object.keys(this.hourlyDataAvailability[key]);
-    if (this.hourlyDataAvailability[key][keys[0]] == 2)
-      return;
-    // Data is currently being loaded
-    if (this.hourlyDataAvailability[key][keys[0]] == 3)
-      return;
+    // let key = tmst.substring(0,13) + 'Z';
+    // // No data exists on that date
+    // if (this.hourlyDataAvailability[key] == undefined)
+    //   return;
+    // // Data exists and its loaded
+    // let keys = Object.keys(this.hourlyDataAvailability[key]);
+    // if (this.hourlyDataAvailability[key][keys[0]] == 2)
+    //   return;
+    // // Data is currently being loaded
+    // if (this.hourlyDataAvailability[key][keys[0]] == 3)
+    //   return;
+
+    // Decide if to load radials according to the GUIManager
+    let fileTypes = ['tuv', 'wls'];
+    if (GUIManager.isAdvancedInterface){
+      if (GUIManager.widgetHFRadars.isVisible){
+        fileTypes.push('ruv');
+      }
+    }
     // First load current file
-    this.loadStaticFilesRepository(tmst, tmst).then(hfRadar => {
+    this.loadStaticFilesRepository(tmst, tmst, fileTypes).then(hfRadar => {
       if (hfRadar != undefined){
         window.eventBus.emit('HFRadarDataLoaded', hfRadar.lastLoadedTimestamp);
       }
@@ -181,31 +196,28 @@ class DataManager {
     let movingDate = new Date(sD.toISOString());
     while (movingDate < eD){
       // Check if the date exists or is already loaded
-      let key = movingDate.toISOString().substring(0,13) + 'Z';
-      // Data exists on date
-      if (this.hourlyDataAvailability[key] != undefined){
-        // Radar files are not loaded
-        let keys = Object.keys(this.hourlyDataAvailability[key]);
-        if (this.hourlyDataAvailability[key][keys[0]] == true){
-          arrayDates.push(movingDate.toISOString());
-          // Set the state to loading
-          Object.keys(this.hourlyDataAvailability[key]).forEach(kk => {
-            this.hourlyDataAvailability[key][kk] = 3;
-          });
-        }
-      }
+      // let key = movingDate.toISOString().substring(0,13) + 'Z';
+      // // Data exists on date
+      // if (this.hourlyDataAvailability[key] != undefined){
+      //   // Radar files are not loaded
+      //   let keys = Object.keys(this.hourlyDataAvailability[key]);
+      //   if (this.hourlyDataAvailability[key][keys[0]] == true){
+      //     arrayDates.push(movingDate.toISOString());
+      //     // Set the state to loading
+      //     Object.keys(this.hourlyDataAvailability[key]).forEach(kk => {
+      //       this.hourlyDataAvailability[key][kk] = 3;
+      //     });
+      //   }
+      // }
 
       // Add 1h
+      arrayDates.push(movingDate.toISOString());
       movingDate.setUTCHours(movingDate.getUTCHours() + 1);
 
     }
     
-    if (arrayDates.length != 0){
-      this.isLoading = true;
-    }
 
-    this.loadDatedStaticFilesRepository(arrayDates).then(hfRadar => {
-      this.isLoading = false;
+    this.loadDatedStaticFilesRepository(arrayDates, fileTypes).then(hfRadar => {
       if (hfRadar != undefined)
         window.eventBus.emit('HFRadarDataLoaded'); });
 
@@ -354,7 +366,8 @@ class DataManager {
 
 
   // Tries to load the most recent file by using the current date and searching backwards until a file is found. Returns a HFRadar.
-  async loadLatestStaticFilesRepository(){
+  // File types are the kind of files to load: ['tuv','ruv','wls'] --> currents, radials, waves
+  async loadLatestStaticFilesRepository(fileTypes){
     // Hourly
     let now = new Date();
     let str = now.toISOString();
@@ -364,7 +377,7 @@ class DataManager {
     now.setUTCHours(now.getUTCHours() - 1); // Most recent data is from 1h ago. Currents are calculated with +1h, 0h, -1h files, thus there is a delay of 1h always.
     let lastDate = now.toISOString();
     // Petition latest dataset
-    let hfRadar = await this.loadStaticFilesRepository(lastDate, lastDate);
+    let hfRadar = await this.loadStaticFilesRepository(lastDate, lastDate, fileTypes);
 
     if (hfRadar != undefined)
       return hfRadar;
@@ -375,7 +388,7 @@ class DataManager {
       // Reduce time one hour
       now.setUTCHours(now.getUTCHours() - 1);
       counter++;
-      hfRadar = await this.loadStaticFilesRepository(now.toISOString(), now.toISOString());
+      hfRadar = await this.loadStaticFilesRepository(now.toISOString(), now.toISOString(), fileTypes);
     }
 
     if (hfRadar != undefined)
@@ -389,8 +402,11 @@ class DataManager {
   }
 
   // Load files from a repository given a start and ending dates. Returns a promise
-  loadStaticFilesRepository(startDate, endDate){
-    
+  // File types are the kind of files to load: ['tuv','ruv','wls'] --> currents, radials, waves
+  loadStaticFilesRepository(startDate, endDate, fileTypes){
+    this.pendingRequests++;
+    window.eventBus.emit("DataManager_pendingRequestsChange", this.pendingRequests);
+
     // Find dates
     let now = new Date();
     let str = now.toISOString();
@@ -414,7 +430,7 @@ class DataManager {
     // Array of promises
     let promises = [];
     while(movingDate <= now){
-      promises.push(window.FileManager.loadDataFromRepository(movingDate.toISOString()));
+      promises.push(window.FileManager.loadDataFromRepository(movingDate.toISOString(), fileTypes));
       // Add 1h
       movingDate.setUTCHours(movingDate.getUTCHours() + 1);
     }
@@ -431,12 +447,13 @@ class DataManager {
             let promiseResult = filesOnDatePromiseResult.value[j];
             if (promiseResult.status == 'fulfilled' && promiseResult.value != undefined){
               lastHFRadar = this.addHFRadarData(promiseResult.value);
-              if (lastHFRadar.data == undefined)
-                lastHFRadar = undefined;
             }
           }
         }
       }
+
+      this.pendingRequests--;
+      window.eventBus.emit("DataManager_pendingRequestsChange", this.pendingRequests);
 
       return lastHFRadar;
     })
@@ -444,12 +461,15 @@ class DataManager {
   }
 
   // Given an array of dates (ISOString), load those dates. Returns a promise
-  loadDatedStaticFilesRepository(arrayDates){
+  // File types are the kind of files to load: ['tuv','ruv','wls'] --> currents, radials, waves
+  loadDatedStaticFilesRepository(arrayDates, fileTypes){
+    this.pendingRequests++;
+    window.eventBus.emit("DataManager_pendingRequestsChange", this.pendingRequests);
 
     // Array of promises
     let promises = [];
     for (let i = 0; i < arrayDates.length; i++) {
-      promises.push(window.FileManager.loadDataFromRepository(arrayDates[i]));
+      promises.push(window.FileManager.loadDataFromRepository(arrayDates[i], fileTypes));
     }
 
     let lastHFRadar;
@@ -468,32 +488,16 @@ class DataManager {
           }
         }
       }
+
+      this.pendingRequests--;
+      window.eventBus.emit("DataManager_pendingRequestsChange", this.pendingRequests);
+
       return lastHFRadar;
     })
   }
 
 
-  // Load static files
-  loadStaticFiles(){
-    // Create promises array
-    let movingDate = new Date(firstDate.toISOString());
-    let promises = [];
-    while (movingDate <= lastDate){
-      promises.push(window.FileManager.loadData(movingDate.toISOString()));
-      // Add 1h
-      movingDate.setUTCHours(movingDate.getUTCHours() + 1);
-    }
 
-    Promise.all(promises).then(values => {
-
-      let lastHFRadar;
-      for (let i = 0; i < values.length; i++){
-        lastHFRadar = this.addHFRadarData(values[i]);
-      }
-      
-      window.eventBus.emit('HFRadarDataLoaded', lastHFRadar.lastLoadedTimestamp);
-    });
-  }
 
 
   // Load files that were dropped

@@ -48,7 +48,14 @@ class FileManager {
           for (let i = 0; i < data.length; i++){
             window.DataManager.addHFRadarData(data[i]);
           }
-          window.eventBus.emit('HFRadarDataLoaded');
+          // First-load exception (from AppManager.vue)
+          if (this.firstLoadDone == undefined){
+            window.eventBus.emit('FileManager_Worker_HFRadarDataLoaded');
+            this.firstLoadDone = true;
+          }
+          // Common case, e.g. loading due to user interaction
+          else
+            window.eventBus.emit('HFRadarDataLoaded');
         }
         // Keep track of requested files
         else if (result[0] == 'requestedFiles'){
@@ -246,7 +253,7 @@ class FileManager {
 
 
 
-  loadDataFromRepository = function(timestamp){
+  loadDataFromRepository = function(timestamp, fileTypes){
 
     //let baseURL = 'https://icatmar.github.io/HFRadarData/'
     let baseURL = '/data/observational/hf_radar/currents/'
@@ -263,30 +270,41 @@ class FileManager {
 
 
     let promises = [];
-    let urls = [
-      // Begur
-      baseURL + 'L2/BEGU/' + year + '/' + month + '/RDLm_BEGU_' + year + '_' + month + '_' + day + '_' + hour + '00_l2b.ruv',
-      //  Creus
-      baseURL + 'L2/CREU/' + year + '/' + month + '/RDLm_CREU_' + year + '_' + month + '_' + day + '_' + hour + '00_l2b.ruv',
-      // Arenys
-      baseURL + 'L2/AREN/' + year + '/' + month + '/RDLm_AREN_' + year + '_' + month + '_' + day + '_' + hour + '00.ruv',
-      // Port de Barcelona
-      baseURL + 'L2/PBCN/' + year + '/' + month + '/RDLm_PBCN_' + year + '_' + month + '_' + day + '_' + hour + '00.ruv',
-      // Port Ginesta
-      baseURL + 'L2/GNST/' + year + '/' + month + '/RDLm_GNST_' + year + '_' + month + '_' + day + '_' + hour + '00.ruv',
+    let urls = [];
+    
+    // Currents
+    if (fileTypes.includes('tuv')){
       // Totals Roses
-      baseURL + 'L3/tuv/' + year + '/' + month + '/TOTL_ROSE_' + year + '_' + month + '_' + day + '_' + hour + '00.tuv',
+      urls.push(baseURL + 'L3/tuv/' + year + '/' + month + '/TOTL_ROSE_' + year + '_' + month + '_' + day + '_' + hour + '00.tuv');
+    }
+    // Radials
+    if (fileTypes.includes('ruv')){
+      // Begur
+      urls.push(baseURL + 'L2/BEGU/' + year + '/' + month + '/RDLm_BEGU_' + year + '_' + month + '_' + day + '_' + hour + '00_l2b.ruv');
+      //  Creus
+      urls.push(baseURL + 'L2/CREU/' + year + '/' + month + '/RDLm_CREU_' + year + '_' + month + '_' + day + '_' + hour + '00_l2b.ruv');
+      // Arenys
+      urls.push(baseURL + 'L2/AREN/' + year + '/' + month + '/RDLm_AREN_' + year + '_' + month + '_' + day + '_' + hour + '00.ruv');
+      // Port de Barcelona
+      urls.push(baseURL + 'L2/PBCN/' + year + '/' + month + '/RDLm_PBCN_' + year + '_' + month + '_' + day + '_' + hour + '00.ruv');
+      // Port Ginesta
+      urls.push(baseURL + 'L2/GNST/' + year + '/' + month + '/RDLm_GNST_' + year + '_' + month + '_' + day + '_' + hour + '00.ruv');
+    }
+    // Waves and wind
+    if (fileTypes.includes('wls')){
       // Waves Begur
-      wavesBaseURL + 'BEGU/' + year + '/WVLM_BEGU_' + year + '_' + month + '_01_0000.wls',
+      urls.push(wavesBaseURL + 'BEGU/' + year + '/WVLM_BEGU_' + year + '_' + month + '_01_0000.wls');
       // Waves Creus
-      wavesBaseURL + 'CREU/' + year + '/WVLM_CREU_' + year + '_' + month + '_01_0000.wls',
+      urls.push(wavesBaseURL + 'CREU/' + year + '/WVLM_CREU_' + year + '_' + month + '_01_0000.wls');
       // Waves Arenys
-      wavesBaseURL + 'AREN/' + year + '/WVLM_AREN_' + year + '_' + month + '_01_0000.wls',
+      urls.push(wavesBaseURL + 'AREN/' + year + '/WVLM_AREN_' + year + '_' + month + '_01_0000.wls');
       // Waves Port de Barcelona
-      wavesBaseURL + 'PBCN/' + year + '/WVLM_PBCN_' + year + '_' + month + '_01_0000.wls',
+      urls.push(wavesBaseURL + 'PBCN/' + year + '/WVLM_PBCN_' + year + '_' + month + '_01_0000.wls');
       // Waves Port Ginesta
-      wavesBaseURL + 'GNST/' + year + '/WVLM_GNST_' + year + '_' + month + '_01_0000.wls',
-    ];
+      urls.push(wavesBaseURL + 'GNST/' + year + '/WVLM_GNST_' + year + '_' + month + '_01_0000.wls');
+    }
+
+
 
     for (let i = 0; i < urls.length; i++){
       // Check if this file was already requested

@@ -588,7 +588,11 @@ export default {
         }
 
         // Add layer
-        this.map.addLayer(this.layers[radarPointsLayerName]);
+        // Create if it does not exist
+        if (this.layers[radarPointsLayerName] == undefined){
+          this.updateRadarData(radar, window.GUIManager.currentTmst, undefined);
+        } else
+          this.map.addLayer(this.layers[radarPointsLayerName]);
       }
     },
 

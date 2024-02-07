@@ -5,14 +5,14 @@
     <!-- Title -->
     <div class="titleWidget" :class="{'titleWidget-closed': !isVisible}">
       <h4>High-Freq. Radars</h4>
-      <onOffButton ref="onOffCurrents" :checked="false" :inSize="'18px'" @change="currentsOnOffButtonClicked($event)"></onOffButton>
+      <onOffButton ref="onOffCurrents" :checked="false" :inSize="'18px'" @change="radialsOnOffButtonClicked($event)"></onOffButton>
 
       <div class="icon-str" @click="infoClicked()" v-show="isVisible">i</div>
       <!-- TODO GRAPH ICON - REPRESENTATION -->
     </div>
 
     <Transition>
-    <div v-show="isVisible">
+    <div v-show="isVisible && !isDataManagerLoading">
       <!-- Existing radars -->
       <div id="existingRadarsContainer">
         <div v-for="radar in radarsVue">
@@ -54,6 +54,12 @@
         @unitsClicked="unitsClicked()"
       ></legendGUI>
     </div>
+    </Transition>
+
+    <Transition name="fade">
+      <div v-show="isVisible && isDataManagerLoading">
+        <span>LOADING...</span>
+      </div>
     </Transition>
 
   </div>
@@ -107,8 +113,8 @@ export default {
             this.radarsVue[key] = {
               UUID: key, 
               Site: radar.Site,
-              isActivated: false,
-              hasDataOnTimestamp: true,
+              isActivated: true,
+              hasDataOnTimestamp: false,
             }
           }
         }
@@ -122,6 +128,7 @@ export default {
         if (radar.constructor.name == "HFRadar")
           this.radarsVue[radar.UUID].hasDataOnTimestamp = true;
       });
+
     });
     // When mouse clicks a data point
     window.eventBus.on('Map_ClickedDataPoint', e => {
@@ -135,15 +142,21 @@ export default {
     })
     // When selected date changes
     window.eventBus.on('DataStreamsBar_SelectedDateChanged', tmst => {
+      if (!this.isVisible)
+        return;
+      
       // Iterate radars
-      Object.keys(window.DataManager.HFRadars).forEach(key => {
-        let radar = window.DataManager.HFRadars[key];
-        if (radar.constructor.name === "HFRadar")
-          if (radar.data != undefined)
-            this.radarsVue[radar.UUID].hasDataOnTimestamp = radar.data[tmst] != undefined;
-          else
-            this.radarsVue[radar.UUID].hasDataOnTimestamp = false;
-      });
+      let keys = Object.keys(window.DataManager.HFRadars);
+      for (let i = 0; i < keys.length; i++) {
+        let key = keys[i];
+        let DMRadar = window.DataManager.HFRadars[key];
+        if (DMRadar.constructor.name == "HFRadar"){
+          // If it was loaded, update if it has data on timestamp
+          if (DMRadar.data != undefined){
+            this.radarsVue[DMRadar.UUID].hasDataOnTimestamp = DMRadar.data[tmst] != undefined;
+          }
+        }
+      };
     });
 
 
@@ -157,6 +170,11 @@ export default {
         this.$refs.onOffPoints.setChecked(window.GUIManager.widgetHFRadars.arePointsVisible);
       }
     });
+
+    // DataManager loading requests
+    window.eventBus.on("DataManager_pendingRequestsChange", pendingRequests => {
+      this.isDataManagerLoading = pendingRequests > 0;
+    })
     
   },
   data (){
@@ -166,6 +184,7 @@ export default {
       defaultUnits: 'cm/s',
       selectedLegends: ['BlueWhiteRed.png', 'GreenBlueWhiteOrangeRed.png', 'ModifiedOccam.png', 'DarkScaleColors.png' ],
       isVisible: false,
+      isDataManagerLoading: false,
       radarsVue: {},
     }
   },
@@ -208,27 +227,27 @@ export default {
 
 
     // USER INTERACTION
-    currentsOnOffButtonClicked: function(e){
+    radialsOnOffButtonClicked: function(e){
       this.isVisible = e.target.checked;
       window.GUIManager.widgetHFRadars.isVisible = e.target.checked;
       window.GUIManager.isDataPointSelected = false;
+
       // Activate all radars when visible
       if (this.isVisible){
-        Object.keys(this.radarsVue).forEach(key => {
+        let keys = Object.keys(this.radarsVue);
+        for (let i = 0; i< keys.length; i++) {
+          let key = keys[i];
           let radar = this.radarsVue[key];
-          radar.isActivated = true;
-          window.GUIManager.widgetHFRadars.radarsVisible[key] = radar.isActivated;
           // Check if radar has data
           let DMRadar = window.DataManager.HFRadars[key];
-          if (DMRadar.data == undefined) // No data structure (wave file is loaded before radar file)
-            radar.hasDataOnTimestamp = false;
-          else{
-            if (DMRadar.data[window.GUIManager.currentTmst] == undefined)
-              radar.hasDataOnTimestamp = false;
-            else 
-              radar.hasDataOnTimestamp = true;
+
+          if (DMRadar.data != undefined) {
+            radar.hasDataOnTimestamp = DMRadar.data[window.GUIManager.currentTmst] != undefined;
+
+            radar.isActivated = true;
+            window.GUIManager.widgetHFRadars.radarsVisible[key] = radar.isActivated;
           }
-        });
+        };
       }
 
       window.eventBus.emit("WidgetHFRadars_VisibilityChanged", e.target.checked);
@@ -248,23 +267,25 @@ export default {
 
     radarActivatedChanged: function(rr){
       rr.isActivated = !rr.isActivated;
-      window.GUIManager.widgetHFRadars.radarsVisible[rr.UUID] = radar.isActivated;
+      window.GUIManager.widgetHFRadars.radarsVisible[rr.UUID] = rr.isActivated;
       // Check if radar has data
       let DMRadar = window.DataManager.HFRadars[rr.UUID];
-      if (DMRadar.data == undefined) // No data structure (wave file is loaded before radar file)
-        radar.hasDataOnTimestamp = false;
-      else{
-        if (DMRadar.data[window.GUIManager.currentTmst] == undefined)
-          radar.hasDataOnTimestamp = false;
-        else 
-          radar.hasDataOnTimestamp = true;
+      if (DMRadar.data != undefined){
+        rr.hasDataOnTimestamp = DMRadar.data[window.GUIManager.currentTmst] != undefined;
       }
+      
       // If there is data, emit an event
       if (rr.hasDataOnTimestamp){
         // Emit
         window.eventBus.emit('WidgetHFRadars_RadarActiveChange', window.DataManager.HFRadars[rr.UUID]);
       }
     },
+
+    // INTERNAL
+    // Update widget
+    updateWidget: function(){
+      
+    }
 
   },
   components: {
