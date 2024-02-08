@@ -6,18 +6,15 @@
 
       <!-- Animation legend -->
       <!-- todo v:for for different data types? -->
-      <div class="widgetContainer" v-show="isAdvancedInterfaceOnOff">
+      <div class="widgetContainer">
         <Transition>
-          <widgetCombinedRadars ref="widgetCombinedRadars"></widgetCombinedRadars>
+          <widgetCombinedRadars></widgetCombinedRadars>
         </Transition>
         <Transition>
-          <widgetHFRadars ref="widgetHFRadars"></widgetHFRadars>
+          <widgetHFRadars v-show="isAdvancedInterfaceOnOff"></widgetHFRadars>
         </Transition>
       </div>
 
-      <!-- Legend GUI for non-advanced-->
-      <legendGUI class="widgetContainer" v-show="!isAdvancedInterfaceOnOff"
-        ></legendGUI>
 
   </div>
 </template>

@@ -209,11 +209,11 @@ export default {
     },
 
     unitsClicked: function(e){
-      let units = ['cm/s', 'm/s', 'mph', 'km/h'];
+      let units = ['cm/s', 'm/s', 'knts', 'km/h'];
       let transformFunc = [
         (value) => {return value}, // cm/s
         (value) => {return (value/100).toFixed(2)}, // m/s
-        (value) => {return (2.2369*value/100).toFixed(2)}, // mph
+        (value) => {return (1.94384*value/100).toFixed(2)}, // knts
         (value) => {return (3.6*value/100).toFixed(2)} // km/h
       ];
 

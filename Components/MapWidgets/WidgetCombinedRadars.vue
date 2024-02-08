@@ -3,7 +3,7 @@
   <div id='widgetCombinedRadars' class="widget" ref='widgetCombinedRadars'>
 
     <!-- Title -->
-    <div class="titleWidget" :class="{'titleWidget-closed': !isVisible}">
+    <div class="titleWidget" :class="{'titleWidget-closed': !isVisible}" v-show="isAdvancedInterfaceOnOff">
       <h4>Currents</h4>
       <onOffButton ref="onOffCurrents" :checked="true" :inSize="'18px'" @change="currentsOnOffButtonClicked($event)"></onOffButton>
 
@@ -12,9 +12,9 @@
     </div>
 
     <Transition>
-    <div v-show="isVisible">
+
     <!-- Buttons animation and points -->
-    <div id="buttonsContainer">
+    <div id="buttonsContainer" v-show="isAdvancedInterfaceOnOff">
 
       <!-- On/Off particle animation -->
       <div class='widgetButtonContainer'>
@@ -29,7 +29,7 @@
       </div>
       <!-- Maybe point variable too here? -->
     </div>
-  
+    </Transition>
 
     <!-- Animation legend -->
     <legendGUI ref="legendGUI"
@@ -43,8 +43,8 @@
       @unitsClicked="unitsClicked()"
 
     ></legendGUI>
-    </div>
-    </Transition>
+ 
+    
 
     
     <div :style="{'padding-bottom': isVisible ? '30px' : '10px'}"></div>
@@ -131,6 +131,8 @@ export default {
           this.$refs.legendGUI.setRange(this.defaultLegendRange);
         }
       }
+
+      this.isAdvancedInterfaceOnOff = state;
     });
     
   },
@@ -148,6 +150,7 @@ export default {
         isVisible: true,
         areParticlesVisible: true,
         arePointsVisible: false,
+        isAdvancedInterfaceOnOff: false,
       }
     },
 
@@ -168,14 +171,14 @@ export default {
       this.$refs.legendGUI.setRange(this.currentRange);
     },
     unitsClicked: function(e){
-      let units = ['cm/s', 'm/s', 'mph', 'km/h'];
+      let units = ['cm/s', 'm/s', 'knts', 'km/h'];
       let transformFunc = [
         (value) => {return value}, // cm/s
         (value) => {return (value/100).toFixed(2)}, // m/s
-        (value) => {return (2.2369*value/100).toFixed(2)}, // mph
+        (value) => {return (1.94384*value/100).toFixed(2)}, // knts
         (value) => {return (3.6*value/100).toFixed(2)} // km/h
       ];
-
+      
       // Find current units
       let currentIndex = units.indexOf(this.currentUnits);
       let nextIndex = (currentIndex+1) % units.length;
