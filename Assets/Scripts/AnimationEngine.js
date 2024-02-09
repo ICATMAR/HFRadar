@@ -941,7 +941,9 @@ class ParticleSystem {
     let numPixels = this.canvas.width * this.canvas.height;
     let numParticlesFactor = numPixels / this.fullScreenPixels;
     // Active number of animations
-    numParticlesFactor /= AnimationEngine.getNumActiveAnimations();
+    // TODO: Commenting the following line resolves issue #64. In case that there are multiple animaitons going on
+    // it might be relevant to do this to keep a stable performance.
+    //numParticlesFactor /= AnimationEngine.getNumActiveAnimations();
     // Define number of particles
     this.numParticles = Math.min(Math.round(numParticlesFactor * this.fullScreenNumParticles), this.fullScreenNumParticles);
     // Minimum
