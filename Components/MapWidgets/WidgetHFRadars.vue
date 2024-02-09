@@ -4,7 +4,7 @@
 
     <!-- Title -->
     <div class="titleWidget clickable" :class="{'titleWidget-closed': !isVisible}" @click="radialsOnOffButtonClicked($event)">
-      <h4>High-Freq. Radars</h4>
+      <h4>Radials</h4>
       <onOffButton ref="onOffCurrents" :checked="false" :inSize="'18px'" @change="radialsOnOffButtonClicked($event)"></onOffButton>
 
       <div class="icon-str" @click="infoClicked()" v-show="isVisible">i</div>
