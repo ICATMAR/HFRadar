@@ -5,7 +5,11 @@
     <div v-show="legendsLoaded">
       <!-- Tooltip -->
       <div id="toolTipContainer" v-show="!isMouseOver && currentValue !=''">
-        <div class="tooltipLegend" ref="tooltipLegend">{{transformFunc(currentValue)}} {{units}}</div>
+        <div class="tooltipLegend" ref="tooltipLegend">
+          {{transformFunc(currentValue)}} {{units}}
+          <span class="fa" :style="{transform: 'rotate('+ (currentDirection-45) +'deg)' }" v-if="currentDirection != undefined">&#xf124;</span>
+        </div>
+        
         <div class="tooltipLegendBar" ref="tooltipLegendBar">|</div>
       </div>
 
@@ -90,6 +94,7 @@ export default {
       // Tooltip
       //legendRange: [-100, 100], // Legend range is changed in AnimationCanvas.vue, when the animation is created
       currentValue: '',
+      currentDirection: '',
       transformFunc: (value) => {return value},
 
       isAdvancedInterfaceOnOff: false,
@@ -140,9 +145,11 @@ export default {
       this.transformFunc = transformFunc;
     },
     // Show current value
-    setCurrentValue: function(value){
-      this.currentValue = value;
-      this.$refs.tooltipLegend.style.left = (100 * (this.currentValue - this.legendRange[0]) / (this.legendRange[1] - this.legendRange[0])) + '%';
+    setCurrentValue: function(magnitude, direction){
+      this.currentValue = magnitude;
+      this.currentDirection = direction;
+
+      //this.$refs.tooltipLegend.style.left = (100 * (this.currentValue - this.legendRange[0]) / (this.legendRange[1] - this.legendRange[0])) + '%';
       this.$refs.tooltipLegendBar.style.left = (100 * (this.currentValue - this.legendRange[0]) / (this.legendRange[1] - this.legendRange[0])) + '%';
     },
     // Set legend color
@@ -183,7 +190,7 @@ export default {
   z-index: 10;
   pointer-events: all;
 
-  align-items: flex-end;
+  align-items: center;
   display: flex;
   flex-direction: column-reverse;
   
@@ -197,7 +204,9 @@ img {
 
 
 #toolTipContainer {
-  position:relative;
+  position: relative;
+  display: flex;
+  justify-content: center;
 }
 .tooltipLegend {
   position:absolute;
@@ -205,8 +214,6 @@ img {
   color:white;
   font-size: small;
   text-shadow: 0px 0px 4px black;
-  transform: translateX(-50%);
-  -ms-transform: translateX(-50%);
   white-space: nowrap;
 }
 .tooltipLegendBar {

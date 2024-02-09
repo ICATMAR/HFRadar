@@ -1,9 +1,9 @@
 <template>
   <!-- Container -->
-  <div id='widgetHFRadars' class="widget" ref='widgetHFRadars'>
+  <div id='widgetHFRadars' class="widgetContainer" ref='widgetHFRadars'>
 
     <!-- Title -->
-    <div class="titleWidget" :class="{'titleWidget-closed': !isVisible}">
+    <div class="titleWidget clickable" :class="{'titleWidget-closed': !isVisible}" @click="radialsOnOffButtonClicked($event)">
       <h4>High-Freq. Radars</h4>
       <onOffButton ref="onOffCurrents" :checked="false" :inSize="'18px'" @change="radialsOnOffButtonClicked($event)"></onOffButton>
 
@@ -228,6 +228,14 @@ export default {
 
     // USER INTERACTION
     radialsOnOffButtonClicked: function(e){
+
+      // Text was clicked
+      if (e.target.checked == undefined){
+        // Trigger onoff button
+        this.$refs.onOffCurrents.setChecked(!this.isVisible)
+        return;
+      }
+
       this.isVisible = e.target.checked;
       window.GUIManager.widgetHFRadars.isVisible = e.target.checked;
       window.GUIManager.isDataPointSelected = false;
@@ -323,6 +331,7 @@ export default {
 
 #existingRadarsContainer {
   display: flex;
+  flex-wrap: wrap;
   flex-direction: row;
   align-items: center;
   justify-content: center;
