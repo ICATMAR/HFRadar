@@ -1,9 +1,9 @@
 <template>
   <!-- Container -->
-  <div id='widgetCombinedRadars' class="widget" ref='widgetCombinedRadars'>
+  <div id='widgetCombinedRadars' class="widgetContainer" ref='widgetCombinedRadars'>
 
     <!-- Title -->
-    <div class="titleWidget" :class="{'titleWidget-closed': !isVisible}">
+    <div class="titleWidget clickable" :class="{'titleWidget-closed': !isVisible}" v-show="isAdvancedInterfaceOnOff" @click="currentsOnOffButtonClicked($event)">
       <h4>Currents</h4>
       <onOffButton ref="onOffCurrents" :checked="true" :inSize="'18px'" @change="currentsOnOffButtonClicked($event)"></onOffButton>
 
@@ -13,38 +13,42 @@
 
     <Transition>
     <div v-show="isVisible">
-    <!-- Buttons animation and points -->
-    <div id="buttonsContainer">
+      <Transition>
 
-      <!-- On/Off particle animation -->
-      <div class='widgetButtonContainer'>
-        <onOffButton ref="onOffParticles" :checked="areParticlesVisible" :inSize="'15px'" @change="particlesButtonClicked($event)"></onOffButton>
-        <span class='widgetSpan'>particles</span>
+      <!-- Buttons animation and points -->
+      <div id="buttonsContainer" v-show="isAdvancedInterfaceOnOff">
+
+        <!-- On/Off particle animation -->
+        <div class='widgetButtonContainer'>
+          <onOffButton ref="onOffParticles" :checked="areParticlesVisible" :inSize="'15px'" @change="particlesButtonClicked($event)"></onOffButton>
+          <span class='widgetSpan'>particles</span>
+        </div>
+
+        <!-- On/Off points -->
+        <div class='widgetButtonContainer'>
+          <onOffButton ref="onOffPoints" :checked="arePointsVisible" :inSize="'15px'" @change="pointsButtonClicked($event)"></onOffButton>
+          <span class='widgetSpan'>points</span>
+        </div>
+        <!-- Maybe point variable too here? -->
       </div>
+      </Transition>
 
-      <!-- On/Off points -->
-      <div class='widgetButtonContainer'>
-        <onOffButton ref="onOffPoints" :checked="arePointsVisible" :inSize="'15px'" @change="pointsButtonClicked($event)"></onOffButton>
-        <span class='widgetSpan'>points</span>
-      </div>
-      <!-- Maybe point variable too here? -->
-    </div>
-  
+      <!-- Animation legend -->
+      <legendGUI ref="legendGUI"
+        :legendName="defaultLegendName" 
+        :legendRange="defaultLegendRange"
+        :defaultUnits="defaultUnits"
+        :selectedLegends="selectedLegends"
 
-    <!-- Animation legend -->
-    <legendGUI ref="legendGUI"
-      :legendName="defaultLegendName" 
-      :legendRange="defaultLegendRange"
-      :defaultUnits="defaultUnits"
-      :selectedLegends="selectedLegends"
+        @legendChanged="legendChanged"
+        @rangeClicked="rangeClicked()"
+        @unitsClicked="unitsClicked()"
 
-      @legendChanged="legendChanged"
-      @rangeClicked="rangeClicked()"
-      @unitsClicked="unitsClicked()"
+      ></legendGUI>
 
-    ></legendGUI>
     </div>
     </Transition>
+    
 
     
     <div :style="{'padding-bottom': isVisible ? '30px' : '10px'}"></div>
@@ -102,15 +106,25 @@ export default {
       let dataPoint = e.dataPoint;
       let radar = e.radar;
       let currentValue = '';
+      let direction = '';
       if (dataPoint['Velocity (cm/s)'] && radar.constructor.name == "CombinedRadars"){
         currentValue = dataPoint['Velocity (cm/s)'].toFixed(1);
+        direction = Math.atan2(dataPoint['V-comp (cm/s)'], dataPoint['U-comp (cm/s)']) * 180 / Math.PI - 90;
+        direction *= -1;
       }
-      this.$refs.legendGUI.setCurrentValue(currentValue);
+      this.$refs.legendGUI.setCurrentValue(currentValue, direction);
     });
 
     // User moves mouse on map
-    window.eventBus.on('GUIManager_MouseMovingCurrentsValue', magnitude => {
-      this.$refs.legendGUI.setCurrentValue(magnitude);
+    window.eventBus.on('GUIManager_MouseMovingCurrentsValue', value => {
+      let magnitude = '';
+      let direction = '';
+      if (!(value[0] == undefined || isNaN(value[0]))){ // Inside negated
+        magnitude = (Math.sqrt(value[0]*value[0] + value[1]*value[1])).toFixed(1);
+        direction = Math.atan2(value[1], value[0]) * 180 / Math.PI - 90;
+        direction *= -1;
+      }
+      this.$refs.legendGUI.setCurrentValue(magnitude, direction);
     });
 
 
@@ -131,6 +145,8 @@ export default {
           this.$refs.legendGUI.setRange(this.defaultLegendRange);
         }
       }
+
+      this.isAdvancedInterfaceOnOff = state;
     });
     
   },
@@ -148,6 +164,7 @@ export default {
         isVisible: true,
         areParticlesVisible: true,
         arePointsVisible: false,
+        isAdvancedInterfaceOnOff: false,
       }
     },
 
@@ -168,14 +185,14 @@ export default {
       this.$refs.legendGUI.setRange(this.currentRange);
     },
     unitsClicked: function(e){
-      let units = ['cm/s', 'm/s', 'mph', 'km/h'];
+      let units = ['cm/s', 'm/s', 'knts', 'km/h'];
       let transformFunc = [
         (value) => {return value}, // cm/s
         (value) => {return (value/100).toFixed(2)}, // m/s
-        (value) => {return (2.2369*value/100).toFixed(2)}, // mph
+        (value) => {return (1.94384*value/100).toFixed(2)}, // knts
         (value) => {return (3.6*value/100).toFixed(2)} // km/h
       ];
-
+      
       // Find current units
       let currentIndex = units.indexOf(this.currentUnits);
       let nextIndex = (currentIndex+1) % units.length;
@@ -187,12 +204,21 @@ export default {
 
     // USER INTERACTION
     currentsOnOffButtonClicked: function(e){
-        this.isVisible = e.target.checked;
-        window.GUIManager.widgetCombinedRadars.isVisible = e.target.checked;
-        window.GUIManager.isDataPointSelected = false;
-        window.eventBus.emit("WidgetCombinedRadars_VisibilityChanged", e.target.checked);
-        if (e.target.checked)
-          this.$refs.onOffParticles.setChecked(true); // TODO: This triggers the button (particlesButtonClicked), not optimal
+
+      // Text was clicked
+      if (e.target.checked == undefined){
+        // Trigger onoff button
+        this.$refs.onOffCurrents.setChecked(!this.isVisible)
+        return;
+      }
+
+      // OnOff buttonw as clicked
+      this.isVisible = e.target.checked;
+      window.GUIManager.widgetCombinedRadars.isVisible = e.target.checked;
+      window.GUIManager.isDataPointSelected = false;
+      window.eventBus.emit("WidgetCombinedRadars_VisibilityChanged", e.target.checked);
+      if (e.target.checked)
+        this.$refs.onOffParticles.setChecked(true); // TODO: This triggers the button (particlesButtonClicked), not optimal
 
     },
     infoClicked: function(e){

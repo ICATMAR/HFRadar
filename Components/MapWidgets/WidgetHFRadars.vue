@@ -1,9 +1,9 @@
 <template>
   <!-- Container -->
-  <div id='widgetHFRadars' class="widget" ref='widgetHFRadars'>
+  <div id='widgetHFRadars' class="widgetContainer" ref='widgetHFRadars'>
 
     <!-- Title -->
-    <div class="titleWidget" :class="{'titleWidget-closed': !isVisible}">
+    <div class="titleWidget clickable" :class="{'titleWidget-closed': !isVisible}" @click="radialsOnOffButtonClicked($event)">
       <h4>High-Freq. Radars</h4>
       <onOffButton ref="onOffCurrents" :checked="false" :inSize="'18px'" @change="radialsOnOffButtonClicked($event)"></onOffButton>
 
@@ -209,11 +209,11 @@ export default {
     },
 
     unitsClicked: function(e){
-      let units = ['cm/s', 'm/s', 'mph', 'km/h'];
+      let units = ['cm/s', 'm/s', 'knts', 'km/h'];
       let transformFunc = [
         (value) => {return value}, // cm/s
         (value) => {return (value/100).toFixed(2)}, // m/s
-        (value) => {return (2.2369*value/100).toFixed(2)}, // mph
+        (value) => {return (1.94384*value/100).toFixed(2)}, // knts
         (value) => {return (3.6*value/100).toFixed(2)} // km/h
       ];
 
@@ -228,6 +228,14 @@ export default {
 
     // USER INTERACTION
     radialsOnOffButtonClicked: function(e){
+
+      // Text was clicked
+      if (e.target.checked == undefined){
+        // Trigger onoff button
+        this.$refs.onOffCurrents.setChecked(!this.isVisible)
+        return;
+      }
+
       this.isVisible = e.target.checked;
       window.GUIManager.widgetHFRadars.isVisible = e.target.checked;
       window.GUIManager.isDataPointSelected = false;
@@ -323,6 +331,7 @@ export default {
 
 #existingRadarsContainer {
   display: flex;
+  flex-wrap: wrap;
   flex-direction: row;
   align-items: center;
   justify-content: center;

@@ -100,10 +100,8 @@ class GUIManager {
       if (combinedRadar !== undefined){
         let value = this.tempArray;
         combinedRadar.getValueAtTmstLongLat(this.currentTmst, screenPosCoords[2], screenPosCoords[3], value);
-        let magnitude = '';
-        if (!(value[0] == undefined || isNaN(value[0]))) // Inside negated
-          magnitude = (Math.sqrt(value[0]*value[0] + value[1]*value[1])).toFixed(1);
-        window.eventBus.emit('GUIManager_MouseMovingCurrentsValue', magnitude);
+
+        window.eventBus.emit('GUIManager_MouseMovingCurrentsValue', value);
         
       }
     }

@@ -6,18 +6,17 @@
 
       <!-- Animation legend -->
       <!-- todo v:for for different data types? -->
-      <div class="widgetContainer" v-show="isAdvancedInterfaceOnOff">
+      <div class="widgetsBottomRightContainer">
         <Transition>
-          <widgetCombinedRadars ref="widgetCombinedRadars"></widgetCombinedRadars>
+          <widgetCombinedRadars></widgetCombinedRadars>
         </Transition>
         <Transition>
-          <widgetHFRadars ref="widgetHFRadars"></widgetHFRadars>
+          <widgetHFRadars v-show="isAdvancedInterfaceOnOff"></widgetHFRadars>
         </Transition>
+        <!-- Disclaimer -->
+        <div class="widgetDataSource"><span>Data source: <a style="color:white; pointer-events: all;" href="https://www.icatmar.cat" target="_blank">ICATMAR</a></span></div>
       </div>
 
-      <!-- Legend GUI for non-advanced-->
-      <legendGUI class="widgetContainer" v-show="!isAdvancedInterfaceOnOff"
-        ></legendGUI>
 
   </div>
 </template>
@@ -269,23 +268,6 @@ export default {
   height: 100%;
   top: 0px;
   pointer-events: none;
-}
-
-.widgetContainer {
-  position: absolute;
-  bottom: 100px;
-  right: clamp(8px, 4%, 40px);
-  width: 264px;
-  display: flex;
-  flex-direction: column;
-  z-index: 5;
-}
-
-/* Mobile */
-@media screen and (max-width: 770px) {
-  .widgetContainer {
-    bottom: 150px;
-  }
 }
 
 
