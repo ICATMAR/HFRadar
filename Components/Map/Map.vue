@@ -220,6 +220,10 @@ export default {
     window.eventBus.on('DataStreamsBar_SelectedDateChanged', (tmst) =>{
       this.selectedDateChanged(tmst);
     });
+    // Initial load and user changing hash TIME in URL
+    window.eventBus.on('GUIManager_URLDateChanged', tmst => {
+      this.selectedDateChanged(tmst);
+    });
     // TODO: COMBINE TWO NEXT EVENTS
     // Show/Hide points of a radar
     window.eventBus.on('WidgetCombinedRadars_PointsActiveChanged', (active)=> {

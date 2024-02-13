@@ -26,6 +26,11 @@ class DataManager {
     window.eventBus.on('DataStreamsBar_SelectedDateChanged', tmst => {
       this.loadOnInteraction(tmst);
     });
+    // User changed TMST hash on the URL
+    window.eventBus.on('GUIManager_URLDateChanged', tmst => {
+      this.loadOnInteraction(tmst);
+    });
+    
     // User clicked to view radials
     window.eventBus.on("WidgetHFRadars_VisibilityChanged", radialsVisible => {
       if (radialsVisible)

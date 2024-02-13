@@ -36,6 +36,7 @@ export default {
     const setTimeStr = (tmst) => this.timeStr = this.formatTimestampString(tmst);
     window.eventBus.on('DataStreamsBar_SelectedDateChanged', setTimeStr);
     window.eventBus.on('Calendar_SelectedDate', setTimeStr);
+    window.eventBus.on('GUIManager_URLDateChanged', setTimeStr);
     window.eventBus.on('HFRadarDataLoaded', (tmst) =>{
       if(tmst != undefined)
         setTimeStr(tmst);

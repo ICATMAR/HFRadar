@@ -2,6 +2,9 @@
 // GUIManager class
 class GUIManager {
 
+  firstDate = new Date('2023-04-01T00:00Z');
+
+
   // Currents widget
   widgetCombinedRadars = {
     isVisible: true,
@@ -43,7 +46,8 @@ class GUIManager {
     // Get configuration from window location hash
     let tmst = window.location.getHashValue('TIME');
     this.setNewTmst(tmst);
-
+    window.location.isInternalChange = false; 
+    
 
     // EVENTS
     // Hash changes
@@ -54,16 +58,14 @@ class GUIManager {
         window.location.isInternalChange = false;
       // User changed hash
       else {
-        console.log("HAS CHANGE");
         // Check if timestamp changed
         let tmst = window.location.getHashValue('TIME');
         if (tmst != this.currentTmst){
           this.setNewTmst(tmst);
-          // TODO
-          // > Event to DataStreamsBar > DatastreamsBar event to all
+          window.eventBus.emit('GUIManager_URLDateChanged', this.currentTmst);
         }
       }
-      
+      window.location.isInternalChange = false;      
     };
     // New HFRadar data
     window.eventBus.on('HFRadarDataLoaded', (tmst) =>{
@@ -98,11 +100,29 @@ class GUIManager {
   // INTERNAL
   setNewTmst(tmst){
     let d = new Date(tmst);
-    // When invalid date, set default (now)
-    if (isNaN(d.getTime())){
+    let isInvalid = isNaN(d.getTime());
+
+    // Invalid date, 
+    if (isInvalid){
       if (tmst != undefined)
         console.warn('Invalid timestamp on URL, please use ISO standard i.e., TIME=2024-02-12T05:00:00.000Z');
+    } 
+    // Outside of range
+    else {
+      let latestTmst = window.DataManager.latestDataTmst || new Date().toISOString();
+      console.log(latestTmst);
+      let latestDate = new Date(latestTmst);
+      if (d < this.firstDate || d > latestDate) console.warn('Timestamp outside of range (before April 2023 or after current time now');
+      // Set to last or first tmst
+      if (d < this.firstDate){
+        tmst = this.firstDate.toISOString();
+      } else if (d > latestDate){
+        tmst = latestDate.toISOString();
+      }
+    }
 
+    // Set default (now or previous)
+    if (isInvalid){
       let now = new Date();
       let str = now.toISOString();
       let nowISODate = str.substring(0, 14) + '00:00.000Z';
