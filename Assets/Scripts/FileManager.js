@@ -339,6 +339,7 @@ class FileManager {
   loadRawHFData = function(timestamp){
 
     let baseURL = window.location.href.replace('index.html', '');
+    baseURL = baseURL.split('#')[0];
 
     let date = new Date(timestamp);
     //date = firstDate; // HACK
@@ -399,6 +400,7 @@ class FileManager {
 // Data availability (generated from python script)
 loadDataAvailability = function(){
   let baseURL = window.location.href.replace('index.html', '');
+  baseURL = baseURL.split('#')[0];
   let url = baseURL + 'data/hfRadarDataAvailability.json'
   return fetch(url)
     .then(r => r.json())
