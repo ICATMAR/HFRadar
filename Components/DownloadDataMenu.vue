@@ -132,6 +132,9 @@ export default {
 
       let url = baseURL + 'L3/tuv/' + year + '/' + month + '/TOTL_ROSE_' + year + '_' + month + '_' + day + '_' + hour + '00.tuv';
 
+      // Event for GA tracker
+      window.eventBus.emit('DownloadDataMenu_Download', {fileFormat: 'tuv', processStage: 'L3', date: dateISO, numFiles: 1});
+
       // Download file
       let link = document.createElement('a');
       link.download = 'ICATMAR_Currents_' + dateISO + '.tuv';
@@ -162,6 +165,8 @@ export default {
 
       // Create JSZip
       let zip = new JSZip();
+      // Keep track of number of files
+      let numFiles = 0;
 
       // Iterate all files
       for (let i = 0; i < hours; i++){
@@ -182,14 +187,19 @@ export default {
             // Respect original name?
             let strParts = log.url.split('/');
             let filename = 'ICATMAR_' + strParts[strParts.length - 1];
-            zip.file(filename, log.txt);
+            zip.file(filename, log.contentTxt);
+
+            numFiles++;
 
             // Exit search loop
             j = FileManager.loadedFilesLog.length;
           }
         }
-
       }
+
+      // Event for GA tracker
+      window.eventBus.emit('DownloadDataMenu_Download', {fileFormat: 'tuv', processStage: 'L3', date: latestTmst, numFiles});
+
       // Generate zip and download
       zip.generateAsync({type:"blob"})
       .then(function(content) {
