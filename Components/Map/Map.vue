@@ -515,8 +515,10 @@ export default {
           geometry: new ol.geom.Point(ol.proj.fromLonLat([dataPoint['Longitude (deg)'], dataPoint['Latitude (deg)']])),
         });
         // Define radius / color according to data point feature
-        let pointRadius = 2;
-        let pointColor = [255, 255, 255, 0.2];
+        //let pointRadius = 2;
+        //let pointColor = [255, 255, 255, 0.2];
+        let pointRadius = 20;
+        let pointColor = [255, 0, 255, 0.5];
         if (pointFeature !== undefined){
           let value = dataPoint[pointFeature];
           let featMax = radar.dataPointFeatures[pointFeature].max;

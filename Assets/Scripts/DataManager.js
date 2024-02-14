@@ -858,7 +858,8 @@ class CombinedRadars extends HFRadar {
     // Calculate distance between two adjacent points
     // WARN: in erroneous files this might fail.
     distances.sort(); // Sort the distances
-    let distanceLimit = distances[Math.floor(distances.length/2)]; // Take the median (most points are adjacent)
+    let distanceLimit = Math.sqrt(2) * distances[Math.floor(distances.length/2)]; // Take the median (most points are adjacent)
+    console.log("Distance limit: " + distanceLimit.toFixed(3));
 
   
   
@@ -917,7 +918,14 @@ class CombinedRadars extends HFRadar {
   
     // Create typed array
     let dataGrid = new Float32Array(resLat * resLong * 2);
-    // let debug_numberOfIterationsPerDataGridPoint = 0;
+    let debug_numberOfIterationsPerDataGridPoint = 0;
+    let debug_numNN = 0;
+    let debug_numLI = 0;
+    let debug_numBarI = 0;
+    let debug_numBLI = 0;
+    let debug_acceptedNeighbours = 0;
+    let debug_discardedNeighbours = 0;
+
     for (let ii = 0; ii < dataGrid.length / 2; ii++){
 
       let i = Math.floor( ii / resLong); // Lat index
@@ -940,6 +948,7 @@ class CombinedRadars extends HFRadar {
       // Interpolation
       // Find four closest points using the grid
       let dataPointDistances = []; // TODO OPTIMIZE MEMORY
+      let discardedDistances = [];
       // let colIndex = Math.floor((long - MINLONG) * GRIDRESOLUTION); // Predefined grid
       // let rowIndex = Math.floor((lat - MINLAT) * GRIDRESOLUTION); // Predefined grid
       let colIndex = Math.floor((long - minLong) * GRIDRESOLUTION);
@@ -963,9 +972,17 @@ class CombinedRadars extends HFRadar {
             let indexData = gridCell[kk];
             // Calculate distance
             let dd = this.calcDistance(long, lat, data[indexData]['Longitude (deg)'], data[indexData]['Latitude (deg)']);
-            //debug_numberOfIterationsPerDataGridPoint++;
+            debug_numberOfIterationsPerDataGridPoint++;
             if (dd < distanceLimit){
               dataPointDistances.push([dd, indexData]);
+              debug_acceptedNeighbours++;
+            } 
+            // debug
+            else {
+              debug_discardedNeighbours++;
+              discardedDistances.push(dd/distanceLimit);
+              if (dd/distanceLimit > 3)
+                debugger;
             }
             // Exit loop if four points are found
             if (dataPointDistances.length >= 4)
@@ -992,9 +1009,10 @@ class CombinedRadars extends HFRadar {
         if (dataPointDistances.length == 1){
           UValue = dataPoint['U-comp (cm/s)'];
           VValue = dataPoint['V-comp (cm/s)'];
+          debug_numNN++;
         }
         // Linear interpolation
-        else {
+        else if (dataPointDistances.length == 2 || dataPointDistances.length == 3) {
           let d1 = dataPointDistances[0][0];
           let d2 = dataPointDistances[1][0];
           let totD = d1 + d2;
@@ -1003,6 +1021,180 @@ class CombinedRadars extends HFRadar {
 
           UValue = dataPoint1['U-comp (cm/s)'] * (1 - d1/totD) + dataPoint2['U-comp (cm/s)'] * (d1 / totD);
           VValue = dataPoint1['V-comp (cm/s)'] * (1 - d1/totD) + dataPoint2['V-comp (cm/s)'] * (d1 / totD);
+          debug_numLI++;
+        }
+        // Barycentric interpolation
+        // https://en.wikipedia.org/wiki/Barycentric_coordinate_system#Edge_approach
+        // else if (dataPointDistances.length == 3) {
+        //   // Closest points will form a triangle. The point will be inside this triangle
+        //   let p0 = data[dataPointDistances[0][1]];
+        //   let p1 = data[dataPointDistances[1][1]];
+        //   let p2 = data[dataPointDistances[2][1]];
+
+        //   // Variables lat long
+        //   let long0 = p0['Longitude (deg)'];
+        //   let long1 = p1['Longitude (deg)'];
+        //   let long2 = p2['Longitude (deg)'];
+        //   let lat0 = p0['Latitude (deg)'];
+        //   let lat1 = p1['Latitude (deg)'];
+        //   let lat2 = p2['Latitude (deg)'];
+
+        //   // Calculate weights;
+        //   let detT = (lat1 - lat2) * (long0 - long2) + (long2 - long1) * (lat0 - lat2);
+        //   let w0 = ((lat1 - lat2) * (long - long2) + (long2 - long1) * (lat - lat2)) / detT;
+        //   let w1 = ((lat2 - lat0) * (long - long2) + (long0 - long2) * (lat - long2));
+        //   let w2 = 1 - w0 - w1;
+        //   // if (w2 < 0 || w0 < 0 || w1 < 0)
+        //   //   debugger;
+        //   // else
+        //   //   debugger;
+
+        //   UValue = p0['U-comp (cm/s)'] * w0 + p1['U-comp (cm/s)'] * w1 + p2['U-comp (cm/s)'] * w2;
+        //   VValue = p0['V-comp (cm/s)'] * w0 + p1['V-comp (cm/s)'] * w1 + p2['V-comp (cm/s)'] * w2;
+          
+        //   debug_numBarI++;
+        // }
+        // Bilinear interpolation
+        // https://en.wikipedia.org/wiki/Bilinear_interpolation#Weighted_mean
+        else {
+          // It is assumed that data is distributed in a regular grid, therefore the point is inside a square
+          let points = [];
+          for (let pIndex = 0; pIndex < 4; pIndex ++){
+            points.push(data[dataPointDistances[pIndex][1]]);
+          }
+
+          // Try to create a square from the points
+          let canCreateSquare = true;
+          // Get max min
+          let maxMinLong = [999, -999];
+          let maxMinLat = [999, -999];
+          for (let pIndex = 0; pIndex < 4; pIndex ++){
+            let p = points[pIndex];
+            // Long
+            if (p['Longitude (deg)'] > maxMinLong[1])
+              maxMinLong[1] = p['Longitude (deg)'];
+            if (p['Longitude (deg)'] < maxMinLong[0])
+              maxMinLong[0] = p['Longitude (deg)'];
+
+            // Lat
+            if (p['Latitude (deg)'] > maxMinLat[1])
+              maxMinLat[1] = p['Latitude (deg)'];
+            if (p['Latitude (deg)'] < maxMinLat[0])
+              maxMinLat[0] = p['Latitude (deg)'];
+          }
+          let rangeLongSquare = maxMinLong[1] - maxMinLong[0];
+          let rangeLatSquare = maxMinLat[1] - maxMinLat[0];
+          // String points
+          let squareIndices = {};
+          for (let pIndex = 0; pIndex < 4; pIndex ++){
+            let p = points[pIndex];
+            let key = '';
+            
+            let value = (p['Longitude (deg)'] - maxMinLong[0]) / rangeLongSquare;
+            // Sigmoid func to approximate values to 0 and 1 as grid is not perfectly regular
+            // https://www.wolframalpha.com/input?i=1%2F+%281%2Be%5E-%2810%28x-0.5%29%29%29+from+0+to+1
+            if (value > -0.2 && value < 1.2)
+              value = 1 / (1 + Math.exp(- (10 * (value - 0.5))));
+            key += value.toFixed(0);
+
+            // Lat
+            value = (p['Latitude (deg)'] - maxMinLat[0]) / rangeLatSquare;
+            if (value > -0.2 && value < 1.2)
+              value = 1 / (1 + Math.exp(- (10 * (value - 0.5))));
+            key += value.toFixed(0);
+            
+            if (squareIndices[key] != undefined)
+              canCreateSquare = false;
+            squareIndices[key] = pIndex;
+          }
+
+          // Check if all indices are there
+          if (canCreateSquare && squareIndices['00'] != undefined && squareIndices['10'] != undefined && squareIndices['01'] != undefined && squareIndices['11'] != undefined){
+            UValue = -20;
+            VValue = 0;
+          } else {
+            UValue = 10;
+            VValue = 0;
+          }
+
+          // TODO: VISUALIZE THE POINTS GOING TO THE CLOSEST POINT
+          let p = points[0];
+          UValue = 100 * (p['Longitude (deg)'] - long) / distanceLimit;
+          VValue =  100 * (p['Latitude (deg)'] - lat) / distanceLimit;
+
+
+          if (false){
+          let p00 = data[dataPointDistances[0][1]];
+          let p11 = data[dataPointDistances[3][1]];
+
+          // Sorted points by distance will always in a Z shape: closer will be in position 0 and opposite corner in position 3
+          // Unknown is if the second point is horizontal or vertical
+          // We assume that second closest point is horizontally displaced to the first
+          let p10 = data[dataPointDistances[1][1]];
+          let p01 = data[dataPointDistances[2][1]];
+          // Otherwise, reverse points (this is relevant when computing U and V values of sea surface velocity)
+          if (Math.abs(p00['Longitude (deg)'] - p01['Longitude (deg)']) < Math.abs(p00['Latitude (deg)'] - p01['Latitude (deg)'])){
+            p10 = data[dataPointDistances[2][1]];
+            p01 = data[dataPointDistances[1][1]];
+          }
+
+          // Debug
+          let pp00 = [p00['Longitude (deg)'], p00['Latitude (deg)']];
+          let pp01 = [p01['Longitude (deg)'], p01['Latitude (deg)']];
+          let pp10 = [p10['Longitude (deg)'], p10['Latitude (deg)']];
+          let pp11 = [p11['Longitude (deg)'], p11['Latitude (deg)']];
+
+          let maxLong = Math.max(pp00[0], pp01[0], pp10[0], pp11[0]);
+          let minLong = Math.min(pp00[0], pp01[0], pp10[0], pp11[0]);
+          let maxLat = Math.max(pp00[1], pp01[1], pp10[1], pp11[1]);
+          let minLat = Math.min(pp00[1], pp01[1], pp10[1], pp11[1]);
+
+          // console.log(`
+          //   ${((pp01[0]-minLong)/(maxLong-minLong)).toFixed(1)} , ${((pp01[1]-minLat)/(maxLat-minLat)).toFixed(1)} ------------ ${((pp11[0]-minLong)/(maxLong-minLong)).toFixed(1)} , ${((pp11[1]-minLat)/(maxLat-minLat)).toFixed(1)} \n
+          //   |                         |\n
+          //   |                         |\n
+          //   ${((pp00[0]-minLong)/(maxLong-minLong)).toFixed(1)} , ${((pp00[1]-minLat)/(maxLat-minLat)).toFixed(1)} ------------ ${((pp10[0]-minLong)/(maxLong-minLong)).toFixed(1)} , ${((pp10[1]-minLat)/(maxLat-minLat)).toFixed(1)} \n
+          // `);
+
+          // console.log(`
+          //   ${((pp01[0]-minLong)/(distanceLimit)).toFixed(1)} , ${((pp01[1]-minLat)/(distanceLimit)).toFixed(1)} ------------ ${((pp11[0]-minLong)/(distanceLimit)).toFixed(1)} , ${((pp11[1]-minLat)/(distanceLimit)).toFixed(1)} \n
+          //   |                         |\n
+          //   |                         |\n
+          //   ${((pp00[0]-minLong)/(distanceLimit)).toFixed(1)} , ${((pp00[1]-minLat)/(distanceLimit)).toFixed(1)} ------------ ${((pp10[0]-minLong)/(distanceLimit)).toFixed(1)} , ${((pp10[1]-minLat)/(distanceLimit)).toFixed(1)} \n
+          // `)
+          //debugger;
+
+          // Weights
+          let long0 = p00['Longitude (deg)'];
+          let long1 = p11['Longitude (deg)'];
+          let lat0 = p00['Latitude (deg)'];
+          let lat1 = p11['Latitude (deg)'];
+          let normWeightsValue = (long1 - long0) * (lat1 - lat0);
+
+          let w00 = Math.abs((long1 - long) * (lat1 - lat) / normWeightsValue);
+          let w01 = Math.abs((long1 - long) * (lat - lat0) / normWeightsValue);
+          let w10 = Math.abs((long - long0) * (lat1 - lat) / normWeightsValue);
+          let w11 = Math.abs((long - long0) * (lat - lat0) / normWeightsValue);
+
+          UValue = p00['U-comp (cm/s)'] * w00 + p10['U-comp (cm/s)'] * w10 + p01['U-comp (cm/s)'] * w01 + p11['U-comp (cm/s)'] * w11;
+          VValue = p00['V-comp (cm/s)'] * w00 + p10['V-comp (cm/s)'] * w10 + p01['V-comp (cm/s)'] * w01 + p11['V-comp (cm/s)'] * w11;
+
+          // Outside box
+          if (Math.sign(lat1 - lat) * Math.sign(lat - lat0) < 0){
+            UValue = -50;
+            VValue = 0;
+            //if (Math.max(Math.abs(lat1-lat), Math.abs(lat - lat0))/(lat1-lat0) > 2)
+              //debugger;
+          }
+          if (Math.sign(long1 - long) * Math.sign(long - long0) < 0){
+            VValue = 50;
+          }
+
+          UValue = 10;
+          VValue = 0;
+          }
+
+          debug_numBLI++;
         }
 
       }
@@ -1014,8 +1206,15 @@ class CombinedRadars extends HFRadar {
       dataGrid[ii * 2] = UValue;
       dataGrid[ii * 2 + 1] = VValue;
     }
-    //console.log("numberOfIterationsPerDataGridPoint: " + debug_numberOfIterationsPerDataGridPoint/dataGrid.length);
-    
+    console.log("numberOfIterationsPerDataGridPoint: " + debug_numberOfIterationsPerDataGridPoint/dataGrid.length);
+    let debugTotalInt = debug_numNN + debug_numLI + debug_numBarI + debug_numBLI;
+    console.log("Total number of interpolations: " + debugTotalInt)
+    console.log("Percentage interpolations: NN " + (100*debug_numNN / debugTotalInt).toFixed(0) + 
+    ", LI " + (100*debug_numLI / debugTotalInt).toFixed(0) + 
+    ", BaryI " + (100*debug_numBarI / debugTotalInt).toFixed(0) + 
+    ", Bilinear " + (100*debug_numBLI / debugTotalInt).toFixed(0));
+    console.log("Ratio accepted / discarded neighbours: " + (debug_acceptedNeighbours / debug_discardedNeighbours).toFixed(4))
+
     this.dataGrid[timestamp] = {
       dataGrid,
       minLat,
