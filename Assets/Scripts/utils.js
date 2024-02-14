@@ -71,4 +71,37 @@ const getHashValue = function(id){
 
 }
 
-export {setHashValue, getHashValue};
+
+// Remove hash
+const removeHash = function(id){
+  let hash = window.location.hash;
+  // Check if hash exists
+  // Get start index
+  let indexId = hash.indexOf(id + '=');
+  if (indexId != -1){
+    // Get previous content to replace
+    let hashSection = hash.substring(indexId, hash.length);
+    let indexSeparator = hashSection.indexOf(separator);
+    // If separator does not exist in section
+    let contentLength = 0;
+    if (indexSeparator == -1){
+      contentLength = hashSection.length - id.length - 1;
+    } else {
+      let hashSubSection = hashSection.substring(0, indexSeparator);
+      contentLength = hashSubSection.length - id.length - 1;
+    }
+    
+    
+    let idAndContent = hash.substring(indexId, indexId + id.length + 1 + contentLength);
+    // console.log("Value: " + content);
+
+    hashSection = hashSection.replace(idAndContent, '');
+
+    window.location.hash = hash.substring(0, indexId) + hashSection;
+  } 
+
+  // Keep track if the URL was changed by user or by the app
+  window.location.isInternalChange = true;
+}
+
+export {setHashValue, getHashValue, removeHash};

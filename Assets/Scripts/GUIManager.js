@@ -110,19 +110,21 @@ class GUIManager {
     // Outside of range
     else {
       let latestTmst = window.DataManager.latestDataTmst || new Date().toISOString();
-      console.log(latestTmst);
+      
       let latestDate = new Date(latestTmst);
       if (d < this.firstDate || d > latestDate) console.warn('Timestamp outside of range (before April 2023 or after current time now');
       // Set to last or first tmst
       if (d < this.firstDate){
         tmst = this.firstDate.toISOString();
-      } else if (d > latestDate){
+      } 
+      // Last date
+      else if (d >= latestDate){
         tmst = latestDate.toISOString();
       }
     }
 
     // Set default (now or previous)
-    if (isInvalid){
+    if (isInvalid) {
       let now = new Date();
       let str = now.toISOString();
       let nowISODate = str.substring(0, 14) + '00:00.000Z';
@@ -133,7 +135,13 @@ class GUIManager {
       this.currentTmst = formatedTmst;
     }
 
-    window.location.setHashValue('TIME', this.currentTmst);
+    // If we are in the latest data value, remove hash
+    if (this.currentTmst == window.DataManager.latestDataTmst){
+      window.location.removeHash('TIME');
+    } else {
+      window.location.setHashValue('TIME', this.currentTmst);
+    }
+    
   }
 
 
@@ -144,7 +152,11 @@ class GUIManager {
     // Get radars on that date
     this.currentRadars = window.DataManager.getRadarsDataOn(this.currentTmst);
     // Set URL config
-    window.location.setHashValue('TIME', this.currentTmst);
+    // If we are in the latest data value, remove hash
+    if (this.currentTmst == window.DataManager.latestDataTmst)
+      window.location.removeHash('TIME');
+    else
+      window.location.setHashValue('TIME', this.currentTmst);
   }
 
 
