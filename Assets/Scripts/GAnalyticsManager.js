@@ -24,8 +24,27 @@ class GAnalyticsManager {
     });
 
 
+    window.eventBus.on('DownloadDataMenu_Download', el => {
+      // {fileFormat: 'tuv', date: latestTmst, processStage: 'L3', numFiles}
 
-    
+      // Ecommerce analytics - array items
+      // https://developers.google.com/analytics/devguides/collection/ga4/ecommerce?client_type=gtag#implementation
+      // https://developers.google.com/analytics/devguides/collection/ga4/set-up-ecommerce
+      gtag("event", "purchase", {
+        value: 1,
+        currency: el.fileFormat,
+        items : [{
+          item_id: "hfradar_" + el.processStage + "_" + el.fileFormat,
+          item_name: "HFRadar " + el.processStage + " as " + el.fileFormat,
+          item_category: el.processStage,
+          item_category2: el.date,
+          item_variant: el.fileFormat,
+          price: 1,
+          quantity: el.numFiles,
+        }]
+      });
+    });
+
   }
 }
 

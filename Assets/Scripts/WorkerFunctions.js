@@ -248,7 +248,7 @@ loadedFilesLog =  [];
           .then (res => {
             if (res[0] == '<')
               throw new Error('File not found: ' + urls[i])
-            loadedFilesLog.push({"url": urls[i], "txt": res});
+            loadedFilesLog.push({"url": urls[i], "contentTxt": res});
             return parseText(res);
           })
         );

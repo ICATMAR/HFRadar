@@ -48,10 +48,6 @@
 
     </div>
     </Transition>
-    
-
-    
-    <div :style="{'padding-bottom': isVisible ? '30px' : '10px'}"></div>
 
     
   </div>

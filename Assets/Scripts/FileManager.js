@@ -319,7 +319,7 @@ class FileManager {
           .then (res => {
             if (res[0] == '<')
               throw new Error('File not found: ' + urls[i]);
-            this.loadedFilesLog.push({"url": urls[i], "txt": res});
+            this.loadedFilesLog.push({"url": urls[i], "contentTxt": res});
             return parseText(res);
           })
         );
