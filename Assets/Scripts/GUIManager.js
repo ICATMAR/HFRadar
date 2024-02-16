@@ -41,13 +41,16 @@ class GUIManager {
   tempArray = [undefined, undefined];
 
   constructor(){
-    // TODO: USE URL
-    // URL configuration
+    // HASH - URL configuration
     // Get configuration from window location hash
+    // Time <TIME=2024-02-14T11:00:00.000Z>
     let tmst = window.location.getHashValue('TIME');
     this.setNewTmst(tmst);
-    window.location.isInternalChange = false; 
-    
+    window.location.isInternalChange = false;
+
+    // Map View <VIEW=long,lat,zoom>
+    this.mapView = window.location.getHashValue('VIEW');
+
 
     // EVENTS
     // Hash changes
@@ -63,6 +66,12 @@ class GUIManager {
         if (tmst != this.currentTmst){
           this.setNewTmst(tmst);
           window.eventBus.emit('GUIManager_URLDateChanged', this.currentTmst);
+        }
+        // Check if map view changed
+        let mapView = window.location.getHashValue('VIEW');
+        if (mapView != this.mapView){
+          this.setMapView(mapView);
+          window.eventBus.emit('GUIManager_URLViewChanged', this.mapView);
         }
       }
       window.location.isInternalChange = false;      
@@ -85,6 +94,10 @@ class GUIManager {
 
 
     // Map
+    window.eventBus.on('Map_MapMoveEnd', values => {
+      this.setMapView(values.toString());
+      window.location.isInternalChange = false;
+    });
     // Data point selection
     window.eventBus.on('Map_ClickedDataPoint', () => this.isDataPointSelected = true);//{"dataPoint": closestDataPoint, "radar": selRadar});
     window.eventBus.on('DeselectedDataPoint', () => this.isDataPointSelected = false);
@@ -144,6 +157,18 @@ class GUIManager {
     
   }
 
+  // Input is a string
+  setMapView(values){
+    let itemsIn = values.split(",");
+    // Three values must be provided
+    if (itemsIn.length == 3){
+      let isAnyNaN = itemsIn.some(el => isNaN(parseFloat(el)));
+      if (!isAnyNaN)
+        this.mapView = values;
+    }
+      
+    window.location.setHashValue('VIEW', this.mapView);
+  }
 
   // Selected date changes
   selectedDateChanged(tmst){

@@ -285,6 +285,17 @@ export default {
       this.map.updateSize();
     });
     
+    // URL Hash change
+    window.eventBus.on('GUIManager_URLViewChanged', mapView => {
+      let long = parseFloat(mapView.split(",")[0]);
+      let lat = parseFloat(mapView.split(",")[1]);
+      let zoom = parseFloat(mapView.split(",")[2]);
+      this.map.getView().animate({
+          center: ol.proj.fromLonLat([long, lat]),
+          zoom: Math.min(15, zoom),
+          duration: 1000,
+        });
+    });
 
   },
   umounted () {
@@ -348,6 +359,16 @@ export default {
     // Figure clicked (TODO: emit)
     initMap: function () {
       //debugger;
+      // Intial conditions
+      let longInit = 3.25;
+      let latInit = 42.25;
+      let zoomInit = 10;
+      if (window.GUIManager.mapView != undefined){
+        longInit = parseFloat(window.GUIManager.mapView.split(",")[0]) || longInit;
+        latInit = parseFloat(window.GUIManager.mapView.split(",")[1]) || latInit;
+        zoomInit = parseFloat(window.GUIManager.mapView.split(",")[2]) || zoomInit;
+      }
+      
       // Initialize map
       this.map = new ol.Map({
         layers : [
@@ -378,8 +399,8 @@ export default {
         target: 'map',
         //controls: ol.control.defaults({ attributionOptions: { collapsible: true } }),
         view: new ol.View({
-          center: ol.proj.fromLonLat([3.25,42.25]),
-          zoom: 10,
+          center: ol.proj.fromLonLat([longInit, latInit]),
+          zoom: zoomInit,
           maxZoom: 22,
           extent: ol.proj.fromLonLat([-28,20]).concat(ol.proj.fromLonLat([40, 50]))
         }),
@@ -757,10 +778,14 @@ export default {
             }
           }
         }
-        
       }
-      // Hide/show wave info
+      // Get center coordinates and zoom level
       let zoomLevel = this.map.getView().getZoom();
+      let coord = this.map.getView().getCenter();
+      let longlat = ol.proj.transform(coord, 'EPSG:3857', 'EPSG:4326');
+      // Emit (GUIManager uses this event. TODO: Others such as AnimationEngine that register to map events could use this?)
+      window.eventBus.emit('Map_MapMoveEnd', [longlat[0].toFixed(3), longlat[1].toFixed(3), zoomLevel.toFixed(2)]);
+      // Hide/show wave info
       if (this.$refs.overlayWaveData){
         this.$refs.overlayWaveData.updatePanel(zoomLevel);
       }
