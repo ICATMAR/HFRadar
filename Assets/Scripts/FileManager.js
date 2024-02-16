@@ -48,14 +48,8 @@ class FileManager {
           for (let i = 0; i < data.length; i++){
             window.DataManager.addHFRadarData(data[i]);
           }
-          // First-load exception (from AppManager.vue)
-          if (this.firstLoadDone == undefined){
-            window.eventBus.emit('FileManager_Worker_HFRadarDataLoaded');
-            this.firstLoadDone = true;
-          }
-          // Common case, e.g. loading due to user interaction
-          else
-            window.eventBus.emit('HFRadarDataLoaded');
+          // First-load and load due to user interaction
+          window.eventBus.emit('HFRadarDataLoaded');
         }
         // Keep track of requested files
         else if (result[0] == 'requestedFiles'){

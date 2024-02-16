@@ -145,18 +145,12 @@ export default {
         // Use web worker to load the rest of the files
         // TODO: with web worker is hard to track pending requests? should this be managed from DataManager instead of here?
         if (window.DataWorker && useWorker){
+          // File manager emits HFRadarDataLoaded
           window.DataWorker.postMessage(['loadStaticFilesRepository', [undefined, tmst, fileTypes]]);
-          // Callback, only happens at initalization
-          window.eventBus.on('FileManager_Worker_HFRadarDataLoaded', () => {
-            window.GUIManager.intialLoadDone = true;
-            window.eventBus.emit('HFRadarDataLoaded');
-          })
-
         } 
         // Fallback option
         else {
           window.DataManager.loadStaticFilesRepository(undefined, tmst, fileTypes).then((hfRadar) => {
-          window.GUIManager.intialLoadDone = true;
           if (hfRadar != undefined)
             window.eventBus.emit('HFRadarDataLoaded');
           });

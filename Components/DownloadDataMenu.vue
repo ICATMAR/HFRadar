@@ -62,7 +62,10 @@
       </div>
 
       <!-- Warning no data available -->
-      <span v-if="!canDownload">Waiting until most recent data is loaded...</span>
+      <div class="container-text" v-if="!canDownload">
+        <span>Downloading data...</span>
+      </div>
+      
     </div>
   </Transition>
 </template>
@@ -73,11 +76,10 @@
 export default {
   name: "DownloadDataMenu",
   mounted(){
-    //this.isVisible = true;
+    //this.isVisible = true; // debug
 
     window.eventBus.on('HFRadarDataLoaded', () => {
-      if (window.GUIManager.intialLoadDone) // Just avoids a first initial load of the latest current file
-        this.canDownload = true;
+      this.canDownload = true;  
     })
   },
   data() {
@@ -149,19 +151,23 @@ export default {
     },
     // Download last 3 days
     downloadLast3days: function(){
-      this.donwloadLatestMultipleFiles(24*7, 'latest3days');
+      this.donwloadLatestMultipleFiles(24*3, 'latest3days');
     },
 
     // Download multiple files
-    donwloadLatestMultipleFiles: function(hours, filename){
-      // Get current date
-      let movingDate = new Date();
+    donwloadLatestMultipleFiles: async function(hours, filename){
+      
+      // Download latest files
+      let fileTypes = ['tuv']; // Only load tuv files at the beginning
+      let nowDate = new Date();
+      let endTime = nowDate.toISOString();
+      let startTime = nowDate.setUTCHours(nowDate.getUTCHours() - hours);
+      
+      this.canDownload = false;
+      await window.DataManager.loadStaticFilesRepository(startTime, endTime, fileTypes);
+      this.canDownload = true;
 
-      let latestTmst = DataManager.latestDataTmst;
-      if (latestTmst == undefined){
-        debugger;
-        return;
-      }
+      let latestTmst = window.DataManager.latestDataTmst;
 
       // Create JSZip
       let zip = new JSZip();
@@ -210,6 +216,10 @@ export default {
         link.click();
         link.delete;
       });
+
+
+      
+      
     }
 
 
