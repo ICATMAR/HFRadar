@@ -35,7 +35,7 @@ class GUIManager {
 
   // Current timestamp
   currentTmst = undefined;
-  currentRadars = [];
+  currentRadars = undefined;
 
   // Memory allocation
   tempArray = [undefined, undefined];
@@ -167,7 +167,7 @@ class GUIManager {
     if (this.widgetCombinedRadars.isVisible && this.widgetCombinedRadars.areParticlesVisible && !this.isDataPointSelected){
       // Get combined radar
       let combinedRadar;
-      let radars = this.currentRadars;
+      let radars = this.currentRadars || window.DataManager.getRadarsDataOn(this.currentTmst);
       if (radars.length != 0 ){
         for (let i = 0; i < radars.length; i++){
           let HFRadar = radars[i];
