@@ -116,7 +116,9 @@ export default {
         if (radar.constructor.name == "HFRadar"){
           // Determine file status
           let tmst = window.GUIManager.currentTmst;
-          let fileStatus = window.DataManager.hourlyDataAvailability[tmst.substring(0,13) + 'Z'][radar.Site];
+          let fileStatus = undefined;
+          if (window.DataManager.hourlyDataAvailability[tmst.substring(0,13) + 'Z'])
+            fileStatus = window.DataManager.hourlyDataAvailability[tmst.substring(0,13) + 'Z'][radar.Site];
           
           this.radarData[radar.UUID] = {
             "site": radar.Site, 
