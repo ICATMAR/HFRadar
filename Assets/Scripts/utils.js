@@ -32,12 +32,12 @@ const setHashValue = function(id, value){
 
   } else {
     // Add value to hash
-    if (hash.substring(hash.length -2, hash.length -1) == '&' || hash.substring(hash.length -2, hash.length -1) == '#' || hash.length == 0){
-      window.location.hash += id + '=' + value;
-    } else {
-      window.location.hash += '&' + id + '=' + value;
-    }
+    window.location.hash += '&' + id + '=' + value;
+    
   }
+
+  // Clean hash
+  window.location.hash = window.location.hash.replaceAll('&&', '&').replaceAll('#&', '#');
   
   // Keep track if the URL was changed by user or by the app
   window.location.isInternalChange = true;
@@ -95,10 +95,15 @@ const removeHash = function(id){
     let idAndContent = hash.substring(indexId, indexId + id.length + 1 + contentLength);
     // console.log("Value: " + content);
 
+    // Remove hashSection
     hashSection = hashSection.replace(idAndContent, '');
 
+    // Final hash
     window.location.hash = hash.substring(0, indexId) + hashSection;
-  } 
+  }
+
+  // Clean hash
+  window.location.hash = window.location.hash.replaceAll('&&', '&').replaceAll('#&', '#');
 
   // Keep track if the URL was changed by user or by the app
   window.location.isInternalChange = true;
