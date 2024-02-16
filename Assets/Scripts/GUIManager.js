@@ -65,7 +65,11 @@ class GUIManager {
         let tmst = window.location.getHashValue('TIME');
         if (tmst != this.currentTmst){
           this.setNewTmst(tmst);
-          window.eventBus.emit('GUIManager_URLDateChanged', this.currentTmst);
+          // Check if event.newURL and event.oldURL have different time
+          let oldTmst = window.location.getHashValue("TIME", event.oldURL);
+          let newTmst = window.location.getHashValue("TIME", event.newURL);
+          if (oldTmst != newTmst)
+            window.eventBus.emit('GUIManager_URLDateChanged', this.currentTmst);
         }
         // Check if map view changed
         let mapView = window.location.getHashValue('VIEW');

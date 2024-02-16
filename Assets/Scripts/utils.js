@@ -45,8 +45,8 @@ const setHashValue = function(id, value){
 
 
 // Get has value
-const getHashValue = function(id){
-  let hash = window.location.hash;
+const getHashValue = function(id, url){
+  let hash = url || window.location.hash;
   // Check if hash exists
   // Get start index
   let indexId = hash.indexOf(id + '=');
