@@ -69,8 +69,10 @@
     },
     mounted() {
       // EVENTS
-      // Fishing track clicked
+      // Date changed
       window.eventBus.on('DataStreamsBar_SelectedDateChanged', this.updateClimaLayer);
+      // Initial load and user changing hash TIME in URL
+      window.eventBus.on('GUIManager_URLDateChanged', this.updateClimaLayer);
       
     },
     data (){

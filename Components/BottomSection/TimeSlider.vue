@@ -68,14 +68,15 @@ export default {
 
 
 
-
+    // EVENTS
+    // HFRadar load
     window.eventBus.on('HFRadarDataLoaded', (tmst) => {
       
       let startEndDates = window.DataManager.getStartEndDatesTotals();
       if (startEndDates == undefined)
         return;
       // If tmst is not defined, set it to latest
-      tmst = tmst || startEndDates.endDate;
+      tmst = tmst || window.GUIManager.currentTmst;
 
       // Calculate number of hours in between
       let sDate = new Date(startEndDates.startDate);
@@ -92,6 +93,11 @@ export default {
       this.updateDataAvailability(sDate, eDate);
       // Date change event
       window.eventBus.emit('TimeSlider_SelectedDateChanged', tmst);
+    });
+
+    // Initial load and user changing hash TIME in URL
+    window.eventBus.on('GUIManager_URLDateChanged', tmst => {
+      this.timeStr = this.formatTimestampString(tmst);
     });
 
     // Automatic minute update

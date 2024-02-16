@@ -134,6 +134,8 @@ export default {
       
       // EVENT LISTENERS
       window.eventBus.on('Calendar_SelectedDate', tmst => this.calendarComponentChangedDate());
+      // Initial load and user changing hash TIME in URL
+      window.eventBus.on('GUIManager_URLDateChanged', tmst => this.calendarComponentChangedDate());
       // Create event listener
       window.addEventListener('resize', this.windowIsResizing);
     },

@@ -142,23 +142,12 @@ export default {
     })
     // When selected date changes
     window.eventBus.on('DataStreamsBar_SelectedDateChanged', tmst => {
-      if (!this.isVisible)
-        return;
-      
-      // Iterate radars
-      let keys = Object.keys(window.DataManager.HFRadars);
-      for (let i = 0; i < keys.length; i++) {
-        let key = keys[i];
-        let DMRadar = window.DataManager.HFRadars[key];
-        if (DMRadar.constructor.name == "HFRadar"){
-          // If it was loaded, update if it has data on timestamp
-          if (DMRadar.data != undefined){
-            this.radarsVue[DMRadar.UUID].hasDataOnTimestamp = DMRadar.data[tmst] != undefined;
-          }
-        }
-      };
+      this.updateWhenNewTmst(tmst);
     });
-
+    // Initial load and user changing hash TIME in URL
+    window.eventBus.on('GUIManager_URLDateChanged', tmst => {
+      this.updateWhenNewTmst(tmst);
+    });
 
     // Advanced interface
     window.eventBus.on("AdvancedInterfaceOnOff", state => {
@@ -194,7 +183,7 @@ export default {
       window.eventBus.emit('WidgetHFRadars_LegendChanged', legendObj);
     },
 
-
+    // USER INTERACTION
     rangeClicked: function(e){
       
       // 50, 100, 150, 200
@@ -226,7 +215,6 @@ export default {
 
 
 
-    // USER INTERACTION
     radialsOnOffButtonClicked: function(e){
 
       // Text was clicked
@@ -291,8 +279,22 @@ export default {
 
     // INTERNAL
     // Update widget
-    updateWidget: function(){
+    updateWhenNewTmst: function(){
+      if (!this.isVisible)
+        return;
       
+      // Iterate radars
+      let keys = Object.keys(window.DataManager.HFRadars);
+      for (let i = 0; i < keys.length; i++) {
+        let key = keys[i];
+        let DMRadar = window.DataManager.HFRadars[key];
+        if (DMRadar.constructor.name == "HFRadar"){
+          // If it was loaded, update if it has data on timestamp
+          if (DMRadar.data != undefined){
+            this.radarsVue[DMRadar.UUID].hasDataOnTimestamp = DMRadar.data[tmst] != undefined;
+          }
+        }
+      };
     }
 
   },

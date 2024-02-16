@@ -75,6 +75,10 @@ export default {
     window.eventBus.on('DataStreamsBar_SelectedDateChanged', (tmst) =>{
       this.updateContent(tmst);
     });
+    // Initial load and user changing hash TIME in URL
+    window.eventBus.on('GUIManager_URLDateChanged', tmst => {
+      this.updateContent(tmst);
+    });
   },
   data () {
     return {

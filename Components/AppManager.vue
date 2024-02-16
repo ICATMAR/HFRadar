@@ -71,52 +71,14 @@ export default {
     }; 
 
     // Load data
-    // First files of real-time data --> load them first to show something on the website
-    let fileTypes = ['tuv']; // Only load tuv files at the beginning
-    window.DataManager.loadLatestStaticFilesRepository(fileTypes).then(hfRadar => {
-      let tmst;
-      if (hfRadar != undefined){
-        tmst = hfRadar.lastLoadedTimestamp;
-        window.eventBus.emit('HFRadarDataLoaded', hfRadar.lastLoadedTimestamp);
-      }
-      return tmst;
-    })
-    // Load the rest of the files
-    .then((tmst) =>{
-      // Add wave files that will create radar objects
-      fileTypes.push('wls');
-      // Reduce tmst by 1h, as this timestamp is already loaded.
-      if (tmst != undefined){
-        let tmp = new Date(tmst);
-        tmp.setUTCHours(tmp.getUTCHours() - 1);
-        tmst = tmp.toISOString();
-      }
-      // Load data
-      let useWorker = true;
-      
-      // Use web worker to load the rest of the files
-      // TODO: with web worker is hard to track pending requests? should this be managed from DataManager instead of here?
-      if (window.DataWorker && useWorker){
-        window.DataWorker.postMessage(['loadStaticFilesRepository', [undefined, tmst, fileTypes]]);
-        // Callback, only happens at initalization
-        window.eventBus.on('FileManager_Worker_HFRadarDataLoaded', () => {
-          window.GUIManager.intialLoadDone = true;
-          window.eventBus.emit('HFRadarDataLoaded');
-        })
-
-      } 
-      // Fallback option
-      else {
-        window.DataManager.loadStaticFilesRepository(undefined, tmst, fileTypes).then((hfRadar) => {
-        window.GUIManager.intialLoadDone = true;
-        if (hfRadar != undefined)
-          window.eventBus.emit('HFRadarDataLoaded');
-        });
-        
-        
-      }
-      
-    })
+    // Check if we are working in the latest date
+    let nowISODate = new Date().toISOString().substring(0, 14) + '00:00.000Z';
+    if (nowISODate == window.GUIManager.currentTmst){
+      this.loadLatestCurrents();
+    } else {
+      window.DataManager.loadOnInteraction(window.GUIManager.currentTmst);
+    }
+    
     
     //window.DataManager.loadStaticFilesRepository().then((lastHFRadar) => {
       //window.eventBus.emit('HFRadarDataLoaded', lastHFRadar.lastLoadedTimestamp);
@@ -154,6 +116,56 @@ export default {
   },
   methods: {
     //onclick: function(e){},
+
+    // INTERNAL
+    loadLatestCurrents: function(){
+      // First files of real-time data --> load them first to show something on the website
+      let fileTypes = ['tuv']; // Only load tuv files at the beginning
+      window.DataManager.loadLatestStaticFilesRepository(fileTypes).then(hfRadar => {
+        let tmst;
+        if (hfRadar != undefined){
+          tmst = hfRadar.lastLoadedTimestamp;
+          window.eventBus.emit('HFRadarDataLoaded', hfRadar.lastLoadedTimestamp);
+        }
+        return tmst;
+      })
+      // Load the rest of the files
+      .then((tmst) =>{
+        // Add wave files that will create radar objects
+        fileTypes.push('wls');
+        // Reduce tmst by 1h, as this timestamp is already loaded.
+        if (tmst != undefined){
+          let tmp = new Date(tmst);
+          tmp.setUTCHours(tmp.getUTCHours() - 1);
+          tmst = tmp.toISOString();
+        }
+        // Load data
+        let useWorker = true;
+        
+        // Use web worker to load the rest of the files
+        // TODO: with web worker is hard to track pending requests? should this be managed from DataManager instead of here?
+        if (window.DataWorker && useWorker){
+          window.DataWorker.postMessage(['loadStaticFilesRepository', [undefined, tmst, fileTypes]]);
+          // Callback, only happens at initalization
+          window.eventBus.on('FileManager_Worker_HFRadarDataLoaded', () => {
+            window.GUIManager.intialLoadDone = true;
+            window.eventBus.emit('HFRadarDataLoaded');
+          })
+
+        } 
+        // Fallback option
+        else {
+          window.DataManager.loadStaticFilesRepository(undefined, tmst, fileTypes).then((hfRadar) => {
+          window.GUIManager.intialLoadDone = true;
+          if (hfRadar != undefined)
+            window.eventBus.emit('HFRadarDataLoaded');
+          });
+          
+          
+        }
+        
+      });
+    }
   },
   components: {
     "mapOL": Map,

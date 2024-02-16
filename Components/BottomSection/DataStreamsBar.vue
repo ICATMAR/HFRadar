@@ -43,6 +43,10 @@ export default {
       this.canvas.width = parentEl.offsetWidth;
       this.updateCanvas();
     });
+    // Initial load and user changing hash TIME in URL
+    window.eventBus.on('GUIManager_URLDateChanged', tmst => {
+      this.updateCanvas();
+    });
     // TODO: there is a bit of overkill here. HFRadarDataLoaded is useful to display the first loaded radar data.
     // In principle, 'DataManager_DataAvailabilityUpdated', should be called after the trigger 'HFRadarDataLoaded', but
     // it does not work on the first radar load. It works on the posterior loads, thus this.updateCanvas() is called twice.

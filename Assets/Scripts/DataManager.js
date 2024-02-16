@@ -26,6 +26,11 @@ class DataManager {
     window.eventBus.on('DataStreamsBar_SelectedDateChanged', tmst => {
       this.loadOnInteraction(tmst);
     });
+    // User changed TMST hash on the URL
+    window.eventBus.on('GUIManager_URLDateChanged', tmst => {
+      this.loadOnInteraction(tmst);
+    });
+    
     // User clicked to view radials
     window.eventBus.on("WidgetHFRadars_VisibilityChanged", radialsVisible => {
       if (radialsVisible)
@@ -87,6 +92,11 @@ class DataManager {
         let tots = new CombinedRadars(HFRadarData);
         this.HFRadars[UUID] = tots;
       }
+      // Store latest datastamp of currents
+      let radarTmst = this.HFRadars[UUID].getTimestamp(HFRadarData);
+      let latestDataTmst = window.DataManager.latestDataTmst;
+      window.DataManager.latestDataTmst = latestDataTmst == undefined ? radarTmst : new Date(radarTmst) > new Date(latestDataTmst) ? radarTmst : latestDataTmst;
+
       return this.HFRadars[UUID];
     }
 

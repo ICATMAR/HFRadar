@@ -58,6 +58,14 @@ export default {
         this.updateRadarAnimationState(radar, tmst);
       }); 
     }); 
+    // Initial load and user changing hash TIME in URL
+    window.eventBus.on('GUIManager_URLDateChanged', tmst => {
+      // Iterate all radars
+      Object.keys(window.DataManager.HFRadars).forEach(key => {
+        let radar = window.DataManager.HFRadars[key];
+        this.updateRadarAnimationState(radar, tmst);
+      }); 
+    });
 
 
 

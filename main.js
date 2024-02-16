@@ -8,6 +8,12 @@ import es from './lang/es.js';
 // https://github.com/developit/mitt
 window.eventBus = window.mitt();
 
+// Utils for hash and routing
+import {setHashValue, getHashValue, removeHash} from './Assets/Scripts/utils.js';
+window.location.setHashValue = setHashValue;
+window.location.getHashValue = getHashValue;
+window.location.removeHash = removeHash;
+
 
 // Load scripts
 import CreateImage from './Assets/Scripts/createImage.js';

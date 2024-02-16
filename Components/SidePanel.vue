@@ -119,6 +119,12 @@ export default {
       this.dataPointContent = '';
       this.isDataPointVisible = false;
     });
+    // User changed TMST hash on the URL
+    window.eventBus.on('GUIManager_URLDateChanged', tmst => {
+      this.updateInformation(tmst);
+      this.dataPointContent = '';
+      this.isDataPointVisible = false;
+    });
 
     // On HF Radar clikc on Map.vue
     window.eventBus.on('Map_ClickedHFRadar', radar => {
