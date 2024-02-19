@@ -30,6 +30,9 @@
       </svg>
     </a>
 
+    <!-- Top Right Section -->
+    <top-right-section></top-right-section>
+
     <!-- Cookie banner -->
     <cookie-banner></cookie-banner>
 
@@ -53,6 +56,7 @@ import Map from "./Map/Map.vue";
 import SidePanel from "./SidePanel.vue";
 import MenuLeft from "./MapWidgets/MenuLeft.vue";
 import CentralPanel from "./Panels/CentralPanel.vue";
+import TopRightSection from "./TopRightSection/TopRightSection.vue";
 import CookieBanner from "./CookieBanner.vue";
 import DownloadDataMenu from "./DownloadDataMenu.vue";
 
@@ -166,6 +170,7 @@ export default {
     "side-panel": SidePanel,
     "menu-left": MenuLeft,
     "central-panel": CentralPanel,
+    "top-right-section": TopRightSection,
     "cookie-banner": CookieBanner,
     "download-data-menu": DownloadDataMenu,
   }
