@@ -279,7 +279,7 @@ export default {
 
     // INTERNAL
     // Update widget
-    updateWhenNewTmst: function(){
+    updateWhenNewTmst: function(tmst){
       if (!this.isVisible)
         return;
       
