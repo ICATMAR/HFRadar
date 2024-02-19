@@ -73,10 +73,13 @@ class GUIManager {
         }
         // Check if map view changed
         let mapView = window.location.getHashValue('VIEW');
-        if (mapView != this.mapView){
-          this.setMapView(mapView);
-          window.eventBus.emit('GUIManager_URLViewChanged', this.mapView);
+        if (mapView != undefined){
+          if (mapView != this.mapView){
+            this.setMapView(mapView);
+            window.eventBus.emit('GUIManager_URLViewChanged', this.mapView);
+          }
         }
+        
       }
       window.location.isInternalChange = false;      
     };
