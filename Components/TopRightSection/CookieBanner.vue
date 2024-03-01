@@ -95,16 +95,14 @@ export default {
 .logo-cookie-banner{
   width: 28px;
   height: 28px;
-  position: fixed;
-  top: 6px;
-  padding: 0px;
-  margin: 0px;
-  z-index: 10;
 
-  right: 70px
+  margin: 0px;
+  margin-left: 3px;
+  margin-right: 3px;
+  
 }
 .container {
-  position: absolute;
+  position: fixed;
   bottom: 100px;
   left: 20px;
   right: 20px;
