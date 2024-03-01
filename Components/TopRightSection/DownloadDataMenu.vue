@@ -1,7 +1,11 @@
 <template>
   
   <!-- Download data top-right button -->
-  <button class="download-button clickable" @click="isVisible = !isVisible" v-if="!isVisible"><span>Download data</span></button>
+  <button class="hiddenInMobile download-button clickable" @click="isVisible = !isVisible" v-if="!isVisible"><span>Download data</span></button>
+
+  <button class="visibleInMobile download-button-icon icon-str clickable" @click="isVisible = !isVisible" v-if="!isVisible">
+    <span class="fa">&#xf019</span>
+  </button>
 
   <Transition>
     <div class="container" v-if="isVisible">
@@ -65,6 +69,17 @@
       <div class="container-text" v-if="!canDownload">
         <span>Downloading data...</span>
       </div>
+
+      <!-- Horizontal white line -->
+      <div class="white-line"></div>
+
+      <div class="buttons-container">
+        <button class="btn-ftp clickable" onclick="window.open('https://icatmar.cat/visors/servei-de-dades/', '_blank')">
+          Access FTP server .
+          <span class="fa"> &#xf1c0</span>.
+        </button>
+      </div>
+      
       
     </div>
   </Transition>
@@ -235,12 +250,25 @@ export default {
 
 
 .download-button {
-  position: fixed; 
-  background: var(--blue);
-  padding: 5px;
-  top: 40px;
-  right: 10px;
-  z-index: 10;
+  background: var(--lightBlue);
+  height: 28px;
+
+  margin-left: 3px;
+  margin-right: 3px;
+}
+
+.download-button:hover {
+  background: var(--blue) !important;
+}
+
+.download-button-icon {
+  height: 28px;
+  width: 28px;
+
+  margin-left: 3px;
+  margin-right: 3px;
+
+  padding: 0px;
 }
 
 .download-button:hover {
@@ -248,12 +276,15 @@ export default {
 }
 
 .container {
-  position: absolute;
-  top: 65px;
+  position: fixed;
+  top: 40px;
   right: 30px;
 
   max-width: 500px;
   width: 80%;
+
+  max-height: 80%;
+  overflow: auto;
 
   display: flex;
   flex-direction: column;
@@ -316,10 +347,18 @@ export default {
 
 .btn-download {
   padding: 15px;
+  max-height: 34px;
 }
 
 .btn-cancel {
   font-size: small;
+  max-height: 34px;
+}
+
+.btn-ftp {
+  padding-left: 15px;
+  padding-right: 15px;
+  max-height: 34px;
 }
 
 /* Transitions for elements */
