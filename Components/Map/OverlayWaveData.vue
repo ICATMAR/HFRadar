@@ -30,7 +30,7 @@
         
         
         <!-- Loading -->
-        <div v-if="radarData[key].fileStatus == 3"><span>Loading...</span></div>
+        <div v-if="radarData[key].fileStatus == 2"><span>Loading...</span></div>
         <!-- No file -->
         <div v-else-if="radarData[key].fileStatus == 0"><span>No file</span></div>
 
@@ -42,7 +42,7 @@
       <!-- window.eventBus.emit('Map_ClickedHFRadar', closestRadar); -->
       <img 
         class="icon-str icon-big icon-img radarIcon" 
-        :class="[radarData[key].fileStatus == 0 ? 'iconNoFile' : radarData[key].fileStatus == 3 ? 'iconLoading' : '']" 
+        :class="[radarData[key].fileStatus == 0 ? 'iconNoFile' : radarData[key].fileStatus == 2 ? 'iconLoading' : '']" 
         @click="radarIconClicked(key)"
         src="/HFRadar/Assets/Images/radar.svg">
 
@@ -115,10 +115,12 @@ export default {
         // Create radar data object
         if (radar.constructor.name == "HFRadar"){
           // Determine file status
+          // 0: file does not exist
+          // 1: file is loaded
+          // 2: datamanager is loading
           let tmst = window.GUIManager.currentTmst;
-          let fileStatus = undefined;
-          if (window.DataManager.hourlyDataAvailability[tmst.substring(0,13) + 'Z'])
-            fileStatus = window.DataManager.hourlyDataAvailability[tmst.substring(0,13) + 'Z'][radar.Site];
+          let fileStatus = 1;
+
           
           this.radarData[radar.UUID] = {
             "site": radar.Site, 
@@ -136,6 +138,8 @@ export default {
           let coord3857 = ol.proj.fromLonLat([location[0], location[1]]);
           // Next tick generates the html in v-for thus we can link the element to the map overlay
           this.$nextTick(() => {
+            // File status
+            this.radarData[radar.UUID].fileStatus = this.getFileStatus(radar, tmst);
             // Wave info
             const waveInfo = new ol.Overlay({
               position: coord3857,
@@ -198,30 +202,52 @@ export default {
               }
             }
           }
-          // File did not start loading
-          if (radar.data == undefined){
-            // Wave file loaded before current file
-            // Do nothing
-          }
-          // File exists and it is loaded
-          else if (radar.data[tmst] != undefined){
-            this.radarData[radar.UUID].fileStatus = 2;
-          } 
-          // File is loading
-          else if (window.DataManager.hourlyDataAvailability[tmst.substring(0,13) + 'Z']) {
-            if (window.DataManager.hourlyDataAvailability[tmst.substring(0,13) + 'Z'][radar.Site] == 3) {
-              this.radarData[radar.UUID].fileStatus = 3;
-              this.radarData[radar.UUID].hasData = false;
-            }
-          }
-          // File does not exist
-          else {
-            this.radarData[radar.UUID].fileStatus = 0;
-            this.radarData[radar.UUID].hasData = false;
-          }
+
+
+          let fileStatus = this.getFileStatus(radar, tmst);
+          this.radarData[radar.UUID].fileStatus = fileStatus;
+          
           
         }
       });
+    },
+
+
+    // The system does not load all kinds of files.
+    // TODO: until we do not load the radials, we do not know if there is a file for that radar
+    // we can use hourlyDataAvailability, load some radials, or maybe use information about how the totals were created
+    getFileStatus(radar, tmst){
+      let fileStatus = 1;
+      
+
+      // Radials
+      // if (radar.data != undefined){
+      //   if (radar.data[tmst] != undefined)
+      //     return fileStatus = 1;
+      //   else if (window.DataManager.pendingRequests != 0)
+      //     return fileStatus = 2;
+      // } 
+
+      // // Wave hourly
+      // if (radar.waveHourlyData != undefined){
+      //   if (radar.waveHourlyData[tmst] != undefined)
+      //     return fileStatus = 1;
+      //   else if (window.DataManager.pendingRequests != 0)
+      //     return fileStatus = 2;
+      // }
+      // // Totals
+      // let loadedRadars = window.DataManager.getRadarsDataOn(window.GUIManager.currentTmst);
+      // for (let i = 0; i < loadedRadars.length; i++){
+      //   if (loadedRadars[i].constructor.name != 'CombinedRadars'){
+      //     debugger;
+      //   } else {
+      //     return fileStatus = 1;
+      //   }
+      // }
+      
+      
+      return fileStatus;
+
     },
 
     // Bearing to direction
