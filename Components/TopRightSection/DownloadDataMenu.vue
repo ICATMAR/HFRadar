@@ -56,6 +56,15 @@
         <span>Estimated file size: {{ selTimespan == 'selected' ? estimatedSize : selTimespan == 'lastDay' ? Math.round(estimatedSize*24) : Math.round(estimatedSize* 24*7) }} MB
         </span>
       </div>
+
+
+      <!-- Disclaimer -->
+      <div class="container-text disclaimer">
+        <span>These data are public and free of charge. User assumes all risk for use of data. 
+          User must display citation in any publication o product using data. User must contact ICATMAR prior to any commercial use of data.
+          HF radar sea surface current velocity dataset by ICATMAR is licensed under a <a class="clickable" href="https://creativecommons.org/licenses/by/4.0/" target="_blank">CC-BY-4.0</a>.
+        </span>
+      </div>
       
       <!-- Download buttons -->
       <div class="buttons-container">
@@ -284,7 +293,8 @@ export default {
   width: 80%;
 
   max-height: 80%;
-  overflow: auto;
+  overflow-y: auto;
+  overflow-x: hidden;
 
   display: flex;
   flex-direction: column;
@@ -337,6 +347,14 @@ export default {
 .container-text {
   padding-bottom: 20px;
   text-align: center;
+}
+
+.disclaimer {
+  text-align: justify;
+}
+
+a {
+  color: white;
 }
 
 .buttons-container {
