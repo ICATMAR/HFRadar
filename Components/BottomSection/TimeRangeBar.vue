@@ -218,6 +218,7 @@ export default {
           // Move in time
           this.reproduceTimeline();
         }
+        window.GUIManager.isTimeRangeBarPlaying = this.isPlaying;
       },
       fastForward: function(){
         this.fastForwardRewind(1);

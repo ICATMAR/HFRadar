@@ -25,7 +25,10 @@ class GUIManager {
       'PBCN': true,
       'GNST': true,
     }
-  }
+  };
+
+  // TimeRangeBar
+  isTimeRangeBarPlaying = false;
 
   // Advanced interface
   isAdvancedInterface = false;

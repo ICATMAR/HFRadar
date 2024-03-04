@@ -31,7 +31,7 @@
 
     <!-- Loading circle -->
     <Transition name="fade">
-        <div class="loading-circle" v-show="dataManagerIsLoading"></div>
+        <div class="loading-circle" v-show="dataManagerIsLoading && isTimeRangeBarPlaying != true"></div>
     </Transition>
   </div>
 </template>
@@ -98,6 +98,8 @@ export default {
     // DataManager is loading
     window.eventBus.on("DataManager_pendingRequestsChange", pendingRequests => {
       this.dataManagerIsLoading = pendingRequests > 0;
+      // Do not show the loading button when the TimeRangeBar is in playing mode
+      this.isTimeRangeBarPlaying = window.GUIManager.isTimeRangeBarPlaying;
     });
   },
   data (){
