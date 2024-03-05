@@ -4,10 +4,12 @@ const separator = '&';
 // Set hash value on window.location.hash
 const setHashValue = function(id, value){
   let hash = window.location.hash;
- 
+  // Do not care about caps
+  let idSC = id.toLowerCase();
+  let hashSC = hash.toLowerCase();
   // Check if hash exists
   // Get start index
-  let indexId = hash.indexOf(id + '=');
+  let indexId = hashSC.indexOf(idSC + '=');
   if (indexId != -1){
     // Get previous content to replace
     let hashSection = hash.substring(indexId, hash.length);
@@ -47,9 +49,12 @@ const setHashValue = function(id, value){
 // Get has value
 const getHashValue = function(id, url){
   let hash = url || window.location.hash;
+  // Do not care about caps
+  let idSC = id.toLowerCase();
+  let hashSC = hash.toLowerCase();
   // Check if hash exists
   // Get start index
-  let indexId = hash.indexOf(id + '=');
+  let indexId = hashSC.indexOf(idSC + '=');
   if (indexId != -1){
     // Get previous content to replace
     let hashSection = hash.substring(indexId, hash.length);
@@ -75,9 +80,12 @@ const getHashValue = function(id, url){
 // Remove hash
 const removeHash = function(id){
   let hash = window.location.hash;
+  // Do not care about caps
+  let idSC = id.toLowerCase();
+  let hashSC = hash.toLowerCase();
   // Check if hash exists
   // Get start index
-  let indexId = hash.indexOf(id + '=');
+  let indexId = hashSC.indexOf(idSC + '=');
   if (indexId != -1){
     // Get previous content to replace
     let hashSection = hash.substring(indexId, hash.length);
