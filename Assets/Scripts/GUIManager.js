@@ -57,6 +57,7 @@ class GUIManager {
     // Radials <RADIALS=BEGU,CREU,AREN,PBCN...>
     this.radials = window.location.getHashValue('RADIALS');
     if (this.radials != undefined){
+      // Show radials if defined on URL at start
       this.isAdvancedInterface = true;
       this.widgetHFRadars.isVisible = true;
       this.widgetHFRadars.areParticlesVisible = true;
@@ -149,15 +150,13 @@ class GUIManager {
         window.location.removeHash('RADIALS');
       } else {
         // Set hash of active radars
-        this.radials = this.getHashValueAccordingToWidgetHFRadar();
-        window.location.setHashValue("RADIALS", this.radials);
+        this.setHashValueAccordingToWidgetHFRadar();
       }
     });
     window.eventBus.on('WidgetHFRadars_RadarActiveChange', radarId => {
       // GUIManager is updated in the other vue component (WidgetHFRadars)
       // Set hash of active radars
-      this.radials = this.getHashValueAccordingToWidgetHFRadar();
-      window.location.setHashValue("RADIALS", this.radials);
+      this.setHashValueAccordingToWidgetHFRadar();
     });
 
     // Data point selection
@@ -174,6 +173,8 @@ class GUIManager {
 
 
   // INTERNAL
+
+  // TIMESTAMP TMST
   setNewTmst(tmst){
     let d = new Date(tmst);
     let isInvalid = isNaN(d.getTime());
@@ -220,6 +221,7 @@ class GUIManager {
     
   }
 
+  // MAP
   // Input is a string
   setMapView(values){
     let itemsIn = values.split(",");
@@ -234,6 +236,7 @@ class GUIManager {
   }
 
 
+  // RADAR
   // Updates radar visibility variable according to hash string
   updateWidgetHFRadarAccordingToHash(radialsStr){
     let rStr = radialsStr.toLowerCase();
@@ -247,7 +250,7 @@ class GUIManager {
   };
 
   // Generate string according to radar variables
-  getHashValueAccordingToWidgetHFRadar(){
+  setHashValueAccordingToWidgetHFRadar(){
     let str = '';
     Object.keys(this.widgetHFRadars.radarsVisible).forEach( rName => {
       if (this.widgetHFRadars.radarsVisible[rName]) {
@@ -255,9 +258,19 @@ class GUIManager {
       }
     });
     str = str.substring(0, str.length-1); // Remove extra comma
-    return str;
+    // If all radars are deactivated
+    if (str == ''){
+      this.radials = undefined;
+      window.location.removeHash("RADIALS");
+    } else {
+      this.radials = str;
+      window.location.setHashValue("RADIALS", this.radials);
+    }
+
   }
 
+
+  // TMST
   // Selected date changes
   selectedDateChanged(tmst){
     // Set current timestamp
