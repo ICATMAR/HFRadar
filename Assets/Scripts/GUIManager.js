@@ -106,11 +106,9 @@ class GUIManager {
             // User deleted radials parameter -> turn to normal interface and show currents?
             // For sure hide radials
             window.eventBus.emit('GUIManager_URLRadialsChanged');
-            // TODO
           } else {
             // Radials changed
             this.radials = radials;
-            // TODO
             this.updateWidgetHFRadarAccordingToHash(radials);
             window.eventBus.emit('GUIManager_URLRadialsChanged', radials);
           }
