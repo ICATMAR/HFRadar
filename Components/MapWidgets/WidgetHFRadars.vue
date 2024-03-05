@@ -113,7 +113,7 @@ export default {
             this.radarsVue[key] = {
               UUID: key, 
               Site: radar.Site,
-              isActivated: true,
+              isActivated: window.GUIManager.widgetHFRadars.radarsVisible[key],
               hasDataOnTimestamp: false,
             }
           }
@@ -157,6 +157,16 @@ export default {
         this.$refs.onOffCurrents.setChecked(false);
         this.$refs.onOffParticles.setChecked(window.GUIManager.widgetHFRadars.areParticlesVisible);
         this.$refs.onOffPoints.setChecked(window.GUIManager.widgetHFRadars.arePointsVisible);
+      }
+      // Use GUIManager state
+      else {
+        this.isVisible = window.GUIManager.widgetHFRadars.isVisible;
+        this.areParticlesVisible = window.GUIManager.widgetHFRadars.areParticlesVisible;
+        this.arePointsVisible = window.GUIManager.widgetHFRadars.arePointsVisible;
+        // Fake button actions
+        this.$refs.onOffCurrents.setChecked(this.isVisible);
+        this.$refs.onOffParticles.setChecked(this.areParticlesVisible);
+        this.$refs.onOffPoints.setChecked(this.arePointsVisible);
       }
     });
 
