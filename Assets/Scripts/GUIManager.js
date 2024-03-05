@@ -19,8 +19,8 @@ class GUIManager {
     areParticlesVisible: true,
     arePointsVisible: false,
     radarsVisible: {
-      'BEGU': true,
       'CREU': true,
+      'BEGU': true,
       'AREN': true,
       'PBCN': true,
       'GNST': true,
@@ -50,9 +50,24 @@ class GUIManager {
     let tmst = window.location.getHashValue('TIME');
     this.setNewTmst(tmst);
     window.location.isInternalChange = false;
-
+    
     // Map View <VIEW=long,lat,zoom>
     this.mapView = window.location.getHashValue('VIEW');
+
+    // Radials <RADIALS=BEGU,CREU,AREN,PBCN...>
+    this.radials = window.location.getHashValue('RADIALS');
+    if (this.radials != undefined){
+      // Show radials if defined on URL at start
+      this.isAdvancedInterface = true;
+      this.widgetHFRadars.isVisible = true;
+      this.widgetHFRadars.areParticlesVisible = true;
+      this.widgetHFRadars.arePointsVisible = false;
+      // Do not show totals
+      this.widgetCombinedRadars.isVisible = false;
+      // Update widget variables
+      this.updateWidgetHFRadarAccordingToHash(this.radials);
+    }
+
 
 
     // EVENTS
@@ -82,6 +97,22 @@ class GUIManager {
             window.eventBus.emit('GUIManager_URLViewChanged', this.mapView);
           }
         }
+        // Radials changed
+        let radials = window.location.getHashValue('RADIALS');
+        if (this.radials != radials){
+          // No radials
+          if (radials == undefined){
+            this.radials = undefined;
+            // User deleted radials parameter -> turn to normal interface and show currents?
+            // For sure hide radials
+            window.eventBus.emit('GUIManager_URLRadialsChanged');
+          } else {
+            // Radials changed
+            this.radials = radials;
+            this.updateWidgetHFRadarAccordingToHash(radials);
+            window.eventBus.emit('GUIManager_URLRadialsChanged', radials);
+          }
+        }
         
       }
       window.location.isInternalChange = false;      
@@ -108,12 +139,31 @@ class GUIManager {
       this.setMapView(values.toString());
       window.location.isInternalChange = false;
     });
+    // Radials
+    // Radials all on/off
+    window.eventBus.on("WidgetHFRadars_VisibilityChanged", areVisible => {
+      if (!areVisible){
+        // Remove hash
+        // GUIManager is updated in the other vue component (WidgetHFRadars)
+        window.location.removeHash('RADIALS');
+      } else {
+        // Set hash of active radars
+        this.setHashValueAccordingToWidgetHFRadar();
+      }
+    });
+    window.eventBus.on('WidgetHFRadars_RadarActiveChange', radarId => {
+      // GUIManager is updated in the other vue component (WidgetHFRadars)
+      // Set hash of active radars
+      this.setHashValueAccordingToWidgetHFRadar();
+    });
+
     // Data point selection
     window.eventBus.on('Map_ClickedDataPoint', () => this.isDataPointSelected = true);//{"dataPoint": closestDataPoint, "radar": selRadar});
     window.eventBus.on('DeselectedDataPoint', () => this.isDataPointSelected = false);
     // Mouse events
     // Mouse move in map
     window.eventBus.on('Map_MouseMove', screenPosCoords => this.mouseMoveInMap(screenPosCoords));
+    
 
 
   }
@@ -121,6 +171,8 @@ class GUIManager {
 
 
   // INTERNAL
+
+  // TIMESTAMP TMST
   setNewTmst(tmst){
     let d = new Date(tmst);
     let isInvalid = isNaN(d.getTime());
@@ -167,6 +219,7 @@ class GUIManager {
     
   }
 
+  // MAP
   // Input is a string
   setMapView(values){
     let itemsIn = values.split(",");
@@ -180,6 +233,42 @@ class GUIManager {
     window.location.setHashValue('VIEW', this.mapView);
   }
 
+
+  // RADAR
+  // Updates radar visibility variable according to hash string
+  updateWidgetHFRadarAccordingToHash(radialsStr){
+    let rStr = radialsStr.toLowerCase();
+    let radialsNames = rStr.split(",");
+    Object.keys(this.widgetHFRadars.radarsVisible).forEach( rName => {
+      if (radialsNames.includes(rName.toLowerCase())){
+        this.widgetHFRadars.radarsVisible[rName] = true;
+      } else
+        this.widgetHFRadars.radarsVisible[rName] = false;
+    });
+  };
+
+  // Generate string according to radar variables
+  setHashValueAccordingToWidgetHFRadar(){
+    let str = '';
+    Object.keys(this.widgetHFRadars.radarsVisible).forEach( rName => {
+      if (this.widgetHFRadars.radarsVisible[rName]) {
+        str += rName + ",";
+      }
+    });
+    str = str.substring(0, str.length-1); // Remove extra comma
+    // If all radars are deactivated
+    if (str == ''){
+      this.radials = undefined;
+      window.location.removeHash("RADIALS");
+    } else {
+      this.radials = str;
+      window.location.setHashValue("RADIALS", this.radials);
+    }
+
+  }
+
+
+  // TMST
   // Selected date changes
   selectedDateChanged(tmst){
     // Set current timestamp

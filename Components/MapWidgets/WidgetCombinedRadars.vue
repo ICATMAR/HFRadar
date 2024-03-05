@@ -141,6 +141,16 @@ export default {
           this.$refs.legendGUI.setRange(this.defaultLegendRange);
         }
       }
+      // Use GUIManager state
+      else {
+        this.isVisible = window.GUIManager.widgetCombinedRadars.isVisible;
+        this.areParticlesVisible = window.GUIManager.widgetCombinedRadars.areParticlesVisible;
+        this.arePointsVisible = window.GUIManager.widgetCombinedRadars.arePointsVisible;
+        // Fake button actions
+        this.$refs.onOffCurrents.setChecked(this.isVisible);
+        this.$refs.onOffParticles.setChecked(this.areParticlesVisible);
+        this.$refs.onOffPoints.setChecked(this.arePointsVisible);
+      }
 
       this.isAdvancedInterfaceOnOff = state;
     });

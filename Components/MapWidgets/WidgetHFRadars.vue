@@ -113,7 +113,7 @@ export default {
             this.radarsVue[key] = {
               UUID: key, 
               Site: radar.Site,
-              isActivated: true,
+              isActivated: window.GUIManager.widgetHFRadars.radarsVisible[key],
               hasDataOnTimestamp: false,
             }
           }
@@ -148,6 +148,27 @@ export default {
     window.eventBus.on('GUIManager_URLDateChanged', tmst => {
       this.updateWhenNewTmst(tmst);
     });
+    // User changing the visible radars on the URL
+    window.eventBus.on('GUIManager_URLRadialsChanged', (radialStr) => {
+      // If they are deleted, hide radials
+      if (radialStr == undefined)
+        this.$refs.onOffCurrents.setChecked(false);
+      // Show / Hide visible radars according to hash
+      else {
+        let radialsArr = radialStr.toUpperCase().split(",");
+        let keys = Object.keys(this.radarsVue);
+        for (let i = 0; i< keys.length; i++) {
+            let key = keys[i];
+            // Check if the radar name is present in the URL hash RADIALS
+            let isRadarVisible = false;
+            if (radialsArr.includes(key))
+              isRadarVisible = true;
+            // Set the visibility on the interface if the state changed
+            if (this.radarsVue[key].isActivated != isRadarVisible)
+              this.radarActivatedChanged(this.radarsVue[key]);
+        }
+      }
+    });
 
     // Advanced interface
     window.eventBus.on("AdvancedInterfaceOnOff", state => {
@@ -157,6 +178,16 @@ export default {
         this.$refs.onOffCurrents.setChecked(false);
         this.$refs.onOffParticles.setChecked(window.GUIManager.widgetHFRadars.areParticlesVisible);
         this.$refs.onOffPoints.setChecked(window.GUIManager.widgetHFRadars.arePointsVisible);
+      }
+      // Use GUIManager state
+      else {
+        this.isVisible = window.GUIManager.widgetHFRadars.isVisible;
+        this.areParticlesVisible = window.GUIManager.widgetHFRadars.areParticlesVisible;
+        this.arePointsVisible = window.GUIManager.widgetHFRadars.arePointsVisible;
+        // Fake button actions
+        this.$refs.onOffCurrents.setChecked(this.isVisible);
+        this.$refs.onOffParticles.setChecked(this.areParticlesVisible);
+        this.$refs.onOffPoints.setChecked(this.arePointsVisible);
       }
     });
 

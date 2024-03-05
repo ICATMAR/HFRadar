@@ -26,7 +26,11 @@
 
     },
     mounted(){
-      window.eventBus.emit("AdvancedInterfaceOnOff", this.isAdvancedInterfaceOnOff);
+      // Advanced interface dependant on hash and GUIManager
+      this.isAdvancedInterfaceOnOff = window.GUIManager.isAdvancedInterface;
+      // Emits an event (provoke click)
+      this.$refs.advancedOnOffButton.setChecked(this.isAdvancedInterfaceOnOff);
+      //window.eventBus.emit("AdvancedInterfaceOnOff", this.isAdvancedInterfaceOnOff);
     },
     unmounted(){
   

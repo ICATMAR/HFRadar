@@ -115,6 +115,13 @@ export default {
     loadLatestCurrents: function(){
       // First files of real-time data --> load them first to show something on the website
       let fileTypes = ['tuv']; // Only load tuv files at the beginning
+      // If radials are visible
+      if (GUIManager.isAdvancedInterface){
+        if (GUIManager.widgetHFRadars.isVisible){
+          fileTypes.push('ruv');
+        }
+      }
+      // Load files
       window.DataManager.loadLatestStaticFilesRepository(fileTypes).then(hfRadar => {
         let tmst;
         if (hfRadar != undefined){
