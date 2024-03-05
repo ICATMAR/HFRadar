@@ -1,9 +1,9 @@
 <template>
   
   <!-- Download data top-right button -->
-  <button class="hiddenInMobile download-button clickable" @click="isVisible = !isVisible" v-if="!isVisible"><span>Download data</span></button>
+  <button class="hiddenInMobile download-button clickable" @click="downloadIconClicked" v-if="!isVisible"><span>Download data</span></button>
 
-  <button class="visibleInMobile download-button-icon icon-str clickable" @click="isVisible = !isVisible" v-if="!isVisible">
+  <button class="visibleInMobile download-button-icon icon-str clickable" @click="downloadIconClicked" v-if="!isVisible">
     <span class="fa">&#xf019</span>
   </button>
 
@@ -65,6 +65,12 @@
           HF radar sea surface current velocity dataset by ICATMAR is licensed under a <a class="clickable" href="https://creativecommons.org/licenses/by/4.0/" target="_blank">CC-BY-4.0</a>.
         </span>
       </div>
+
+      <!-- Cookies warning -->
+      <div class="container-text disclaimer" v-if="mustShowCookieWarning">
+        <span><strong>Downloading the data implies acknowledgment of our use of cookies to monitor download activity and improve our services.
+        </strong></span>
+      </div>
       
       <!-- Download buttons -->
       <div class="buttons-container">
@@ -101,10 +107,9 @@ export default {
   name: "DownloadDataMenu",
   mounted(){
     //this.isVisible = true; // debug
-
     window.eventBus.on('HFRadarDataLoaded', () => {
       this.canDownload = true;  
-    })
+    });
   },
   data() {
     return {
@@ -119,6 +124,22 @@ export default {
     // USER INTERACTION
     // Information about cookies settings is in index.html
     downloadClicked: function(e){
+      // Update cookies
+      // Google analytics and cookies
+      let params = {
+        ad_storage: 'denied',
+        ads_data_redaction: 'false',
+        ad_user_data: 'denied',
+        ad_personalization: 'denied',
+        analytics_storage: 'granted',
+      }
+      gtag('consent', 'update', params);
+      // Store cookies
+      localStorage.setItem('cookie-analytics', JSON.stringify(params));
+
+      this.mustShowCookieWarning = false;
+
+
       // Check the time span selected
       // Download single file
       if (this.selTimespan == 'selected'){
@@ -135,7 +156,7 @@ export default {
       // TODO
       // If we want a week, these files need to be loaded first. FileManager.requested files can be used
       
-      //this.isVisible = false;
+      
     },
 
     // Download single file
@@ -241,10 +262,21 @@ export default {
         link.delete;
       });
 
+    },
 
-      
-      
-    }
+    // Donwload button clicked
+    downloadIconClicked: function(){
+      if (localStorage.getItem('cookie-analytics')){
+        let params = JSON.parse(localStorage.getItem('cookie-analytics'));
+        if (params.analytics_storage == "denied")
+          this.mustShowCookieWarning = true;
+        else
+          this.mustShowCookieWarning = false;
+      } else
+        this.mustShowCookieWarning = true;
+
+      this.isVisible = true;
+    },
 
 
 
