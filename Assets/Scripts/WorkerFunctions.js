@@ -210,10 +210,10 @@ loadedFilesLog =  [];
     }
     // Radials
     if (fileTypes.includes('ruv')){
-      // Begur
-      urls.push(baseURL + 'L2/BEGU/' + year + '/' + month + '/RDLm_BEGU_' + year + '_' + month + '_' + day + '_' + hour + '00_l2b.ruv');
       //  Creus
       urls.push(baseURL + 'L2/CREU/' + year + '/' + month + '/RDLm_CREU_' + year + '_' + month + '_' + day + '_' + hour + '00_l2b.ruv');
+      // Begur
+      urls.push(baseURL + 'L2/BEGU/' + year + '/' + month + '/RDLm_BEGU_' + year + '_' + month + '_' + day + '_' + hour + '00_l2b.ruv');
       // Arenys
       urls.push(baseURL + 'L2/AREN/' + year + '/' + month + '/RDLm_AREN_' + year + '_' + month + '_' + day + '_' + hour + '00.ruv');
       // Port de Barcelona
@@ -223,10 +223,10 @@ loadedFilesLog =  [];
     }
     // Waves and wind
     if (fileTypes.includes('wls')){
-      // Waves Begur
-      urls.push(wavesBaseURL + 'BEGU/' + year + '/WVLM_BEGU_' + year + '_' + month + '_01_0000.wls');
       // Waves Creus
       urls.push(wavesBaseURL + 'CREU/' + year + '/WVLM_CREU_' + year + '_' + month + '_01_0000.wls');
+      // Waves Begur
+      urls.push(wavesBaseURL + 'BEGU/' + year + '/WVLM_BEGU_' + year + '_' + month + '_01_0000.wls');
       // Waves Arenys
       urls.push(wavesBaseURL + 'AREN/' + year + '/WVLM_AREN_' + year + '_' + month + '_01_0000.wls');
       // Waves Port de Barcelona
