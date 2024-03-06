@@ -205,8 +205,8 @@ loadedFilesLog =  [];
     
     // Currents
     if (fileTypes.includes('tuv')){
-      // Totals Roses
-      urls.push(baseURL + 'L3/tuv/' + year + '/' + month + '/TOTL_ROSE_' + year + '_' + month + '_' + day + '_' + hour + '00.tuv');
+      // Totals
+      urls.push(baseURL + 'L3/tuv/' + year + '/' + month + '/TOTL_CATS_' + year + '_' + month + '_' + day + '_' + hour + '00.tuv');
     }
     // Currents geojson
     if (fileTypes.includes('geojson')){
@@ -220,11 +220,11 @@ loadedFilesLog =  [];
       // Begur
       urls.push(baseURL + 'L2/BEGU/' + year + '/' + month + '/RDLm_BEGU_' + year + '_' + month + '_' + day + '_' + hour + '00_l2b.ruv');
       // Arenys
-      urls.push(baseURL + 'L2/AREN/' + year + '/' + month + '/RDLm_AREN_' + year + '_' + month + '_' + day + '_' + hour + '00.ruv');
+      urls.push(baseURL + 'L2/AREN/' + year + '/' + month + '/RDLm_AREN_' + year + '_' + month + '_' + day + '_' + hour + '00_l2b.ruv');
       // Port de Barcelona
-      urls.push(baseURL + 'L2/PBCN/' + year + '/' + month + '/RDLm_PBCN_' + year + '_' + month + '_' + day + '_' + hour + '00.ruv');
+      urls.push(baseURL + 'L2/PBCN/' + year + '/' + month + '/RDLm_PBCN_' + year + '_' + month + '_' + day + '_' + hour + '00_l2b.ruv');
       // Port Ginesta
-      urls.push(baseURL + 'L2/GNST/' + year + '/' + month + '/RDLm_GNST_' + year + '_' + month + '_' + day + '_' + hour + '00.ruv');
+      urls.push(baseURL + 'L2/GNST/' + year + '/' + month + '/RDLm_GNST_' + year + '_' + month + '_' + day + '_' + hour + '00_l2b.ruv');
     }
     // Waves and wind
     if (fileTypes.includes('wls')){

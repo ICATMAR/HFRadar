@@ -207,8 +207,7 @@ export default {
       // Selected format
       let selFormat = this.selFormat;
 
-      // TODO --> ROSE WILL BE CATS
-      let url = baseURL + 'L3/'+ selFormat +'/' + year + '/' + month + '/TOTL_ROSE_' + year + '_' + month + '_' + day + '_' + hour + '00.' + selFormat;
+      let url = baseURL + 'L3/'+ selFormat +'/' + year + '/' + month + '/TOTL_CATS_' + year + '_' + month + '_' + day + '_' + hour + '00.' + selFormat;
 
       // Event for GA tracker
       window.eventBus.emit('DownloadDataMenu_Download', {fileFormat: selFormat, processStage: 'L3', date: dateISO, numFiles: 1});
@@ -258,7 +257,7 @@ export default {
         let tmpStr = movingDate.toISOString();
         tmpStr = tmpStr.replaceAll('-','_');
         // Generate key that is the same as the tmst in the file name
-        // /data/observational/hf_radar/currents/L3/tuv/2024/01/TOTL_ROSE_2024_01_31_0900.tuv
+        // /data/observational/hf_radar/currents/L3/tuv/2024/01/TOTL_CATS_2024_01_31_0900.tuv
         let keyStr = tmpStr.substring(0,10) + '_' + tmpStr.substring(11,13) + '00.' + this.selFormat;
         // Find the file
         // TODO: consider optimizing this search (only done when downloading...)
