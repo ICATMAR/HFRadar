@@ -102,6 +102,13 @@ export default {
       this.timeStr = this.formatTimestampString(tmst);
     });
 
+    // DataStreamsBar in advanced interface
+    window.eventBus.on('DataStreamsBar_SelectedDateChanged', tmst => {
+      let currentDate = new Date(tmst);
+      this.$refs.slider.value = currentDate.getTime()/(1000*60*60);
+      this.timeStr = this.formatTimestampString(tmst);
+    });
+
     // Automatic minute update
     this.updateTimeString();
     
