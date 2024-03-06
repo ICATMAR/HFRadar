@@ -180,7 +180,7 @@ export default {
       let canvas = this.canvas;
       let ctx = this.ctx;
 
-      let measures = ['CATS','CREU','BEGU'];
+      let measures = ['CATS','CREU','BEGU','AREN','PBCN','GNST'];
       let loadedColor = 'darkBlue';
       let existsColor = 'rgb(127, 127, 127)';
       // Time varying color (update canvas is painted contiously when loading data)
