@@ -68,7 +68,7 @@
 
       <!-- Estimated file size -->
       <div class="container-text">
-        <span v-if="selVariable == 'currents'">Estimated file size: {{ selTimespan == 'selected' ? estimatedSize : selTimespan == 'lastDay' ? Math.round(estimatedSize*24) : Math.round(estimatedSize* 24*7) }} MB
+        <span v-if="selVariable == 'currents'">Estimated file size: {{ selTimespan == 'selected' ? estimatedSize[selFormat] : selTimespan == 'lastDay' ? Math.round(estimatedSize[selFormat]*24) : Math.round(estimatedSize[selFormat]* 24*7) }} MB
         </span>
 
         <span v-if="selVariable == 'waves'">Estimated maximum file size: 4 MB
@@ -136,7 +136,11 @@ export default {
       selVariable: 'currents',
       selFormat: 'geojson',
       selTimespan: 'selected',
-      estimatedSize: 0.078,
+      estimatedSize: {
+        'geojson': 0.18,
+        'nc': 0.65,
+        'tuv': 0.078
+      },
     }
   },
   methods: {
@@ -207,7 +211,11 @@ export default {
       // Selected format
       let selFormat = this.selFormat;
 
-      let url = baseURL + 'L3/'+ selFormat +'/' + year + '/' + month + '/TOTL_CATS_' + year + '_' + month + '_' + day + '_' + hour + '00.' + selFormat;
+      let url = '';
+      if (selFormat == 'nc')
+        url = baseURL + 'L3/netcdf/' + year + '/' + month + '/TOTL_CATS_' + year + '_' + month + '_' + day + '_' + hour + '00.' + selFormat;
+      else
+        url = baseURL + 'L3/'+ selFormat +'/' + year + '/' + month + '/TOTL_CATS_' + year + '_' + month + '_' + day + '_' + hour + '00.' + selFormat;
 
       // Event for GA tracker
       window.eventBus.emit('DownloadDataMenu_Download', {fileFormat: selFormat, processStage: 'L3', date: dateISO, numFiles: 1});

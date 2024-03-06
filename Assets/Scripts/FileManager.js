@@ -280,6 +280,11 @@ class FileManager {
       // Totals CATS
       urls.push(baseURL + 'L3/geojson/' + year + '/' + month + '/TOTL_CATS_' + year + '_' + month + '_' + day + '_' + hour + '00.geojson');
     }
+    // Currents netcdf
+    if (fileTypes.includes('nc')){
+      // Totals CATS
+      urls.push(baseURL + 'L3/netcdf/' + year + '/' + month + '/TOTL_CATS_' + year + '_' + month + '_' + day + '_' + hour + '00.nc');
+    }
     // Radials
     if (fileTypes.includes('ruv')){
       //  Creus

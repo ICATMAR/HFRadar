@@ -37,7 +37,7 @@ loadedFilesLog =  [];
     tableHeaders = tableHeaders.replaceAll(' Distance', '-Distance');
     tableHeaders = tableHeaders.replaceAll(' comp', '-comp');
     tableHeaders = tableHeaders.replaceAll(' StdDev', '-StdDev');
-    
+
     
     tableHeaders = tableHeaders.replaceAll('%', '').replace( /\s\s+/g, ',').replaceAll(' ', ',').split(','); // Remove starting %%, remove spaces in between, split
     tableHeaders.shift();
@@ -216,6 +216,11 @@ loadedFilesLog =  [];
     if (fileTypes.includes('geojson')){
       // Totals CATS
       urls.push(baseURL + 'L3/geojson/' + year + '/' + month + '/TOTL_CATS_' + year + '_' + month + '_' + day + '_' + hour + '00.geojson');
+    }
+    // Currents netcdf
+    if (fileTypes.includes('nc')){
+      // Totals CATS
+      urls.push(baseURL + 'L3/netcdf/' + year + '/' + month + '/TOTL_CATS_' + year + '_' + month + '_' + day + '_' + hour + '00.nc');
     }
     // Radials
     if (fileTypes.includes('ruv')){
