@@ -44,11 +44,15 @@ loadedFilesLog =  [];
     tableUnits = tableUnits.replaceAll('%', '').replace( /\s\s+/g, ',').replaceAll(' ', ',').split(',');
     tableUnits.shift();
 
-    // Combined radar data file fix
+    // Combined radar data file fix (Site Country)
     let siteIndex = tableHeaders.indexOf('Site');
     if (siteIndex != -1){
-      for (let i = siteIndex; i < numCols; i++)
+      let counter = 0;
+      for (let i = siteIndex; i < numCols; i++){
         tableHeaders[i] = 'Site Contri';
+        counter++;
+      }
+      tableHeaders = tableHeaders.slice(0, tableHeaders.length - counter);
     }
 
     // Table columns check

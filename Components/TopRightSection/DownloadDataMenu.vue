@@ -71,7 +71,7 @@
         <span v-if="selVariable == 'currents'">Estimated file size: {{ selTimespan == 'selected' ? estimatedSize : selTimespan == 'lastDay' ? Math.round(estimatedSize*24) : Math.round(estimatedSize* 24*7) }} MB
         </span>
 
-        <span v-if="selVariable == 'waves'">Estimated file size: 4 MB
+        <span v-if="selVariable == 'waves'">Estimated maximum file size: 4 MB
         </span>
       </div>
 
