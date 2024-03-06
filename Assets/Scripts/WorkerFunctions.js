@@ -208,6 +208,11 @@ loadedFilesLog =  [];
       // Totals Roses
       urls.push(baseURL + 'L3/tuv/' + year + '/' + month + '/TOTL_ROSE_' + year + '_' + month + '_' + day + '_' + hour + '00.tuv');
     }
+    // Currents geojson
+    if (fileTypes.includes('geojson')){
+      // Totals CATS
+      urls.push(baseURL + 'L3/geojson/' + year + '/' + month + '/TOTL_CATS_' + year + '_' + month + '_' + day + '_' + hour + '00.geojson');
+    }
     // Radials
     if (fileTypes.includes('ruv')){
       //  Creus
