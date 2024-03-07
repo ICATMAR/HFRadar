@@ -37,18 +37,22 @@ loadedFilesLog =  [];
     tableHeaders = tableHeaders.replaceAll(' Distance', '-Distance');
     tableHeaders = tableHeaders.replaceAll(' comp', '-comp');
     tableHeaders = tableHeaders.replaceAll(' StdDev', '-StdDev');
-    
+
     
     tableHeaders = tableHeaders.replaceAll('%', '').replace( /\s\s+/g, ',').replaceAll(' ', ',').split(','); // Remove starting %%, remove spaces in between, split
     tableHeaders.shift();
     tableUnits = tableUnits.replaceAll('%', '').replace( /\s\s+/g, ',').replaceAll(' ', ',').split(',');
     tableUnits.shift();
 
-    // Combined radar data file fix
+    // Combined radar data file fix (Site Country)
     let siteIndex = tableHeaders.indexOf('Site');
     if (siteIndex != -1){
-      for (let i = siteIndex; i < numCols; i++)
+      let counter = 0;
+      for (let i = siteIndex; i < numCols; i++){
         tableHeaders[i] = 'Site Contri';
+        counter++;
+      }
+      tableHeaders = tableHeaders.slice(0, tableHeaders.length - counter);
     }
 
     // Table columns check
@@ -205,8 +209,18 @@ loadedFilesLog =  [];
     
     // Currents
     if (fileTypes.includes('tuv')){
-      // Totals Roses
-      urls.push(baseURL + 'L3/tuv/' + year + '/' + month + '/TOTL_ROSE_' + year + '_' + month + '_' + day + '_' + hour + '00.tuv');
+      // Totals
+      urls.push(baseURL + 'L3/tuv/' + year + '/' + month + '/TOTL_CATS_' + year + '_' + month + '_' + day + '_' + hour + '00.tuv');
+    }
+    // Currents geojson
+    if (fileTypes.includes('geojson')){
+      // Totals CATS
+      urls.push(baseURL + 'L3/geojson/' + year + '/' + month + '/TOTL_CATS_' + year + '_' + month + '_' + day + '_' + hour + '00.geojson');
+    }
+    // Currents netcdf
+    if (fileTypes.includes('nc')){
+      // Totals CATS
+      urls.push(baseURL + 'L3/netcdf/' + year + '/' + month + '/TOTL_CATS_' + year + '_' + month + '_' + day + '_' + hour + '00.nc');
     }
     // Radials
     if (fileTypes.includes('ruv')){
@@ -215,11 +229,11 @@ loadedFilesLog =  [];
       // Begur
       urls.push(baseURL + 'L2/BEGU/' + year + '/' + month + '/RDLm_BEGU_' + year + '_' + month + '_' + day + '_' + hour + '00_l2b.ruv');
       // Arenys
-      urls.push(baseURL + 'L2/AREN/' + year + '/' + month + '/RDLm_AREN_' + year + '_' + month + '_' + day + '_' + hour + '00.ruv');
+      urls.push(baseURL + 'L2/AREN/' + year + '/' + month + '/RDLm_AREN_' + year + '_' + month + '_' + day + '_' + hour + '00_l2b.ruv');
       // Port de Barcelona
-      urls.push(baseURL + 'L2/PBCN/' + year + '/' + month + '/RDLm_PBCN_' + year + '_' + month + '_' + day + '_' + hour + '00.ruv');
+      urls.push(baseURL + 'L2/PBCN/' + year + '/' + month + '/RDLm_PBCN_' + year + '_' + month + '_' + day + '_' + hour + '00_l2b.ruv');
       // Port Ginesta
-      urls.push(baseURL + 'L2/GNST/' + year + '/' + month + '/RDLm_GNST_' + year + '_' + month + '_' + day + '_' + hour + '00.ruv');
+      urls.push(baseURL + 'L2/GNST/' + year + '/' + month + '/RDLm_GNST_' + year + '_' + month + '_' + day + '_' + hour + '00_l2b.ruv');
     }
     // Waves and wind
     if (fileTypes.includes('wls')){

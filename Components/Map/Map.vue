@@ -361,8 +361,8 @@ export default {
       //debugger;
       // Intial conditions
       let longInit = 3.25;
-      let latInit = 42.25;
-      let zoomInit = 10;
+      let latInit = 41.47;
+      let zoomInit = 9;
       if (window.GUIManager.mapView != undefined){
         longInit = parseFloat(window.GUIManager.mapView.split(",")[0]) || longInit;
         latInit = parseFloat(window.GUIManager.mapView.split(",")[1]) || latInit;

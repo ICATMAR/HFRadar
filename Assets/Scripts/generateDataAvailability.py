@@ -44,7 +44,7 @@ def extract_timestamp(file_name):
         return file_name[10:-4]
     elif file_name.startswith("RDLm_CREU_") and file_name.endswith(".ruv"):
         return file_name[10:-4]
-    elif file_name.startswith("TOTL_ROSE_") and file_name.endswith(".tuv"):
+    elif file_name.startswith("TOTL_CATS_") and file_name.endswith(".tuv"):
         return file_name[10:-4]
     elif file_name.startswith("RDLm_AREN_") and file_name.endswith(".ruv"):
         return file_name[10:-4]
@@ -71,7 +71,7 @@ script_directory = os.path.dirname(os.path.abspath(__file__))
 # Specify the folders to search for files
 folders = ["L2/BEGU", "L2/CREU", "L3/tuv", "L2/AREN", "L2/GNST", "L2/PBCN"]
 # Site names (useful for the web app)
-siteNames = ["BEGU", "CREU", "ROSE", "AREN", "GNST", "PBCN"]
+siteNames = ["BEGU", "CREU", "CATS", "AREN", "GNST", "PBCN"]
 
 # Specify the minimum file size in bytes
 min_file_size = 15240  # 10KB

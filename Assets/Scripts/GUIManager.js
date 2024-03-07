@@ -203,7 +203,11 @@ class GUIManager {
       let now = new Date();
       let str = now.toISOString();
       let nowISODate = str.substring(0, 14) + '00:00.000Z';
-      this.currentTmst = this.currentTmst || nowISODate;
+      
+      if (tmst == undefined)
+        this.currentTmst = window.DataManager.latestDataTmst || nowISODate;
+      else
+        this.currentTmst = this.currentTmst || nowISODate;
     }
     else {
       let formatedTmst = tmst.substring(0, 14) + '00:00.000Z';

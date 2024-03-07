@@ -18,42 +18,60 @@
         <span>Download settings</span>
       </div>
 
-      <!-- Subtitle -->
-      <div class="container-subtitle">
-        <span>Sea surface velocities</span>
+
+      <!-- Variable option -->
+      <div class="option-container">
+        <span>Select the variable</span>
+        <!-- Button group -->
+        <div class="button-group">
+          <button class="clickable" :class="[selVariable == 'currents' ? 'button-active' : '']" @click="selVariable = 'currents'"><span>Sea surface velocities</span></button>
+          <button class="clickable" :class="[selVariable == 'waves' ? 'button-active' : '']" @click="selVariable = 'waves'"><span>Waves</span></button>
+        </div>
       </div>
 
 
 
       <!-- File format option -->
-      <div class="option-container">
+      <div class="option-container" v-if="selVariable == 'currents'">
         <span>Choose the file format</span>
         <!-- Button group -->
         <div class="button-group">
-          <button class="clickable" :class="[selFormat == 'tuv' ? 'button-active' : '']" @click="selFormat = 'tuv'"><span>.tuv</span></button>
-          <button class="unavailable" :class="[selFormat == 'nc' ? 'button-active' : '']" @click="selFormat = 'nc'"><span>.nc</span></button>
-          <button class="unavailable" :class="[selFormat == 'geojson' ? 'button-active' : '']" @click="selFormat = 'geojson'"><span>.geojson</span></button>
+          <!-- <button class="clickable" :class="[selFormat == 'tuv' ? 'button-active' : '']" @click="selFormat = 'tuv'"><span>.tuv</span></button> -->
+          <button class="clickable" :class="[selFormat == 'nc' ? 'button-active' : '']" @click="selFormat = 'nc'"><span>netCDF</span></button>
+          <button class="clickable" :class="[selFormat == 'geojson' ? 'button-active' : '']" @click="selFormat = 'geojson'"><span>geojson</span></button>
         </div>
         <!-- Warning -->
         <span v-if="selFormat=='tuv'">Warning: tuv files do not have a quality control.</span>
       </div>
 
 
-      <!-- File format option -->
-      <div class="option-container">
+      <!-- Time span option -->
+      <div class="option-container" v-if="selVariable == 'currents'">
         <span>Select the time span</span>
         <!-- Button group -->
         <div class="button-group">
-          <button class="clickable" :class="[selTimespan == 'selected' ? 'button-active' : '']" @click="selTimespan = 'selected'"><span>Selected time</span></button>
+          <button class="clickable" :class="[selTimespan == 'selected' ? 'button-active' : '']" @click="selTimespan = 'selected'"><span>Displayed time</span></button>
           <button class="clickable" :class="[selTimespan == 'lastDay' ? 'button-active' : '']" @click="selTimespan = 'lastDay'"><span>Last 24h</span></button>
           <button class="clickable" :class="[selTimespan == 'last3days' ? 'button-active' : '']" @click="selTimespan = 'last3days'"><span>Last 3 days</span></button>
         </div>
       </div>
+
+      <!-- Time span option -->
+      <div class="option-container" v-if="selVariable == 'waves'">
+        <span>Select the time span</span>
+        <!-- Button group -->
+        <div class="button-group">
+          <button class="clickable button-active"><span>Latest month</span></button>
+        </div>
+      </div>
       
 
-      <!-- Text -->
+      <!-- Estimated file size -->
       <div class="container-text">
-        <span>Estimated file size: {{ selTimespan == 'selected' ? estimatedSize : selTimespan == 'lastDay' ? Math.round(estimatedSize*24) : Math.round(estimatedSize* 24*7) }} MB
+        <span v-if="selVariable == 'currents'">Estimated file size: {{ selTimespan == 'selected' ? estimatedSize[selFormat] : selTimespan == 'lastDay' ? Math.round(estimatedSize[selFormat]*24) : Math.round(estimatedSize[selFormat]* 24*7) }} MB
+        </span>
+
+        <span v-if="selVariable == 'waves'">Estimated maximum file size: 4 MB
         </span>
       </div>
 
@@ -115,9 +133,14 @@ export default {
     return {
       isVisible: false,
       canDownload: false,
-      selFormat: 'tuv',
+      selVariable: 'currents',
+      selFormat: 'geojson',
       selTimespan: 'selected',
-      estimatedSize: 0.078,
+      estimatedSize: {
+        'geojson': 0.18,
+        'nc': 0.65,
+        'tuv': 0.078
+      },
     }
   },
   methods: {
@@ -142,17 +165,25 @@ export default {
 
       // Check the time span selected
       // Download single file
-      if (this.selTimespan == 'selected'){
-        this.downloadSelectedTmst();
+      if (this.selVariable == "currents"){
+        if (this.selTimespan == 'selected'){
+          this.downloadSelectedTmst();
+        }
+        // Last 24h
+        else if (this.selTimespan == 'lastDay'){
+          this.downloadLast24h();
+        }
+        // Last 3 days
+        else if (this.selTimespan == 'last3days'){
+          this.downloadLast3days();
+        }
+      } 
+      // Waves
+      else {
+        // Download latest month of waves
+        this.downloadWavesLatestMonth();
       }
-      // Last 24h
-      else if (this.selTimespan == 'lastDay'){
-        this.downloadLast24h();
-      }
-      // Last 3 days
-      else if (this.selTimespan == 'last3days'){
-        this.downloadLast3days();
-      }
+      
       // TODO
       // If we want a week, these files need to be loaded first. FileManager.requested files can be used
       
@@ -177,14 +208,21 @@ export default {
       let day = dateISO.substring(8,10);
       let hour = dateISO.substring(11,13);
 
-      let url = baseURL + 'L3/tuv/' + year + '/' + month + '/TOTL_ROSE_' + year + '_' + month + '_' + day + '_' + hour + '00.tuv';
+      // Selected format
+      let selFormat = this.selFormat;
+
+      let url = '';
+      if (selFormat == 'nc')
+        url = baseURL + 'L3/netcdf/' + year + '/' + month + '/TOTL_CATS_' + year + '_' + month + '_' + day + '_' + hour + '00.' + selFormat;
+      else
+        url = baseURL + 'L3/'+ selFormat +'/' + year + '/' + month + '/TOTL_CATS_' + year + '_' + month + '_' + day + '_' + hour + '00.' + selFormat;
 
       // Event for GA tracker
-      window.eventBus.emit('DownloadDataMenu_Download', {fileFormat: 'tuv', processStage: 'L3', date: dateISO, numFiles: 1});
+      window.eventBus.emit('DownloadDataMenu_Download', {fileFormat: selFormat, processStage: 'L3', date: dateISO, numFiles: 1});
 
       // Download file
       let link = document.createElement('a');
-      link.download = 'ICATMAR_Currents_' + dateISO + '.tuv';
+      link.download = 'ICATMAR_Currents_' + dateISO + '.' + selFormat;
       link.href = url;
       link.click();
       link.delete;
@@ -192,18 +230,18 @@ export default {
 
     // Download last 24h
     downloadLast24h: function(){
-      this.donwloadLatestMultipleFiles(24, 'latest24h');
+      this.downloadLatestMultipleFiles(24, 'latest24h');
     },
     // Download last 3 days
     downloadLast3days: function(){
-      this.donwloadLatestMultipleFiles(24*3, 'latest3days');
+      this.downloadLatestMultipleFiles(24*3, 'latest3days');
     },
 
     // Download multiple files
-    donwloadLatestMultipleFiles: async function(hours, filename){
+    downloadLatestMultipleFiles: async function(hours, filename){
       
       // Download latest files
-      let fileTypes = ['tuv']; // Only load tuv files at the beginning
+      let fileTypes = [this.selFormat]; // Only load files with the selected format
       let nowDate = new Date();
       let endTime = nowDate.toISOString();
       let startTime = nowDate.setUTCHours(nowDate.getUTCHours() - hours);
@@ -227,8 +265,8 @@ export default {
         let tmpStr = movingDate.toISOString();
         tmpStr = tmpStr.replaceAll('-','_');
         // Generate key that is the same as the tmst in the file name
-        // /data/observational/hf_radar/currents/L3/tuv/2024/01/TOTL_ROSE_2024_01_31_0900.tuv
-        let keyStr = tmpStr.substring(0,10) + '_' + tmpStr.substring(11,13) + '00.tuv';
+        // /data/observational/hf_radar/currents/L3/tuv/2024/01/TOTL_CATS_2024_01_31_0900.tuv
+        let keyStr = tmpStr.substring(0,10) + '_' + tmpStr.substring(11,13) + '00.' + this.selFormat;
         // Find the file
         // TODO: consider optimizing this search (only done when downloading...)
         for (let j = 0; j < FileManager.loadedFilesLog.length; j++){
@@ -249,7 +287,7 @@ export default {
       }
 
       // Event for GA tracker
-      window.eventBus.emit('DownloadDataMenu_Download', {fileFormat: 'tuv', processStage: 'L3', date: latestTmst, numFiles});
+      window.eventBus.emit('DownloadDataMenu_Download', {fileFormat: this.selFormat, processStage: 'L3', date: latestTmst, numFiles});
 
       // Generate zip and download
       zip.generateAsync({type:"blob"})
@@ -264,7 +302,63 @@ export default {
 
     },
 
-    // Donwload button clicked
+    // Download wave data
+    downloadWavesLatestMonth: async function(){
+
+      // Download latest files
+      let fileTypes = ['wls']; // Only load files with the selected format
+      let nowDate = new Date();
+      let nowDateISO = nowDate.toISOString();
+      
+      this.canDownload = false;
+      await window.DataManager.loadStaticFilesRepository(nowDateISO, nowDateISO, fileTypes);
+      this.canDownload = true;
+
+      let latestTmst = window.DataManager.latestDataTmst;
+
+      // Create JSZip
+      let zip = new JSZip();
+      // Keep track of number of files
+      let numFiles = 0;
+
+      // Iterate all files
+      // Get ISO string
+      nowDateISO = nowDateISO.replaceAll('-','_');
+      // Generate key that is the same as the tmst in the file name
+      // /data/observational/hf_radar/waves/CREU/2024/WVLM_CREU_2024_03_01_0000.wls
+      let keyStr = nowDateISO.substring(0,7) + '_01_' + '0000.wls'
+      // Find the file
+      // TODO: consider optimizing this search (only done when downloading...)
+      for (let j = 0; j < FileManager.loadedFilesLog.length; j++){
+        let log = FileManager.loadedFilesLog[j];
+        if (log.url.includes(keyStr)){
+          // Create filename
+          // Respect original name?
+          let strParts = log.url.split('/');
+          let filename = 'ICATMAR_' + strParts[strParts.length - 1];
+          zip.file(filename, log.contentTxt);
+
+          numFiles++;
+        }
+      }
+      
+      // Event for GA tracker
+      window.eventBus.emit('DownloadDataMenu_Download', {fileFormat: 'wls', processStage: 'none', date: latestTmst, numFiles});
+
+      // Generate zip and download
+      zip.generateAsync({type:"blob"})
+      .then(function(content) {
+        let blobUrl = URL.createObjectURL(content);
+        let link = document.createElement('a');
+        link.download = 'ICATMAR_wavesLatestMonth_' + nowDateISO.substring(0,10) + '.zip';
+        link.href = blobUrl;
+        link.click();
+        link.delete;
+      });
+    },
+
+
+    // Download button clicked
     downloadIconClicked: function(){
       if (localStorage.getItem('cookie-analytics')){
         let params = JSON.parse(localStorage.getItem('cookie-analytics'));

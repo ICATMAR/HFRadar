@@ -97,6 +97,15 @@ export default {
 
     // Initial load and user changing hash TIME in URL
     window.eventBus.on('GUIManager_URLDateChanged', tmst => {
+      let currentDate = new Date(tmst);
+      this.$refs.slider.value = currentDate.getTime()/(1000*60*60);
+      this.timeStr = this.formatTimestampString(tmst);
+    });
+
+    // DataStreamsBar in advanced interface
+    window.eventBus.on('DataStreamsBar_SelectedDateChanged', tmst => {
+      let currentDate = new Date(tmst);
+      this.$refs.slider.value = currentDate.getTime()/(1000*60*60);
       this.timeStr = this.formatTimestampString(tmst);
     });
 
