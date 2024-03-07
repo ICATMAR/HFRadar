@@ -238,15 +238,15 @@ loadedFilesLog =  [];
     // Waves and wind
     if (fileTypes.includes('wls')){
       // Waves Creus
-      urls.push(wavesBaseURL + 'CREU/' + year + '/WVLM_CREU_' + year + '_' + month + '_01_0000.wls');
+      urls.push(wavesBaseURL + 'CREU/WVLM_CREU_' + year + '_' + month + '_01_0000.wls');
       // Waves Begur
-      urls.push(wavesBaseURL + 'BEGU/' + year + '/WVLM_BEGU_' + year + '_' + month + '_01_0000.wls');
+      urls.push(wavesBaseURL + 'BEGU/WVLM_BEGU_' + year + '_' + month + '_01_0000.wls');
       // Waves Arenys
-      urls.push(wavesBaseURL + 'AREN/' + year + '/WVLM_AREN_' + year + '_' + month + '_01_0000.wls');
+      urls.push(wavesBaseURL + 'AREN/WVLM_AREN_' + year + '_' + month + '_01_0000.wls');
       // Waves Port de Barcelona
-      urls.push(wavesBaseURL + 'PBCN/' + year + '/WVLM_PBCN_' + year + '_' + month + '_01_0000.wls');
+      urls.push(wavesBaseURL + 'PBCN/WVLM_PBCN_' + year + '_' + month + '_01_0000.wls');
       // Waves Port Ginesta
-      urls.push(wavesBaseURL + 'GNST/' + year + '/WVLM_GNST_' + year + '_' + month + '_01_0000.wls');
+      urls.push(wavesBaseURL + 'GNST/WVLM_GNST_' + year + '_' + month + '_01_0000.wls');
     }
 
 
