@@ -8,7 +8,9 @@ const SEARCHHOURS = 24*7;
 class DataManager {
 
   HFRadars = {};
-    //https://ows.emodnet-bathymetry.eu/wms?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap&FORMAT=image%2Fpng8&TRANSPARENT=true&LAYERS=emodnet:mean_2016&TILED=TRUE&WIDTH=2048&HEIGHT=2048&CRS=EPSG%3A4326&STYLES=&BBOX=39.8,0,43,5
+  //https://ows.emodnet-bathymetry.eu/wms?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap&FORMAT=image%2Fpng8&TRANSPARENT=true&LAYERS=emodnet:mean_2016&TILED=TRUE&WIDTH=2048&HEIGHT=2048&CRS=EPSG%3A4326&STYLES=&BBOX=39.8,0,43,5
+  // EPSG 3857 projection works better
+  //https://ows.emodnet-bathymetry.eu/wms?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap&FORMAT=image%2Fpng8&TRANSPARENT=true&LAYERS=emodnet:mean_2016&TILED=TRUE&WIDTH=2048&HEIGHT=2048&CRS=EPSG%3A3857&STYLES=&BBOX=0.0%2C4836921.25%2C556597.45%2C5311971.85
   LANDMAKSURL = './Assets/Images/LandMask_0_39.8_5_43.png';
   LANDMASKBBOX = [0.0, 4836921.25, 556597.45, 5311971.85];// [0, 39.8, 5, 43];
   
