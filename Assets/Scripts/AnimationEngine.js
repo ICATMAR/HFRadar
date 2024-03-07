@@ -965,6 +965,16 @@ class ParticleSystem {
     this.numParticles = Math.min(Math.round(numParticlesFactor * this.fullScreenNumParticles), this.fullScreenNumParticles);
     // Minimum
     this.numParticles = Math.max(this.numParticles, this.minParticles);
+
+    // Arrow density maximum
+    if (this.source.animation.useArrows){
+      // Check density
+      let density = this.numParticles / numPixels;
+      if (density > Arrow.maximumDensity){
+        this.numParticles = Math.floor(numPixels * Arrow.maximumDensity);
+      }
+    }
+          
   }
   
   // Reposition particles
@@ -1520,6 +1530,8 @@ class ParticleCombinedRadar extends Particle {
 
 // Class for static directional arrows
 class Arrow {
+  // Static variables
+  static maximumDensity = 0.005; // arrows per pixel^2
   // Variables
   numVerticesPath = 5; // bottom arrow, center arrow, left corner, top arrow, right corner
   stepInLongLat = 1;
