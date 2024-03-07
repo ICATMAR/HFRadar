@@ -605,10 +605,27 @@ class SourceCombinedRadar {
       return value;
     }
 
+    // Lat and long are on land
+    if (window.DataManager){
+      let coord = ol.proj.transform([long, lat], 'EPSG:4326', 'EPSG:3857');
+      // If point is found in land, write as undefined and return
+      if (window.DataManager.isThereLand(...coord)){
+        // Assign
+        value[0] = undefined;
+        value[1] = undefined;
+        return value;
+      }
+    }
+
     // Find value
     let index = latIndex * grid.numLongPoints + longIndex;
     value[0] = grid.dataGrid[ index * 2];
     value[1] = grid.dataGrid[ index * 2 + 1];
+    // dataGrid returns NaN when it does not have a value. Transform to undefined here
+    if (isNaN(value[0])) {
+      value[0] = undefined;
+      value[1] = undefined;
+    }
 
     return value;
   }
@@ -1081,7 +1098,7 @@ class Particle {
       this.vertices[i*2] = pixelPos[0];
       this.vertices[i*2 + 1] = pixelPos[1];
       // Get new value according to longitude and latitude
-      this.valueVec2 = this.particleSystem.source.getValueAtLongLat(coord[0], coord[1], this.valueVec2);
+            this.valueVec2 = this.particleSystem.source.getValueAtLongLat(coord[0], coord[1], this.valueVec2);
       // Assign values
       if (this.valueVec2[0] !== undefined)
         this.verticesValue[i] = Math.sqrt(this.valueVec2[0]*this.valueVec2[0] + this.valueVec2[1]*this.valueVec2[1]);
@@ -1110,7 +1127,7 @@ class Particle {
     coord = ol.proj.transform(coord, 'EPSG:3857', 'EPSG:4326');
     // Get value at long lat from source
     //value = this.particleSystem.source.getValueAtPixel(point, value);
-    value = this.particleSystem.source.getValueAtLongLat(coord[0], coord[1], value);
+        value = this.particleSystem.source.getValueAtLongLat(coord[0], coord[1], value);
     
 
     // If pixel does not contain data, throw it again at least 20 times
@@ -1122,7 +1139,7 @@ class Particle {
 
   // Draw / Update
   drawVelocity(dt){
-
+    
     // Update life
     this.life += 0.005 + this.particleSystem.speedFactor * 0.1 * this.verticesValue[Math.round(this.life * this.numVerticesPath)];
     // Reset life
@@ -1285,15 +1302,29 @@ class ParticleCombinedRadar extends Particle {
     particleSystem.speedFactor = 0.01;
     this.stepInLongLat = 0.008;
     this.color = [255,255,255];
+
+    // Intial properties
+    this.maxNumVerticesPath = this.numVerticesPath;
+    this.mustDiscard = false;
   }
 
   // Overwrite
   repositionParticle(){
+    // Reset properties
+    this.numVerticesPath = this.maxNumVerticesPath;
+    this.mustDiscard = false;
+
     // Reset previous position for painting path
     this.prevPos[0] = undefined;
     this.prevPos[1] = undefined;
     // Generate starting vertex with initial value
     this.generatePoint(this.pointVec2, this.valueVec2);
+    // If it could not find a point with data after (20) tries, discard particle
+    if (this.valueVec2[0] == undefined){
+      this.mustDiscard = true;
+      return;
+    }if (isNaN(this.valueVec2[0] && this.valueVec2[0] != undefined)){debugger;}
+      
 
     // Assign initial position
     this.vertices[0] = this.pointVec2[0];
@@ -1301,7 +1332,7 @@ class ParticleCombinedRadar extends Particle {
 
     // Get position in long lat
     let coord = this.particleSystem.map.getCoordinateFromPixel(this.pointVec2);
-    coord = ol.proj.transform(coord, 'EPSG:3857', 'EPSG:4326');
+        coord = ol.proj.transform(coord, 'EPSG:3857', 'EPSG:4326');
 
     // Create vertices path
     // There is an advantge of storing pixel location: when painting we dont need to transform from lat-long to screen space
@@ -1321,10 +1352,19 @@ class ParticleCombinedRadar extends Particle {
       this.vertices[i*2 + 1] = pixelPos[1];
       // Get value
       this.valueVec2 = this.particleSystem.source.getValueAtLongLat(coord[0], coord[1], this.valueVec2);
+      
+
+
       // Assign values
-      if (this.valueVec2[0] !== undefined)
+      if (!isNaN(this.valueVec2[0])){
         this.verticesValue[i] = Math.sqrt(this.valueVec2[0]*this.valueVec2[0] + this.valueVec2[1]*this.valueVec2[1]);
-   
+      // If it reached a point without data, exit loop and set the numVerticesPath to i
+      // WARN: this will create particles with less vertices in the path
+      } else{
+        let tmp = i; // Store new number of vertices before undefined
+        i = this.numVerticesPath; // Exit loop
+        this.numVerticesPath = tmp - 1; // Define new number of vertices per path for this particle
+      }
     }
 
     // Assign first value (avoids white dots in animation)
@@ -1365,13 +1405,18 @@ class ParticleCombinedRadar extends Particle {
     if (value[0] == undefined && callStackNum < 20){
       this.generatePoint(point, value, callStackNum + 1); // Recursive function
     }
+    // If after 20 times it does not contain data, exit
+    if (value[0] == undefined){
+      return;
+    }
 
     // Transform point to screen space
     let coord = ol.proj.transform([longPoint, latPoint], 'EPSG:4326', 'EPSG:3857');
     let pixelCoord = this.particleSystem.map.getPixelFromCoordinate(coord);
     if (pixelCoord == null){
-      debugger;
-      pixelCoord = [-10, -10];
+      pixelCoord = [0, 0];
+      value[0] = undefined;
+      value[1] = undefined;
     }
     // Assign to point
     point[0] = pixelCoord[0];
@@ -1380,12 +1425,14 @@ class ParticleCombinedRadar extends Particle {
 
   // Draw / Update
   drawVelocity(dt){
+    if (this.mustDiscard)
+      return;
 
     this.particleSystem.drawCalls++;
 
     // Current value
     let value = this.verticesValue[Math.round(this.life * this.numVerticesPath)];
-
+    
     // Update life
     this.life += 0.005 + this.particleSystem.speedFactor * 0.1 * this.verticesValue[Math.round(this.life * this.numVerticesPath)];
     // Reset life
@@ -1607,7 +1654,7 @@ class Arrow {
       debugger;
     coord = ol.proj.transform(coord, 'EPSG:3857', 'EPSG:4326');
     // Get value at long lat from source
-    value = this.particleSystem.source.getValueAtLongLat(coord[0], coord[1], value);
+        value = this.particleSystem.source.getValueAtLongLat(coord[0], coord[1], value);
     // If pixel does not contain data
     if (value[0] == undefined)
       return value;

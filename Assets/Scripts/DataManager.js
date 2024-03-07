@@ -1018,11 +1018,9 @@ class CombinedRadars extends HFRadar {
         }
 
       }
-      
-
-
 
       // Assign
+      // undefined turns into NaN for FloatArray32
       dataGrid[ii * 2] = UValue;
       dataGrid[ii * 2 + 1] = VValue;
     }
