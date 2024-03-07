@@ -121,6 +121,11 @@ class GUIManager {
     window.eventBus.on('HFRadarDataLoaded', (tmst) =>{
       if (tmst != undefined)
         this.selectedDateChanged(tmst);
+      // If latestDate is bigger than current date, add TIME to hash
+      if (window.DataManager.latestDataTmst != this.currentTmst){
+        // Show TIME hash
+        window.location.setHashValue('TIME', this.currentTmst);
+      }
     });
     // Selected date changed (slider moves or drag and drop files)
     window.eventBus.on('DataStreamsBar_SelectedDateChanged', (tmst) =>{
@@ -281,9 +286,9 @@ class GUIManager {
     this.currentRadars = window.DataManager.getRadarsDataOn(this.currentTmst);
     // Set URL config
     // If we are in the latest data value, remove hash
-    if (this.currentTmst == window.DataManager.latestDataTmst)
+    if (this.currentTmst == window.DataManager.latestDataTmst){
       window.location.removeHash('TIME');
-    else
+    }else
       window.location.setHashValue('TIME', this.currentTmst);
   }
 
