@@ -868,9 +868,10 @@ class CombinedRadars extends HFRadar {
       }
     }
     // Calculate distance between two adjacent points
-    // WARN: in erroneous files this might fail.
+    // WARN: in erroneous files this might fail, i.e., we are assuming that points are adjacent.
     distances.sort(); // Sort the distances
     let distanceLimit = distances[Math.floor(distances.length/2)]; // Take the median (most points are adjacent)
+    let areaOriginalDataPoint = distanceLimit * distanceLimit;
 
   
   
@@ -1037,7 +1038,9 @@ class CombinedRadars extends HFRadar {
       rangeLong,
       rangeLat,
       "numLongPoints": resLong,
-      "numLatPoints": resLat
+      "numLatPoints": resLat,
+      "originalData": CombinedRadarData.data,
+      "areaOriginalDataPoint": areaOriginalDataPoint, // This is used in the animation engine to calculate the density of the data source 
     }
 
     this.lastLoadedTimestamp = timestamp;
