@@ -279,8 +279,8 @@ class AnimationEngine {
 
   // Callback when map size changes
   onMapMoveEnd(){
-    this.resizeCanvas();
     this.calculateCanvasGeographicExtent();
+    this.resizeCanvas();
     this.mapIsMoving = false;
     if (this.source) {
       if (this.source.isReady){
@@ -949,6 +949,13 @@ class ParticleSystem {
 
   updateSource(source){
     this.source = source;
+    // Each source can have different coverage, therefore the number of particles can change
+    if (this.source.constructor.name == 'SourceCombinedRadar' && !source.animation.useArrows){
+      this.clear()
+      this.resizeNumParticles();
+      this.repositionParticles();
+      this.updateLegend();
+    }
   }
 
 
@@ -965,6 +972,42 @@ class ParticleSystem {
     this.numParticles = Math.min(Math.round(numParticlesFactor * this.fullScreenNumParticles), this.fullScreenNumParticles);
     // Minimum
     this.numParticles = Math.max(this.numParticles, this.minParticles);
+
+    // DENSITY
+    // Combined Radar particle density
+    if (this.source.constructor.name == 'SourceCombinedRadar' && !this.source.animation.useArrows){
+      // Count the number of visible data points
+      let visibleDataPoints = 0;
+      let originalDataPoints = this.source.dataGrid.originalData;
+      for (let i = 0; i < originalDataPoints.length; i++){
+        let oPoint = originalDataPoints[i];
+        // Use the map view range long-lat
+        if (oPoint['Longitude (deg)'] < this.canvas.mapMaxLong && oPoint['Longitude (deg)'] > this.canvas.mapMinLong &&
+          oPoint['Latitude (deg)'] < this.canvas.mapMaxLat && oPoint['Latitude (deg)'] > this.canvas.mapMinLat) {
+            visibleDataPoints++;
+          }
+      }
+      //console.log("Visible data points: " + visibleDataPoints + ". Percentage: " + (100 * visibleDataPoints / originalDataPoints.length).toFixed(1)); 
+      // Calculate the pixel area that all datapoints take
+      let areaInLatLong = this.source.dataGrid.areaOriginalDataPoint * visibleDataPoints;
+      let totalLatLongMapArea = (this.canvas.mapMaxLong - this.canvas.mapMinLong) * (this.canvas.mapMaxLat - this.canvas.mapMinLat);
+      let percentageAreaOnScreen = 100 * areaInLatLong / totalLatLongMapArea;
+      //console.log("Percentage area taken: " + percentageAreaOnScreen.toFixed(1));
+
+      // Density
+      let density = this.numParticles / (numPixels * Math.min(100,percentageAreaOnScreen) / 100);
+      //console.log("Particle density: " + density);
+      if (density > 0.1){
+        this.numParticles = Math.floor((numPixels * Math.min(100,percentageAreaOnScreen) / 100) * 0.1);
+        // Limit
+        this.numParticles = Math.min(this.numParticles, this.fullScreenNumParticles);
+        //console.log("New number of particles: " + this.numParticles)
+        
+      }
+    }
+
+
+
 
     // Arrow density maximum
     if (this.source.animation.useArrows){
@@ -1013,9 +1056,9 @@ class ParticleSystem {
 
 
   updateLegend(legend){
-    this.legend = legend;
+    this.legend = legend || this.legend;
     for (let i = 0; i < this.numParticles; i++)
-      this.particles[i].updateLegend(legend);
+      this.particles[i].updateLegend(this.legend);
   }
 
 }
@@ -1310,7 +1353,8 @@ class ParticleCombinedRadar extends Particle {
     super(particleSystem);
 
     particleSystem.speedFactor = 0.01;
-    this.stepInLongLat = 0.008;
+    //this.stepInLongLat = 0.008;
+    this.stepInLongLat = 0.02;
     this.color = [255,255,255];
 
     // Intial properties
