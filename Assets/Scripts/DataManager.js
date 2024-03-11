@@ -148,18 +148,20 @@ class DataManager {
     // Iterate radars
     Object.keys(this.HFRadars).forEach(key => {
       let HFRadar = this.HFRadars[key];
-      let data = HFRadar.data || HFRadar.waveHourlyData;
+      let data = HFRadar.data;// || HFRadar.waveHourlyData;
       let site = HFRadar.header.Site.replace(' ""', '').replaceAll(" ", "").replaceAll("\r", "");
       // Iterate timestamps
-      Object.keys(data).forEach(tmst => {
-        tmst = tmst.substring(0,13) + 'Z';
-        // If it does not exist, create
-        if (this.hourlyDataAvailability[tmst] == undefined){
-          this.hourlyDataAvailability[tmst] = {};
-        }
-        // Add site
-        this.hourlyDataAvailability[tmst][site] = 2;
-      })
+      if (data != undefined){
+        Object.keys(data).forEach(tmst => {
+          tmst = tmst.substring(0,13) + 'Z';
+          // If it does not exist, create
+          if (this.hourlyDataAvailability[tmst] == undefined){
+            this.hourlyDataAvailability[tmst] = {};
+          }
+          // Add site
+          this.hourlyDataAvailability[tmst][site] = 2;
+        });
+      }
     });
     // TODO: optimize
     this.generateDailyDataAvailability(this.hourlyDataAvailability);
