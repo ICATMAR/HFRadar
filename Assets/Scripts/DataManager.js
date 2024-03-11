@@ -916,33 +916,33 @@ class CombinedRadars extends HFRadar {
     // the computation expense comes from calculating distances between the dataGrid point (for animation) and the original data points.
 
     // WARN: in erroneous files it might be better to have a predefined grid?
-    const GRIDRESOLUTION = Math.ceil(Math.max(rangeLat, rangeLong)/(distanceLimit * Math.sqrt(2)));
-    let numCols = GRIDRESOLUTION;
+    const LOOKUPGRIDRESOLUTION = Math.ceil(Math.max(rangeLat, rangeLong)/(distanceLimit * Math.sqrt(2)));
+    let numCols = LOOKUPGRIDRESOLUTION;
 
     // Predefined grid
     // const MINLONG = 3.0;
     // const MAXLONG = 3.2;
     // const MINLAT = 41.0;
     // const MAXLAT = 41.5;
-    // const GRIDRESOLUTION = Math.max(resLat, resLong)/10; // Predefined grid
-    // let numCols = Math.round((MAXLONG - MINLONG) * GRIDRESOLUTION);
-    // let numRows = Math.round((MAXLAT - MINLAT) * GRIDRESOLUTION);
+    // const LOOKUPGRIDRESOLUTION = Math.max(resLat, resLong)/10; // Predefined grid
+    // let numCols = Math.round((MAXLONG - MINLONG) * LOOKUPGRIDRESOLUTION);
+    // let numRows = Math.round((MAXLAT - MINLAT) * LOOKUPGRIDRESOLUTION);
     // let numGridCells = numCols * numRows;
-    let grid = new Array(); // TODO: PREALLOCATE MEMORY?
-    // Fill grid with point indices
+    let lookupGrid = new Array(); // TODO: PREALLOCATE MEMORY?
+    // Fill lookupGrid with point indices
     for (let i = 0; i < data.length; i++){
       let long =  data[i]['Longitude (deg)'];
       let lat = data[i]['Latitude (deg)'];
-      // let colIndex = Math.floor((long - MINLONG) * GRIDRESOLUTION); // Predefined grid
-      // let rowIndex = Math.floor((lat - MINLAT) * GRIDRESOLUTION); // Predefined grid
-      let colIndex = Math.floor((long - minLong) * GRIDRESOLUTION);
-      let rowIndex = Math.floor((lat - minLat) * GRIDRESOLUTION);
+      // let colIndex = Math.floor((long - MINLONG) * LOOKUPGRIDRESOLUTION); // Predefined grid
+      // let rowIndex = Math.floor((lat - MINLAT) * LOOKUPGRIDRESOLUTION); // Predefined grid
+      let colIndex = Math.floor((long - minLong) * LOOKUPGRIDRESOLUTION);
+      let rowIndex = Math.floor((lat - minLat) * LOOKUPGRIDRESOLUTION);
       // Store grid indices of cells
       let gridCellIndex = rowIndex * numCols + colIndex; 
-      if (grid[gridCellIndex] == undefined)
-        grid[gridCellIndex] = [i];
+      if (lookupGrid[gridCellIndex] == undefined)
+        lookupGrid[gridCellIndex] = [i];
       else
-        grid[gridCellIndex].push(i);
+        lookupGrid[gridCellIndex].push(i);
     }
     
 
@@ -972,10 +972,10 @@ class CombinedRadars extends HFRadar {
       // Interpolation
       // Find four closest points using the grid
       let dataPointDistances = []; // TODO OPTIMIZE MEMORY
-      // let colIndex = Math.floor((long - MINLONG) * GRIDRESOLUTION); // Predefined grid
-      // let rowIndex = Math.floor((lat - MINLAT) * GRIDRESOLUTION); // Predefined grid
-      let colIndex = Math.floor((long - minLong) * GRIDRESOLUTION);
-      let rowIndex = Math.floor((lat - minLat) * GRIDRESOLUTION);
+      // let colIndex = Math.floor((long - MINLONG) * LOOKUPGRIDRESOLUTION); // Predefined grid
+      // let rowIndex = Math.floor((lat - MINLAT) * LOOKUPGRIDRESOLUTION); // Predefined grid
+      let colIndex = Math.floor((long - minLong) * LOOKUPGRIDRESOLUTION);
+      let rowIndex = Math.floor((lat - minLat) * LOOKUPGRIDRESOLUTION);
       let gridCellIndex = rowIndex * numCols + colIndex;
       
 
@@ -988,7 +988,7 @@ class CombinedRadars extends HFRadar {
         gridCellIndex = tmpR * numCols + tmpC;
 
         // First test, use only the ones inside the cell
-        let gridCell = grid[gridCellIndex];
+        let gridCell = lookupGrid[gridCellIndex];
         if (gridCell !== undefined){
           
           for (let kk = 0; kk < gridCell.length; kk++){
