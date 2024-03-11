@@ -429,7 +429,7 @@ class DataManager {
 
     let movingDate;
     if (startDate == undefined){
-      movingDate = new Date(nowISODate);
+      movingDate = endDate == undefined ? new Date(nowISODate) : new Date(endDate);
       movingDate.setDate(movingDate.getDate() - DAYSTOLOAD); // Days before
     } 
     // If a period is specified
