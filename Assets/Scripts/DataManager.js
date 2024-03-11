@@ -837,7 +837,7 @@ class CombinedRadars extends HFRadar {
     // WARN, HACK, TODO: for some reason when calling super, the addRadarData from CombinedRadars is called but
     // the data structure is not store, e.g. this.dataGrid is empty. addRadarData needs to be called again. This only happens
     // once when the CombinedRadar is created: new CombinedRadars();
-    this.addRadarData(CombinedRadarData, 100, 200); // Consider using power of two numbers to create image and upsample later
+    this.addRadarData(CombinedRadarData); // Consider using power of two numbers to create image and upsample later
   }
 
 
@@ -901,8 +901,11 @@ class CombinedRadars extends HFRadar {
     let rangeLat = maxLat - minLat;
     let rangeLong = maxLong - minLong;
 
-    let resLat = resolutionLat || 200;
-    let resLong = resolutionLong || 100;
+    //console.log(rangeLat)
+    //console.log(rangeLong)
+
+    let resLat = resolutionLat || Math.ceil(rangeLat * 150);//300;
+    let resLong = resolutionLong || Math.ceil(rangeLong * 125);//250;
     let stepLat = rangeLat / resLat;
     let stepLong = rangeLong / resLong;
 
@@ -913,7 +916,7 @@ class CombinedRadars extends HFRadar {
     // the computation expense comes from calculating distances between the dataGrid point (for animation) and the original data points.
 
     // WARN: in erroneous files it might be better to have a predefined grid?
-    const GRIDRESOLUTION = Math.ceil(Math.max(rangeLat, rangeLong)/distanceLimit);
+    const GRIDRESOLUTION = Math.ceil(Math.max(rangeLat, rangeLong)/(distanceLimit * Math.sqrt(2)));
     let numCols = GRIDRESOLUTION;
 
     // Predefined grid
@@ -1007,6 +1010,14 @@ class CombinedRadars extends HFRadar {
 
 
 
+      // for (let dIndex = 0; dIndex < data.length; dIndex++){
+      //   // Calculate distance
+      //   let dd = this.calcDistance(long, lat, data[dIndex]['Longitude (deg)'], data[dIndex]['Latitude (deg)']);
+      //   //debug_numberOfIterationsPerDataGridPoint++;
+      //   if (dd < distanceLimit){
+      //     dataPointDistances.push([dd, dIndex]);
+      //   }
+      // }
 
 
 
@@ -1014,9 +1025,12 @@ class CombinedRadars extends HFRadar {
       // TODO: something wrong with the distance calculation?
       let UValue = undefined;
       let VValue = undefined;
+      // let closestDataPoint = undefined;
+      // let secondClosest = undefined;
       if (dataPointDistances.length != 0){
         dataPointDistances.sort( (a,b) => a[0] - b[0] );
         let dataPoint = data[dataPointDistances[0][1]];
+        // closestDataPoint = dataPoint;
         // Nearest neighbour
         if (dataPointDistances.length == 1){
           UValue = dataPoint['U-comp (cm/s)'];
@@ -1029,6 +1043,7 @@ class CombinedRadars extends HFRadar {
           let totD = d1 + d2;
           let dataPoint1 = data[dataPointDistances[0][1]];
           let dataPoint2 = data[dataPointDistances[1][1]];
+          // secondClosest = dataPoint2;
 
           UValue = dataPoint1['U-comp (cm/s)'] * (1 - d1/totD) + dataPoint2['U-comp (cm/s)'] * (d1 / totD);
           VValue = dataPoint1['V-comp (cm/s)'] * (1 - d1/totD) + dataPoint2['V-comp (cm/s)'] * (d1 / totD);
@@ -1040,6 +1055,20 @@ class CombinedRadars extends HFRadar {
       // undefined turns into NaN for FloatArray32
       dataGrid[ii * 2] = UValue;
       dataGrid[ii * 2 + 1] = VValue;
+
+      // Point towards the data point location
+      // if (closestDataPoint != undefined){
+      //   dataGrid[ii * 2] = (closestDataPoint['Longitude (deg)'] - long) * 1000;
+      //   dataGrid[ii * 2 + 1] = (closestDataPoint['Latitude (deg)'] - lat) * 1000;
+      // }
+      // if (secondClosest != undefined){
+      //   dataGrid[ii * 2] = (secondClosest['Longitude (deg)'] - long) * 1000;
+      //   dataGrid[ii * 2 + 1] = (secondClosest['Latitude (deg)'] - lat) * 1000;
+      // } else {
+      //   dataGrid[ii * 2] = undefined;
+      //   dataGrid[ii * 2 + 1] = undefined;
+      // }
+
     }
     //console.log("numberOfIterationsPerDataGridPoint: " + debug_numberOfIterationsPerDataGridPoint/dataGrid.length);
     
