@@ -180,7 +180,7 @@ export default {
       let canvas = this.canvas;
       let ctx = this.ctx;
 
-      let measures = ['CATS','CREU','BEGU','AREN','PBCN','GNST'];
+      let radarNames = ['CATS','CREU','BEGU','AREN','PBCN','GNST'];
       let loadedColor = 'darkBlue';
       let existsColor = 'rgb(127, 127, 127)';
       // Time varying color (update canvas is painted contiously when loading data)
@@ -212,13 +212,13 @@ export default {
           let ddData = this.dailyData[key];
           if (ddData != undefined){
             // Paint            
-            for (let j = 0; j < measures.length; j++){
+            for (let j = 0; j < radarNames.length; j++){
               // If measure exists in dataset
-              if (ddData[measures[j]]){
+              if (ddData[radarNames[j]]){
                 // Calculate position in canvas
                 let posX = ((i + dayDiff - 0.5)/(numDays-1)) * canvas.width; // Use the start day difference to position the points
                 let padding = canvas.height * 0.2;
-                let posY = padding + j * (canvas.height-padding) / measures.length;
+                let posY = padding + j * (canvas.height-padding) / radarNames.length;
                 // Calculate width?
                 // Calculate height (use datatypes max?)
                 let factor = 1;
@@ -227,7 +227,7 @@ export default {
                 ctx.beginPath();
                 let radMod = Math.min(3, radius * factor * factor);
                 ctx.arc(posX, posY, radMod, 2 * Math.PI, 0, false);
-                ctx.fillStyle = ddData[measures[j]] == 2 ? loadedColor : ddData[measures[j]] == 3 ? loadingColor : existsColor;
+                ctx.fillStyle = ddData[radarNames[j]] == 2 ? loadedColor : ddData[radarNames[j]] == 3 ? loadingColor : existsColor;
                 ctx.fill();
               }
             }
@@ -281,23 +281,23 @@ export default {
         let movingDate = this.movingDate;
         movingDate.setTime(this.startDate.getTime());
         
-        // Iterate halfhours
+        // Iterate hours
         for (let i = 0; i < Math.ceil(numHours); i++) {
-          // Half hourly key
+          // Hourly key
           let key = movingDate.toISOString();
           key = key.substring(0,13) + 'Z';
-          
+
           let hhData = this.hourlyData[key];
           if (hhData != undefined) {
             // Paint
-            for (let j = 0; j < measures.length; j++) {
+            for (let j = 0; j < radarNames.length; j++) {
               // If measure exists in dataset
-              if (hhData[measures[j]]) {
+              if (hhData[radarNames[j]]) {
                 // Calculate position in canvas
                 //let posX = ((i + dayDiff - 0.5) / (numDays - 1)) * canvas.width; // Use the start day difference to position the points
                 let posX = canvas.width * i / numHours; // Use the start day difference to position the points
                 let padding = canvas.height * 0.2;
-                let posY = padding + j * (canvas.height - padding) / measures.length;
+                let posY = padding + j * (canvas.height - padding) / radarNames.length;
                 // Calculate width?
                 // Calculate height (use datatypes max?)
                 let factor = 1;
@@ -306,7 +306,7 @@ export default {
                 ctx.beginPath();
                 let radMod = Math.min(3, radius * factor * factor);
                 ctx.arc(posX, posY, radMod, 2 * Math.PI, 0, false);
-                ctx.fillStyle = hhData[measures[j]] == 2 ? loadedColor : hhData[measures[j]] == 3 ? loadingColor : existsColor;
+                ctx.fillStyle = hhData[radarNames[j]] == 2 ? loadedColor : hhData[radarNames[j]] == 3 ? loadingColor : existsColor;
                 ctx.fill();
               }
             }
