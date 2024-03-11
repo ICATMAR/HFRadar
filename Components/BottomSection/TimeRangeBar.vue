@@ -709,6 +709,11 @@ export default {
         this.setRangeSlider();
         
         this.updateHTMLTimeline();
+
+        // Limit to hourly resolution
+        this.limitToHourlyResolution(this.startDate);
+        this.limitToHourlyResolution(this.endDate);
+
         return;
         
         // Calculate wght according to number of years/months
