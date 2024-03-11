@@ -410,7 +410,15 @@ class DataManager {
     else
       console.log('Data is delayed by more than '+ (SEARCHHOURS) +' hours.');
 
-    this.latestDataTmst = hfRadar.lastLoadedTimestamp;
+    // Only assign latest date if it is actually the latest
+    if (this.latestDataTmst != undefined){
+      if (new Date(this.latestDataTmst) < new Date(hfRadar.lastLoadedTimestamp)){
+        this.latestDataTmst = hfRadar.lastLoadedTimestamp;
+      }
+    } else
+      this.latestDataTmst = hfRadar.lastLoadedTimestamp;
+
+    
 
     return hfRadar;
   }
@@ -725,6 +733,12 @@ class HFRadar {
 
     // Store latest data timestamp
     this.lastLoadedTimestamp = timestamp;
+    // Store most recent timestamp
+    if (this.latestTimestamp != undefined){
+      if (new Date(this.latestTimestamp) < new Date(timestamp))
+        this.latestTimestamp = timestamp;
+    } else
+      this.latestTimestamp = timestamp;
 
     // Create data features
     this.updateDataPointFeatures(HFRadarData.data);
@@ -1045,7 +1059,15 @@ class CombinedRadars extends HFRadar {
       "areaOriginalDataPoint": areaOriginalDataPoint, // This is used in the animation engine to calculate the density of the data source 
     }
 
+    
+    // Store last loaded timestamp
     this.lastLoadedTimestamp = timestamp;
+    // Store most recent timestamp
+    if (this.latestTimestamp != undefined){
+      if (new Date(this.latestTimestamp) < new Date(timestamp))
+        this.latestTimestamp = timestamp;
+    } else
+      this.latestTimestamp = timestamp;
 
   }
 

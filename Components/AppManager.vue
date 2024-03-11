@@ -125,8 +125,8 @@ export default {
       window.DataManager.loadLatestStaticFilesRepository(fileTypes).then(hfRadar => {
         let tmst;
         if (hfRadar != undefined){
-          tmst = hfRadar.lastLoadedTimestamp;
-          window.eventBus.emit('HFRadarDataLoaded', hfRadar.lastLoadedTimestamp);
+          tmst = hfRadar.latestTimestamp; // Use latest timestamp (not last loaded)
+          window.eventBus.emit('HFRadarDataLoaded', hfRadar.latestTimestamp);
         }
         return tmst;
       })
