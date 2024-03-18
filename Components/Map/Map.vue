@@ -27,7 +27,7 @@
       <overlay-wave-data ref="overlayWaveData"></overlay-wave-data>
 
       <!-- Overlay puertos del estado buoys data -->
-      <!-- <overlay-buoy-data ref="overlayBuoyData"></overlay-buoy-data> -->
+      <overlay-buoy-data ref="overlayBuoyData"></overlay-buoy-data>
 
       <!-- Overlay obsea buoys data -->
       <overlay-obsea-data ref="overlayOBSEAData"></overlay-obsea-data>
