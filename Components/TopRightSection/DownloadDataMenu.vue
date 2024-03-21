@@ -222,7 +222,7 @@ export default {
 
       // Download file
       let link = document.createElement('a');
-      link.download = 'ICATMAR_Currents_' + dateISO + '.' + selFormat;
+      link.download = 'ICATMAR_Currents_' + dateISO.replaceAll(":", "_") + '.' + selFormat;
       link.href = url;
       link.click();
       link.delete;
@@ -263,7 +263,7 @@ export default {
         movingDate.setHours(movingDate.getHours() - i);
         // Get ISO string
         let tmpStr = movingDate.toISOString();
-        tmpStr = tmpStr.replaceAll('-','_');
+        tmpStr = tmpStr.replaceAll('-','_').replaceAll(':', '_');
         // Generate key that is the same as the tmst in the file name
         // /data/observational/hf_radar/currents/L3/tuv/2024/01/TOTL_CATS_2024_01_31_0900.tuv
         let keyStr = tmpStr.substring(0,10) + '_' + tmpStr.substring(11,13) + '00.' + this.selFormat;
