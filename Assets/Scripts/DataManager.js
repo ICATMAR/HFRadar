@@ -2,7 +2,7 @@
 const firstDate = new Date('2023-01-26T06:00Z');
 const lastDate = new Date('2023-02-02T06:00Z');
 const DAYSTOLOAD = 3;
-const SEARCHHOURS = 24*7;
+const SEARCHHOURS = 24*14;
 
 // Data manager class
 class DataManager {
@@ -415,8 +415,12 @@ class DataManager {
       if (new Date(this.latestDataTmst) < new Date(hfRadar.lastLoadedTimestamp)){
         this.latestDataTmst = hfRadar.lastLoadedTimestamp;
       }
-    } else
+    } else if (hfRadar != undefined)
       this.latestDataTmst = hfRadar.lastLoadedTimestamp;
+    else {
+      // TODO: load backup file with some date that is never removed
+      debugger;
+    }
 
     
 
