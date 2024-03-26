@@ -1039,6 +1039,10 @@ class CombinedRadars extends HFRadar {
         if (dataPointDistances.length == 1){
           UValue = dataPoint['U-comp (cm/s)'];
           VValue = dataPoint['V-comp (cm/s)'];
+
+          // TODO HERE
+          // CHECK IF DATA POINT HAS EXTREME VALUES
+          debugger;
         }
         // Linear interpolation
         else {
@@ -1051,6 +1055,10 @@ class CombinedRadars extends HFRadar {
 
           UValue = dataPoint1['U-comp (cm/s)'] * (1 - d1/totD) + dataPoint2['U-comp (cm/s)'] * (d1 / totD);
           VValue = dataPoint1['V-comp (cm/s)'] * (1 - d1/totD) + dataPoint2['V-comp (cm/s)'] * (d1 / totD);
+
+          // TODO HERE
+          // CHECK IF DATA POINT HAS EXTREME VALUES
+          debugger;
         }
 
       }
@@ -1059,6 +1067,10 @@ class CombinedRadars extends HFRadar {
       // undefined turns into NaN for FloatArray32
       dataGrid[ii * 2] = UValue;
       dataGrid[ii * 2 + 1] = VValue;
+
+      // TODO: CHECK IF A DATA POINT HAS EXTREME VALUES
+      if (UValue > 1000)
+        debugger;
 
       // Point towards the data point location
       // if (closestDataPoint != undefined){

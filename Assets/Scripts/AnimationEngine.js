@@ -1352,13 +1352,13 @@ class ParticleCombinedRadar extends Particle {
   constructor(particleSystem){
     super(particleSystem);
 
-    particleSystem.speedFactor = 0.01;
+    particleSystem.speedFactor = 0.1;
     //this.stepInLongLat = 0.008;
     this.stepInLongLat = 0.02;
     this.color = [255,255,255];
 
     // Intial properties
-    this.maxNumVerticesPath = this.numVerticesPath;
+    this.maxNumVerticesPath = 10//this.numVerticesPath;
     this.mustDiscard = false;
   }
 
@@ -1390,12 +1390,35 @@ class ParticleCombinedRadar extends Particle {
 
     // Create vertices path
     // There is an advantge of storing pixel location: when painting we dont need to transform from lat-long to screen space
+    this.numVerticesPathWithData = this.numVerticesPath;
     for (var i = 1; i < this.numVerticesPath; i++){
       // Make step
       let step = this.stepInLongLat;
       // Step in long lat
       let nextLong = coord[0] + ((this.valueVec2[0] * step) / earthRadius) * (180 / Math.PI) / Math.cos(coord[0] * Math.PI / 180);
       let nextLat = coord[1] + ((this.valueVec2[1] * step) / earthRadius) * (180 / Math.PI);
+
+      // DEBUG
+      // Distance between prev an next pos
+      let dist = Math.sqrt((nextLong - coord[0]) * (nextLong - coord[0]) + (nextLat - coord[1]) * (nextLat - coord[1]));
+      let module = Math.sqrt(this.valueVec2[0]*this.valueVec2[0] + this.valueVec2[1]*this.valueVec2[1]);
+      console.log(module + ", " + dist + ", Vec: " + this.valueVec2[0].toFixed(2) + ", " + this.valueVec2[1].toFixed(2));
+     
+      if (dist > step*8){
+        // TODO: for some reason, generatePoint makes the valueVec2 have extreme values (1000 cm/s for example)
+        // Possible causes for the bug --> files have errors, DataManager messes up.
+        //console.log(dist);
+        let tmp = i; // Store new number of vertices before undefined
+        i = this.numVerticesPath; // Exit loop
+        this.numVerticesPathWithData = tmp - 1; // Define new number of vertices per path for this particle
+        debugger;
+        this.valueVec2[0] = undefined;
+        this.valueVec2[1] = undefined;
+        continue;
+      } else {
+
+      }
+
       // Convert to pixel coordinates
       coord[0] = nextLong;
       coord[1] = nextLat;
@@ -1414,10 +1437,10 @@ class ParticleCombinedRadar extends Particle {
         this.verticesValue[i] = Math.sqrt(this.valueVec2[0]*this.valueVec2[0] + this.valueVec2[1]*this.valueVec2[1]);
       // If it reached a point without data, exit loop and set the numVerticesPath to i
       // WARN: this will create particles with less vertices in the path
-      } else{
+      } else {
         let tmp = i; // Store new number of vertices before undefined
         i = this.numVerticesPath; // Exit loop
-        this.numVerticesPath = tmp - 1; // Define new number of vertices per path for this particle
+        this.numVerticesPathWithData = tmp - 1; // Define new number of vertices per path for this particle
       }
     }
 
@@ -1484,29 +1507,57 @@ class ParticleCombinedRadar extends Particle {
 
     this.particleSystem.drawCalls++;
 
-    // Current value
-    let value = this.verticesValue[Math.round(this.life * this.numVerticesPath)];
-    
     // Update life
-    this.life += 0.005 + this.particleSystem.speedFactor * 0.1 * this.verticesValue[Math.round(this.life * this.numVerticesPath)];
-    // Reset life
-    if (this.life > 1 || isNaN(this.life)) {
-      this.life = Math.random();
+    this.life += 0.01 * this.particleSystem.speedFactor / (this.numVerticesPath / 200);// + this.particleSystem.speedFactor * 0.1 * this.verticesValue[Math.round(this.life * this.numVerticesPath)];
+
+    if (this.life > 1){
+      this.life = 0;
       // Start of vertices path
       this.prevPos[0] = undefined;
       this.prevPos[1] = undefined;
+      return;
     }
 
-    // Get exact position
-    let prevVertPath = Math.floor(this.life * (this.numVerticesPath-1)); // From 0 to numVerticesPath
-    let nextVertPath = Math.ceil(this.life * (this.numVerticesPath-1)); // From 0 to numVerticesPath
-
-    // Interpolation value
+    // Current index in vertices path
+    let prevVertPath = Math.floor(this.life * (this.numVerticesPath - 1)); // From 0 to numVerticesPath
+    let nextVertPath = Math.ceil(this.life * (this.numVerticesPath - 1)); // From 0 to numVerticesPath
     let interpCoeff = (nextVertPath - this.life * (this.numVerticesPath-1));
+
+    // Check if there is data on those vertices
+    if (prevVertPath >= this.numVerticesPathWithData){
+      // Start of vertices path
+      this.prevPos[0] = undefined;
+      this.prevPos[1] = undefined;
+      return;
+    }
+
+
+    // Current value (interpolate between previous and next)
+    let value = this.verticesValue[prevVertPath] * interpCoeff + this.verticesValue[nextVertPath] * (1 - interpCoeff);
+
+    if (value == undefined){
+      debugger;
+      // Start of vertices path
+      //this.prevPos[0] = undefined;
+      //this.prevPos[1] = undefined;
+      return;
+    }
+
+
+
+    // Current position (interpolate between prev and next)
     this.currentPos[0] = interpCoeff * this.vertices[prevVertPath*2]  +
                 (1-interpCoeff) * this.vertices[nextVertPath*2];
     this.currentPos[1] = interpCoeff * this.vertices[prevVertPath*2 + 1]  +
                 (1-interpCoeff) * this.vertices[nextVertPath*2 + 1];
+
+    // let dist = Math.sqrt((this.vertices[prevVertPath*2] - this.vertices[nextVertPath*2]) * (this.vertices[prevVertPath*2] - this.vertices[nextVertPath*2]) +
+    // (this.vertices[prevVertPath*2+1] - this.vertices[nextVertPath*2+1]) * (this.vertices[prevVertPath*2+1] - this.vertices[nextVertPath*2+1]));
+    // if (dist > 100 ){
+    //   this.prevPos[0] = undefined;
+    //   this.prevPos[1] = undefined;
+    //   return;
+    // }
 
     // When prevPos is not valid (map moved, source changed, etc)
     if (this.prevPos[0] == undefined){
@@ -1514,7 +1565,14 @@ class ParticleCombinedRadar extends Particle {
       this.prevPos[1] = this.currentPos[1];
       return;
     }
-      
+    // When there is no data (currentPos is NaN)
+    if (isNaN(this.currentPos[0]) || isNaN(this.currentPos[1])){
+      this.life = Math.random();
+      // Start of vertices path
+      this.prevPos[0] = undefined;
+      this.prevPos[1] = undefined;
+      return;
+    }
     this.getColorFromLegend(this.color, value);
 
     // Draw in canvas
