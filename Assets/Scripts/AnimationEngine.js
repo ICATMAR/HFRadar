@@ -916,7 +916,7 @@ class ParticleHF {
 // Class that manages the particle system
 class ParticleSystem {
   // Variables
-  fullScreenNumParticles = 30000;
+  fullScreenNumParticles = 20000;
   speedFactor = 0.7;
   fullScreenPixels = 1920 * 1080;
   minParticles = 4000;
@@ -997,7 +997,7 @@ class ParticleSystem {
       // Density
       let density = this.numParticles / (numPixels * Math.min(100,percentageAreaOnScreen) / 100);
       //console.log("Particle density: " + density);
-      if (density > 0.1){
+      if (density > 0.07){
         this.numParticles = Math.floor((numPixels * Math.min(100,percentageAreaOnScreen) / 100) * 0.1);
         // Limit
         this.numParticles = Math.min(this.numParticles, this.fullScreenNumParticles);
@@ -1037,7 +1037,13 @@ class ParticleSystem {
     // Trail effect
     // https://codepen.io/Tyriar/pen/BfizE
     if (this.particles[0].constructor.name != 'Arrow'){
-      this.ctx.fillStyle = 'rgba(255, 255, 255, .9)';
+      //this.ctx.fillStyle = 'rgba(255, 255, 255, .9)';
+      // Adaptive path length
+      let zoom = this.map.getView().getZoom();
+      let alpha = 0.98 - 0.1*(zoom - 8.5) / 2;
+      alpha = Math.min(0.96, alpha); // Limit to 0.98 for far away zoom
+      this.ctx.fillStyle = 'rgba(255, 255, 255, '+ alpha +')';
+
       this.ctx.globalCompositeOperation = "destination-in";
       this.ctx.fillRect(0,0, this.canvas.width, this.canvas.height);
       this.ctx.globalCompositeOperation = "source-over";
@@ -1352,13 +1358,12 @@ class ParticleCombinedRadar extends Particle {
   constructor(particleSystem){
     super(particleSystem);
 
-    particleSystem.speedFactor = 0.1;
-    //this.stepInLongLat = 0.008;
+    particleSystem.speedFactor = 0.2;
     this.stepInLongLat = 0.02;
     this.color = [255,255,255];
 
     // Intial properties
-    this.maxNumVerticesPath = 10//this.numVerticesPath;
+    this.maxNumVerticesPath = this.numVerticesPath;
     this.mustDiscard = false;
   }
 
@@ -1488,7 +1493,9 @@ class ParticleCombinedRadar extends Particle {
     this.particleSystem.drawCalls++;
 
     // Update life
-    this.life += 0.01 * this.particleSystem.speedFactor / (this.numVerticesPath / 200);// + this.particleSystem.speedFactor * 0.1 * this.verticesValue[Math.round(this.life * this.numVerticesPath)];
+    // The increase in life (speed) depends on the number of vertices in the path
+    this.life += 0.01 * this.particleSystem.speedFactor / (this.numVerticesPath / 200);
+    
 
     if (this.life > 1){
       this.life = 0;
@@ -1531,13 +1538,7 @@ class ParticleCombinedRadar extends Particle {
     this.currentPos[1] = interpCoeff * this.vertices[prevVertPath*2 + 1]  +
                 (1-interpCoeff) * this.vertices[nextVertPath*2 + 1];
 
-    // let dist = Math.sqrt((this.vertices[prevVertPath*2] - this.vertices[nextVertPath*2]) * (this.vertices[prevVertPath*2] - this.vertices[nextVertPath*2]) +
-    // (this.vertices[prevVertPath*2+1] - this.vertices[nextVertPath*2+1]) * (this.vertices[prevVertPath*2+1] - this.vertices[nextVertPath*2+1]));
-    // if (dist > 100 ){
-    //   this.prevPos[0] = undefined;
-    //   this.prevPos[1] = undefined;
-    //   return;
-    // }
+
 
     // When prevPos is not valid (map moved, source changed, etc)
     if (this.prevPos[0] == undefined){
