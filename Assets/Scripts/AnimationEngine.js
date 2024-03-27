@@ -1398,27 +1398,7 @@ class ParticleCombinedRadar extends Particle {
       let nextLong = coord[0] + ((this.valueVec2[0] * step) / earthRadius) * (180 / Math.PI) / Math.cos(coord[0] * Math.PI / 180);
       let nextLat = coord[1] + ((this.valueVec2[1] * step) / earthRadius) * (180 / Math.PI);
 
-      // DEBUG
-      // Distance between prev an next pos
-      let dist = Math.sqrt((nextLong - coord[0]) * (nextLong - coord[0]) + (nextLat - coord[1]) * (nextLat - coord[1]));
-      let module = Math.sqrt(this.valueVec2[0]*this.valueVec2[0] + this.valueVec2[1]*this.valueVec2[1]);
-      console.log(module + ", " + dist + ", Vec: " + this.valueVec2[0].toFixed(2) + ", " + this.valueVec2[1].toFixed(2));
-     
-      if (dist > step*8){
-        // TODO: for some reason, generatePoint makes the valueVec2 have extreme values (1000 cm/s for example)
-        // Possible causes for the bug --> files have errors, DataManager messes up.
-        //console.log(dist);
-        let tmp = i; // Store new number of vertices before undefined
-        i = this.numVerticesPath; // Exit loop
-        this.numVerticesPathWithData = tmp - 1; // Define new number of vertices per path for this particle
-        debugger;
-        this.valueVec2[0] = undefined;
-        this.valueVec2[1] = undefined;
-        continue;
-      } else {
-
-      }
-
+      
       // Convert to pixel coordinates
       coord[0] = nextLong;
       coord[1] = nextLat;

@@ -1040,9 +1040,11 @@ class CombinedRadars extends HFRadar {
           UValue = dataPoint['U-comp (cm/s)'];
           VValue = dataPoint['V-comp (cm/s)'];
 
-          // TODO HERE
-          // CHECK IF DATA POINT HAS EXTREME VALUES
-          debugger;
+          // When using tuv files there is no quality control and some values are out of range
+          if (Math.abs(UValue) > 250 || Math.abs(VValue) > 250){
+            UValue = undefined;
+            VValue = undefined;
+          }
         }
         // Linear interpolation
         else {
@@ -1056,9 +1058,11 @@ class CombinedRadars extends HFRadar {
           UValue = dataPoint1['U-comp (cm/s)'] * (1 - d1/totD) + dataPoint2['U-comp (cm/s)'] * (d1 / totD);
           VValue = dataPoint1['V-comp (cm/s)'] * (1 - d1/totD) + dataPoint2['V-comp (cm/s)'] * (d1 / totD);
 
-          // TODO HERE
-          // CHECK IF DATA POINT HAS EXTREME VALUES
-          debugger;
+          // When using tuv files there is no quality control and some values are out of range
+          if (Math.abs(UValue) > 250 || Math.abs(VValue) > 250){
+            UValue = undefined;
+            VValue = undefined;
+          }
         }
 
       }
@@ -1068,9 +1072,6 @@ class CombinedRadars extends HFRadar {
       dataGrid[ii * 2] = UValue;
       dataGrid[ii * 2 + 1] = VValue;
 
-      // TODO: CHECK IF A DATA POINT HAS EXTREME VALUES
-      if (UValue > 1000)
-        debugger;
 
       // Point towards the data point location
       // if (closestDataPoint != undefined){
