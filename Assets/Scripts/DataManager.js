@@ -1029,6 +1029,8 @@ class CombinedRadars extends HFRadar {
       // TODO: something wrong with the distance calculation?
       let UValue = undefined;
       let VValue = undefined;
+
+      let threePointInterpPossible = dataPointDistances.length >= 3;
       // let closestDataPoint = undefined;
       // let secondClosest = undefined;
       if (dataPointDistances.length != 0){
@@ -1040,25 +1042,84 @@ class CombinedRadars extends HFRadar {
           UValue = dataPoint['U-comp (cm/s)'];
           VValue = dataPoint['V-comp (cm/s)'];
         }
-        // Linear interpolation
+        // Other interpolation methods (triangular with areas and linear interpolation)
         else {
-          let d1 = dataPointDistances[0][0];
-          let d2 = dataPointDistances[1][0];
-          let totD = d1 + d2;
-          let dataPoint1 = data[dataPointDistances[0][1]];
-          let dataPoint2 = data[dataPointDistances[1][1]];
-          // secondClosest = dataPoint2;
+          // Check if it is possible to do interpolation between three points
+          // Three points that form a triangle
+          if (threePointInterpPossible){
+            // Calculate interpolation of a triangle using areas
+            let getTriangleArea = (x0, y0, x1, y1, x2, y2) => {
+              return Math.abs(0.5 *  ( x0 * (y1 - y2) + x1 * (y2 - y0) + x2 * (y0 - y1) ));
+            }
 
-          UValue = dataPoint1['U-comp (cm/s)'] * (1 - d1/totD) + dataPoint2['U-comp (cm/s)'] * (d1 / totD);
-          VValue = dataPoint1['V-comp (cm/s)'] * (1 - d1/totD) + dataPoint2['V-comp (cm/s)'] * (d1 / totD);
-        }
+            let A = data[dataPointDistances[0][1]];
+            let B = data[dataPointDistances[1][1]];
+            let C = data[dataPointDistances[2][1]];
 
+            // Area P - B - C
+            let areaA = getTriangleArea(long, lat, B['Longitude (deg)'], B['Latitude (deg)'], C['Longitude (deg)'], C['Latitude (deg)']);
+            // Area P - A - C
+            let areaB = getTriangleArea(long, lat, A['Longitude (deg)'], A['Latitude (deg)'], C['Longitude (deg)'], C['Latitude (deg)']);
+            // Area P - A - B
+            let areaC = getTriangleArea(long, lat, A['Longitude (deg)'], A['Latitude (deg)'], B['Longitude (deg)'], B['Latitude (deg)']);
+
+            //let areas = calcVoronoiArea(long, lat, A['Longitude (deg)'], A['Latitude (deg)'], B['Longitude (deg)'], B['Latitude (deg)'], C['Longitude (deg)'], C['Latitude (deg)']);
+            let totalArea = getTriangleArea(A['Longitude (deg)'], A['Latitude (deg)'], B['Longitude (deg)'], B['Latitude (deg)'], C['Longitude (deg)'], C['Latitude (deg)']);
+            
+            // Total area should match the sum of the three areas. Otherwise the point is outside the triangle
+            let isInsideTriangle = Math.abs(areaA + areaB + areaC - totalArea) < 10e-16;
+
+            //console.log(Math.abs(areaA + areaB + areaC - totalArea));
+
+            if (isInsideTriangle) {
+              let w1 = areaA / totalArea;
+              let w2 = areaB / totalArea;
+              let w3 = areaC / totalArea;
+
+              // Comparison with distances
+              // let dw1 = 1 / dataPointDistances[0][0];
+              // let dw2 = 1 / dataPointDistances[1][0];
+              // let dw3 = 1 / dataPointDistances[2][0];
+              // let ddw1 = dw1 / (dw1 + dw2 + dw3);
+              // let ddw2 = dw2 / (dw1 + dw2 + dw3);
+              // let ddw3 = dw3 / (dw1 + dw2 + dw3);
+
+              UValue = A['U-comp (cm/s)'] * w1 + B['U-comp (cm/s)'] * w2 + C['U-comp (cm/s)'] * w3;
+              VValue = A['V-comp (cm/s)'] * w1 + B['V-comp (cm/s)'] * w2 + C['V-comp (cm/s)'] * w3;
+
+            }
+            else
+            threePointInterpPossible = false;
+          }
+
+          // Linear interpolation
+          if (!threePointInterpPossible) {
+            let d1 = dataPointDistances[0][0];
+            let d2 = dataPointDistances[1][0];
+            let totD = d1 + d2;
+            let dataPoint1 = data[dataPointDistances[0][1]];
+            let dataPoint2 = data[dataPointDistances[1][1]];
+            // secondClosest = dataPoint2;
+
+            UValue = dataPoint1['U-comp (cm/s)'] * (1 - d1/totD) + dataPoint2['U-comp (cm/s)'] * (d1 / totD);
+            VValue = dataPoint1['V-comp (cm/s)'] * (1 - d1/totD) + dataPoint2['V-comp (cm/s)'] * (d1 / totD);
+          }
+        } // End of linear or triangular interpolation
+
+      } // End of -is there a close point-
+
+
+      // When using tuv files there is no quality control and some values are out of range
+      if (Math.abs(UValue) > 250 || Math.abs(VValue) > 250){
+        UValue = undefined;
+        VValue = undefined;
       }
 
       // Assign
       // undefined turns into NaN for FloatArray32
       dataGrid[ii * 2] = UValue;
       dataGrid[ii * 2 + 1] = VValue;
+
 
       // Point towards the data point location
       // if (closestDataPoint != undefined){
