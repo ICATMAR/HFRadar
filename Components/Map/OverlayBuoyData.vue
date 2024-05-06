@@ -191,6 +191,13 @@ export default {
           data: {}, // tmst1: {Hm0: value, Tm02: value...}, tmst2: {...} 
         },
         "Tarragona": {
+          id: '1712',
+          params: ['Hm0', 'Hmax', 'Tm02', 'Tp','MeanDir','MeanDirPeak'],
+          location: [1.1900, 41.070],
+          coord3857: undefined,
+          data: {}
+        },
+        "Tarragona offshore": {
           id: '2720',
           params: ['Hm0', 'Hmax', 'Tm02', 'Tp','MeanDir','MeanDirPeak', 
                     'WindSpeed', 'WindDir',
