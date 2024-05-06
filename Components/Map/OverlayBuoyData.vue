@@ -192,7 +192,8 @@ export default {
         },
         "Tarragona": {
           id: '1712',
-          params: ['Hm0', 'Hmax', 'Tm02', 'Tp','MeanDir','MeanDirPeak'],
+          params: ['Hm0', 'Hmax', 'Tm02', 'Tp','MeanDir','MeanDirPeak',
+                  'WaterTemp'],
           location: [1.1900, 41.070],
           coord3857: undefined,
           data: {}
