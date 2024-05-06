@@ -68,7 +68,9 @@ export default {
     if (nowISODate == window.GUIManager.currentTmst){
       this.loadLatestCurrents();
     } else {
-      window.DataManager.loadOnInteraction(window.GUIManager.currentTmst);
+      // Forces event from loaded data
+      window.DataManager.loadOnInteraction(window.GUIManager.currentTmst, ['tuv']);
+      window.DataManager.loadOnInteraction(window.GUIManager.currentTmst, ['wls']);
     }
     
     

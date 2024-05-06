@@ -170,7 +170,7 @@ class DataManager {
 
 
   // Checks if to load data when the user or the app interacts with the interface
-  loadOnInteraction(tmst){
+  loadOnInteraction(tmst, fileTypes){
     // Check if data is loaded, otherwise load
     // let key = tmst.substring(0,13) + 'Z';
     // // No data exists on that date
@@ -183,9 +183,9 @@ class DataManager {
     // // Data is currently being loaded
     // if (this.hourlyDataAvailability[key][keys[0]] == 3)
     //   return;
-
+console.log("LoadOnInteraction");
     // Decide if to load radials according to the GUIManager
-    let fileTypes = ['tuv', 'wls'];
+    fileTypes = fileTypes || ['tuv', 'wls'];
     if (GUIManager.isAdvancedInterface){
       if (GUIManager.widgetHFRadars.isVisible){
         fileTypes.push('ruv');
