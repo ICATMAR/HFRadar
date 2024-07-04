@@ -3,7 +3,7 @@
   <div id="overlay-buoy-data" ref="containerbuoyInfo">
   <!-- Container -->
     <div v-for="buoyName in Object.keys(buoysData)" :id="buoyName" :ref="buoyName" class="buoyContainer"
-      :class="[!isTooFar && isAdvancedInterfaceOnOff && isExternalObsVisible ? 'showOverlayMap' : 'hideOverlayMap']">
+      :class="[!isTooFar && isAdvancedInterfaceOnOff && isExternalObsVisible ? 'showOverlayMap' : 'hideOverlayMap']" v-show="!isHidden">
       <!-- Buoy icon -->
       <!-- <div style="padding: 10px; border-radius:5px; background-color: red">Boya</div> -->
       <img class="icon-str icon-medium icon-img" @click="buoyIconClicked(buoyName)" src="/HFRadar/Assets/Images/buoy.svg">
@@ -149,10 +149,20 @@ export default {
     window.eventBus.on("WidgetMapOptions_ExternalObsVisibilityChanged", state => {
       this.isExternalObsVisible = state;
     });
+
+    // KEYBOARD EVENTS
+    // Change the visibility of the buoys
+    window.addEventListener('keypress', (event) => {
+      // Check if the pressed key is 'P'
+      if (event.key === 'P' || event.key === 'p') {
+          this.isHidden = !this.isHidden;
+      }
+    });
   },
   data () {
     return {
       once: false,
+      isHidden: true,
       isAdvancedInterfaceOnOff: false,
       isExternalObsVisible: false,
       buoysData: {},
@@ -181,6 +191,14 @@ export default {
           data: {}, // tmst1: {Hm0: value, Tm02: value...}, tmst2: {...} 
         },
         "Tarragona": {
+          id: '1712',
+          params: ['Hm0', 'Hmax', 'Tm02', 'Tp','MeanDir','MeanDirPeak',
+                  'WaterTemp'],
+          location: [1.1900, 41.070],
+          coord3857: undefined,
+          data: {}
+        },
+        "Tarragona offshore": {
           id: '2720',
           params: ['Hm0', 'Hmax', 'Tm02', 'Tp','MeanDir','MeanDirPeak', 
                     'WindSpeed', 'WindDir',
