@@ -420,6 +420,7 @@ class DataManager {
     else {
       // TODO: load backup file with some date that is never removed
       debugger;
+      hfRadar = await this.loadDemoData();
     }
 
     
@@ -545,6 +546,43 @@ class DataManager {
       window.eventBus.emit('HFRadarDataLoaded', lastHFRadar.lastLoadedTimestamp);
     })
   }
+
+
+
+
+  // Load demo data when the pipeline is broken and there is no recent data
+  loadDemoData(){
+    this.pendingRequests++;
+    window.eventBus.emit("DataManager_pendingRequestsChange", this.pendingRequests);
+
+    // Array of promises
+    let promises = [];
+    promises.push(window.FileManager.loadDemoData());
+    
+
+    let lastHFRadar;
+    // Resolve promises
+    return Promise.allSettled(promises).then(values => {
+      for (let i = 0; i < values.length; i++){
+        let filesOnDatePromiseResult = values[i];
+        // If promise was fullfiled (I think always)
+        if (filesOnDatePromiseResult.status == 'fulfilled'){
+          for (let j = 0; j < filesOnDatePromiseResult.value.length; j++){
+            let promiseResult = filesOnDatePromiseResult.value[j];
+            if (promiseResult.status == 'fulfilled'){
+              lastHFRadar = this.addHFRadarData(promiseResult.value);             
+            }
+          }
+        }
+      }
+
+      this.pendingRequests--;
+      window.eventBus.emit("DataManager_pendingRequestsChange", this.pendingRequests);
+
+      return lastHFRadar;
+    })
+  }
+
 
 
 // End of class

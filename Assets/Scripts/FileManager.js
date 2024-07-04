@@ -343,6 +343,71 @@ class FileManager {
 
 
 
+
+  // Load demo data in case the pipeline is broken
+  loadDemoData = function(){
+    let baseURL = window.location.href.replace('index.html', '');
+    baseURL = baseURL.split('#')[0];
+    baseURL += 'data/demoData';
+
+    let year = 2024;
+    let month = '07';
+    let day = '01';
+    let hour = '01';
+
+
+    let urls = [];
+    let promises = [];
+    
+    // Totals
+    urls.push(baseURL + '/TOTL_CATS_' + year + '_' + month + '_' + day + '_' + hour + '00.tuv');
+    // Radials
+    //  Creus
+    urls.push(baseURL + '/RDLm_CREU_' + year + '_' + month + '_' + day + '_' + hour + '00_l2b.ruv');
+    // Begur
+    urls.push(baseURL + '/RDLm_BEGU_' + year + '_' + month + '_' + day + '_' + hour + '00_l2b.ruv');
+    // Arenys
+    urls.push(baseURL + '/RDLm_AREN_' + year + '_' + month + '_' + day + '_' + hour + '00_l2b.ruv');
+    // Port de Barcelona
+    urls.push(baseURL + '/RDLm_PBCN_' + year + '_' + month + '_' + day + '_' + hour + '00_l2b.ruv');
+    // Port Ginesta
+    urls.push(baseURL + '/RDLm_GNST_' + year + '_' + month + '_' + day + '_' + hour + '00_l2b.ruv');
+    // Waves and wind
+    // Waves Creus
+    urls.push(baseURL + '/WVLM_CREU_' + year + '_' + month + '_01_0000.wls');
+    // Waves Begur
+    urls.push(baseURL + '/WVLM_BEGU_' + year + '_' + month + '_01_0000.wls');
+    // Waves Arenys
+    urls.push(baseURL + '/WVLM_AREN_' + year + '_' + month + '_01_0000.wls');
+    // Waves Port de Barcelona
+    urls.push(baseURL + '/WVLM_PBCN_' + year + '_' + month + '_01_0000.wls');
+    // Waves Port Ginesta
+    urls.push(baseURL + '/WVLM_GNST_' + year + '_' + month + '_01_0000.wls');
+
+    
+    for (let i = 0; i < urls.length; i++){
+      // Check if this file was already requested
+      if (this.requestedFiles.indexOf(urls[i]) != -1){
+        continue;
+      }
+      // Request file
+      this.requestedFiles.push(urls[i]);
+      promises.push(
+        fetch(urls[i])
+          .then( r => r.text()) // https://stackoverflow.com/questions/32545632/how-can-i-download-a-file-using-window-fetch
+          .then (res => {
+            if (res[0] == '<')
+              throw new Error('File not found: ' + urls[i]);
+            this.loadedFilesLog.push({"url": urls[i], "contentTxt": res});
+            return parseText(res);
+          })
+        );
+    }
+
+    return Promise.allSettled(promises)
+  }
+
+
   // Returns a promise of loading the data
   loadRawHFData = function(timestamp){
 
