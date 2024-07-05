@@ -234,9 +234,12 @@ class DataManager {
     }
     
 
-    this.loadDatedStaticFilesRepository(arrayDates, fileTypes).then(hfRadar => {
+    return this.loadDatedStaticFilesRepository(arrayDates, fileTypes).then(hfRadar => {
       if (hfRadar != undefined)
-        window.eventBus.emit('HFRadarDataLoaded'); });
+        window.eventBus.emit('HFRadarDataLoaded');
+      return hfRadar;  
+    });
+      
 
     // // Use web worker to load the rest of the files
     // if (window.DataWorker){

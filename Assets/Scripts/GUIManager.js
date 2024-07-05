@@ -135,7 +135,6 @@ class GUIManager {
       // If we are in the latest date and activeSync is on
       else {
         if (this.activeSync && !this.activeSyncLoopOn) {
-          console.log('%%%%%%%% Activating loop %%%%%%%%%%%%')
           this.activeSyncRadarData();
         }
       }
@@ -145,6 +144,12 @@ class GUIManager {
       this.selectedDateChanged(tmst);
     });
 
+    // User clicked on active sync, show the latest current
+    window.eventBus.on('TopRightCanvas_activeSyncIsOn', (tmst) => {
+      this.selectedDateChanged(tmst);
+      // Reuse event from URL hash change. Active sync button will never react to this event
+      window.eventBus.emit('GUIManager_URLDateChanged', this.currentTmst);
+    })
 
     // Advanced interface button
     window.eventBus.on('AdvancedInterfaceOnOff', state => {
@@ -308,7 +313,6 @@ class GUIManager {
 
   // AUTO UPDATE - Active sync
   activeSyncRadarData(){
-    console.log("***************activeSyncRadarData")
     let minDiff = (new Date().getTime() - new Date(window.DataManager.latestDataTmst).getTime()) / (1000*60);
 
     let latestDate = new Date(window.DataManager.latestDataTmst);
@@ -316,14 +320,14 @@ class GUIManager {
     let startDate = new Date(latestDate.setUTCHours(latestDate.getUTCHours() + 1));
     let startTmst = startDate.toISOString();
 
-    console.log("Minutes of difference: " + minDiff)
     if (minDiff > 90){
       // Force reload
       // But not the first time when opening the app
       if (this.firstReloadDone == undefined){
         this.firstReloadDone = true;
-      }else {
+      } else {
         // Force reload (FileManager uses this.activeSync to know if the urls need to be re-requested)
+        console.log("Active sync - Requesting new files")
         // Load data
         window.DataManager.loadStaticFilesRepository(startTmst, new Date().toISOString(), ['tuv']).then(hfRadar => {
           if (hfRadar != undefined){
@@ -337,13 +341,11 @@ class GUIManager {
           // Load files  
           window.DataManager.loadStaticFilesRepository(startTmst, new Date().toISOString(), fileTypes);
         });
-
       }
 
-      // Set timeout
+      // Loop - Set timeout
       if (this.activeSync){
         this.activeSyncLoopOn = true;
-        console.log("************ Calling timeout")
         setTimeout(() => this.activeSyncRadarData(), 10 * 1000)//5 * 1000 * 60)
       } else {
         if (this.activeSyncLoopOn == false){
@@ -351,7 +353,6 @@ class GUIManager {
           // Trying to stop a loop that was already stop (double initialization of loop)
         }
         this.activeSyncLoopOn = false;
-        console.log("End of loop");
       }
     }
   }

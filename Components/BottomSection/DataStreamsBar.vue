@@ -324,6 +324,7 @@ export default {
       }
 
       // Paint selected date
+      // TODO: this is called several times, not OPTIMAL!
       let selTmst = window.GUIManager.currentTmst;
       if (selTmst != undefined){
         let currentDate = new Date(selTmst);

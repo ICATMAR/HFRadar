@@ -45,6 +45,15 @@ export default {
   },
   mounted() {
     this.isActiveSyncOn = window.GUIManager.activeSync;
+
+    // When user clicks on timeline or changes the current date, deactivate as long as we are not in the latest date
+    // Selected date changed (slider moves or drag and drop files)
+    window.eventBus.on('DataStreamsBar_SelectedDateChanged', (tmst) =>{
+      if (tmst != window.DataManager.latestDataTmst){
+        this.isActiveSyncOn = false;
+        window.GUIManager.activeSync = this.isActiveSyncOn;
+      }
+    });
   },
   data() {
     return {
@@ -58,6 +67,12 @@ export default {
     changeActiveSync: function(e) {
       this.isActiveSyncOn = !this.isActiveSyncOn;
       window.GUIManager.activeSync = this.isActiveSyncOn;
+      // If it is activated, force to be on the latest date
+      if (this.isActiveSyncOn){
+        window.DataManager.loadOnInteraction(new Date().toISOString()).then(hfRadar => {
+          window.eventBus.emit('TopRightCanvas_activeSyncIsOn', window.DataManager.latestDataTmst);
+        });
+      }
     },
   },
   components: {
