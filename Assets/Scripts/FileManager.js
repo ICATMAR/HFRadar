@@ -317,9 +317,13 @@ class FileManager {
     for (let i = 0; i < urls.length; i++){
       // Check if this file was already requested, only if activeSync is off
       let fileWasRequested = this.requestedFiles.indexOf(urls[i]) != -1;
+      
+      // Skip file
       if (fileWasRequested && !window.GUIManager.activeSync){
         continue;
-      } else if (!fileWasRequested){
+      }
+      // Keep track of requested files
+      if (!fileWasRequested){
         this.requestedFiles.push(urls[i]);
       }
      
