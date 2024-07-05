@@ -4,7 +4,7 @@
   <button class="hiddenInMobile download-button clickable" @click="downloadIconClicked" v-if="!isVisible"><span>Download data</span></button>
 
   <button class="visibleInMobile download-button-icon icon-str clickable" @click="downloadIconClicked" v-if="!isVisible">
-    <span class="fa">&#xf019</span>
+    <span class="fa">&#xf019;</span>
   </button>
 
   <Transition>
