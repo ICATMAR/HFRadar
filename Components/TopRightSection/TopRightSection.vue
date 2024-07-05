@@ -16,6 +16,12 @@
       <!-- Download data menu -->
       <download-data-menu></download-data-menu>
 
+      <!-- Active sync -->
+      <div class="hiddenInMobile activeSyncButton clickable" :class="[isActiveSyncOn ? 'activeSyncButtonOn' : '']" @click="changeActiveSync" title="Latest data is updated automatically when active"><span>Active Sync</span></div>
+      <div class="visibleInMobile activeSyncButton icon-str clickable" :class="[isActiveSyncOn ? 'activeSyncButtonOn' : '']" @click="changeActiveSync" title="Latest data is updated automatically when active">
+        <span class="fa">&#xf2f1;</span>
+      </div>
+
     </div>
 
   </div>
@@ -38,15 +44,21 @@ export default {
 
   },
   mounted() {
+    this.isActiveSyncOn = window.GUIManager.activeSync;
   },
   data() {
     return {
+      isActiveSyncOn: false
     }
   },
   methods: {
     // USER ACTIONS
     // onClick: function(e){
     // },
+    changeActiveSync: function(e) {
+      this.isActiveSyncOn = !this.isActiveSyncOn;
+      window.GUIManager.activeSync = this.isActiveSyncOn;
+    },
   },
   components: {
     "cookie-banner": CookieBanner,
@@ -86,5 +98,13 @@ export default {
   border: double;
   width: 28px;
   height: 28px;
+}
+
+.activeSyncButton {
+  background: gray;
+}
+
+.activeSyncButtonOn {
+  background: green;
 }
 </style>

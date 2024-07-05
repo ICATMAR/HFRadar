@@ -40,6 +40,9 @@ class GUIManager {
   currentTmst = undefined;
   currentRadars = undefined;
 
+  // Auto-update
+  activeSync = false;
+
   // Memory allocation
   tempArray = [undefined, undefined];
 
@@ -48,6 +51,9 @@ class GUIManager {
     // Get configuration from window location hash
     // Time <TIME=2024-02-14T11:00:00.000Z>
     let tmst = window.location.getHashValue('TIME');
+    if (tmst == undefined){
+      this.activeSync = true;
+    } 
     this.setNewTmst(tmst);
     window.location.isInternalChange = false;
     
@@ -125,6 +131,13 @@ class GUIManager {
       if (window.DataManager.latestDataTmst != this.currentTmst){
         // Show TIME hash
         window.location.setHashValue('TIME', this.currentTmst);
+      } 
+      // If we are in the latest date and activeSync is on
+      else {
+        if (this.activeSync && !this.activeSyncLoopOn) {
+          console.log('%%%%%%%% Activating loop %%%%%%%%%%%%')
+          this.activeSyncRadarData();
+        }
       }
     });
     // Selected date changed (slider moves or drag and drop files)
@@ -290,6 +303,57 @@ class GUIManager {
       window.location.removeHash('TIME');
     }else
       window.location.setHashValue('TIME', this.currentTmst);
+  }
+
+
+  // AUTO UPDATE - Active sync
+  activeSyncRadarData(){
+    console.log("***************activeSyncRadarData")
+    let minDiff = (new Date().getTime() - new Date(window.DataManager.latestDataTmst).getTime()) / (1000*60);
+
+    let latestDate = new Date(window.DataManager.latestDataTmst);
+    // Add one hour to the latest hour
+    let startDate = new Date(latestDate.setUTCHours(latestDate.getUTCHours() + 1));
+    let startTmst = startDate.toISOString();
+
+    console.log("Minutes of difference: " + minDiff)
+    if (minDiff > 90){
+      // Force reload
+      // But not the first time when opening the app
+      if (this.firstReloadDone == undefined){
+        this.firstReloadDone = true;
+      }else {
+        // Force reload (FileManager uses this.activeSync to know if the urls need to be re-requested)
+        // Load data
+        window.DataManager.loadStaticFilesRepository(startTmst, new Date().toISOString(), ['tuv']).then(hfRadar => {
+          if (hfRadar != undefined){
+            window.eventBus.emit('HFRadarDataLoaded', window.DataManager.latestDataTmst);
+          }
+          // Load wave files (and radials if required)
+          let fileTypes = ['wls'];
+          // Load radials if required
+          if (widgetHFRadars.isVisible)
+            fileTypes.push('ruv');
+          // Load files  
+          window.DataManager.loadStaticFilesRepository(startTmst, new Date().toISOString(), fileTypes);
+        });
+
+      }
+
+      // Set timeout
+      if (this.activeSync){
+        this.activeSyncLoopOn = true;
+        console.log("************ Calling timeout")
+        setTimeout(() => this.activeSyncRadarData(), 10 * 1000)//5 * 1000 * 60)
+      } else {
+        if (this.activeSyncLoopOn == false){
+          debugger;
+          // Trying to stop a loop that was already stop (double initialization of loop)
+        }
+        this.activeSyncLoopOn = false;
+        console.log("End of loop");
+      }
+    }
   }
 
 
