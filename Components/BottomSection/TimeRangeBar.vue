@@ -133,9 +133,15 @@ export default {
         this.$refs.dataStreamsBar.setStartEndDates(this.startDate, this.endDate);
       
       // EVENT LISTENERS
-      window.eventBus.on('Calendar_SelectedDate', tmst => this.calendarComponentChangedDate());
+      window.eventBus.on('Calendar_SelectedDate', tmst => {
+        this.calendarComponentChangedDate();
+        // TODO: mixing between timerangebar and datastreamsbar EMIT UPDATE CURRENT DATE TODO CHANGE
+        window.eventBus.emit('DataStreamsBar_SelectedDateChanged', this.currentDate.toISOString())
+      });
       // Initial load and user changing hash TIME in URL
       window.eventBus.on('GUIManager_URLDateChanged', tmst => this.calendarComponentChangedDate());
+      // User clicked on Active sync and turned it on
+      window.eventBus.on('TopRightCanvas_ActiveSyncClickedAndOn', tmst => this.calendarComponentChangedDate());
       // Create event listener
       window.addEventListener('resize', this.windowIsResizing);
     },
@@ -261,9 +267,6 @@ export default {
         // Update start and ending dates
         // It also calls this.updateHTMLTimeline()
         this.centerOnDate(this.currentDate);
-
-        // TODO: mixing between timerangebar and datastreamsbar EMIT UPDATE CURRENT DATE TODO CHANGE
-        window.eventBus.emit('DataStreamsBar_SelectedDateChanged', this.currentDate.toISOString())
 
         // Update simulation
         if (this.$refs.dataStreamsBar){

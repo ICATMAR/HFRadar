@@ -113,18 +113,19 @@ export default {
       window.eventBus.emit('SidePanelSizechanged', this.showPanel);
     });
 
+
+    // Define common function for tmst related events
+    const dateHasChanged = (tmst) => {
+      this.updateInformation(tmst);
+      this.dataPointContent = '';
+      this.isDataPointVisible = false;
+    }
     // Selected date changes
-    window.eventBus.on('DataStreamsBar_SelectedDateChanged', (tmst) => {
-      this.updateInformation(tmst);
-      this.dataPointContent = '';
-      this.isDataPointVisible = false;
-    });
+    window.eventBus.on('DataStreamsBar_SelectedDateChanged', dateHasChanged);
     // User changed TMST hash on the URL
-    window.eventBus.on('GUIManager_URLDateChanged', tmst => {
-      this.updateInformation(tmst);
-      this.dataPointContent = '';
-      this.isDataPointVisible = false;
-    });
+    window.eventBus.on('GUIManager_URLDateChanged', dateHasChanged);
+    // User clicked on Active sync and turned it on
+    window.eventBus.on('TopRightCanvas_ActiveSyncClickedAndOn', dateHasChanged);
 
     // On HF Radar clikc on Map.vue
     window.eventBus.on('Map_ClickedHFRadar', radar => {

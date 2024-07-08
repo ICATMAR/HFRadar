@@ -49,23 +49,20 @@ export default {
       })
     });
 
-
+    // Common function for date changing
+    const dateHasChanged = tmst => {
+      // Iterate all radars
+      Object.keys(window.DataManager.HFRadars).forEach(key => {
+        let radar = window.DataManager.HFRadars[key];
+        this.updateRadarAnimationState(radar, tmst);
+      }); 
+    }
     // Selected date changed (slider moves or drag and drop files)
-    window.eventBus.on('DataStreamsBar_SelectedDateChanged', (tmst) =>{
-      // Iterate all radars
-      Object.keys(window.DataManager.HFRadars).forEach(key => {
-        let radar = window.DataManager.HFRadars[key];
-        this.updateRadarAnimationState(radar, tmst);
-      }); 
-    }); 
+    window.eventBus.on('DataStreamsBar_SelectedDateChanged', dateHasChanged); 
     // Initial load and user changing hash TIME in URL
-    window.eventBus.on('GUIManager_URLDateChanged', tmst => {
-      // Iterate all radars
-      Object.keys(window.DataManager.HFRadars).forEach(key => {
-        let radar = window.DataManager.HFRadars[key];
-        this.updateRadarAnimationState(radar, tmst);
-      }); 
-    });
+    window.eventBus.on('GUIManager_URLDateChanged', dateHasChanged);
+    // User clicked on Active sync and turned it on
+    window.eventBus.on('TopRightCanvas_ActiveSyncClickedAndOn', dateHasChanged);
 
 
 

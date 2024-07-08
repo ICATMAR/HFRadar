@@ -145,10 +145,8 @@ class GUIManager {
     });
 
     // User clicked on active sync, show the latest current
-    window.eventBus.on('TopRightCanvas_activeSyncIsOn', (tmst) => {
+    window.eventBus.on('TopRightCanvas_ActiveSyncClickedAndOn', (tmst) => {
       this.selectedDateChanged(tmst);
-      // Reuse event from URL hash change. Active sync button will never react to this event
-      window.eventBus.emit('GUIManager_URLDateChanged', this.currentTmst);
     })
 
     // Advanced interface button
@@ -320,7 +318,7 @@ class GUIManager {
     let startDate = new Date(latestDate.setUTCHours(latestDate.getUTCHours() + 1));
     let startTmst = startDate.toISOString();
 
-    if (minDiff > 90){
+    if (minDiff > 5){
       // Force reload
       // But not the first time when opening the app
       if (this.firstReloadDone == undefined){

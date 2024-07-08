@@ -47,6 +47,10 @@ export default {
     window.eventBus.on('GUIManager_URLDateChanged', tmst => {
       this.updateCanvas();
     });
+    // User clicked on Active sync and turned it on
+    window.eventBus.on('TopRightCanvas_ActiveSyncClickedAndOn', tmst => {
+      this.updateCanvas();
+    });
     // TODO: there is a bit of overkill here. HFRadarDataLoaded is useful to display the first loaded radar data.
     // In principle, 'DataManager_DataAvailabilityUpdated', should be called after the trigger 'HFRadarDataLoaded', but
     // it does not work on the first radar load. It works on the posterior loads, thus this.updateCanvas() is called twice.
