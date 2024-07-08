@@ -206,7 +206,9 @@ class DataManager {
     // When playing forward or backward, this function is called. Maybe need to recheck data availability. Also write if the file is being loaded
     // TODO HERE
     sD.setUTCDate(sD.getUTCDate() - 1);
+    // Limit end date to current time
     eD.setUTCDate(eD.getUTCDate() + 1);
+    eD = Math.min(new Date(), eD);
 
     // Iterate dates
     let arrayDates = [];
