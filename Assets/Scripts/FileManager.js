@@ -315,12 +315,19 @@ class FileManager {
 
 
     for (let i = 0; i < urls.length; i++){
-      // Check if this file was already requested
-      if (this.requestedFiles.indexOf(urls[i]) != -1){
+      // Check if this file was already requested, only if activeSync is off
+      let fileWasRequested = this.requestedFiles.indexOf(urls[i]) != -1;
+      
+      // Skip file
+      if (fileWasRequested && !window.GUIManager.activeSync){
         continue;
       }
+      // Keep track of requested files
+      if (!fileWasRequested){
+        this.requestedFiles.push(urls[i]);
+      }
+     
       // Request file
-      this.requestedFiles.push(urls[i]);
       promises.push(
         fetch(urls[i])
           .then( r => r.text()) // https://stackoverflow.com/questions/32545632/how-can-i-download-a-file-using-window-fetch
@@ -333,7 +340,7 @@ class FileManager {
         );
     }
 
-
+    //console.log("Promises length: " + promises.length + ". Activesync: " + window.GUIManager.activeSync + ". Tmst: " + timestamp)
 
     return Promise.allSettled(promises)
       //.then(values => console.log(values))
@@ -387,6 +394,7 @@ class FileManager {
     
     for (let i = 0; i < urls.length; i++){
       // Check if this file was already requested
+      // No need to use autoSync here, because when demoData is loaded it means that the repo is not working or not updated
       if (this.requestedFiles.indexOf(urls[i]) != -1){
         continue;
       }

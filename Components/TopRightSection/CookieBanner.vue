@@ -1,6 +1,6 @@
 <template>
   
-  <div class="logo-cookie-banner icon-str clickable" @click="isVisible = !isVisible" v-if="!isVisible">
+  <div class="logo-cookie-banner icon-str clickable" @click="isVisible = !isVisible" v-if="!isVisible" title="Cookies and privacy">
     <span class="fa">&#xf563</span>
   </div>
   

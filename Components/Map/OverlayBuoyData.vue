@@ -134,13 +134,11 @@ export default {
         this.selectedDateChanged(tmst);
     });
     // Selected date changed (slider moves or drag and drop files)
-    window.eventBus.on('DataStreamsBar_SelectedDateChanged', (tmst) =>{
-      this.selectedDateChanged(tmst);
-    });
+    window.eventBus.on('DataStreamsBar_SelectedDateChanged', this.selectedDateChanged);
     // Initial load and user changing hash TIME in URL
-    window.eventBus.on('GUIManager_URLDateChanged', tmst => {
-      this.selectedDateChanged(tmst);
-    });
+    window.eventBus.on('GUIManager_URLDateChanged', this.selectedDateChanged);
+    // User clicked on Active sync and turned it on
+    window.eventBus.on('TopRightCanvas_ActiveSyncClickedAndOn', this.selectedDateChanged);
     // Advanced interface
     window.eventBus.on("AdvancedInterfaceOnOff", state => {
       this.isAdvancedInterfaceOnOff = state;

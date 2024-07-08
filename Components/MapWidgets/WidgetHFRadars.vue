@@ -141,13 +141,11 @@ export default {
       this.$refs.legendGUI.setCurrentValue(currentValue);
     })
     // When selected date changes
-    window.eventBus.on('DataStreamsBar_SelectedDateChanged', tmst => {
-      this.updateWhenNewTmst(tmst);
-    });
+    window.eventBus.on('DataStreamsBar_SelectedDateChanged', this.updateWhenNewTmst);
     // Initial load and user changing hash TIME in URL
-    window.eventBus.on('GUIManager_URLDateChanged', tmst => {
-      this.updateWhenNewTmst(tmst);
-    });
+    window.eventBus.on('GUIManager_URLDateChanged', this.updateWhenNewTmst);
+    // User clicked on Active sync and turned it on
+    window.eventBus.on('TopRightCanvas_ActiveSyncClickedAndOn', this.updateWhenNewTmst);
     // User changing the visible radars on the URL
     window.eventBus.on('GUIManager_URLRadialsChanged', (radialStr) => {
       // If they are deleted, hide radials

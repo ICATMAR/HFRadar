@@ -95,19 +95,18 @@ export default {
       window.eventBus.emit('TimeSlider_SelectedDateChanged', tmst);
     });
 
+    // Repeated function for date changing events
+    const dateHasChanged = tmst => {
+      let currentDate = new Date(tmst);
+      this.$refs.slider.value = currentDate.getTime()/(1000*60*60);
+      this.timeStr = this.formatTimestampString(tmst);
+    }
     // Initial load and user changing hash TIME in URL
-    window.eventBus.on('GUIManager_URLDateChanged', tmst => {
-      let currentDate = new Date(tmst);
-      this.$refs.slider.value = currentDate.getTime()/(1000*60*60);
-      this.timeStr = this.formatTimestampString(tmst);
-    });
-
+    window.eventBus.on('GUIManager_URLDateChanged', dateHasChanged);
+    // User clicked on Active sync and turned it on
+    window.eventBus.on('TopRightCanvas_ActiveSyncClickedAndOn', dateHasChanged);
     // DataStreamsBar in advanced interface
-    window.eventBus.on('DataStreamsBar_SelectedDateChanged', tmst => {
-      let currentDate = new Date(tmst);
-      this.$refs.slider.value = currentDate.getTime()/(1000*60*60);
-      this.timeStr = this.formatTimestampString(tmst);
-    });
+    window.eventBus.on('DataStreamsBar_SelectedDateChanged', dateHasChanged);
 
     // Automatic minute update
     this.updateTimeString();

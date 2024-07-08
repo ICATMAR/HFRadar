@@ -73,6 +73,8 @@
       window.eventBus.on('DataStreamsBar_SelectedDateChanged', this.updateClimaLayer);
       // Initial load and user changing hash TIME in URL
       window.eventBus.on('GUIManager_URLDateChanged', this.updateClimaLayer);
+      // User clicked on Active sync and turned it on
+      window.eventBus.on('TopRightCanvas_ActiveSyncClickedAndOn', this.updateClimaLayer);
       
     },
     data (){

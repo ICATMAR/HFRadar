@@ -37,6 +37,9 @@ export default {
     window.eventBus.on('DataStreamsBar_SelectedDateChanged', setTimeStr);
     window.eventBus.on('Calendar_SelectedDate', setTimeStr);
     window.eventBus.on('GUIManager_URLDateChanged', setTimeStr);
+    // User clicked on Active sync and turned it on
+    window.eventBus.on('TopRightCanvas_ActiveSyncClickedAndOn', setTimeStr);
+    
     window.eventBus.on('HFRadarDataLoaded', (tmst) =>{
       if(tmst != undefined)
         setTimeStr(tmst);
