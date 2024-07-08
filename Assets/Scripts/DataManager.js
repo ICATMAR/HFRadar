@@ -174,19 +174,16 @@ class DataManager {
 
   // Checks if to load data when the user or the app interacts with the interface
   loadOnInteraction(tmst, fileTypes){
-    // Check if data is loaded, otherwise load
-    // let key = tmst.substring(0,13) + 'Z';
-    // // No data exists on that date
-    // if (this.hourlyDataAvailability[key] == undefined)
-    //   return;
-    // // Data exists and its loaded
-    // let keys = Object.keys(this.hourlyDataAvailability[key]);
-    // if (this.hourlyDataAvailability[key][keys[0]] == 2)
-    //   return;
-    // // Data is currently being loaded
-    // if (this.hourlyDataAvailability[key][keys[0]] == 3)
-    //   return;
-    console.log("LoadOnInteraction");
+    // HACK: If no timestamp is defined, it is called from Active Sync button. Otherwise user clicked somewhere else
+    // This hack is related to a problem encountered with order of the events. Active Sync is turned off, but this happens
+    // after loadOnInteraction is called, therefore all the files are reloaded and data is overwritten. To avoid this,
+    // force the calling of loadOnInteraction from TopRightMenu.vue to be different from the rest, i.e. without tmst.
+    if (tmst == undefined)
+      tmst = new Date().toISOString();
+    else
+      window.GUIManager.activeSync = false;
+    // End of hack
+    
     // Decide if to load radials according to the GUIManager
     fileTypes = fileTypes || ['tuv', 'wls'];
     if (GUIManager.isAdvancedInterface){

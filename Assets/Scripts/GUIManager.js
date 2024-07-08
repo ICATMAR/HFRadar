@@ -42,6 +42,8 @@ class GUIManager {
 
   // Auto-update
   activeSync = false;
+  minBetweenCalls = 5;
+  minToCallFromLastData = 75;
 
   // Memory allocation
   tempArray = [undefined, undefined];
@@ -311,6 +313,10 @@ class GUIManager {
 
   // AUTO UPDATE - Active sync
   activeSyncRadarData(){
+    if (this.activeSync == false){
+      if (this.activeSyncLoopOn == false){debugger;}// Trying to stop a loop that was already stop (double initialization of loop)
+      return
+    }
     let minDiff = (new Date().getTime() - new Date(window.DataManager.latestDataTmst).getTime()) / (1000*60);
 
     let latestDate = new Date(window.DataManager.latestDataTmst);
@@ -318,7 +324,7 @@ class GUIManager {
     let startDate = new Date(latestDate.setUTCHours(latestDate.getUTCHours() + 1));
     let startTmst = startDate.toISOString();
 
-    if (minDiff > 5){
+    if (minDiff > this.minToCallFromLastData){
       // Force reload
       // But not the first time when opening the app
       if (this.firstReloadDone == undefined){
@@ -344,7 +350,7 @@ class GUIManager {
       // Loop - Set timeout
       if (this.activeSync){
         this.activeSyncLoopOn = true;
-        setTimeout(() => this.activeSyncRadarData(), 10 * 1000)//5 * 1000 * 60)
+        setTimeout(() => this.activeSyncRadarData(), this.minBetweenCalls * 60 * 1000);
       } else {
         if (this.activeSyncLoopOn == false){
           debugger;

@@ -18,7 +18,7 @@
 
       <!-- Active sync -->
       <div class="hiddenInMobile activeSyncButton clickable" :class="[isActiveSyncOn ? 'activeSyncButtonOn' : '']" @click="changeActiveSync" title="Latest data is updated automatically when active"><span>Active Sync</span></div>
-      <div class="visibleInMobile activeSyncButton icon-str clickable" :class="[isActiveSyncOn ? 'activeSyncButtonOn' : '']" @click="changeActiveSync" title="Latest data is updated automatically when active">
+      <div class="visibleInMobile activeSyncButton activeSyncButtonIcon icon-str clickable" :class="[isActiveSyncOn ? 'activeSyncButtonOn' : '']" @click="changeActiveSync" title="Latest data is updated automatically when active">
         <span class="fa">&#xf2f1;</span>
       </div>
 
@@ -69,7 +69,8 @@ export default {
       window.GUIManager.activeSync = this.isActiveSyncOn;
       // If it is activated, force to be on the latest date
       if (this.isActiveSyncOn){
-        window.DataManager.loadOnInteraction(new Date().toISOString()).then(hfRadar => {
+        // HACK: do not send tmst so that DataManager knows that it is sent from TopRightSection
+        window.DataManager.loadOnInteraction().then(hfRadar => {
           window.eventBus.emit('TopRightCanvas_ActiveSyncClickedAndOn', window.DataManager.latestDataTmst);
         });
       }
@@ -126,5 +127,10 @@ export default {
 
 .activeSyncButtonOn {
   background: green;
+}
+
+.activeSyncButtonIcon{
+  padding: 0px;
+  text-align: center;
 }
 </style>
