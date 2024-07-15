@@ -44,6 +44,7 @@ class GUIManager {
   activeSync = false;
   minBetweenCalls = 5;
   minToCallFromLastData = 75;
+  minCouldFileChanged = 30; // Some files are generated and then updated later when new data comes.
 
   // Memory allocation
   tempArray = [undefined, undefined];
@@ -320,11 +321,17 @@ class GUIManager {
     let minDiff = (new Date().getTime() - new Date(window.DataManager.latestDataTmst).getTime()) / (1000*60);
 
     let latestDate = new Date(window.DataManager.latestDataTmst);
-    // Add one hour to the latest hour
-    let startDate = new Date(latestDate.setUTCHours(latestDate.getUTCHours() + 1));
+    
+    let startDate;
+    // Recent file exists but maybe needs to be updated
+    if (minDiff < this.minCouldFileChanged)
+      startDate = latestDate;
+    // Request for new files by adding one hour to the latest timestamp
+    else
+      startDate = new Date(latestDate.setUTCHours(latestDate.getUTCHours() + 1)); // Add one hour to the latest hour
     let startTmst = startDate.toISOString();
 
-    if (minDiff > this.minToCallFromLastData){
+    if (minDiff > this.minToCallFromLastData || minDiff < this.minCouldFileChanged){
       // Force reload
       // But not the first time when opening the app
       if (this.firstReloadDone == undefined){
