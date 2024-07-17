@@ -43,7 +43,7 @@ class GUIManager {
   // Auto-update
   activeSync = false;
   minBetweenCalls = 5;
-  minToCallFromLastData = 75;
+  minToCallFromLastData = 50; // July update: T+00:50 first try, then at T+01:03 and at T+01:16.
   minCouldFileChanged = 30; // Some files are generated and then updated later when new data comes.
 
   // Memory allocation
