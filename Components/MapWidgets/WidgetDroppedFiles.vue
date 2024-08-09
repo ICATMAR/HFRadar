@@ -10,9 +10,9 @@
         <span @click="fileOnOff($event, key)">{{key}}</span>
       </div>
       <!-- Info --> <!-- some files do not have any info. Some have timestamp, generator, copyright, attribution, name, source... -->
-      <!-- opacity -->
-      
-      <!-- remove -->
+      <!-- Change opacity -->
+      <opacity-knob size="25px" @change="changeFileOpacity($event, key)"></opacity-knob>
+      <!-- Remove -->
       <span class="clickable fa" @click="fileRemove(key)">&#xf2ed;</span>
     </div>
 
@@ -25,6 +25,7 @@
 
 // Import components
 import OnOffButton from "../OnOffButton.vue";
+import OpacityKnob from "../OpacityKnob.vue";
 
 
 export default {
@@ -75,7 +76,11 @@ export default {
       // Emit
       window.eventBus.emit("WidgetDroppedFiles_FileRemoved", fileName);
     },
-
+    changeFileOpacity: function(opacity, fileName){
+      this.droppedFiles[fileName].opacity = opacity;
+      // Emit
+      window.eventBus.emit("WidgetDroppedFiles_FileOpacityChanged", fileName);
+    },
 
 
 
@@ -100,6 +105,7 @@ export default {
   },
   components: {
     "onOffButton": OnOffButton,
+    "opacity-knob": OpacityKnob,
   }
 }
 </script>
