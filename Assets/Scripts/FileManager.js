@@ -446,15 +446,30 @@ class FileManager {
 
 
   // Reads files from drag and drop
-  readFile = function(file){
+  readFile = function(file, fileExtension){
     return new Promise((resolve, reject) => {
       let reader = new FileReader();
       reader.fileName = file.name;
+      reader.fileExtension = fileExtension;
 
       // On load file
       reader.addEventListener('load', e => {
-        // Store in Data Manager
-        resolve(this.parseText(reader.result));
+        try {
+          // Store in Data Manager
+          // Parse HF files
+          if (reader.fileExtension == 'wls' || fileExtension == 'tuv' || fileExtension == 'ruv')
+            resolve(this.parseText(reader.result));
+          // Parse geojson
+          else if (reader.fileExtension == 'geojson'){
+            let parsedGeoJSON = JSON.parse(reader.result);
+            parsedGeoJSON.fileName = reader.fileName;
+            resolve(parsedGeoJSON);
+          }
+        }
+        catch (e){
+          debugger;
+          reject(e);
+        }
       });
       reader.addEventListener('error', e => {
         console.error('Could not read file ' + reader.file.name);
