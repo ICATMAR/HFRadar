@@ -1,7 +1,7 @@
 
 class GeoJSONWrapper {
 
-    isVisible = false;
+    isVisible = true;
     opacity = 1;
     isAddedToMap = false;
     // color

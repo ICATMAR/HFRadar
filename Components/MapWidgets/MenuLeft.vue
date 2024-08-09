@@ -8,6 +8,8 @@
       </div>
 
       <widgetMapOptions v-show="isAdvancedInterfaceOnOff"></widgetMapOptions>
+
+      <widgetDroppedFiles></widgetDroppedFiles>
   
     </div>
   </template>
@@ -18,6 +20,7 @@
   
   <script>
   import OnOffButton from "../OnOffButton.vue";
+  import WidgetDroppedFiles from "./WidgetDroppedFiles.vue";
   import WidgetMapOptions from "./WidgetMapOptions.vue"
 
   export default {
@@ -57,6 +60,7 @@
     },
     components: {
     "widgetMapOptions": WidgetMapOptions,
+    "widgetDroppedFiles": WidgetDroppedFiles,
     "onOffButton": OnOffButton,
 },
     computed: {

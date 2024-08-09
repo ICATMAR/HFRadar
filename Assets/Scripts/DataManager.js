@@ -570,7 +570,7 @@ class DataManager {
         let fileName = lastReceived.fileName;
         this.geoJSONWrappers[fileName] = lastReceived;
       }
-      window.eventBus.emit('GeoJSONDataLoaded', lastReceived);
+      window.eventBus.emit('DataManager_geoJSONDataLoaded', lastReceived);
     });
   }
 

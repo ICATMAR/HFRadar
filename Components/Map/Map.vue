@@ -261,7 +261,7 @@ export default {
 
 
     // Geojson
-    window.eventBus.on('GeoJSONDataLoaded', () => {
+    window.eventBus.on('DataManager_geoJSONDataLoaded', () => {
       let wrappers = window.DataManager.geoJSONWrappers;
       Object.keys(wrappers).forEach(key => {
         let wrapper = wrappers[key];
