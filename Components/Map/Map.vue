@@ -1,51 +1,56 @@
 <template>
-    <div id="app-map">
-      <!-- LAYOUT -->
-      <!-- OL map -->
-      <div id="map" ref="OLMap" v-on:drop="onDropFile($event)" v-on:dragover="onDragOver($event)"></div>
-
-      
+  <div id="app-map">
+    <!-- LAYOUT -->
+    <!-- OL map -->
+    <div id="map" ref="OLMap" v-on:drop="onDropFile($event)" v-on:dragover="onDragOver($event)"></div>
 
 
 
-      <!-- OVERLAYS -->
-      <!-- Progress bar load tiles -->
-      <div v-show="!progress.isLoaded" class="position-absolute m-0 btn-dark" style="width: 100%; height: 10px; opacity: 0.8; top:0" :style="{'max-width': progress.progressPercent + '%'}">
-        <div class="spinner-border text-dark" style="position: relative; margin-top: 20px; margin-left: 20px" role="status">
-          <span class="visually-hidden">Loading...</span>
-        </div>
+
+
+    <!-- OVERLAYS -->
+    <!-- Progress bar load tiles -->
+    <div v-show="!progress.isLoaded" class="position-absolute m-0 btn-dark"
+      style="width: 100%; height: 10px; opacity: 0.8; top:0" :style="{ 'max-width': progress.progressPercent + '%' }">
+      <div class="spinner-border text-dark" style="position: relative; margin-top: 20px; margin-left: 20px"
+        role="status">
+        <span class="visually-hidden">Loading...</span>
       </div>
-
-      <!-- Progress bar load WMS tiles -->
-      <div v-show="!wmsProgress.isLoaded" class="position-absolute m-0 btn-dark" style="background: var(--blue); width: 100%; height: 5px; opacity: 0.8; top:0px" :style="{'max-width': wmsProgress.progressPercent + '%'}">
-        <div class="spinner-border" style="position: relative; margin-top: 20px; margin-left: 40px; color:var(--blue)" role="status">
-          <span class="visually-hidden">Loading...</span>
-        </div>
-      </div>
-
-      <!-- Overlay wave data -->
-      <overlay-wave-data ref="overlayWaveData"></overlay-wave-data>
-
-      <!-- Overlay puertos del estado buoys data -->
-      <overlay-buoy-data ref="overlayBuoyData"></overlay-buoy-data>
-
-      <!-- Overlay obsea buoys data -->
-      <overlay-obsea-data ref="overlayOBSEAData"></overlay-obsea-data>
-
-      <!-- <time-slider></time-slider> -->
-
-      <!-- Bottom Section -->
-      <bottom-section></bottom-section>
-
-      <!-- Direction for WMS layers -->
-      <climaDirectionCanvas ref="climaDirectionCanvas"></climaDirectionCanvas>
-       
-
-      <!-- Animation Canvas -->
-      <animationCanvas ref="animationCanvas"></animationCanvas>
-
-
     </div>
+
+    <!-- Progress bar load WMS tiles -->
+    <div v-show="!wmsProgress.isLoaded" class="position-absolute m-0 btn-dark"
+      style="background: var(--blue); width: 100%; height: 5px; opacity: 0.8; top:0px"
+      :style="{ 'max-width': wmsProgress.progressPercent + '%' }">
+      <div class="spinner-border" style="position: relative; margin-top: 20px; margin-left: 40px; color:var(--blue)"
+        role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+    </div>
+
+    <!-- Overlay wave data -->
+    <overlay-wave-data ref="overlayWaveData"></overlay-wave-data>
+
+    <!-- Overlay puertos del estado buoys data -->
+    <overlay-buoy-data ref="overlayBuoyData"></overlay-buoy-data>
+
+    <!-- Overlay obsea buoys data -->
+    <overlay-obsea-data ref="overlayOBSEAData"></overlay-obsea-data>
+
+    <!-- <time-slider></time-slider> -->
+
+    <!-- Bottom Section -->
+    <bottom-section></bottom-section>
+
+    <!-- Direction for WMS layers -->
+    <climaDirectionCanvas ref="climaDirectionCanvas"></climaDirectionCanvas>
+
+
+    <!-- Animation Canvas -->
+    <animationCanvas ref="animationCanvas"></animationCanvas>
+
+
+  </div>
 </template>
 
 
@@ -68,34 +73,34 @@ import OverlayOBSEAData from "./OverlayOBSEAData.vue";
 
 export default {
   name: 'app-map',
-  created (){
+  created() {
     // Declare non-reactive variables
-    this.map= undefined;
+    this.map = undefined;
     this.baseLayerSources = {
-      'Bathymetry' : new ol.source.XYZ ({ // https://openlayers.org/en/latest/examples/xyz.html
+      'Bathymetry': new ol.source.XYZ({ // https://openlayers.org/en/latest/examples/xyz.html
         url: 'https://tiles.emodnet-bathymetry.eu/2020/baselayer/web_mercator/{z}/{x}/{y}.png', // https://tiles.emodnet-bathymetry.eu/
         attributions: "© EMODnet Bathymetry Consortium",
         cacheSize: 500,
         crossOrigin: 'anonymous',
       }),
-      'OSM': new ol.source.OSM ({ // https://openlayers.org/en/latest/examples/canvas-tiles.html
+      'OSM': new ol.source.OSM({ // https://openlayers.org/en/latest/examples/canvas-tiles.html
         cacheSize: 500,
         crossOrigin: 'anonymous',
       }),
-      'Imagery': new ol.source.XYZ ({ // https://services.arcgisonline.com/arcgis/rest/services/World_Imagery/MapServer/0
+      'Imagery': new ol.source.XYZ({ // https://services.arcgisonline.com/arcgis/rest/services/World_Imagery/MapServer/0
         url: 'https://services.arcgisonline.com/arcgis/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}.png',
         attributions: '© Esri, Maxar, GeoEye, Earthstar Geographics, CNES/Airbus DS, USDA, USGS, AeroGRID, IGN, and the GIS User Community',
         cacheSize: 500,
         crossOrigin: 'anonymous',
       }),
-      'Ocean': new ol.source.XYZ ({ // https://openlayers.org/en/latest/examples/canvas-tiles.html
+      'Ocean': new ol.source.XYZ({ // https://openlayers.org/en/latest/examples/canvas-tiles.html
         url: 'https://services.arcgisonline.com/ArcGIS/rest/services/Ocean/World_Ocean_Base/MapServer/tile/{z}/{y}/{x}.png',
         attributions: 'Esri, Garmin, GEBCO, NOAA NGDC, and other contributors',
         cacheSize: 500,
         crossOrigin: 'anonymous',
       }),
     },
-    this.layers = {
+      this.layers = {
         // Base layers
         baseLayer: new ol.layer.Tile({
           name: 'baseLayer',
@@ -106,11 +111,11 @@ export default {
         contours: new ol.layer.Tile({
           name: 'contours',
           source: new ol.source.TileWMS({
-                  url: 'https://ows.emodnet-bathymetry.eu/wms',
-                  params: {'LAYERS': 'emodnet:contours', 'TILED': true},
-                  serverType: 'geoserver',
-                  crossOrigin: 'anonymous',
-                  cacheSize: 500
+            url: 'https://ows.emodnet-bathymetry.eu/wms',
+            params: { 'LAYERS': 'emodnet:contours', 'TILED': true },
+            serverType: 'geoserver',
+            crossOrigin: 'anonymous',
+            cacheSize: 500
           }),
           maxResolution: 500
         }),
@@ -199,7 +204,7 @@ export default {
         // })
 
 
-    };
+      };
 
 
     this.layerData = undefined;
@@ -207,12 +212,12 @@ export default {
 
   },
 
-  mounted () {
+  mounted() {
     this.initMap();
     this.$refs.OLMap.addEventListener('mousemove', this.onMouseMove);
     // EVENT LISTENERS
     // New HFRadar data
-    window.eventBus.on('HFRadarDataLoaded', (tmst) =>{
+    window.eventBus.on('HFRadarDataLoaded', (tmst) => {
       if (tmst != undefined)
         this.selectedDateChanged(tmst);
     });
@@ -224,12 +229,12 @@ export default {
     window.eventBus.on('TopRightCanvas_ActiveSyncClickedAndOn', this.selectedDateChanged);
     // TODO: COMBINE TWO NEXT EVENTS
     // Show/Hide points of a radar
-    window.eventBus.on('WidgetCombinedRadars_PointsActiveChanged', (active)=> {
+    window.eventBus.on('WidgetCombinedRadars_PointsActiveChanged', (active) => {
       // Iterate radars and stop animations
       this.radarTypePointsActiveChanged("CombinedRadars", active);
     })
     // Show/hide points of HF Radar
-    window.eventBus.on('WidgetHFRadars_PointsActiveChanged', (active)=> {
+    window.eventBus.on('WidgetHFRadars_PointsActiveChanged', (active) => {
       // Iterate radars and stop animations
       this.radarTypePointsActiveChanged("HFRadar", active);
     });
@@ -252,12 +257,43 @@ export default {
     window.eventBus.on('WidgetMapOptions_IsobathsVisibilityChange', (isVisible) => {
       //
     });
-    
+
+
+
+    // Geojson
+    window.eventBus.on('DataManager_geoJSONDataLoaded', () => {
+      let wrappers = window.DataManager.geoJSONWrappers;
+      Object.keys(wrappers).forEach(key => {
+        let wrapper = wrappers[key];
+        // Check if the geojson is not in the map
+        if (!wrapper.isAddedToMap) {
+          this.addGeoJSON(wrapper);
+          wrapper.isAddedToMap = true;
+        }
+      })
+    });
+    // Widget Dropped Files
+    // Show/hide
+    window.eventBus.on('WidgetDroppedFiles_FileVisibilityChanged', (fileName) => {
+      let layer = this.getMapLayer(fileName);
+      let isVisible = window.DataManager.geoJSONWrappers[fileName].isVisible;
+      let opacity = window.DataManager.geoJSONWrappers[fileName].opacity * isVisible;
+      layer.setOpacity(opacity);
+    });
+    // Set opacity
+    window.eventBus.on('WidgetDroppedFiles_FileOpacityChanged', (fileName) => {
+      let layer = this.getMapLayer(fileName);
+      layer.setOpacity(window.DataManager.geoJSONWrappers[fileName].opacity);
+    });
+    // Remove layer
+    window.eventBus.on('WidgetDroppedFiles_FileRemoved', (fileName) => {
+      this.map.removeLayer(this.getMapLayer(fileName));
+    });
 
 
     // When the side panel is hiden
     window.eventBus.on('SidePanelSizechanged', (isSidePanelOpen) => {
-      setTimeout(()=> this.map.updateSize(), 100);
+      setTimeout(() => this.map.updateSize(), 100);
       this.map.updateSize();
     });
     // When radar is activated / deactivated
@@ -279,29 +315,29 @@ export default {
 
     // Advanced interface
     window.eventBus.on('AdvancedInterfaceOnOff', state => {
-      setTimeout(()=> this.map.updateSize(), 100);
+      setTimeout(() => this.map.updateSize(), 100);
       this.map.updateSize();
     });
-    
+
     // URL Hash change
     window.eventBus.on('GUIManager_URLViewChanged', mapView => {
       let long = parseFloat(mapView.split(",")[0]);
       let lat = parseFloat(mapView.split(",")[1]);
       let zoom = parseFloat(mapView.split(",")[2]);
       this.map.getView().animate({
-          center: ol.proj.fromLonLat([long, lat]),
-          zoom: Math.min(15, zoom),
-          duration: 1000,
-        });
+        center: ol.proj.fromLonLat([long, lat]),
+        zoom: Math.min(15, zoom),
+        duration: 1000,
+      });
     });
 
   },
-  umounted () {
+  umounted() {
     this.$refs.OLMap.removeEventListener('mousemove', this.onMouseMove);
     this.map.un('moveend', this.onMapMoveEnd);
-    this.map.un('movestart', this.onMapMoveStart); 
+    this.map.un('movestart', this.onMapMoveStart);
   },
-  data () {
+  data() {
     return {
       progress: {
         loading: 0,
@@ -320,34 +356,34 @@ export default {
   methods: {
     // USER ACTIONS
     // DRAG & DROP FILES
-    onDragOver: function(event) {
-        event.preventDefault();
-        event.stopPropagation();
+    onDragOver: function (event) {
+      event.preventDefault();
+      event.stopPropagation();
     },
     // On drop event
-    onDropFile: function(event) {
-        event.preventDefault();
-        event.stopPropagation();
-        if (window.DataManager){
-          window.DataManager.loadDroppedFiles(event.dataTransfer.files);
-        }
+    onDropFile: function (event) {
+      event.preventDefault();
+      event.stopPropagation();
+      if (window.DataManager) {
+        window.DataManager.loadDroppedFiles(event.dataTransfer.files);
+      }
     },
 
     // EXTERNAL EVENTS
     // RADARS
-    radarTypePointsActiveChanged: function(radarType, active){
+    radarTypePointsActiveChanged: function (radarType, active) {
       Object.keys(window.DataManager.HFRadars).forEach(key => {
         let radar = window.DataManager.HFRadars[key];
-        if (radar.constructor.name == radarType){
+        if (radar.constructor.name == radarType) {
           // Update map layers
           this.updateHFRadarPointsVisibility(radar);
         }
       });
     },
-    radarTypeVisibilityChanged: function(radarType, areVisible){
+    radarTypeVisibilityChanged: function (radarType, areVisible) {
       Object.keys(window.DataManager.HFRadars).forEach(key => {
         let radar = window.DataManager.HFRadars[key];
-        if (radar.constructor.name == radarType){
+        if (radar.constructor.name == radarType) {
           this.updateHFRadarPointsVisibility(radar);
         }
       });
@@ -361,15 +397,15 @@ export default {
       let longInit = 3.25;
       let latInit = 41.47;
       let zoomInit = 9;
-      if (window.GUIManager.mapView != undefined){
+      if (window.GUIManager.mapView != undefined) {
         longInit = parseFloat(window.GUIManager.mapView.split(",")[0]) || longInit;
         latInit = parseFloat(window.GUIManager.mapView.split(",")[1]) || latInit;
         zoomInit = parseFloat(window.GUIManager.mapView.split(",")[2]) || zoomInit;
       }
-      
+
       // Initialize map
       this.map = new ol.Map({
-        layers : [
+        layers: [
           // Data layer
           this.layers.data,
           // Base layer
@@ -385,7 +421,7 @@ export default {
           //this.layers.eez12nm,
           // Shoreline
           this.layers.shoreline,
-          
+
           // Ports
           //this.layers.portsLayer,
           // Fishing effort
@@ -400,7 +436,7 @@ export default {
           center: ol.proj.fromLonLat([longInit, latInit]),
           zoom: zoomInit,
           maxZoom: 22,
-          extent: ol.proj.fromLonLat([-28,20]).concat(ol.proj.fromLonLat([40, 50]))
+          extent: ol.proj.fromLonLat([-28, 20]).concat(ol.proj.fromLonLat([40, 50]))
         }),
       });
       // Set css
@@ -434,7 +470,7 @@ export default {
 
       // Map single click
       this.map.on('singleclick', this.onMapClick);
-      
+
 
       // Register tile load progress
       Object.keys(this.baseLayerSources).forEach(key => {
@@ -446,7 +482,7 @@ export default {
 
 
 
-  
+
 
 
 
@@ -454,19 +490,19 @@ export default {
 
     // HFRADAR
     // Selected date change, thus upate radar data
-    selectedDateChanged: function(tmst){
+    selectedDateChanged: function (tmst) {
       // Remove layers
       this.removeHFlayers();
 
       // Get current active radars on that date
       let activeRadars = window.DataManager.getRadarsDataOn(tmst);
-      if (activeRadars.length != 0 ){
-        for (let i = 0; i < activeRadars.length; i++){
+      if (activeRadars.length != 0) {
+        for (let i = 0; i < activeRadars.length; i++) {
           let radar = activeRadars[i];
 
           // WARNING: createImage might be useful to create radar previews.
           // TODO: HFRadar.data.timestamp {dataPoints: [X], imgData: ...}
-          if (radar.images[tmst] == undefined){
+          if (radar.images[tmst] == undefined) {
             //let imgData = window.createImage(HFRadar, tmst);
             //radar.images[tmst] = imgData;
             radar.images[tmst] = null;
@@ -479,17 +515,17 @@ export default {
     },
 
     // Remove HFRadar layers HFData, HFPoints
-    removeHFlayers: function(){
+    removeHFlayers: function () {
       this.map.getLayers().getArray().slice().forEach(layerItem => {
-          if (layerItem != undefined){
-            let layerName = layerItem.get('name');
-            if (layerName.includes('HFData') || 
-            layerName.includes('HFPoints') || 
-            layerName.includes('HFSelPoint')){
-              this.map.removeLayer(layerItem);
-            }
+        if (layerItem != undefined) {
+          let layerName = layerItem.get('name');
+          if (layerName.includes('HFData') ||
+            layerName.includes('HFPoints') ||
+            layerName.includes('HFSelPoint')) {
+            this.map.removeLayer(layerItem);
           }
-        });
+        }
+      });
     },
 
 
@@ -498,7 +534,7 @@ export default {
 
 
     // Update radar data
-    updateRadarData: function(radar, tmst, imgData) {
+    updateRadarData: function (radar, tmst, imgData) {
       // ID of the radar
       let radarID = radar.UUID;
       // let radarImgLayerName = 'HFData' + radarID;
@@ -515,14 +551,14 @@ export default {
       // if (this.getMapLayer(radarImgLayerName)) this.map.removeLayer(this.getMapLayer(radarImgLayerName)); // Remove layer before adding. Not optimal but prettier
       //this.map.addLayer(this.layers[radarImgLayerName]);
 
-      
-      
+
+
 
       // Center on latest radar location
       //let location = radar.getRadarOrigin();
       //this.centerOnCoord(location);
 
-      
+
       // Vector - Features layer
       // Show radar points
       // TODO: is this optimal?
@@ -530,9 +566,9 @@ export default {
       let pointFeature;
       //radar.pointFeature = 'SNR (dB)'; // TODO HACK
       //pointFeature = radar.pointFeature;
-      
+
       let featPoints = [];
-      for (let i = 0; i<radar.data[tmst].length; i++){
+      for (let i = 0; i < radar.data[tmst].length; i++) {
         let dataPoint = radar.data[tmst][i];
         let featPoint = new ol.Feature({
           geometry: new ol.geom.Point(ol.proj.fromLonLat([dataPoint['Longitude (deg)'], dataPoint['Latitude (deg)']])),
@@ -540,16 +576,16 @@ export default {
         // Define radius / color according to data point feature
         let pointRadius = 2;
         let pointColor = [255, 255, 255, 0.2];
-        if (pointFeature !== undefined){
+        if (pointFeature !== undefined) {
           let value = dataPoint[pointFeature];
           let featMax = radar.dataPointFeatures[pointFeature].max;
           let featMin = radar.dataPointFeatures[pointFeature].min;
-          let normValue = (value - featMin)/(featMax - featMin);
+          let normValue = (value - featMin) / (featMax - featMin);
           pointRadius *= normValue * 10;
         }
 
 
-        featPoint.setStyle( new ol.style.Style({
+        featPoint.setStyle(new ol.style.Style({
           image: new ol.style.Circle({
             radius: pointRadius,
             fill: new ol.style.Fill({
@@ -584,41 +620,56 @@ export default {
 
 
     // Update HFRadar points visibility
-    updateHFRadarPointsVisibility: function(radar){
+    updateHFRadarPointsVisibility: function (radar) {
       let radarPointsLayerName = 'HFPoints' + radar.UUID;
       let guiState = radar.constructor.name == "HFRadar" ? window.GUIManager.widgetHFRadars : window.GUIManager.widgetCombinedRadars;
       // Remove layer
-      if (radar.data == undefined){
+      if (radar.data == undefined) {
         if (this.getMapLayer(radarPointsLayerName)) this.map.removeLayer(this.getMapLayer(radarPointsLayerName));
         if (this.getMapLayer('HFSelPoint')) this.map.removeLayer(this.getMapLayer('HFSelPoint'));
       }
-      else if (!guiState.isVisible || !guiState.arePointsVisible || radar.data[window.GUIManager.currentTmst] == undefined){
+      else if (!guiState.isVisible || !guiState.arePointsVisible || radar.data[window.GUIManager.currentTmst] == undefined) {
         // Remove layer
         if (this.getMapLayer(radarPointsLayerName)) this.map.removeLayer(this.getMapLayer(radarPointsLayerName));
         if (this.getMapLayer('HFSelPoint')) this.map.removeLayer(this.getMapLayer('HFSelPoint'));
-      } 
+      }
       // Add layer only if
-      else if (guiState.isVisible && guiState.arePointsVisible){
+      else if (guiState.isVisible && guiState.arePointsVisible) {
         // Remove layers first
         if (this.getMapLayer(radarPointsLayerName)) this.map.removeLayer(this.getMapLayer(radarPointsLayerName));
         if (this.getMapLayer('HFSelPoint')) this.map.removeLayer(this.getMapLayer('HFSelPoint'));
-        
+
         // If HFRadar is hidden
-        if (radar.constructor.name == "HFRadar"){
-          if (!guiState.radarsVisible[radar.Site]){
+        if (radar.constructor.name == "HFRadar") {
+          if (!guiState.radarsVisible[radar.Site]) {
             return;
           }
         }
 
         // Add layer
         // Create if it does not exist
-        if (this.layers[radarPointsLayerName] == undefined){
+        if (this.layers[radarPointsLayerName] == undefined) {
           this.updateRadarData(radar, window.GUIManager.currentTmst, undefined);
         } else
           this.map.addLayer(this.layers[radarPointsLayerName]);
       }
     },
 
+
+    // Add geoJSON
+    addGeoJSON: function (wrapper) {
+      const vectorSource = new ol.source.Vector({
+        features: new ol.format.GeoJSON().readFeatures(wrapper.rawJSON, {
+          featureProjection: 'EPSG:3857'
+        })
+      });
+      const vectorLayer = new ol.layer.Vector({
+        name: wrapper.fileName,
+        source: vectorSource
+      });
+
+      this.map.addLayer(vectorLayer);
+    },
 
 
 
@@ -628,7 +679,7 @@ export default {
 
 
     // Get layer function
-    getMapLayer: function(layerName){
+    getMapLayer: function (layerName) {
       let selLayer = undefined;
       this.map.getLayers().forEach(layerItem => {
         //console.log(layerItem.get('name'));
@@ -637,31 +688,31 @@ export default {
       })
       return selLayer;
     },
-  
+
 
     // USER EVENTS
     // MAP CLICK
-    onMapClick: function(evt) {
+    onMapClick: function (evt) {
       let distMin = 999;
       let coord = ol.proj.transform(evt.coordinate, 'EPSG:3857', 'EPSG:4326');
       let closestDataPoint;
       let selRadar;
       // Find closest points or radars
       let radars = window.DataManager.getRadarsDataOn(window.GUIManager.currentTmst);//window.DataManager.HFRadars;
-      if (Object.keys(radars).length != 0){
+      if (Object.keys(radars).length != 0) {
         // Iterate radar points and radars
         Object.keys(radars).forEach(key => {
           let radar = radars[key];
           // GUI state
           let guiState = radar.constructor.name == "HFRadar" ? window.GUIManager.widgetHFRadars : window.GUIManager.widgetCombinedRadars;
           // If radar has data, then check the proximity
-          if (guiState.isVisible && guiState.arePointsVisible){ // AND IS SELECTED? TWO RADARS TOGETHER, HOW TO SELECT ONE OR THE OTHER DATAPOINT?
-            for (let j = 0; j < radar.currentData.length; j++){
-              let dataPoint = radar.currentData[j]; 
+          if (guiState.isVisible && guiState.arePointsVisible) { // AND IS SELECTED? TWO RADARS TOGETHER, HOW TO SELECT ONE OR THE OTHER DATAPOINT?
+            for (let j = 0; j < radar.currentData.length; j++) {
+              let dataPoint = radar.currentData[j];
               // Calculate distance (could do it in km with the right formula, but this is interaction and it does not matter that much)
-              let dist = Math.sqrt( Math.pow(dataPoint['Longitude (deg)'] - coord[0], 2) + Math.pow(dataPoint['Latitude (deg)'] - coord[1], 2));              
+              let dist = Math.sqrt(Math.pow(dataPoint['Longitude (deg)'] - coord[0], 2) + Math.pow(dataPoint['Latitude (deg)'] - coord[1], 2));
               // Find closest point
-              if (dist < distMin){
+              if (dist < distMin) {
                 distMin = dist;
                 closestDataPoint = dataPoint;
                 selRadar = radar;
@@ -670,31 +721,31 @@ export default {
           }
         });
 
-        
-        
+
+
         // If point is closest, emit only if click is close to point in pixels
         // Limit by distance in pixels
-        if (closestDataPoint){
+        if (closestDataPoint) {
           let epsg3857coord = ol.proj.fromLonLat([closestDataPoint['Longitude (deg)'], closestDataPoint['Latitude (deg)']]);
           let pixelCoord = this.map.getPixelFromCoordinate(epsg3857coord);
 
-          let pixelDistance = Math.sqrt(Math.pow(evt.originalEvent.clientX - pixelCoord[0],2) + Math.pow(evt.originalEvent.clientY - pixelCoord[1],2));
+          let pixelDistance = Math.sqrt(Math.pow(evt.originalEvent.clientX - pixelCoord[0], 2) + Math.pow(evt.originalEvent.clientY - pixelCoord[1], 2));
           // Click distance to point
-          if (pixelDistance < 60){
-            window.eventBus.emit('Map_ClickedDataPoint', {"dataPoint": closestDataPoint, "radar": selRadar});
+          if (pixelDistance < 60) {
+            window.eventBus.emit('Map_ClickedDataPoint', { "dataPoint": closestDataPoint, "radar": selRadar });
             // Create map layer with styled point
-              let featPoint = new ol.Feature({
-                geometry: new ol.geom.Point(epsg3857coord),
-              });
-              featPoint.setStyle( new ol.style.Style({
-                image: new ol.style.Circle({
-                  radius: 4,
-                  fill: new ol.style.Fill({
-                    color: [255, 255, 0, 0.5],
-                    opacity: 0.5,
-                  })
+            let featPoint = new ol.Feature({
+              geometry: new ol.geom.Point(epsg3857coord),
+            });
+            featPoint.setStyle(new ol.style.Style({
+              image: new ol.style.Circle({
+                radius: 4,
+                fill: new ol.style.Fill({
+                  color: [255, 255, 0, 0.5],
+                  opacity: 0.5,
                 })
-              }))
+              })
+            }))
             this.layers.HFSelPoint = new ol.layer.Vector({
               name: 'HFSelPoint',
               source: new ol.source.Vector({
@@ -720,7 +771,7 @@ export default {
 
     // INTERNAL EVENTS
     // Change the styles (WMSLegend.vue emit)
-    changeStyle: function(newStyle){
+    changeStyle: function (newStyle) {
       // Get params
       let params = this.getMapLayer('data').getSource().getParams();
       // Check if the new style is the current
@@ -736,9 +787,9 @@ export default {
       // this.$emit('changeWMSStyle', newStyle);
     },
 
-    
+
     // Mouse move on map
-    onMouseMove: function(event){
+    onMouseMove: function (event) {
       // Return if map is moving
       if (this.isMapMoving)
         return;
@@ -754,24 +805,24 @@ export default {
 
 
       // Change legend tooltip value
-      if (this.isLayerDataReady && !this.isRendering){
+      if (this.isLayerDataReady && !this.isRendering) {
         let color = this.getDataAtPixel(event.clientX, event.clientY);
         window.eventBus.emit('Map_MouseOnData_WMSColor', color);
       }
-      
+
     },
 
     // Map moves
-    onMapMoveEnd: function(){
+    onMapMoveEnd: function () {
       this.isMapMoving = false;
       // If data is loaded, update the pixel information once the map move finishes
       // TODO: this could be optimized --> get a canvas with all data and relate lat-long to that canvas
-      if (this.isLayerDataReady){
+      if (this.isLayerDataReady) {
 
-        if (this.getMapLayer('data') != undefined){
-          if (this.getMapLayer('data').getOpacity() != 0){  
+        if (this.getMapLayer('data') != undefined) {
+          if (this.getMapLayer('data').getOpacity() != 0) {
             this.updateSourceData();
-            if (this.$refs.directionCanvas){
+            if (this.$refs.directionCanvas) {
               this.$refs.directionCanvas.onMapMoveEnd();
             }
           }
@@ -784,20 +835,20 @@ export default {
       // Emit (GUIManager uses this event. TODO: Others such as AnimationEngine that register to map events could use this?)
       window.eventBus.emit('Map_MapMoveEnd', [longlat[0].toFixed(3), longlat[1].toFixed(3), zoomLevel.toFixed(2)]);
       // Hide/show wave info
-      if (this.$refs.overlayWaveData){
+      if (this.$refs.overlayWaveData) {
         this.$refs.overlayWaveData.updatePanel(zoomLevel);
       }
       // Hide/show buoy info
-      if (this.$refs.overlayBuoyData){
+      if (this.$refs.overlayBuoyData) {
         this.$refs.overlayBuoyData.updatePanel(zoomLevel);
       }
       // Hide/show obsea info
-      if (this.$refs.overlayOBSEAData){
+      if (this.$refs.overlayOBSEAData) {
         this.$refs.overlayOBSEAData.updatePanel(zoomLevel);
       }
 
     },
-    onMapMoveStart: function(){
+    onMapMoveStart: function () {
       this.isMapMoving = true;
     },
 
@@ -805,7 +856,7 @@ export default {
 
 
     // Declare loading tile events
-    registerLoadTilesEvents: function(source, progress){
+    registerLoadTilesEvents: function (source, progress) {
       // Source is a ol.source
       progress = progress || this.progress;
       progress.loading = 0;
@@ -813,22 +864,22 @@ export default {
       progress.isLoaded = false;
       progress.progressPercent = 0;
 
-      source.on('tileloadstart',() => {
+      source.on('tileloadstart', () => {
         progress.loading += 1;
         progress.isLoaded = false;
       });
       source.on('tileloadend', (e) => {
         progress.loaded += 1;
-        progress.progressPercent = 100*progress.loaded/progress.loading;
-        if (progress.loading == progress.loaded){
+        progress.progressPercent = 100 * progress.loaded / progress.loading;
+        if (progress.loading == progress.loaded) {
           this.onTilesLoaded(e); // TODO: could reference the isLayerDataReady to source, so we control if a source is ready
           progress.isLoaded = true;
         }
       });
       source.on('tileloaderror', (e) => {
         progress.loaded += 1;
-        progress.progressPercent = 100*progress.loaded/progress.loading;
-        if (progress.loading == progress.loaded){
+        progress.progressPercent = 100 * progress.loaded / progress.loading;
+        if (progress.loading == progress.loaded) {
           this.onTilesLoaded(e); // TODO: could reference the isLayerDataReady to source, so we control if a source is ready
           progress.isLoaded = true;
         }
@@ -837,8 +888,8 @@ export default {
 
 
     // Store pixel information once tiles are loaded
-    onTilesLoaded: function(e){   
-      if (e.target.name == 'wmsSource'){
+    onTilesLoaded: function (e) {
+      if (e.target.name == 'wmsSource') {
         this.isLayerDataReady = true;
         this.updateSourceData();
       }
@@ -847,11 +898,11 @@ export default {
     // Update the data pixels
     // This function can be called consecutively and as it is async, it can happen that all the layers are hidden.
     // To solve it, we need to keep the state when it is being rendered.
-    updateSourceData: async function(){
+    updateSourceData: async function () {
       let map = this.map;
 
       // Reset array if it was rendered and store visible layers
-      if (!this.isRendering){
+      if (!this.isRendering) {
         this.isRendering = true;
 
         this.visibilityArray = [];
@@ -868,17 +919,17 @@ export default {
 
       // Hide all layers but the data layer
       map.getLayers().forEach(ll => {
-          if (ll.C.name != "data")
-            ll.setVisible(false);
-        });
-      
+        if (ll.C.name != "data")
+          ll.setVisible(false);
+      });
+
       // Force map render
       map.renderSync();
 
       // Get ol layer
       let layer = this.getMapLayer('data');
       // If layer was hidden by the user during the delay
-      if (layer == undefined){
+      if (layer == undefined) {
         this.isRendering = false;
         this.isLayerDataReady = false;
         // Restore map
@@ -893,10 +944,10 @@ export default {
       let ctx = tmpCnv.getContext("2d", { willReadFrequently: true });
       // Store width to access pixels
       this.layerDataWidth = tmpCnv.width;
-  
-      
+
+
       // Get data
-      this.layerData = ctx.getImageData(0,0,tmpCnv.width,tmpCnv.height);
+      this.layerData = ctx.getImageData(0, 0, tmpCnv.width, tmpCnv.height);
       // For mobile versions, the canvas is scaled through a style. Openlayers does not have build in function 
       // to provide this scaling factor.
       // Get the width of the map container
@@ -937,26 +988,26 @@ export default {
         ll.setVisible(this.visibilityArray[i]);
       });
       map.renderSync();
-      
+
       this.isRendering = false;
 
     },
 
 
     // Get pixel data
-    getDataAtPixel: function(x , y){
+    getDataAtPixel: function (x, y) {
       let imgArrayPos = (x + y * this.layerDataWidth) * 4; // + 1,2,3 if you want (R)GBA
       let imgData = this.layerData.data;
       let color = this.pixelColor;
       color[0] = imgData[imgArrayPos]
-      color[1] = imgData[imgArrayPos+1]
-      color[2] = imgData[imgArrayPos+2]
-      color[3] = imgData[imgArrayPos+3];
+      color[1] = imgData[imgArrayPos + 1]
+      color[2] = imgData[imgArrayPos + 2]
+      color[3] = imgData[imgArrayPos + 3];
       return color;
     },
 
     // Center on the coordinate
-    centerOnCoord(coord, forceCenter){
+    centerOnCoord(coord, forceCenter) {
       // Center map to track
       let view = this.map.getView();
       let currentZoom = view.getZoom();
@@ -964,7 +1015,7 @@ export default {
       let bbox = this.map.getView().calculateExtent(this.map.getSize());
       let coord3857 = ol.proj.fromLonLat([coord[0], coord[1]]);
       let isInsideBBOX = false;
-      if (coord3857[0] > bbox[0] && coord3857[0] < bbox[2] && coord3857[1] > bbox[1] && coord3857[1] < bbox[3] )
+      if (coord3857[0] > bbox[0] && coord3857[0] < bbox[2] && coord3857[1] > bbox[1] && coord3857[1] < bbox[3])
         isInsideBBOX = true;
 
       // If point of interest is too far away from the center...
@@ -977,9 +1028,9 @@ export default {
       // let ratio = (smallestAspect-distPixels) / smallestAspect;
       // if (ratio < 0.6)
       //   forceCenter = true;
-      
 
-      if (!isInsideBBOX || forceCenter){ 
+
+      if (!isInsideBBOX || forceCenter) {
         view.animate({
           center: ol.proj.fromLonLat([coord[0], coord[1]]),
           zoom: Math.max(9.5, currentZoom),
@@ -993,8 +1044,8 @@ export default {
 
 
     // UTILS
-    getDistance: function(posA, posB){
-      return Math.sqrt( Math.pow(posA[0] - posB[0], 2) + Math.pow(posA[1] - posB[1], 2));
+    getDistance: function (posA, posB) {
+      return Math.sqrt(Math.pow(posA[0] - posB[0], 2) + Math.pow(posA[1] - posB[1], 2));
     },
 
 
@@ -1005,21 +1056,21 @@ export default {
 
     // PUBLIC METHODS
     // Get OL map object
-    getOLMap: function(){
+    getOLMap: function () {
       return this.map;
     },
 
 
 
     // Update WMS data source. This function is called from AppManager.vue
-    updateSourceWMS: function (infoWMS){
+    updateSourceWMS: function (infoWMS) {
       // Create tile grid for faster rendering for low resolution WMS
       let extent = ol.proj.get('EPSG:3857').getExtent();
       let tileSize = 512;
       let maxResolution = ol.extent.getWidth(extent) / tileSize;
       let resolutions = new Array(6);
-      for (let i = 0; i < resolutions.length; i++){
-        resolutions[i] = maxResolution / Math.pow(2,i);
+      for (let i = 0; i < resolutions.length; i++) {
+        resolutions[i] = maxResolution / Math.pow(2, i);
       }
       // Assign to openlayers WMS tile source
       infoWMS.tileGrid = new ol.tilegrid.TileGrid({
@@ -1027,28 +1078,28 @@ export default {
         resolutions: resolutions,
         tileSize: tileSize
       });
-      
+
       // Avoid cross origin problems when getting pixel data (The canvas has been tainted by cross-origin data.)
-      infoWMS.crossOrigin='anonymous';
+      infoWMS.crossOrigin = 'anonymous';
       infoWMS.cacheSize = 500;
 
       // Create OL source from ForecastBar.vue object
       let source = new ol.source.TileWMS(infoWMS);
-      source.name="wmsSource";
+      source.name = "wmsSource";
       this.getMapLayer('data').setSource(source);
       // Tracking the load progress
       this.isLayerDataReady = false;
       this.registerLoadTilesEvents(source, this.wmsProgress);
-      
+
     },
-    
 
 
 
 
-    setBaseLayer: function(baseLayerName){
+
+    setBaseLayer: function (baseLayerName) {
       let source = this.baseLayerSources[baseLayerName];
-      if (source == undefined){
+      if (source == undefined) {
         console.error('Base layer name does not exist in array of base layers: ' + baseLayerName);
         return;
       }
@@ -1056,25 +1107,25 @@ export default {
       let baseLayer = this.getMapLayer('baseLayer');
       baseLayer.setSource(source);
     },
-    setLayerOpacity: function(params){
+    setLayerOpacity: function (params) {
       let layerName = params[0];
       let opacity = params[1];
       // Get layer
       let layer = this.getMapLayer(layerName);
-      if (layer == undefined){
+      if (layer == undefined) {
         console.log(layerName + ' does not exist. Wrong layer name. Cannot set opacity.');
         return;
       }
       // Set opacity
       layer.setOpacity(parseFloat(opacity));
     },
-    setClimaLayer: function(urlParams){
+    setClimaLayer: function (urlParams) {
       let climaLayer = this.getMapLayer('data');
-      if (urlParams == undefined){
+      if (urlParams == undefined) {
         // Remove clima layer
         if (climaLayer != undefined)
           this.map.removeLayer(climaLayer);
-        
+
         return;
       }
       // Add layer if it is not included
@@ -1082,7 +1133,7 @@ export default {
         this.map.addLayer(this.layers.data);
       // Update parameters
       this.updateSourceWMS(urlParams);
-      
+
     },
 
 
@@ -1097,9 +1148,9 @@ export default {
     "overlay-wave-data": OverlayWaveData,
     "overlay-buoy-data": OverlayBuoyData,
     "overlay-obsea-data": OverlayOBSEAData,
-},
+  },
   computed: {
-      //foo: function () {}
+    //foo: function () {}
   }
 }
 </script>
@@ -1115,7 +1166,6 @@ export default {
 
 
 <style scoped>
-
 #app-map {
   width: 100%;
   height: 100%;
@@ -1127,7 +1177,7 @@ export default {
   height: 100%;
   /* background-color: rgb(255, 138, 138); */
   background-color: var(--darkBlue);
-  z-index: 0; 
+  z-index: 0;
 }
 
 
@@ -1148,5 +1198,4 @@ export default {
   padding: 10px;
   max-height: 200px;
 } */
-
 </style>

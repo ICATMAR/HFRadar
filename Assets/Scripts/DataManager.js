@@ -1,5 +1,6 @@
 // Import classes
 import {HFRadar, CombinedRadars} from './HFRadarClass.js';
+import { GeoJSONWrapper } from './GeoJSONWrapperClass.js';
 
 // Static files sample
 const firstDate = new Date('2023-01-26T06:00Z');
@@ -11,6 +12,7 @@ const SEARCHHOURS = 24*14;
 class DataManager {
 
   HFRadars = {};
+  geoJSONWrappers = {};
   //https://ows.emodnet-bathymetry.eu/wms?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap&FORMAT=image%2Fpng8&TRANSPARENT=true&LAYERS=emodnet:mean_2016&TILED=TRUE&WIDTH=2048&HEIGHT=2048&CRS=EPSG%3A4326&STYLES=&BBOX=39.8,0,43,5
   // EPSG 3857 projection works better
   //https://ows.emodnet-bathymetry.eu/wms?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap&FORMAT=image%2Fpng8&TRANSPARENT=true&LAYERS=emodnet:mean_2016&TILED=TRUE&WIDTH=2048&HEIGHT=2048&CRS=EPSG%3A3857&STYLES=&BBOX=0.0%2C4836921.25%2C556597.45%2C5311971.85
@@ -535,21 +537,53 @@ class DataManager {
   // Load files that were dropped
   loadDroppedFiles(files){
     console.log(files.length + " files dropped.");
-    let promises = [];
+    let promisesHFFiles = [];
+    let promisesGeoJSON = [];
     // Iterate files
     for (let i = 0; i < files.length; i++) {
         let file = files[i];
+        let fileExtension = file.name.split('.').pop().toLowerCase();
         // Read files
-        promises.push(window.FileManager.readFile(file));
+        if (fileExtension == 'wls' || fileExtension == 'tuv' || fileExtension == 'ruv')
+          promisesHFFiles.push(window.FileManager.readFile(file));
+        else if (fileExtension == 'geojson')
+          promisesGeoJSON.push(window.FileManager.readFile(file, fileExtension))
     }
 
-    Promise.all(promises).then(values => {
+    // HF files
+    Promise.all(promisesHFFiles).then(values => {
+      if (values.length == 0)
+        return;
       let lastHFRadar;
       for (let i = 0; i < values.length; i++){
         lastHFRadar = this.addHFRadarData(values[i]);
       }
       window.eventBus.emit('HFRadarDataLoaded', lastHFRadar.lastLoadedTimestamp);
-    })
+    }); 
+    // Geojson files
+    Promise.all(promisesGeoJSON).then(values => {
+      if (values.length == 0)
+        return;
+      let lastReceived;
+      for (let i = 0; i < values.length; i++){
+        lastReceived = new GeoJSONWrapper(values[i]);
+        let fileName = lastReceived.fileName;
+        //  File alredy exists, add a count at the end
+        if (this.geoJSONWrappers[fileName]){
+          let count = 0;
+          let tmpFileName = fileName + '_' + count;
+          while(this.geoJSONWrappers[tmpFileName] || count > 20){
+            count ++;
+            tmpFileName = fileName + '_' + count;
+          }
+          fileName = tmpFileName;
+          lastReceived.fileName = tmpFileName;
+        }
+        // Assign to DataManager
+        this.geoJSONWrappers[fileName] = lastReceived;
+      }
+      window.eventBus.emit('DataManager_geoJSONDataLoaded', lastReceived);
+    });
   }
 
 
