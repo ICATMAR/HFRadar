@@ -4,7 +4,7 @@
     <!-- White line -->
     <div class="whiteLine"></div>
     <!-- Files -->
-    <div class="fileListContainer" :key="key" v-for="(content, key) in droppedFiles">
+    <div class="fileListContainer" v-for="(content, key) in droppedFiles">
       <div class="clickable menuElement">
         <onOffButton :ref="key + 'OnOff'" :checked="content.isVisible" :inSize="'14px'" @change="fileOnOff($event, key)"></onOffButton>
         <span @click="fileOnOff($event, key)">{{key}}</span>
@@ -40,6 +40,7 @@ export default {
     window.eventBus.on("DataManager_geoJSONDataLoaded", lastReceived => {
       // WARN: vue is connected to DataManager
       this.droppedFiles = window.DataManager.geoJSONWrappers;
+      this.$forceUpdate();
     });
   },
   data (){
@@ -73,6 +74,7 @@ export default {
     // Remove file
     fileRemove: function(fileName){
       delete window.DataManager.geoJSONWrappers[fileName];
+      this.$forceUpdate();
       // Emit
       window.eventBus.emit("WidgetDroppedFiles_FileRemoved", fileName);
     },

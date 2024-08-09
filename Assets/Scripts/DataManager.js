@@ -568,6 +568,18 @@ class DataManager {
       for (let i = 0; i < values.length; i++){
         lastReceived = new GeoJSONWrapper(values[i]);
         let fileName = lastReceived.fileName;
+        //  File alredy exists, add a count at the end
+        if (this.geoJSONWrappers[fileName]){
+          let count = 0;
+          let tmpFileName = fileName + '_' + count;
+          while(this.geoJSONWrappers[tmpFileName] || count > 20){
+            count ++;
+            tmpFileName = fileName + '_' + count;
+          }
+          fileName = tmpFileName;
+          lastReceived.fileName = tmpFileName;
+        }
+        // Assign to DataManager
         this.geoJSONWrappers[fileName] = lastReceived;
       }
       window.eventBus.emit('DataManager_geoJSONDataLoaded', lastReceived);

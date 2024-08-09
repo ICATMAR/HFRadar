@@ -271,7 +271,24 @@ export default {
           wrapper.isAddedToMap = true;
         }
       })
-    })
+    });
+    // Widget Dropped Files
+    // Show/hide
+    window.eventBus.on('WidgetDroppedFiles_FileVisibilityChanged', (fileName) => {
+      let layer = this.getMapLayer(fileName);
+      let isVisible = window.DataManager.geoJSONWrappers[fileName].isVisible;
+      let opacity = window.DataManager.geoJSONWrappers[fileName].opacity * isVisible;
+      layer.setOpacity(opacity);
+    });
+    // Set opacity
+    window.eventBus.on('WidgetDroppedFiles_FileOpacityChanged', (fileName) => {
+      let layer = this.getMapLayer(fileName);
+      layer.setOpacity(window.DataManager.geoJSONWrappers[fileName].opacity);
+    });
+    // Remove layer
+    window.eventBus.on('WidgetDroppedFiles_FileRemoved', (fileName) => {
+      this.map.removeLayer(this.getMapLayer(fileName));
+    });
 
 
     // When the side panel is hiden
@@ -647,9 +664,10 @@ export default {
         })
       });
       const vectorLayer = new ol.layer.Vector({
+        name: wrapper.fileName,
         source: vectorSource
       });
-      vectorLayer.name = wrapper.fileName;
+
       this.map.addLayer(vectorLayer);
     },
 
