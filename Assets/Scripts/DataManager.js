@@ -561,12 +561,12 @@ class DataManager {
       window.eventBus.emit('HFRadarDataLoaded', lastHFRadar.lastLoadedTimestamp);
     }); 
     // Geojson files
-    Promise.all(promisesGeoJSON).then(jsons => {
+    Promise.all(promisesGeoJSON).then(values => {
       if (values.length == 0)
         return;
       let lastReceived;
-      for (let i = 0; i < jsons.length; i++){
-        lastReceived = new GeoJSONWrapper(jsons[i]);
+      for (let i = 0; i < values.length; i++){
+        lastReceived = new GeoJSONWrapper(values[i]);
         let fileName = lastReceived.fileName;
         this.geoJSONWrappers[fileName] = lastReceived;
       }
