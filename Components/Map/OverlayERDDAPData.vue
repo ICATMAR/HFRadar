@@ -7,9 +7,6 @@
       class="ERDDAPContainer"
       :class="[!isTooFar && isAdvancedInterfaceOnOff && isExternalObsVisible ? 'showOverlayMap' : 'hideOverlayMap']">
 
-      <!-- Platform icon -->
-      <img v-if="index % 2 == 1" class="icon-str icon-medium icon-img obsea-icon-left"
-        @click="ERDDAPIconClicked(platformId)" src="/HFRadar/Assets/Images/buoy.svg">
 
 
       <!-- Platform panel -->
@@ -23,8 +20,8 @@
               <div></div>
               <div></div>
             </div>
-            <span><strong>ERDDAP platform</strong></span>
-            <a href="https://obsea.es/" target="_blank" rel="noopener noreferrer" class="icon-str">i</a>
+            <span><strong>{{platforms[platformId]["type"]}}</strong></span>
+            <a href="https://erddap.aoml.noaa.gov/gdp/erddap/index.html" target="_blank" rel="noopener noreferrer" class="icon-str">i</a>
           </div>
 
           <!-- Platform data -->
@@ -122,7 +119,7 @@
 
 
       <!-- Platform icon -->
-      <img v-if="index % 2 == 0" class="icon-str icon-medium icon-img obsea-icon-right"
+      <img class="icon-str icon-medium icon-img panel-icon-right"
         @click="ERDDAPIconClicked(platformId)" src="/HFRadar/Assets/Images/buoy.svg">
 
 
@@ -185,7 +182,7 @@ export default {
         "?{parameters}" +
         "&time>={startDate}&time<={endDate}&longitude>={longMin}&longitude<={longMax}&latitude>={latMin}&latitude<={latMax}",
       bbox: [0, 5, 39.5, 44], // long, lat
-      parameters =[
+      parameters: [
         'platform_type',
         'platform_code',
         'platform_id',
@@ -233,7 +230,7 @@ export default {
     // Use API to get observed variables and platforms
     loadERDDAPAPI: async function () {
       // Using ERDDAP API
-      let platforms = {};
+      let platforms = this.platforms;
 
       var startDate = new Date();
       var endDate = new Date();
@@ -243,9 +240,13 @@ export default {
       let url = this.queryPlatformsURL.replace('{parameters}', this.parameters.join());
       url = url.replace('{startDate}', startDate.toISOString());
       url = url.replace('{endDate}', endDate.toISOString());
-      url = url.replace('{longMin}', bbox[0]).replace('{longMax}', bbox[1]).replace('{latMin}', bbox[2]).replace('{latMax}', bbox[3])
+      url = url.replace('{longMin}', this.bbox[0]).replace('{longMax}', this.bbox[1]).replace('{latMin}', this.bbox[2]).replace('{latMax}', this.bbox[3]);
 
-      await fetch(url).then(r => r.text()).then(res => {
+      console.log(url);
+      const encodedUrl = encodeURIComponent(url);
+      let proxyURL = "http://localhost:3000/proxy?url=" + encodedUrl;
+
+      await fetch(proxyURL).then(r => r.text()).then(res => {
         var rows = res.split('\n');
         rows.pop(); // Delete empty
 
@@ -261,10 +262,17 @@ export default {
               "data": {},
             }
           }
-          var platform = platforms[jsRow.platform_id]
+          // Fill the platform with data on given timestamps
+          let platform = platforms[jsRow.platform_id];
+          // Define tmst object
+          if (platform.data[jsRow.time] != undefined) {
+            debugger;
+          }
+          platform.data[jsRow.time] = {};
+
           // Add parameters to data
           for (let i = 3; i < this.parameters.length; i++) {
-            if (jsRow[parameters[i]] != null) {
+            if (jsRow[this.parameters[i]] != null) {
               platform.data[jsRow.time][this.parameters[i]] = jsRow[this.parameters[i]];
             }
           }
@@ -276,7 +284,6 @@ export default {
         });
         console.log(platforms);
         // Once all rows have been iterated, define location for non-drifters
-
       });
 
 
@@ -287,17 +294,22 @@ export default {
 
         // Create vue object
         if (this.platformsData[platformKey] == undefined) {
-          this.platformsData[platformKey] = { "hasData": false, "showInfo": true, "isLoading": false };
+          this.platformsData[platformKey] = { "hasData": false, "showInfo": false, "isLoading": false };
           this.platforms[platformKey].coord3857 = ol.proj.fromLonLat([this.platforms[platformKey].location[0], this.platforms[platformKey].location[1]]);
         }
 
         // Add to map
-        if (!platform.isDrifter){
+        if (true) {//(!platform.isDrifter){
           // Add platform to map
-          let addPlatformToMap = () => {
+          let addPlatformToMap = (count) => {
             this.$nextTick(() => {
               if (this.$refs[platformKey] == undefined) {
-                addPlatformToMap();
+                if (count > 2){
+                  debugger;
+                  console.error("Could not find html element with vue ref")
+                  return
+                }
+                addPlatformToMap(count++);
                 return;
               }
               // Get map
@@ -308,7 +320,7 @@ export default {
               // Platform info
               const platformInfo = new ol.Overlay({
                 position: this.platforms[platformKey].coord3857,
-                positioning: Object.keys(this.platforms).length % 2 == 1 ? 'center-right' : 'center-left',
+                positioning: 'center-right',//Object.keys(this.platforms).length % 2 == 1 ? 'center-right' : 'center-left',
                 element: this.$refs[platformKey],
                 stopEvent: false,
               });
@@ -318,11 +330,12 @@ export default {
               //this.selectedDateChanged(window.GUIManager.currentTmst, true);
             })
           }
-          addPlatformToMap();
+          addPlatformToMap(0);
         }
-
-        
       });
+
+
+
 
 
 
@@ -694,11 +707,11 @@ a {
   align-items: center;
 }
 
-.obsea-icon-left {
+.panel-icon-left {
   margin-left: -15px;
 }
 
-.obsea-icon-right {
+.panel-icon-right {
   margin-right: -15px;
 }
 
