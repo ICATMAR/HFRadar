@@ -139,6 +139,47 @@
 // All data: https://osmc.noaa.gov/erddap/tabledap/OSMC_flattened.htmlTable?platform_id%2Cplatform_code%2Cplatform_type%2Ccountry%2Ctime%2Clatitude%2Clongitude%2Cobservation_depth%2Csst%2Catmp%2Cprecip%2Csss%2Cztmp%2Czsal%2Cslp%2Cwindspd%2Cwinddir%2Cwvht%2Cwaterlevel%2Cclouds%2Cdewpoint%2Cuo%2Cvo%2Cwo%2Crainfall_rate%2Chur%2Csea_water_elec_conductivity%2Csea_water_pressure%2Crlds%2Crsds%2Cwaterlevel_met_res%2Cwaterlevel_wrt_lcd%2Cwater_col_ht%2Cwind_to_direction%2Clon360&time%3E=2024-08-15T00%3A00%3A00Z&latitude%3E=29&latitude%3C=46&longitude%3E=-6&longitude%3C=20
 
 
+
+// This component requires a proxy server to avoid CORS policies from the ERDDAP server. The proxy server looks like this:
+/*
+const express = require('express');
+const request = require('request');
+const app = express();
+// Middleware to add CORS headers to all responses
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*'); // Allow requests from any origin
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+  next();
+});
+// REST API
+app.get('/proxy', (req, res) => {
+  console.log("Request received");
+  const url = req.query.url;
+  // If no URL is provided, return an error
+  if (!url) {
+    return res.status(400).send('Error: Missing "url" query parameter.');
+  }
+  //url = 'https://osmc.noaa.gov/erddap/tabledap/OSMC_flattened.jsonlKVP?platform_type,platform_code,platform_id,longitude,latitude,time,observation_depth,sst,atmp,precip,sss,ztmp,zsal,slp,windspd,winddir,wvht,waterlevel,clouds,dewpoint,uo,vo,wo,rainfall_rate,hur,sea_water_elec_conductivity,rlds,rsds,waterlevel_met_res,waterlevel_wrt_lcd,water_col_ht,wind_to_direction&time>=2024-08-21T17:22:15.676Z&time<=2024-08-22T17:22:15.676Z&longitude>=0&longitude<=5&latitude>=39.5&latitude<=44'
+  request(url)
+    .on('error', (err) => {
+      console.error('Error with the request:', err);
+      res.status(500).send('Error: Unable to retrieve data.');
+    })
+    .pipe(res);
+});
+app.listen(3000, () => {
+  console.log('Proxy server running on port 3000');
+});
+
+
+// npm init -y
+// npm install express request
+// node server.js
+*/
+
+
+
+
 export default {
   name: 'overlay-erddap-data',
   created() { },
@@ -335,149 +376,6 @@ export default {
       });
 
 
-
-
-
-
-      return;
-
-
-      await fetch('https://data.obsea.es/data-api/ObservedProperties').then(r => r.json()).then(res => {
-
-        // Iterate observed properties
-        for (let i = 0; i < res.value.length; i++) {
-          let prop = res.value[i];
-          prop.datastreams = [];
-
-          // Get the datastreams of each observed property (e.g. https://data.obsea.es/FROST-Server//v1.1/ObservedProperties(1)/Datastreams)
-          fetch(prop["Datastreams@iot.navigationLink"]).then(r => r.json()).then(resDS => {
-            // Iterate datastreams
-            for (let j = 0; j < resDS.value.length; j++) {
-              let ds = resDS.value[j];
-              // Skip if it is not a 30 min average
-              // if (!ds.name.includes("30min_average"))
-              //   continue;
-              // Skip if no phenomenon time
-              if (ds.phenomenonTime == undefined)
-                continue;
-
-              // Store property and datastream
-              prop.datastreams.push(ds);
-              // ?
-
-
-              // Get location of the platform
-              fetch(ds["Thing@iot.navigationLink"] + '/Locations').then(r => r.json()).then(resLoc => {
-                let loc = resLoc.value[0];
-                if (resLoc.value.length > 1) {
-                  console.warn("More than one location for a platform");
-                  debugger;
-                }
-
-                let platformKey = loc.location.coordinates[0] + "," + loc.location.coordinates[1];
-                // If it does not exist, create
-                if (platforms[platformKey] == undefined) {
-                  platforms[platformKey] = {};
-                }
-                if (platforms[platformKey][prop] != undefined) {
-                  console.warn("This ERDDAP variable is collected twice in the same location? " + prop.name + " at " + loc.name + platformKey);
-                }
-                // In principle, no circularity
-                platforms[platformKey][prop.name] = prop;
-
-
-
-                // Create vue data structure
-                //this.updatePlatforms(platformKey, prop, ds, loc);
-                // Create platform data object
-                let platforms = this.platforms;
-                if (platforms[platformKey] == undefined) {
-                  platforms[platformKey] = {
-                    id: platformKey,
-                    props: {},
-                    location: platformKey.split(","),
-                    data: {}, // tmst1: {WDIR: value, WSP: value...}, tmst2: {}...
-                  }
-                  // Add platform to map
-                  let addPlatformToMap = () => {
-                    this.$nextTick(() => {
-                      if (this.$refs[platformKey] == undefined) {
-                        addPlatformToMap();
-                        return;
-                      }
-                      // Get map
-                      if (this.map == undefined) {
-                        this.map = this.$parent.map;
-                      }
-                      // Relate overlay with map
-                      // Platform info
-                      const platformInfo = new ol.Overlay({
-                        position: this.platforms[platformKey].coord3857,
-                        positioning: Object.keys(this.platforms).length % 2 == 1 ? 'center-right' : 'center-left',
-                        element: this.$refs[platformKey],
-                        stopEvent: false,
-                      });
-                      platformInfo.element.style['pointerEvents'] = 'none';// Remove pointer events, container takes more space than necessary and blocks visible icons
-                      this.map.addOverlay(platformInfo);
-                      console.log("Added ERDDAP platform");
-                      this.selectedDateChanged(window.GUIManager.currentTmst, true);
-                    })
-                  }
-                  addPlatformToMap();
-                }
-
-                // Create props object
-                let propObj;
-                if (platforms[platformKey].props[prop.name] == undefined) {
-                  propObj = {
-                    "description": prop.description,
-                    "name": prop.name,
-                    "units": '',
-                    // Create datastreams array
-                    "datastreams": [],
-                  }
-                } else {
-                  propObj = platforms[platformKey].props[prop.name];
-                }
-
-
-                // Create datastream object
-                let dsObj = {
-                  "id": ds["@iot.id"],
-                  //"description": ds.description, 
-                  "latestTmst": ds.phenomenonTime.split("/")[1],
-                  "units": ds.unitOfMeasurement.symbol,
-                  "sensorDepth": '',
-                };
-                // This fetch creates many requests
-                // fetch("https://data.obsea.es/data-api/Datastreams("+ ds["@iot.id"] +")/Sensor").then(res => res.json()).then(jj => {
-                //   dsObj.sensorDepth = jj.properties.deployment.coordinates.meters_depth;
-                // });
-                // ADCP currents
-                if (ds.name.includes('CSPD')) {
-                  dsObj.depth = ds.properties["ADCP cell parameters"]["center depth"];
-                }
-
-                propObj.datastreams.push(dsObj);
-                platforms[platformKey].props[prop.name] = propObj;
-
-                // Create vue object
-                if (this.platformsData[platformKey] == undefined) {
-                  this.platformsData[platformKey] = { "hasData": false, "showInfo": true, "isLoading": false };
-                  this.platforms[platformKey].coord3857 = ol.proj.fromLonLat([this.platforms[platformKey].location[1], this.platforms[platformKey].location[0]]);
-                }
-                // Load data everytime a new datastream is received
-                this.selectedDateChanged(window.GUIManager.currentTmst, true);
-
-
-              });
-
-            }
-
-          });
-        }
-      });
-      //console.log(this.platforms)
     },
 
 
