@@ -368,7 +368,7 @@ export default {
               platformInfo.element.style['pointerEvents'] = 'none';// Remove pointer events, container takes more space than necessary and blocks visible icons
               this.map.addOverlay(platformInfo);
               console.log("Added ERDDAP platform");
-              //this.selectedDateChanged(window.GUIManager.currentTmst, true);
+              this.selectedDateChanged(window.GUIManager.currentTmst, true);
             })
           }
           addPlatformToMap(0);
@@ -395,6 +395,7 @@ export default {
       let sDate = new Date(movingDate.getTime() - 24 * 60 * 60 * 1000);
       let eDate = new Date(movingDate.getTime() + 24 * 60 * 60 * 1000);
 
+      debugger;
       // Register requested timestamps. This should only happen when all the datastreams and platforms are loaded
       if (doNotRegisterRequest == undefined || doNotRegisterRequest == false) {
         // Check if the tmst was requested
