@@ -11,7 +11,7 @@
 
       <!-- Platform panel -->
       <Transition>
-        <div class="platformPanel" v-if="platformsData[platformId].showInfo">
+        <div class="platformPanel" v-if="platformsData[platformId].showInfo && platformsData[platformId].hasData">
           <!-- Site -->
           <div class="platformTitle">
             <div v-show="platformsData[platformId].isLoading" class="lds-ring">
@@ -20,15 +20,16 @@
               <div></div>
               <div></div>
             </div>
-            <span><strong>{{platforms[platformId]["type"]}}</strong></span>
-            <a href="https://erddap.aoml.noaa.gov/gdp/erddap/index.html" target="_blank" rel="noopener noreferrer" class="icon-str">i</a>
+            <span><strong>{{ platforms[platformId]["type"] }}</strong></span>
+            <a href="https://erddap.aoml.noaa.gov/gdp/erddap/index.html" target="_blank" rel="noopener noreferrer"
+              class="icon-str">i</a>
           </div>
 
           <!-- Platform data -->
           <div v-if="platformsData[platformId].hasData">
 
             <!-- Wind -->
-            <div v-if="Object.keys(platformsData[platformId].data).includes('WSPD')">
+            <div v-if="Object.keys(platformsData[platformId].data).includes('windspd')">
               <span>
                 <strong>Wind: </strong>
                 {{ platformsData[platformId].data['windspd'].toFixed(1) }} m/s,
@@ -51,7 +52,7 @@
             <div v-if="Object.keys(platformsData[platformId].data).includes('wvht')">
               <span>
                 <strong>Waves: </strong>
-                {{ platformsData[platformId].data['wvht'].toFixed(1) }} m,
+                {{ platformsData[platformId].data['wvht'].toFixed(1) }} m
                 <!-- {{ platformsData[platformId].data['Tm02(s)'].toFixed(1) }} s, -->
                 <!-- {{ bearing2compassRose(platformsData[platformId].data['MeanDir(º)']) }} -->
                 <!-- <span class="fa"
@@ -119,8 +120,8 @@
 
 
       <!-- Platform icon -->
-      <img class="icon-str icon-medium icon-img panel-icon-right"
-        @click="ERDDAPIconClicked(platformId)" src="/HFRadar/Assets/Images/buoy.svg">
+      <img class="icon-str icon-medium icon-img panel-icon-right" @click="ERDDAPIconClicked(platformId)"
+        src="/HFRadar/Assets/Images/buoy.svg" v-show="platformsData[platformId].hasData">
 
 
     </div>
@@ -221,7 +222,9 @@ export default {
       isTooFar: false,
       queryPlatformsURL: "https://osmc.noaa.gov/erddap/tabledap/OSMC_flattened.jsonlKVP" +
         "?{parameters}" +
-        "&time>={startDate}&time<={endDate}&longitude>={longMin}&longitude<={longMax}&latitude>={latMin}&latitude<={latMax}",
+        "&time>={startDate}&time<={endDate}&longitude>={longMin}&longitude<={longMax}&latitude>={latMin}&latitude<={latMax}" +
+        "&observation_depth<0.5" + // Avoid subsurface data
+        '&platform_type="DRIFTING BUOYS"', // Restric to drifters
       bbox: [0, 5, 39.5, 44], // long, lat
       parameters: [
         'platform_type',
@@ -288,29 +291,50 @@ export default {
       let proxyURL = "http://localhost:3000/proxy?url=" + encodedUrl;
 
       await fetch(proxyURL).then(r => r.text()).then(res => {
-        var rows = res.split('\n');
+        let rows = res.split('\n');
         rows.pop(); // Delete empty
 
         // Get number of different platforms
         rows.forEach(row => {
-          var jsRow = JSON.parse(row);
+          let jsRow = JSON.parse(row);
           // Define platform
           if (platforms[jsRow.platform_id] == undefined) {
             platforms[jsRow.platform_id] = {
               "type": jsRow.platform_type,
               "location": [jsRow.longitude, jsRow.latitude],
               "id": jsRow.platform_id,
+              "code": jsRow.platform_code,
               "data": {},
             }
           }
           // Fill the platform with data on given timestamps
           let platform = platforms[jsRow.platform_id];
-          // Define tmst object
+          // Unexpectedly, it can happen that two platforms share the same id and code. This was found for ships.
+          // To solve this, we store the rows and process these platforms a posteriori by looking at the proximity of the data
+          // Hopefully these platforms are far away enough. Otherwise they might be confused as one
           if (platform.data[jsRow.time] != undefined) {
-            debugger;
+            // Another platform has the same id
+            // Check if there already a duplicate
+            if (platforms[jsRow.platform_id + '_1']) {
+              platform = platforms[jsRow.platform_id + '_1'];
+              platform.type = platform.type + '(1)';
+              // Triplicate?
+              if (platform.data[jsRow.time] != undefined) { debugger }
+            }
+            // Create duplicate
+            else {
+              platforms[jsRow.platform_id + '_1'] = {
+                "type": jsRow.platform_type,
+                "location": [jsRow.longitude, jsRow.latitude],
+                "id": jsRow.platform_id,
+                "code": jsRow.platform_code,
+                "data": {},
+              }
+            }
           }
-          platform.data[jsRow.time] = {};
 
+
+          platform.data[jsRow.time] = {};
           // Add parameters to data
           for (let i = 3; i < this.parameters.length; i++) {
             if (jsRow[this.parameters[i]] != null) {
@@ -320,11 +344,10 @@ export default {
           // Check if it is a drifter (lat long changes)
           // When platform is moving, it is a drifter. // TODO: mooring buoys also move (borneo), is it reflected here? does it matter?
           if (jsRow.longitude != platform.longitude || jsRow.latitude != platform.latitude) {
-            platform.isDrifter = true;
+            platform.isDrifting = true;
           }
         });
         console.log(platforms);
-        // Once all rows have been iterated, define location for non-drifters
       });
 
 
@@ -340,12 +363,12 @@ export default {
         }
 
         // Add to map
-        if (true) {//(!platform.isDrifter){
+        if (true) {//(!platform.isDrifting){
           // Add platform to map
           let addPlatformToMap = (count) => {
             this.$nextTick(() => {
               if (this.$refs[platformKey] == undefined) {
-                if (count > 2){
+                if (count > 2) {
                   debugger;
                   console.error("Could not find html element with vue ref")
                   return
@@ -368,6 +391,7 @@ export default {
               platformInfo.element.style['pointerEvents'] = 'none';// Remove pointer events, container takes more space than necessary and blocks visible icons
               this.map.addOverlay(platformInfo);
               console.log("Added ERDDAP platform");
+              platform.olLayer = platformInfo;
               this.selectedDateChanged(window.GUIManager.currentTmst, true);
             })
           }
@@ -383,12 +407,61 @@ export default {
     selectedDateChanged: function (tmst, doNotRegisterRequest) {
       if (tmst == undefined || this.once == undefined)
         return;
-
+      
       let platforms = this.platforms;
+
       // Hide all data from platforms
       Object.keys(platforms).forEach(platformId => {
+        let platform = platforms[platformId];
         this.platformsData[platformId].hasData = false;
+        // Iterate tmst
+        let halfHourinMs = 1000 * 60 * 29;
+        let closestTimeDiff = 10e12;
+        // Pic up closest data
+        Object.keys(platform.data).forEach(dataTmst => {
+          let timeDiff = Math.abs(new Date(dataTmst).getTime() - new Date(tmst).getTime());
+          if (timeDiff < halfHourinMs && timeDiff < closestTimeDiff) {
+            closestTimeDiff = timeDiff;
+            this.platformsData[platformId].hasData = true;
+            // Empty observed properties
+            this.platformsData[platformId].data = {};
+
+            // Iterate props and assign to platformsData (vue uses this object)
+            Object.keys(platform.data[dataTmst]).forEach(key => {
+              this.platformsData[platformId].data[key] = platform.data[dataTmst][key];
+            });
+
+            // Change layer location
+            platform.coord3857 = ol.proj.fromLonLat([platform.data[dataTmst].longitude, platform.data[dataTmst].latitude]);
+            if (platform.olLayer != undefined)
+              platform.olLayer.setPosition(platform.coord3857);
+          }
+
+        });
       });
+
+
+
+      return;
+      // Update the content
+      // No data in that timestamp
+      if (platforms[platformId].data[tmst] == undefined) {
+        this.platformsData[platformId].hasData = false;
+        return;
+      }
+      // Has data
+      this.platformsData[platformId].hasData = true;
+      // Empty observed properties
+      this.platformsData[platformId].data = {};
+
+      // Iterate props and assign to platformsData (vue uses this object)
+      Object.keys(this.platforms[platformId].data[tmst]).forEach(key => {
+        this.platformsData[platformId].data[key] = this.platforms[platformId].data[tmst][key];
+      });
+
+
+
+      return;
 
       // Add one day before and after of the tmst
       let movingDate = new Date(tmst);
