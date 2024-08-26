@@ -365,7 +365,7 @@ export default {
         console.log(url.replace('jsonlKVP', 'htmlTable'));
         const encodedUrl = encodeURIComponent(url);
         let proxyURL = "http://localhost:3000/proxy?url=" + encodedUrl;
-        return this.getDataFromURL(proxyURL)
+        let promise = this.getDataFromURL(proxyURL)
           .then(res => {
             // Store response
             this.requestedDailyData[dayTmst] = res;
@@ -378,6 +378,8 @@ export default {
             // Map and vue data structure if required
             this.addPlatformsToMap();
           });
+        this.requestedDailyData[dayTmst] = promise;
+        return promise
       }
 
     },
