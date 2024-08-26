@@ -120,8 +120,9 @@
 
 
       <!-- Platform icon -->
-      <img class="icon-str icon-medium icon-img panel-icon-right" @click="ERDDAPIconClicked(platformId)"
-        src="/HFRadar/Assets/Images/buoy.svg" v-show="platformsData[platformId].hasData">
+      <img class="icon-str icon-medium icon-img panel-icon-right" @click="ERDDAPIconClicked(platformId)" :src="[platforms[platformId]['type'].includes('SHIP') ? '/HFRadar/Assets/Images/boat.svg' :
+              platforms[platformId]['type'].includes('DRIFTING') ? '/HFRadar/Assets/Images/drifter.svg' :
+               '/HFRadar/Assets/Images/buoy.svg']" v-show="platformsData[platformId].hasData">
 
 
     </div>
@@ -191,7 +192,7 @@ export default {
         "?{parameters}" +
         "&time>={startDate}&time<={endDate}&longitude>={longMin}&longitude<={longMax}&latitude>={latMin}&latitude<={latMax}" +
         "&observation_depth<0.5",// + // Avoid subsurface data
-        //'&platform_type="DRIFTING BUOYS"', // Restric to drifters
+      //'&platform_type="DRIFTING BUOYS"', // Restric to drifters
       bbox: [0, 5, 39.5, 44], // long, lat
       parameters: [
         'platform_type',
@@ -355,7 +356,9 @@ export default {
                 element: this.$refs[platformKey],
                 stopEvent: false,
               });
-              platformInfo.element.style['pointerEvents'] = 'none';// Remove pointer events, container takes more space than necessary and blocks visible icons
+              platformInfo.getElement().classList.add('no-pointer-events');
+              platformInfo.getElement().parentElement.classList.add('no-pointer-events');
+              platformInfo.element.classList.add('no-pointer-events'); // Remove pointer events, container takes more space than necessary and blocks visible icons
               this.map.addOverlay(platformInfo);
               console.log("Added ERDDAP platform");
               platform.olLayer = platformInfo;
