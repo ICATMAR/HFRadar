@@ -141,42 +141,9 @@
 
 
 
-// This component requires a proxy server to avoid CORS policies from the ERDDAP server. The proxy server looks like this:
-/*
-const express = require('express');
-const request = require('request');
-const app = express();
-// Middleware to add CORS headers to all responses
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*'); // Allow requests from any origin
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
-  next();
-});
-// REST API
-app.get('/proxy', (req, res) => {
-  console.log("Request received");
-  const url = req.query.url;
-  // If no URL is provided, return an error
-  if (!url) {
-    return res.status(400).send('Error: Missing "url" query parameter.');
-  }
-  //url = 'https://osmc.noaa.gov/erddap/tabledap/OSMC_flattened.jsonlKVP?platform_type,platform_code,platform_id,longitude,latitude,time,observation_depth,sst,atmp,precip,sss,ztmp,zsal,slp,windspd,winddir,wvht,waterlevel,clouds,dewpoint,uo,vo,wo,rainfall_rate,hur,sea_water_elec_conductivity,rlds,rsds,waterlevel_met_res,waterlevel_wrt_lcd,water_col_ht,wind_to_direction&time>=2024-08-21T17:22:15.676Z&time<=2024-08-22T17:22:15.676Z&longitude>=0&longitude<=5&latitude>=39.5&latitude<=44'
-  request(url)
-    .on('error', (err) => {
-      console.error('Error with the request:', err);
-      res.status(500).send('Error: Unable to retrieve data.');
-    })
-    .pipe(res);
-});
-app.listen(3000, () => {
-  console.log('Proxy server running on port 3000');
-});
+// This component requires a proxy server to avoid CORS policies from the ERDDAP server. 
+// https://github.com/ICATMAR/proxyServer
 
-
-// npm init -y
-// npm install express request
-// node server.js
-*/
 
 
 
@@ -223,8 +190,8 @@ export default {
       queryPlatformsURL: "https://osmc.noaa.gov/erddap/tabledap/OSMC_flattened.jsonlKVP" +
         "?{parameters}" +
         "&time>={startDate}&time<={endDate}&longitude>={longMin}&longitude<={longMax}&latitude>={latMin}&latitude<={latMax}" +
-        "&observation_depth<0.5" + // Avoid subsurface data
-        '&platform_type="DRIFTING BUOYS"', // Restric to drifters
+        "&observation_depth<0.5",// + // Avoid subsurface data
+        //'&platform_type="DRIFTING BUOYS"', // Restric to drifters
       bbox: [0, 5, 39.5, 44], // long, lat
       parameters: [
         'platform_type',
@@ -407,7 +374,7 @@ export default {
     selectedDateChanged: function (tmst, doNotRegisterRequest) {
       if (tmst == undefined || this.once == undefined)
         return;
-      
+
       let platforms = this.platforms;
 
       // Hide all data from platforms
@@ -417,7 +384,7 @@ export default {
         // Iterate tmst
         let halfHourinMs = 1000 * 60 * 29;
         let closestTimeDiff = 10e12;
-        // Pic up closest data
+        // Pick up closest data
         Object.keys(platform.data).forEach(dataTmst => {
           let timeDiff = Math.abs(new Date(dataTmst).getTime() - new Date(tmst).getTime());
           if (timeDiff < halfHourinMs && timeDiff < closestTimeDiff) {
