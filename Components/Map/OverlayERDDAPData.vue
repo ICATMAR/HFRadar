@@ -551,6 +551,7 @@ a {
 .ERDDAPContainer {
   display: flex;
   align-items: center;
+  user-select: none;
 }
 
 .panel-icon-left {
