@@ -47,6 +47,13 @@
                   :style="{ transform: 'rotate(' + (platformsData[platformCode].data['currentdir'] - 45) + 'deg)' }">&#xf124;</span>
               </span>
             </div>
+            <!-- Current UO -->
+            <div v-if="Object.keys(platformsData[platformCode].data).includes('uo')">
+              <span>
+                <strong>UO: </strong>
+                {{ platformsData[platformCode].data['uo'].toFixed(1) }} m/s
+              </span>
+            </div>
             <!-- Waves -->
             <div v-if="Object.keys(platformsData[platformCode].data).includes('wvht')">
               <span>
@@ -412,7 +419,8 @@ export default {
         if (platform.data[jsRow.time] != undefined) {
           // Keep the one with more data
           if (Object.keys(jsRow).length - 3 > Object.keys(platform.data[jsRow.time]).length) {
-            console.log('Duplicated data for platform type: ' + platform.type + ', id: ' + platform.code + '. Overwritting data.');
+            // TODO: WHAT ABOUT DUPLICATED DATA? ERDDAP PROBLEM'S
+            //console.log('Duplicated data for platform type: ' + platform.type + ', id: ' + platform.code + '. Overwritting data.');
             platform.data[jsRow.time] = {};
             // Add parameters to data
             for (let i = 3; i < this.parameters.length; i++) {
@@ -421,7 +429,7 @@ export default {
               }
             }
           } else {
-            console.log('Duplicated data for platform type: ' + platform.type + ', id: ' + platform.code + '. Discarded new data.');
+            //console.log('Duplicated data for platform type: ' + platform.type + ', id: ' + platform.code + '. Discarded new data.');
             //console.log(platform.data[jsRow.time]);
             //console.log(jsRow);
           }
