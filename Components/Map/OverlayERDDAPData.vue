@@ -2,8 +2,7 @@
 
   <div id="overlay-erddap-data" ref="containerErddapInfo">
     <!-- Container -->
-    <!-- <div v-for="platformId in Object.keys(platformsData)" :id="platformId" :ref="platformId" class="ERDDAPContainer" :class="[!isTooFar && isAdvancedInterfaceOnOff ? 'show' : 'hideOverlayMap']"> -->
-    <div v-for="(platformId, index) in Object.keys(platformsData)" :id="platformId" :ref="platformId"
+    <div v-for="(platformCode, index) in Object.keys(platformsData)" :id="platformCode" :ref="platformCode"
       class="ERDDAPContainer"
       :class="[!isTooFar && isAdvancedInterfaceOnOff && isExternalObsVisible ? 'showOverlayMap' : 'hideOverlayMap']">
 
@@ -11,106 +10,135 @@
 
       <!-- Platform panel -->
       <Transition>
-        <div class="platformPanel" v-if="platformsData[platformId].showInfo && platformsData[platformId].hasData">
+        <div class="platformPanel" v-if="platformsData[platformCode].showInfo && platformsData[platformCode].hasData">
           <!-- Site -->
           <div class="platformTitle">
-            <div v-show="platformsData[platformId].isLoading" class="lds-ring">
+            <div v-show="platformsData[platformCode].isLoading" class="lds-ring">
               <div></div>
               <div></div>
               <div></div>
               <div></div>
             </div>
-            <span><strong>{{ platforms[platformId]["type"] }}</strong></span>
+            <span><strong>{{ platforms[platformCode]["type"] }}</strong></span>
             <a href="https://erddap.aoml.noaa.gov/gdp/erddap/index.html" target="_blank" rel="noopener noreferrer"
               class="icon-str">i</a>
           </div>
 
           <!-- Platform data -->
-          <div v-if="platformsData[platformId].hasData">
+          <div v-if="platformsData[platformCode].hasData">
 
             <!-- Wind -->
-            <div v-if="Object.keys(platformsData[platformId].data).includes('windspd')">
+            <div v-if="Object.keys(platformsData[platformCode].data).includes('windspd')">
               <span>
                 <strong>Wind: </strong>
-                {{ platformsData[platformId].data['windspd'].toFixed(1) }} m/s,
-                {{ bearing2compassRose(platformsData[platformId].data['winddir']) }}
+                {{ platformsData[platformCode].data['windspd'].toFixed(1) }} m/s,
+                {{ bearing2compassRose(platformsData[platformCode].data['winddir']) }}
                 <span class="fa"
-                  :style="{ transform: 'rotate(' + (platformsData[platformId].data['winddir'] - 45 + 180) + 'deg)' }">&#xf124;</span>
+                  :style="{ transform: 'rotate(' + (platformsData[platformCode].data['winddir'] - 45 + 180) + 'deg)' }">&#xf124;</span>
               </span>
             </div>
             <!-- Currents -->
-            <div v-if="Object.keys(platformsData[platformId].data).includes('currentspd')">
+            <div v-if="Object.keys(platformsData[platformCode].data).includes('currentspd')">
               <span>
                 <strong>Current: </strong>
-                {{ platformsData[platformId].data['currentspd'].toFixed(1) }} m/s,
-                {{ bearing2compassRose(platformsData[platformId].data['currentdir']) }}
+                {{ platformsData[platformCode].data['currentspd'].toFixed(1) }} m/s,
+                {{ bearing2compassRose(platformsData[platformCode].data['currentdir']) }}
                 <span class="fa"
-                  :style="{ transform: 'rotate(' + (platformsData[platformId].data['currentdir'] - 45) + 'deg)' }">&#xf124;</span>
+                  :style="{ transform: 'rotate(' + (platformsData[platformCode].data['currentdir'] - 45) + 'deg)' }">&#xf124;</span>
               </span>
             </div>
             <!-- Waves -->
-            <div v-if="Object.keys(platformsData[platformId].data).includes('wvht')">
+            <div v-if="Object.keys(platformsData[platformCode].data).includes('wvht')">
               <span>
                 <strong>Waves: </strong>
-                {{ platformsData[platformId].data['wvht'].toFixed(1) }} m
-                <!-- {{ platformsData[platformId].data['Tm02(s)'].toFixed(1) }} s, -->
-                <!-- {{ bearing2compassRose(platformsData[platformId].data['MeanDir(º)']) }} -->
+                {{ platformsData[platformCode].data['wvht'].toFixed(1) }} m
+                <!-- {{ platformsData[platformCode].data['Tm02(s)'].toFixed(1) }} s, -->
+                <!-- {{ bearing2compassRose(platformsData[platformCode].data['MeanDir(º)']) }} -->
                 <!-- <span class="fa"
-                  :style="{ transform: 'rotate(' + (platformsData[platformId].data['MeanDir(º)'] - 45 + 180) + 'deg)' }">&#xf124;</span> -->
+                  :style="{ transform: 'rotate(' + (platformsData[platformCode].data['MeanDir(º)'] - 45 + 180) + 'deg)' }">&#xf124;</span> -->
               </span>
             </div>
 
             <!-- Extra data -->
             <Transition>
-              <div v-if="platforms[platformId].showAllData">
+              <div v-if="platforms[platformCode].showAllData">
                 <!-- Sea water temperature -->
-                <div v-if="Object.keys(platformsData[platformId].data).includes('sst')">
+                <div v-if="Object.keys(platformsData[platformCode].data).includes('sst')">
                   <span>
                     <strong>Water temperature: </strong>
-                    {{ platformsData[platformId].data['sst'].toFixed(1) }} ºC
+                    {{ platformsData[platformCode].data['sst'].toFixed(1) }} ºC
                   </span>
                 </div>
                 <!-- Sea water salinity -->
-                <div v-if="Object.keys(platformsData[platformId].data).includes('sss')">
+                <div v-if="Object.keys(platformsData[platformCode].data).includes('sss')">
                   <span>
                     <strong>Sea water salinity: </strong>
-                    {{ platformsData[platformId].data['sss'].toFixed(1) }} psu
+                    {{ platformsData[platformCode].data['sss'].toFixed(1) }} psu
+                  </span>
+                </div>
+                <!-- Water level -->
+                <div v-if="Object.keys(platformsData[platformCode].data).includes('waterlevel')">
+                  <span>
+                    <strong>Water level: </strong>
+                    {{ platformsData[platformCode].data['waterlevel'].toFixed(1) }} m
+                  </span>
+                </div>
+
+                
+                <!-- Sea water potential temperature -->
+                <div v-if="Object.keys(platformsData[platformCode].data).includes('ztmp')">
+                  <span>
+                    <strong>Water potential temperature: </strong>
+                    {{ platformsData[platformCode].data['ztmp'].toFixed(1) }} ºC
+                  </span>
+                </div>
+                <!-- Sea water potential salinity -->
+                <div v-if="Object.keys(platformsData[platformCode].data).includes('zsal')">
+                  <span>
+                    <strong>Water potential salinity: </strong>
+                    {{ platformsData[platformCode].data['zsal'].toFixed(1) }} psu
                   </span>
                 </div>
 
 
                 <!-- Air temperature -->
-                <div v-if="Object.keys(platformsData[platformId].data).includes('atmp')">
+                <div v-if="Object.keys(platformsData[platformCode].data).includes('atmp')">
                   <span>
                     <strong>Air temperature: </strong>
-                    {{ platformsData[platformId].data['atmp'].toFixed(1) }} ºC
+                    {{ platformsData[platformCode].data['atmp'].toFixed(1) }} ºC
                   </span>
                 </div>
                 <!-- Relative humidity -->
-                <div v-if="Object.keys(platformsData[platformId].data).includes('hur')">
+                <div v-if="Object.keys(platformsData[platformCode].data).includes('hur')">
                   <span>
                     <strong>Humidity: </strong>
-                    {{ platformsData[platformId].data['hur'].toFixed(1) }} %
+                    {{ platformsData[platformCode].data['hur'].toFixed(1) }} %
                   </span>
                 </div>
                 <!-- Atmospheric pressure -->
-                <div v-if="Object.keys(platformsData[platformId].data).includes('slp')">
+                <div v-if="Object.keys(platformsData[platformCode].data).includes('slp')">
                   <span>
                     <strong>Atms. pressure: </strong>
-                    {{ platformsData[platformId].data['slp'].toFixed(1) }} hPa
+                    {{ platformsData[platformCode].data['slp'].toFixed(1) }} hPa
                   </span>
                 </div>
 
-
+                <!-- Code -->
+                <div>
+                  <span>
+                    <strong>Code: </strong>
+                    {{ platformCode }}
+                  </span>
+                </div>
               </div>
             </Transition>
 
             <!-- Button showAllData ON OFF-->
             <div class="button-container">
-              <button v-show="!platforms[platformId].showAllData" class="more-data-button"
-                @click="platforms[platformId].showAllData = true">+</button>
-              <button v-show="platforms[platformId].showAllData" class="more-data-button"
-                @click="platforms[platformId].showAllData = false">-</button>
+              <button v-show="!platforms[platformCode].showAllData" class="more-data-button"
+                @click="platforms[platformCode].showAllData = true">+</button>
+              <button v-show="platforms[platformCode].showAllData" class="more-data-button"
+                @click="platforms[platformCode].showAllData = false">-</button>
             </div>
 
           </div>
@@ -120,9 +148,10 @@
 
 
       <!-- Platform icon -->
-      <img class="icon-str icon-medium icon-img panel-icon-right" @click="ERDDAPIconClicked(platformId)" :src="[platforms[platformId]['type'].includes('SHIP') ? '/HFRadar/Assets/Images/boat.svg' :
-              platforms[platformId]['type'].includes('DRIFTING') ? '/HFRadar/Assets/Images/drifter.svg' :
-               '/HFRadar/Assets/Images/buoy.svg']" v-show="platformsData[platformId].hasData">
+      <img class="icon-str icon-medium icon-img panel-icon-right" @click="ERDDAPIconClicked(platformCode)" :src="[platforms[platformCode]['type'].includes('SHIP') ? '/HFRadar/Assets/Images/boat.svg' :
+        platforms[platformCode]['type'].includes('DRIFTING') ? '/HFRadar/Assets/Images/drifter.svg' :
+          platforms[platformCode]['type'].includes('GLIDERS') ? '/HFRadar/Assets/Images/drifter.svg' :
+            '/HFRadar/Assets/Images/buoy.svg']" v-show="platformsData[platformCode].hasData">
 
 
     </div>
@@ -153,9 +182,6 @@ export default {
   name: 'overlay-erddap-data',
   created() { },
   mounted() {
-    // Get ERDDAP sites
-    //this.loadERDDAPAPI();
-
 
     // EVENTS
     // HFRadarLoaded
@@ -175,7 +201,7 @@ export default {
       // Get ERDDAP sites and load data
       if (this.once == undefined && state == true) {
         this.once = true;
-        this.loadERDDAPAPI();
+        this.selectedDateChanged(window.GUIManager.currentTmst);
       }
     });
     // External observations visible
@@ -231,159 +257,36 @@ export default {
       platforms: {},
       platformsData: {},
       requestStatus: {}, // Stores requested timestamps
+      requestedDailyData: {} // Stores promises and results of promises by daily tmst
     }
   },
   methods: {
     // USER ACTIONS
-    ERDDAPIconClicked: function (platformId) {
-      this.platformsData[platformId].showInfo = !this.platformsData[platformId].showInfo;
+    ERDDAPIconClicked: function (platformCode) {
+      this.platformsData[platformCode].showInfo = !this.platformsData[platformCode].showInfo;
     },
     // INTERNAL
-    // Use API to get observed variables and platforms
-    loadERDDAPAPI: async function () {
-      // Using ERDDAP API
-      let platforms = this.platforms;
+    selectedDateChanged: function (tmst) {
+      if (tmst == undefined || this.once == undefined)
+        return;
 
-      var startDate = new Date();
-      var endDate = new Date();
-      startDate.setUTCDate(startDate.getUTCDate() - 1);
-
-      // Prepare url
-      let url = this.queryPlatformsURL.replace('{parameters}', this.parameters.join());
-      url = url.replace('{startDate}', startDate.toISOString());
-      url = url.replace('{endDate}', endDate.toISOString());
-      url = url.replace('{longMin}', this.bbox[0]).replace('{longMax}', this.bbox[1]).replace('{latMin}', this.bbox[2]).replace('{latMax}', this.bbox[3]);
-
-      console.log(url);
-      const encodedUrl = encodeURIComponent(url);
-      let proxyURL = "http://localhost:3000/proxy?url=" + encodedUrl;
-
-      await fetch(proxyURL).then(r => r.text()).then(res => {
-        let rows = res.split('\n');
-        rows.pop(); // Delete empty
-
-        // Get number of different platforms
-        rows.forEach(row => {
-          let jsRow = JSON.parse(row);
-          // Define platform
-          if (platforms[jsRow.platform_id] == undefined) {
-            platforms[jsRow.platform_id] = {
-              "type": jsRow.platform_type,
-              "location": [jsRow.longitude, jsRow.latitude],
-              "id": jsRow.platform_id,
-              "code": jsRow.platform_code,
-              "data": {},
-            }
-          }
-          // Fill the platform with data on given timestamps
-          let platform = platforms[jsRow.platform_id];
-          // Unexpectedly, it can happen that two platforms share the same id and code. This was found for ships.
-          // To solve this, we store the rows and process these platforms a posteriori by looking at the proximity of the data
-          // Hopefully these platforms are far away enough. Otherwise they might be confused as one
-          if (platform.data[jsRow.time] != undefined) {
-            // Another platform has the same id
-            // Check if there already a duplicate
-            if (platforms[jsRow.platform_id + '_1']) {
-              platform = platforms[jsRow.platform_id + '_1'];
-              platform.type = platform.type + '(1)';
-              // Triplicate?
-              if (platform.data[jsRow.time] != undefined) { debugger }
-            }
-            // Create duplicate
-            else {
-              platforms[jsRow.platform_id + '_1'] = {
-                "type": jsRow.platform_type,
-                "location": [jsRow.longitude, jsRow.latitude],
-                "id": jsRow.platform_id,
-                "code": jsRow.platform_code,
-                "data": {},
-              }
-            }
-          }
-
-
-          platform.data[jsRow.time] = {};
-          // Add parameters to data
-          for (let i = 3; i < this.parameters.length; i++) {
-            if (jsRow[this.parameters[i]] != null) {
-              platform.data[jsRow.time][this.parameters[i]] = jsRow[this.parameters[i]];
-            }
-          }
-          // Check if it is a drifter (lat long changes)
-          // When platform is moving, it is a drifter. // TODO: mooring buoys also move (borneo), is it reflected here? does it matter?
-          if (jsRow.longitude != platform.longitude || jsRow.latitude != platform.latitude) {
-            platform.isDrifting = true;
-          }
-        });
-        console.log(platforms);
+      // Get day
+      let dayTmst = tmst.substring(0, 10);
+      // Check if the data for the day was already loaded
+      this.getDataForDayTmst(dayTmst).then(() => {
+        this.updateContent(tmst)
       });
-
-
-
-      // Iterate platforms to create vue objects and map layers
-      Object.keys(this.platforms).forEach(platformKey => {
-        let platform = this.platforms[platformKey];
-
-        // Create vue object
-        if (this.platformsData[platformKey] == undefined) {
-          this.platformsData[platformKey] = { "hasData": false, "showInfo": false, "isLoading": false };
-          this.platforms[platformKey].coord3857 = ol.proj.fromLonLat([this.platforms[platformKey].location[0], this.platforms[platformKey].location[1]]);
-        }
-
-        // Add to map
-        if (true) {//(!platform.isDrifting){
-          // Add platform to map
-          let addPlatformToMap = (count) => {
-            this.$nextTick(() => {
-              if (this.$refs[platformKey] == undefined) {
-                if (count > 2) {
-                  debugger;
-                  console.error("Could not find html element with vue ref")
-                  return
-                }
-                addPlatformToMap(count++);
-                return;
-              }
-              // Get map
-              if (this.map == undefined) {
-                this.map = this.$parent.map;
-              }
-              // Relate overlay with map
-              // Platform info
-              const platformInfo = new ol.Overlay({
-                position: this.platforms[platformKey].coord3857,
-                positioning: 'center-right',//Object.keys(this.platforms).length % 2 == 1 ? 'center-right' : 'center-left',
-                element: this.$refs[platformKey],
-                stopEvent: false,
-              });
-              platformInfo.getElement().classList.add('no-pointer-events');
-              platformInfo.getElement().parentElement.classList.add('no-pointer-events');
-              platformInfo.element.classList.add('no-pointer-events'); // Remove pointer events, container takes more space than necessary and blocks visible icons
-              this.map.addOverlay(platformInfo);
-              console.log("Added ERDDAP platform");
-              platform.olLayer = platformInfo;
-              this.selectedDateChanged(window.GUIManager.currentTmst, true);
-            })
-          }
-          addPlatformToMap(0);
-        }
-      });
-
 
     },
 
-
-
-    selectedDateChanged: function (tmst, doNotRegisterRequest) {
-      if (tmst == undefined || this.once == undefined)
-        return;
+    updateContent: function (tmst) {
 
       let platforms = this.platforms;
 
       // Hide all data from platforms
-      Object.keys(platforms).forEach(platformId => {
-        let platform = platforms[platformId];
-        this.platformsData[platformId].hasData = false;
+      Object.keys(platforms).forEach(platformCode => {
+        let platform = platforms[platformCode];
+        this.platformsData[platformCode].hasData = false;
         // Iterate tmst
         let halfHourinMs = 1000 * 60 * 29;
         let closestTimeDiff = 10e12;
@@ -392,216 +295,200 @@ export default {
           let timeDiff = Math.abs(new Date(dataTmst).getTime() - new Date(tmst).getTime());
           if (timeDiff < halfHourinMs && timeDiff < closestTimeDiff) {
             closestTimeDiff = timeDiff;
-            this.platformsData[platformId].hasData = true;
+            this.platformsData[platformCode].hasData = true;
             // Empty observed properties
-            this.platformsData[platformId].data = {};
+            this.platformsData[platformCode].data = {};
 
             // Iterate props and assign to platformsData (vue uses this object)
             Object.keys(platform.data[dataTmst]).forEach(key => {
-              this.platformsData[platformId].data[key] = platform.data[dataTmst][key];
+              this.platformsData[platformCode].data[key] = platform.data[dataTmst][key];
             });
 
             // Change layer location
-            platform.coord3857 = ol.proj.fromLonLat([platform.data[dataTmst].longitude, platform.data[dataTmst].latitude]);
-            if (platform.olLayer != undefined)
-              platform.olLayer.setPosition(platform.coord3857);
+            this.$nextTick(() => {
+              platform.coord3857 = ol.proj.fromLonLat([platform.data[dataTmst].longitude, platform.data[dataTmst].latitude]);
+
+              if (platform.olLayer != undefined) {
+                platform.olLayer.setElement(this.$refs[platformCode]);
+                platform.olLayer.setPosition(platform.coord3857); // For some reason vue and the map element have to be redefined
+              } else {
+                debugger;
+              }
+
+              if (platformCode != platform.olLayer.C.element.id) {
+                debugger;
+              }
+            });
+
           }
 
         });
       });
+    },
 
 
 
-      return;
-      // Update the content
-      // No data in that timestamp
-      if (platforms[platformId].data[tmst] == undefined) {
-        this.platformsData[platformId].hasData = false;
-        return;
+
+    // Get the data for a specific day
+    getDataForDayTmst(dayTmst) {
+      // Return the data (or the promise to load the data)
+      if (this.requestedDailyData[dayTmst] != undefined) {
+        return new Promise((resolve, reject) => {
+          resolve(this.requestedDailyData[dayTmst]);
+        });
       }
-      // Has data
-      this.platformsData[platformId].hasData = true;
-      // Empty observed properties
-      this.platformsData[platformId].data = {};
+      // Load the data
+      else {
+        // Prepare start / end of day
+        let startDate = new Date(dayTmst + 'T00:00Z');
+        let endDate = new Date(dayTmst + 'T00:00Z');
+        endDate.setUTCDate(endDate.getUTCDate() + 1);
 
-      // Iterate props and assign to platformsData (vue uses this object)
-      Object.keys(this.platforms[platformId].data[tmst]).forEach(key => {
-        this.platformsData[platformId].data[key] = this.platforms[platformId].data[tmst][key];
-      });
+        // Prepare url
+        let url = this.queryPlatformsURL.replace('{parameters}', this.parameters.join());
+        url = url.replace('{startDate}', startDate.toISOString());
+        url = url.replace('{endDate}', endDate.toISOString());
+        url = url.replace('{longMin}', this.bbox[0]).replace('{longMax}', this.bbox[1]).replace('{latMin}', this.bbox[2]).replace('{latMax}', this.bbox[3]);
 
-
-
-      return;
-
-      // Add one day before and after of the tmst
-      let movingDate = new Date(tmst);
-      let sDate = new Date(movingDate.getTime() - 24 * 60 * 60 * 1000);
-      let eDate = new Date(movingDate.getTime() + 24 * 60 * 60 * 1000);
-
-      debugger;
-      // Register requested timestamps. This should only happen when all the datastreams and platforms are loaded
-      if (doNotRegisterRequest == undefined || doNotRegisterRequest == false) {
-        // Check if the tmst was requested
-        if (this.requestStatus[tmst] != undefined) {
-          //console.log("ERDDAP data was already requested for timestamp " + tmst);
-          Object.keys(platforms).forEach(platformId => {
-            this.updateContent(platformId, tmst);
+        console.log(url.replace('jsonlKVP', 'htmlTable'));
+        const encodedUrl = encodeURIComponent(url);
+        let proxyURL = "http://localhost:3000/proxy?url=" + encodedUrl;
+        return this.getDataFromURL(proxyURL)
+          .then(res => {
+            // Store response
+            this.requestedDailyData[dayTmst] = res;
+            // Create data structure
+            this.parseRawTextAndStructureData(res);
+            // Map and vue data structure if required
+            this.addPlatformsToMap();
           });
-          return;
-        }
-
-
-        // Check if any part of the time period was already loaded
-        // End date
-        movingDate = new Date(tmst);
-        for (let i = 0; i < 24; i++) {
-          movingDate.setHours(movingDate.getHours() + 1);
-          if (this.requestStatus[movingDate.toISOString()] != undefined) {
-            eDate.setTime(movingDate.getTime()); // Set new ending date
-            i = 24; // Exit for
-          }
-        }
-        // Start date
-        movingDate = new Date(tmst);
-        for (let i = 0; i < 24; i++) {
-          movingDate.setHours(movingDate.getHours() - 1);
-          if (this.requestStatus[movingDate.toISOString()] != undefined) {
-            sDate.setTime(movingDate.getTime()); // Set new starting date
-            i = 24; // Exit for
-          }
-        }
-
-
-        // TODO: 
-        // The problem is that when entering a new date, half of the data requested will be
-        // already loaded. Playing with if's might be worth it (if forward date was requested
-        // it means that the following forward dates were resquested too. same with before date, as they
-        // belong to a 48h window request).
-
-        // Register requests
-        // Platforms must be loaded
-        // WARN: could it be that this is exectued when only one platform exists?
-        if (Object.keys(platforms).length != 0) {
-          movingDate = new Date(sDate.getTime());
-          //console.log("Registering timestamps ERDDAP")
-          for (let i = 0; i < 24 * 2; i++) {
-            this.requestStatus[movingDate.toISOString()] = 1;
-            movingDate.setHours(movingDate.getHours() + 1);
-          }
-        }
-
       }
 
+    },
 
 
+    // Get data from URL
+    getDataFromURL(url) {
+      return fetch(url).then(r => r.text())
+    },
+    // Parse raw text
+    parseRawTextAndStructureData(res) {
+      let rows = res.split('\n');
+      rows.pop(); // Delete empty
 
+      let platforms = this.platforms;
 
-
-      let url = this.url;
-      // Iterate data streams to fetch data
-      for (let i = 0; i < Object.keys(platforms).length; i++) {
-        let platform = platforms[Object.keys(platforms)[i]];
-        this.platformsData[platform.id].isLoading = true;
-        //console.log("LOADING...");
-
-        // Loading keepup
-        let requested = 0;
-        let loaded = 0;
-        // Iterate parameters (temp, wind, etc...)
-        for (let j = 0; j < Object.keys(platform.props).length; j++) {
-          let param = platform.props[Object.keys(platform.props)[j]];
-
-
-          // Iterate datastreams
-          for (let k = 0; k < param.datastreams.length; k++) {
-            let datastream = param.datastreams[k];
-
-            // Check latest data available
-            if (new Date(datastream.latestTmst) > sDate) {
-              // Fetch data
-              let streamURL = url.replace('{{datastream}}', datastream.id).replace('{{sDate}}', sDate.toISOString()).replace('{{eDate}}', eDate.toISOString());
-
-              // Keep track of requested URLs
-              // During loading platforms and datastreams, once a datastream is loaded
-              // it is automatically requestd. This keeps track of the requested urls,
-              // as during loading they could be requested everytime a new datastream
-              // is loaded
-              if (this.requestedURLs == undefined) {
-                this.requestedURLs = [];
+      // Get number of different platforms
+      rows.forEach(row => {
+        let jsRow = JSON.parse(row);
+        // Remove nulls
+        Object.keys(jsRow).forEach((key) => {
+          if (jsRow[key] === null) {
+            delete jsRow[key];
+          }
+        });
+        // Define platform
+        if (platforms[jsRow.platform_code] == undefined) {
+          platforms[jsRow.platform_code] = {
+            "type": jsRow.platform_type,
+            "location": [jsRow.longitude, jsRow.latitude],
+            "id": jsRow.platform_id,
+            "code": jsRow.platform_code,
+            "data": {},
+          }
+        }
+        // Fill the platform with data on given timestamps
+        let platform = platforms[jsRow.platform_code];
+        // Unexpectedly, it can happen that two platforms share the same id and code. This was found for ships.
+        if (platform.data[jsRow.time] != undefined) {
+          // Keep the one with more data
+          if (Object.keys(jsRow).length - 3 > Object.keys(platform.data[jsRow.time]).length) {
+            console.log('Duplicated data for platform type: ' + platform.type + ', id: ' + platform.code + '. Overwritting data.');
+            platform.data[jsRow.time] = {};
+            // Add parameters to data
+            for (let i = 3; i < this.parameters.length; i++) {
+              if (jsRow[this.parameters[i]] != undefined) {
+                platform.data[jsRow.time][this.parameters[i]] = jsRow[this.parameters[i]];
               }
-              // URL was not requested
-              if (!this.requestedURLs.includes(streamURL)) {
-                this.requestedURLs.push(streamURL)
-                //console.log(datastream.id + ", " + param.name + ", "+ platform.id.substring(5));
-                requested++;
+            }
+          } else {
+            console.log('Duplicated data for platform type: ' + platform.type + ', id: ' + platform.code + '. Discarded new data.');
+            //console.log(platform.data[jsRow.time]);
+            //console.log(jsRow);
+          }
+        }
 
-                fetch(streamURL).then(res => res.json()).then(r => {
-                  //console.log("Storing " + param.name);
-                  this.parseAPIResult(platform, param, datastream, r.value)
-                  this.updateContent(platform.id, window.GUIManager.currentTmst); // It can happen that the user changed dates and that the current timestamp is not the same as requested. Therefore use GUI.currentTmst instead of tmst
-                  loaded++;
-                  if (loaded == requested) {
-                    this.platformsData[platform.id].isLoading = false;
-                    //console.log("LOADED");
-                  }
-                });
-              }
-              // URL was already requested, try updating content
-              else {
-                this.updateContent(platform.id, tmst);
-              }
-
+        else {
+          platform.data[jsRow.time] = {};
+          // Add parameters to data
+          for (let i = 3; i < this.parameters.length; i++) {
+            if (jsRow[this.parameters[i]] != undefined) {
+              platform.data[jsRow.time][this.parameters[i]] = jsRow[this.parameters[i]];
             }
           }
 
-
         }
-        // If nothing was requested
-        if (requested == 0) {
-          this.platformsData[platform.id].isLoading = false;
-          //console.log("LOADED (no data to load)")
+
+        // Check if it is a drifter (lat long changes)
+        // When platform is moving, it is a drifter. // TODO: mooring buoys also move (borneo), is it reflected here? does it matter?
+        if (jsRow.longitude != platform.longitude || jsRow.latitude != platform.latitude) {
+          platform.isDrifting = true;
         }
-      }
 
-      return;
-
-    },
-
-    updateContent: function (platformId, tmst) {
-
-      // No data in that timestamp
-      if (this.platforms[platformId].data[tmst] == undefined) {
-        this.platformsData[platformId].hasData = false;
-        return;
-      }
-      // Has data
-      this.platformsData[platformId].hasData = true;
-      // Empty observed properties
-      this.platformsData[platformId].data = {};
-
-      // Iterate props and assign to platformsData (vue uses this object)
-      Object.keys(this.platforms[platformId].data[tmst]).forEach(key => {
-        this.platformsData[platformId].data[key] = this.platforms[platformId].data[tmst][key];
       });
-      // console.log(this.platformsData[platformId].data)
-      // console.log(this.platforms[platformId].data[tmst]);
-      //console.log(this.platforms);
+      //console.log(platforms);
     },
+    // Update vue and map
+    addPlatformsToMap() {
+      // Iterate platforms to create vue objects and map layers
+      Object.keys(this.platforms).forEach(platformCode => {
+        this.addPlatformToMap(platformCode, 0);
+      });
+    },
+    // Add platform to map
+    addPlatformToMap(platformCode, count) {
+      let platform = this.platforms[platformCode];
 
+      // Platform was already added to map
+      if (platform.olLayer != undefined)
+        return;
 
-    parseAPIResult(platform, param, datastream, data) {
-      for (let i = 0; i < data.length; i++) {
-        let tmst = data[i].resultTime;
-        if (platform.data[tmst] == undefined)
-          platform.data[tmst] = {};
-
-        param.units = datastream.units;
-        if (platform.data[tmst][param.name] != undefined) {
-          //console.warn("Overwritting data");
-
-        }
-        platform.data[tmst][param.name] = data[i].result;
+      // Create vue object
+      if (this.platformsData[platformCode] == undefined) {
+        this.platformsData[platformCode] = { "hasData": false, "showInfo": false, "isLoading": false };
+        this.platforms[platformCode].coord3857 = ol.proj.fromLonLat([this.platforms[platformCode].location[0], this.platforms[platformCode].location[1]]);
       }
+
+      this.$nextTick(() => {
+        if (this.$refs[platformCode] == undefined) {
+          if (count > 2) {
+            debugger;
+            console.error("Could not find html element with vue ref")
+            return
+          }
+          this.addPlatformToMap(count++);
+          return;
+        }
+        // Get map
+        if (this.map == undefined) {
+          this.map = this.$parent.map;
+        }
+        // Relate overlay with map
+        // Platform info
+        const platformInfo = new ol.Overlay({
+          name: platformCode,
+          position: this.platforms[platformCode].coord3857,
+          positioning: 'center-right',//Object.keys(this.platforms).length % 2 == 1 ? 'center-right' : 'center-left',
+          element: this.$refs[platformCode],
+          stopEvent: false,
+        });
+        platformInfo.getElement().classList.add('no-pointer-events');
+        platformInfo.getElement().parentElement.classList.add('no-pointer-events');
+        platformInfo.element.classList.add('no-pointer-events'); // Remove pointer events, container takes more space than necessary and blocks visible icons
+        this.map.addOverlay(platformInfo);
+        console.log("Added ERDDAP platform");
+        platform.olLayer = platformInfo;
+      });
     },
 
 
