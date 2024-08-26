@@ -84,7 +84,7 @@
                   </span>
                 </div>
 
-                
+
                 <!-- Sea water potential temperature -->
                 <div v-if="Object.keys(platformsData[platformCode].data).includes('ztmp')">
                   <span>
@@ -339,6 +339,11 @@ export default {
       }
       // Load the data
       else {
+        // Set all platforms to loading
+        Object.keys(this.platforms).forEach(platformCode => {
+          this.platformsData[platformCode].isLoading = true;
+        });
+
         // Prepare start / end of day
         let startDate = new Date(dayTmst + 'T00:00Z');
         let endDate = new Date(dayTmst + 'T00:00Z');
@@ -357,6 +362,10 @@ export default {
           .then(res => {
             // Store response
             this.requestedDailyData[dayTmst] = res;
+            // All platforms loaded
+            Object.keys(this.platforms).forEach(platformCode => {
+              this.platformsData[platformCode].isLoading = false;
+            });
             // Create data structure
             this.parseRawTextAndStructureData(res);
             // Map and vue data structure if required
