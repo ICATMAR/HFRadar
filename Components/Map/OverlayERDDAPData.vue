@@ -503,7 +503,7 @@ export default {
         platformInfo.getElement().parentElement.classList.add('no-pointer-events');
         platformInfo.element.classList.add('no-pointer-events'); // Remove pointer events, container takes more space than necessary and blocks visible icons
         this.map.addOverlay(platformInfo);
-        console.log("Added ERDDAP platform");
+        console.log("Added NOAA ERDDAP platform");
         platform.olLayer = platformInfo;
       });
     },
