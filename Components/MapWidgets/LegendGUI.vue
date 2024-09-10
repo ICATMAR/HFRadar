@@ -150,7 +150,7 @@ export default {
       this.currentDirection = direction;
 
       //this.$refs.tooltipLegend.style.left = (100 * (this.currentValue - this.legendRange[0]) / (this.legendRange[1] - this.legendRange[0])) + '%';
-      this.$refs.tooltipLegendBar.style.left = (100 * (this.currentValue - this.legendRange[0]) / (this.legendRange[1] - this.legendRange[0])) + '%';
+      this.$refs.tooltipLegendBar.style.left = Math.min(100, (100 * (this.currentValue - this.legendRange[0]) / (this.legendRange[1] - this.legendRange[0]))) + '%';
     },
     // Set legend color
     setLegendColorScale: function(legendName){
