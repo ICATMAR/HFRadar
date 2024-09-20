@@ -1,59 +1,59 @@
 <!DOCTYPE HTML>
 <html>
-  <head>
-    <meta charset=utf-8>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HF Radar</title>
-    <meta name="description"
-      content="HF Radar visualization demo">
-    <meta name="author" content="Gerard Llorach Tó">
-    <link rel="shortcut icon" type="image/png" href="favicon.ico"/>
 
-    <!-- Vue -->
-    <!-- <script src="https://unpkg.com/vue@next"></script> -->
-    <script src="lib/vue/vue.js"></script>
+<head>
+  <meta charset=utf-8>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HF Radar</title>
+  <meta name="description" content="HF Radar visualization demo">
+  <meta name="author" content="Gerard Llorach Tó">
+  <link rel="shortcut icon" type="image/png" href="favicon.ico" />
 
-    <!-- Vue Multilingual -->
-    <!-- <script src="https://unpkg.com/vue-i18n@next"></script> -->
-    <script src="lib/vue/vue-i18n.js"></script>
+  <!-- Vue -->
+  <!-- <script src="https://unpkg.com/vue@next"></script> -->
+  <script src="lib/vue/vue.js"></script>
 
-    <!-- Client parser of .vue files -->
-    <!-- <script src="https://cdn.jsdelivr.net/npm/vue3-sfc-loader/dist/vue3-sfc-loader.js"></script> -->
-    <script src="lib/vue/vue3-sfc-loader.js"></script>
+  <!-- Vue Multilingual -->
+  <!-- <script src="https://unpkg.com/vue-i18n@next"></script> -->
+  <script src="lib/vue/vue-i18n.js"></script>
 
-    <!-- Bootstrap 5.0 CSS -->
-    <link href="lib/Bootstrap/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+  <!-- Client parser of .vue files -->
+  <!-- <script src="https://cdn.jsdelivr.net/npm/vue3-sfc-loader/dist/vue3-sfc-loader.js"></script> -->
+  <script src="lib/vue/vue3-sfc-loader.js"></script>
 
-
-    <!-- Openlayers library -->
-    <script src="lib/OpenLayers/ol_v7.0.0.js"></script>
-    <link href="lib/OpenLayers/ol_css_v7.0.0.css" rel="stylesheet" crossorigin="anonymous">
+  <!-- Bootstrap 5.0 CSS -->
+  <link href="lib/Bootstrap/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
 
 
+  <!-- Openlayers library -->
+  <script src="lib/OpenLayers/ol_v7.0.0.js"></script>
+  <link href="lib/OpenLayers/ol_css_v7.0.0.css" rel="stylesheet" crossorigin="anonymous">
 
-    <!-- font-awesome -->
-    <!--  https://github.com/FortAwesome/Font-Awesome/blob/6.x/css/all.min.css 
+
+
+  <!-- font-awesome -->
+  <!--  https://github.com/FortAwesome/Font-Awesome/blob/6.x/css/all.min.css 
           https://origin.fontawesome.com/v6/docs/web/add-icons/pseudo-elements
           https://origin.fontawesome.com/search?o=r&m=free&s=regular&f=classic
     -->
-    <link rel="stylesheet" type="text/css" href="lib/font-awesome/all.min.css" />
-    <!-- Font poppins -->
-    <!-- https://fonts.google.com/specimen/Poppins -->
-    <link rel="stylesheet" type="text/css" href="lib/font-poppins.css" />
-    <!-- Global Style -->
-    <link rel="stylesheet" type="text/css" href="globalStyle.css" media="screen" />
+  <link rel="stylesheet" type="text/css" href="lib/font-awesome/all.min.css" />
+  <!-- Font poppins -->
+  <!-- https://fonts.google.com/specimen/Poppins -->
+  <link rel="stylesheet" type="text/css" href="lib/font-poppins.css" />
+  <!-- Global Style -->
+  <link rel="stylesheet" type="text/css" href="globalStyle.css" media="screen" />
 
-    <!-- Event bus (mitt)-->
-    <script src="lib/mitt.umd.js"></script>
+  <!-- Event bus (mitt)-->
+  <script src="lib/mitt.umd.js"></script>
 
-    <!-- Web worker scripts -->
-    <script src="Assets/Scripts/WorkerFunctions.js"></script>
+  <!-- Web worker scripts -->
+  <script src="Assets/Scripts/WorkerFunctions.js"></script>
 
-    <!-- JSZip library -->
-    <script src="lib/JSZip/jszip.min.js"></script>
+  <!-- JSZip library -->
+  <script src="lib/JSZip/jszip.min.js"></script>
 
-    <!-- Tween -->
-    <!-- <script src="lib/tween.js"></script> -->
+  <!-- Tween -->
+  <!-- <script src="lib/tween.js"></script> -->
 
 
   <!-- Google tag (gtag.js) -->
@@ -63,11 +63,11 @@
     // https://developers.google.com/tag-platform/gtagjs/reference
     // https://github.com/yaiks/vue-cookie-comply/
     window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
+    function gtag() { dataLayer.push(arguments); }
     gtag('js', new Date());
     // Check if analyitic preferences were stored
     let params = {};
-    if (localStorage.getItem('cookie-analytics')){
+    if (localStorage.getItem('cookie-analytics')) {
       let paramsStr = localStorage.getItem('cookie-analytics');
       params = JSON.parse(paramsStr);
     } else {
@@ -77,30 +77,29 @@
         ad_user_data: 'denied',
         ad_personalization: 'denied',
         analytics_storage: 'denied',
-      };   
+      };
       localStorage.setItem('cookie-analytics', JSON.stringify(params));
     }
     gtag('consent', 'default', params);
     gtag('config', 'G-Y32NMB1CZ6');
   </script>
 
-  </head>
-  <body>
+</head>
 
-    <!-- Bootstrap 5.0 and Popper https://getbootstrap.com/docs/5.0/getting-started/introduction/ -->
-    <script src="lib/Bootstrap/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+<body>
 
-    <script src="Assets/Scripts/WMSDataTypes.js"></script>
-    <script src="Assets/Scripts/WMSDataRetreiver.js"></script>
+  <!-- Bootstrap 5.0 and Popper https://getbootstrap.com/docs/5.0/getting-started/introduction/ -->
+  <script src="lib/Bootstrap/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
 
-    <!-- Vue component -->
-    <div id="vue-app">
-    </div>
+  <!-- Vue component -->
+  <div id="vue-app">
+  </div>
 
-    <!-- Vue client parser-->
-    <script type="module" src="main.js"></script>
+  <!-- Vue client parser-->
+  <script type="module" src="main.js"></script>
 
 
 
-  </body>
+</body>
+
 </html>
