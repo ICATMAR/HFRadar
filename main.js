@@ -40,6 +40,13 @@ window.GUIManager = new GUIManager();
 window.GAnalyticsManager = new GAnalyticsManager();
 window.AnimationEngine = AnimationEngine;
 
+// Import WMTSDataRetriever
+import WMTSDataRetrieverClass from './Assets/Scripts/WMTS/WMTSDataRetriever.js';
+window.WMTSDataRetriever = new WMTSDataRetrieverClass();
+// Import tile manager
+import WMTSTileManagerClass from './Assets/Scripts/WMTS/WMTSTileManager.js'
+window.WMTSTileManager = new WMTSTileManagerClass();
+
 
 
 
