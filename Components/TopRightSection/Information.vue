@@ -22,7 +22,7 @@
         </div>
         <!-- Text -->
         <div class="banner-text-warning">
-          <span>Real-time data is unavailable from Friday 4th to Monday 7th of October 2024 due to manteinance. Sorry for the inconvenience.
+          <span>Real-time data might be unavailable from Friday 4th to Wednesday 9th of October 2024 due to manteinance. Sorry for the inconvenience.
           </span>
         </div>
       </div>
@@ -52,7 +52,7 @@
 export default {
   name: "Information",
   mounted(){
-    this.isWarningOn = new Date() < new Date(2024, 10 - 1, 8);
+    this.isWarningOn = new Date() < new Date(2024, 10 - 1, 9);
     this.isVisible = this.isWarningOn;
   },
   data() {
