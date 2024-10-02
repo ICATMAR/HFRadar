@@ -2,6 +2,9 @@
   <div class="top-right-section">
     <div class="container-section">
 
+      <!-- Information -->
+      <information></information>
+
       <!-- Repository -->
       <a href="https://github.com/ICATMAR/HFRadar" target="_blank" title="Github repository">
         <svg height="32" aria-hidden="true" viewBox="0 0 16 16" version="1.1" width="32" data-view-component="true" class="clickable github-logo">
@@ -35,6 +38,7 @@
 <script>
 
 // Import components
+import Information from "./Information.vue";
 import CookieBanner from "./CookieBanner.vue";
 import DownloadDataMenu from "./DownloadDataMenu.vue";
 
@@ -77,6 +81,7 @@ export default {
     },
   },
   components: {
+    "information": Information,
     "cookie-banner": CookieBanner,
     "download-data-menu": DownloadDataMenu,
   }
