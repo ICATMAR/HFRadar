@@ -22,7 +22,7 @@
         </div>
         <!-- Text -->
         <div class="banner-text-warning">
-          <span>Real-time data might be unavailable from the 4th to the {{ this.lastDay }} of October 2024 due to manteinance. Sorry for the inconvenience.
+          <span>Real-time data might be unavailable from the 4th to the {{ lastDay }}th of October 2024 due to manteinance. Sorry for the inconvenience.
           </span>
         </div>
       </div>
@@ -31,7 +31,9 @@
       <!-- Text -->
       <div class="banner-text">
         <span>This webiste is being developed by Gerard Llorach-Tó. Please do not hesitate to contact me 
-          if you find any errors or have suggestions at gerard.llorach (at) csic(dot)es or at info (at) icatmar (dot) cat.
+          if you find any errors or have suggestions at 
+          <a :href="mailtoGerard" v-text="gerardEmail"></a> or at
+          <a :href="mailtoIcatmar" v-text="icatmarEmail"></a>.
           If you are familiar with github and issues, please use the
            <a href="https://github.com/ICATMAR/HFRadar" target="_blank">github repository</a>.
         </span>
@@ -51,6 +53,16 @@
 
 export default {
   name: "Information",
+  created(){
+    const domainCsic = "csic.es";
+    const domainIcatmar = "icatmar.cat";
+
+    this.gerardEmail = "gerard.llorach" + "@" + domainCsic;
+    this.mailtoGerard = "mailto:" + this.gerardEmail;
+
+    this.icatmarEmail = "info" + "@" + domainIcatmar;
+    this.mailtoIcatmar = "mailto:" + this.icatmarEmail;
+  },
   mounted(){
     this.isWarningOn = new Date() < new Date(2024, 10 - 1, this.lastDay);
     this.isVisible = this.isWarningOn;
@@ -60,6 +72,10 @@ export default {
       isVisible: false,
       isWarningOn: false,
       lastDay: 11,
+      gerardEmail: "", 
+      mailtoGerard: "",
+      icatmarEmail: "",
+      mailtoIcatmar: "",
     }
   },
   methods: {
