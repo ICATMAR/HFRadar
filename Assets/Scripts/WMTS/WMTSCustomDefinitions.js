@@ -4,7 +4,7 @@ const customDefinitions = {
   'VHM0': {
     shortName: 'Wave height',
     altNames: ['Hs', 'Hm0', 'Wave significant height', 'Spectral significant wave height (Hm0)'],
-    range: [0,12],
+    range: [0, 12],
     unit: 'm',
     animation: {
       layerNames: ['VHM0', 'VMDR'], // Intensity, Angle
@@ -41,7 +41,7 @@ const customDefinitions = {
   'VHM0_WW': {// Wind wave height
     shortName: 'Wind wave height',
     altNames: ['Wind wave significant height', "Spectral significant wind wave height", 'Wind waves', 'WWSH'],
-    range: [0,12],
+    range: [0, 12],
     unit: 'm',
     animation: {
       layerNames: ['VHM0_WW', 'VMDR_WW'], // Intensity, Angle
@@ -75,6 +75,28 @@ const customDefinitions = {
       format: 'value_angle',
       type: 'wave'
     },
+  },
+  'sea_water_velocity': {
+    shortName: 'Sea water velocity',
+    altNames: ['Sea velocity', 'Current', 'Currents', 'Water velocity'],
+    range: [0, 3],
+    unit: 'm/s',
+    animation: {
+      layerNames: ['uo', 'vo'], // Estward, northward
+      format: 'east_north',
+      range: [-3, 3],
+      type: 'wind',
+      directionFrom: false,
+    },
+    // Styles
+    // Legends from Assets/Legends
+    legends: ['Occam', 'Alg2', 'Inferno', 'OccamPastel', 'Zebra'],
+    legendRanges: [
+      [0, 1],
+      [0, 1.5],
+      [0, 2],
+      [0, 3],
+    ],
   },
   'uo': {
     range: [0, 2.5],
@@ -123,7 +145,7 @@ const customDefinitions = {
     unit: 'ºC',
     // Styles
     // Legends from Assets/Legends
-    legends: ['TwoSidedOccam','TwoSidedBlueWhiteRed', 'TwoSidedDarkScaleColors'],
+    legends: ['TwoSidedOccam', 'TwoSidedBlueWhiteRed', 'TwoSidedDarkScaleColors'],
     legendRanges: [
       [-5, 5],
       [-8, 8],
@@ -136,7 +158,7 @@ const customDefinitions = {
     unit: '‰',
     // Styles
     // Legends from Assets/Legends
-    legends: ['OccamCold','Occam', 'Alg2', 'Inferno', 'OccamPastel', 'Zebra'],
+    legends: ['OccamCold', 'Occam', 'Alg2', 'Inferno', 'OccamPastel', 'Zebra'],
     legendRanges: [
       [35, 39],
       [36, 38],
@@ -149,7 +171,7 @@ const customDefinitions = {
     unit: 'mg/m³',
     // Styles
     // Legends from Assets/Legends
-    legends: ['Green','Occam', 'Alg2', 'Inferno', 'OccamPastel', 'Zebra'],
+    legends: ['Green', 'Occam', 'Alg2', 'Inferno', 'OccamPastel', 'Zebra'],
     legendRanges: [
       [0.01, 0.4],
       [0.01, 0.1],
