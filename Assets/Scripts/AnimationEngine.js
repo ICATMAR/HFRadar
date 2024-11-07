@@ -8,10 +8,10 @@
 
 // Constants
 const earthRadius = 6378;
-const LEGENDURLS = [
-  './Assets/Legends/GreenBlueWhiteOrangeRed.png',
-  './Assets/Legends/BlueWhiteRed.png',
-  './Assets/Legends/ModifiedOccam.png'
+const LEGENDNAMES = [
+  'GreenBlueWhiteOrangeRed',
+  'BlueWhiteRed',
+  'ModifiedOccam'
 ];
 
 class AnimationEngine {
@@ -111,7 +111,7 @@ class AnimationEngine {
     // Load color legends if it was not passed as a constructor
     // TODO: THIS SHOULD NOT BE NECESSARY
     if (!legend){
-      window.FileManager.getLegend(LEGENDURLS[3], 20)
+      window.FileManager.getLegend(LEGENDNAMES[2], 20)
         .then(legend => {
           this.legend = legend;
           this.particles.updateLegend(legend);
