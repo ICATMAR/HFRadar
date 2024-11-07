@@ -804,15 +804,6 @@ export default {
       // Change currents tooltip
       window.eventBus.emit('Map_mouseMove', [event.clientX, event.clientY, coord[0], coord[1]]);
 
-
-      // Change legend tooltip value
-      // LEGACY?
-      // if (this.isLayerDataReady && !this.isRendering) {
-      //   debugger;
-      //   let color = this.getDataAtPixel(event.clientX, event.clientY);
-      //   window.eventBus.emit('Map_MouseOnData_WMTSColor', color);
-      // }
-
     },
 
     // Map moves
@@ -996,18 +987,6 @@ export default {
 
     },
 
-
-    // Get pixel data
-    getDataAtPixel: function (x, y) {
-      let imgArrayPos = (x + y * this.layerDataWidth) * 4; // + 1,2,3 if you want (R)GBA
-      let imgData = this.layerData.data;
-      let color = this.pixelColor;
-      color[0] = imgData[imgArrayPos]
-      color[1] = imgData[imgArrayPos + 1]
-      color[2] = imgData[imgArrayPos + 2]
-      color[3] = imgData[imgArrayPos + 3];
-      return color;
-    },
 
     // Center on the coordinate
     centerOnCoord(coord, forceCenter) {
