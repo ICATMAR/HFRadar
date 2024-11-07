@@ -44,7 +44,7 @@ export default {
     'legendName': {default: 'absModifiedOccam', type: String},
     'legendRange':{default: [0, 100], type: Array},
     'defaultUnits': {default: 'cm/s', type: String},
-    'selectedLegends': {default: ['absModifiedOccam.png', 'absColdOccam.png', 'white.png', 'black.png' ], type: Array},
+    'selectedLegends': {default: ['absModifiedOccam', 'absColdOccam', 'white', 'black' ], type: Array},
   },
   created() {
     this.units = this.defaultUnits;
