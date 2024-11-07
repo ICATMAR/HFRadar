@@ -1216,12 +1216,4 @@ export default {
 }
 
 
-/* #time-range-bar {
-  background:white;
-  bottom: 0; 
-  height: 90px; 
-  width: 100%;
-}
-
-
 </style>
