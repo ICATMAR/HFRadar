@@ -802,15 +802,16 @@ export default {
       this.$emit('mouseMove', coord);
       // LEGEND TOOLTIPS
       // Change currents tooltip
-      window.eventBus.emit('Map_MouseMove', [event.clientX, event.clientY, coord[0], coord[1]]);
+      window.eventBus.emit('Map_mouseMove', [event.clientX, event.clientY, coord[0], coord[1]]);
 
 
       // Change legend tooltip value
-      if (this.isLayerDataReady && !this.isRendering) {
-        debugger;
-        let color = this.getDataAtPixel(event.clientX, event.clientY);
-        window.eventBus.emit('Map_MouseOnData_WMTSColor', color);
-      }
+      // LEGACY?
+      // if (this.isLayerDataReady && !this.isRendering) {
+      //   debugger;
+      //   let color = this.getDataAtPixel(event.clientX, event.clientY);
+      //   window.eventBus.emit('Map_MouseOnData_WMTSColor', color);
+      // }
 
     },
 

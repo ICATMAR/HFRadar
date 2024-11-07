@@ -73,7 +73,8 @@ export default {
     window.eventBus.on('GUIManager_URLDateChanged', this.updateClimaLayer);
     // User clicked on Active sync and turned it on
     window.eventBus.on('TopRightCanvas_ActiveSyncClickedAndOn', this.updateClimaLayer);
-
+    // Map mouse move to update lgend WMTS
+    window.eventBus.on('Map_mouseMove', coord => this.mapMouseMove(coord));
   },
   data() {
     return {
@@ -176,6 +177,28 @@ export default {
       // // Set legend
       // this.$refs.wmsLegend.setWMSLegend(infoWMS);
     },
+
+
+    // Map mouse move, related to WMTS legend to show the value
+    mapMouseMove: async function(screenPos_coord){
+      let coord = [screenPos_coord[2], screenPos_coord[3]];
+      if (!this.isClimaLayerVisible)
+        return;        
+      let value = await window.WMTSDataRetriever.getDataAtPoint(this.selClimaLayer, this.currentTmst, coord[1], coord[0], this.timeScale); // dataName, tmst, lat, long, timeScale, direction
+      if (this.dataSetAnimation){
+        let dir = await window.WMTSDataRetriever.getDataAtPoint(this.selClimaLayer, this.currentTmst, coord[1], coord[0], this.timeScale, true);
+        if (this.dataSetAnimation.directionFrom){ // Wave products show where the waves are coming from, not where they are going
+          dir += 180;
+        }
+        this.$refs.wmtsLegend.setCurrentValue(value, dir);
+      } else{
+        this.$refs.wmtsLegend.setCurrentValue(value);
+      }
+      
+      
+    },
+
+
 
 
     // PUBLIC METHODS
