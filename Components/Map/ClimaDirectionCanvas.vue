@@ -69,7 +69,7 @@ export default {
         this.$refs.climaDirectionCanvas.style.display = 'revert';
       }
       // Check if it has animation parameter
-      if (infoWMTS.animation){
+      if (infoWMTS.dataSet.animation){
         // OL map
         if (this.map == undefined){
           this.map = this.$parent.map;
@@ -77,6 +77,7 @@ export default {
 
         // TODO
         // Prepare WMTS url
+        debugger;
         let url = infoWMTS.url;
         url += '?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap&FORMAT=image/png&TRANSPARENT=true';
         Object.keys(infoWMTS.params).forEach(key => {
@@ -85,18 +86,18 @@ export default {
         infoWMTS.WMTSURL = url;
 
         // Force arrows
-        infoWMTS.animation.useArrows = true;
+        infoWMTS.dataSet.animation.useArrows = true;
 
         // Create animation engine
         if (this.animEngine == undefined){
-          this.animEngine = new AnimationEngine(this.canvas, this.map, infoWMTS, undefined);
+          this.animEngine = new AnimationEngine(this.canvas, this.map, infoWMTS.dataSet, undefined);
           // Bind events
           // Map events for animation
           this.$parent.map.on('moveend', this.animEngine.onMapMoveEnd);
           this.$parent.map.on('movestart', this.animEngine.onMapMoveStart);
         } else {
           this.animEngine.isStopped = false;
-          this.animEngine.setWMTSSource(infoWMTS.WMTSURL, infoWMTS.animation);
+          this.animEngine.setWMTSSource(infoWMTS.dataSet, infoWMTS.dataSet.animation);
         }
         return
       } 
