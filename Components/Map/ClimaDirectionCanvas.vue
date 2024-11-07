@@ -23,13 +23,13 @@ export default {
     // Canvas size
     this.createCanvas('dirCanvas');
 
-    // WMS data retriever
-    this.dataRetriever = new WMSDataRetriever(); // TODO: this class should be a singleton
+    // WMTS data retriever
+    this.dataRetriever = window.WMTSDataRetriever; // TODO: this class should be a singleton
 
     // EVENTS
     // Clima layer
-    window.eventBus.on('WidgetWeatherLayers_ClimaLayerChange', infoWMS => {
-      this.setClimaLayer(infoWMS);
+    window.eventBus.on('WidgetWeatherLayers_ClimaLayerChange', infoWMTS => {
+      this.setClimaLayer(infoWMTS);
     });
     // When the side panel is open/hidden
     window.eventBus.on('SidePanelSizechanged', (isSidePanelOpen) => {
@@ -60,42 +60,43 @@ export default {
     },
 
     // New clima layer selected
-    setClimaLayer: function(infoWMS){
+    setClimaLayer: function(infoWMTS){
       // Hide if undefined (send undefined when closing widget)
-      if (infoWMS == undefined){
+      if (infoWMTS == undefined){
         this.$refs.climaDirectionCanvas.style.display = 'none';
         return;
       } else {
         this.$refs.climaDirectionCanvas.style.display = 'revert';
       }
       // Check if it has animation parameter
-      if (infoWMS.animation){
+      if (infoWMTS.animation){
         // OL map
         if (this.map == undefined){
           this.map = this.$parent.map;
         }
 
-        // Prepare WMS url
-        let url = infoWMS.url;
+        // TODO
+        // Prepare WMTS url
+        let url = infoWMTS.url;
         url += '?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap&FORMAT=image/png&TRANSPARENT=true';
-        Object.keys(infoWMS.params).forEach(key => {
-          url += '&' + key + '=' + infoWMS.params[key];
+        Object.keys(infoWMTS.params).forEach(key => {
+          url += '&' + key + '=' + infoWMTS.params[key];
         });
-        infoWMS.wmsURL = url;
+        infoWMTS.WMTSURL = url;
 
         // Force arrows
-        infoWMS.animation.useArrows = true;
+        infoWMTS.animation.useArrows = true;
 
         // Create animation engine
         if (this.animEngine == undefined){
-          this.animEngine = new AnimationEngine(this.canvas, this.map, infoWMS, undefined);
+          this.animEngine = new AnimationEngine(this.canvas, this.map, infoWMTS, undefined);
           // Bind events
           // Map events for animation
           this.$parent.map.on('moveend', this.animEngine.onMapMoveEnd);
           this.$parent.map.on('movestart', this.animEngine.onMapMoveStart);
         } else {
           this.animEngine.isStopped = false;
-          this.animEngine.setWMSSource(infoWMS.wmsURL, infoWMS.animation);
+          this.animEngine.setWMTSSource(infoWMTS.WMTSURL, infoWMTS.animation);
         }
         return
       } 
