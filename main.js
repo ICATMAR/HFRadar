@@ -21,7 +21,7 @@ import FileManager from './Assets/Scripts/FileManager.js';
 import DataManager from './Assets/Scripts/DataManager.js';
 import GUIManager from './Assets/Scripts/GUIManager.js';
 import GAnalyticsManager from './Assets/Scripts/GAnalyticsManager.js';
-import AnimationEngine from './Assets/Scripts/AnimationEngine.js';
+import AnimationEngine from './Assets/Scripts/AnimationEngine/AnimationEngine.js';
 
 
 // Web worker
