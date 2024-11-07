@@ -547,6 +547,8 @@ loadDataAvailability = function(){
 
     return new Promise ((resolve, reject) => {
 
+      if (legendName == undefined) {debugger};
+
       let img = new Image();
       img.src = this.legendsFilePath + legendName + '.png';
       
