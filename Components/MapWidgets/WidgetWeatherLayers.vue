@@ -42,7 +42,7 @@
     <wmts-legend ref="wmtsLegend"></wmts-legend>
 
     <!-- Current date -->
-    <span>{{ $t('Date') }}: {{ currentDate }}</span>
+    <!-- <span>{{ $t('Date') }}: {{ currentDate }}</span> -->
 
     <!-- Data source attribution -->
     <span class="wrapText">{{ $t('Data from') }}: <a title="Weather data source" :href="sourceDoi" target="_blank">{{
@@ -106,7 +106,7 @@ export default {
       WMTSLegendURL: '',
       sourceDoi: '',
       productName: '',
-      currentDate: '',
+      // currentDate: '',
     }
   },
   methods: {
@@ -127,6 +127,8 @@ export default {
 
       // Get date
       let date = window.GUIManager.currentTmst;
+      // Current date?
+      // this.currentDate = date?
       if (date == undefined) {
         setTimeout(this.updateClimaLayer, 1000);
         console.log("Current date not found. Trying to update clima layer in 1s.");
