@@ -531,6 +531,7 @@ loadDataAvailability = function(){
 
   // LEGENDS
   // Load legends
+  // TODO: DO NOT LOAD THEM TWICE
   loadLegends = function(steps){
     let promises = [];
     steps = steps || 50;
