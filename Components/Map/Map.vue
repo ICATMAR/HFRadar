@@ -253,6 +253,11 @@ export default {
     window.eventBus.on('WidgetMapOptions_BaseLayerClicked', (baseLayerName) => {
       this.setBaseLayer(baseLayerName);
     });
+    // Change clima layer stayle. Legend WMTS changed
+    window.eventBus.on('WMTSLegend_LegendChange', () => {
+      // Reload WMTS source
+      this.getMapLayer('data').getSource().refresh();
+    });
     // Change isobaths
     window.eventBus.on('WidgetMapOptions_IsobathsVisibilityChange', (isVisible) => {
       //
