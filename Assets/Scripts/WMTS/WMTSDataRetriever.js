@@ -303,7 +303,7 @@ export class WMTSDataRetriever {
     }
     if (selectedDataSet == undefined) {
       this.printLog("No dataSet with id=" + id + " contains the selected timestamp: " + tmst + " at a timeScale of " + timeScale);
-      this.console.error("No dataSet with id=" + id + " contains the selected timestamp: " + tmst + " at a timeScale of " + timeScale);
+      console.error("No dataSet with id=" + id + " contains the selected timestamp: " + tmst + " at a timeScale of " + timeScale);
     }
 
     return selectedDataSet;
