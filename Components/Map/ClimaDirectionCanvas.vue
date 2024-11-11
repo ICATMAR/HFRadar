@@ -75,29 +75,22 @@ export default {
           this.map = this.$parent.map;
         }
 
-        // TODO
-        // Prepare WMTS url
-        debugger;
-        let url = infoWMTS.url;
-        url += '?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap&FORMAT=image/png&TRANSPARENT=true';
-        Object.keys(infoWMTS.params).forEach(key => {
-          url += '&' + key + '=' + infoWMTS.params[key];
-        });
-        infoWMTS.WMTSURL = url;
+        // Force key to identify in AnimationEngine
+        infoWMTS.isWMTS = true;
 
         // Force arrows
         infoWMTS.dataSet.animation.useArrows = true;
 
         // Create animation engine
         if (this.animEngine == undefined){
-          this.animEngine = new AnimationEngine(this.canvas, this.map, infoWMTS.dataSet, undefined);
+          this.animEngine = new AnimationEngine(this.canvas, this.map, infoWMTS, undefined);
           // Bind events
           // Map events for animation
           this.$parent.map.on('moveend', this.animEngine.onMapMoveEnd);
           this.$parent.map.on('movestart', this.animEngine.onMapMoveStart);
         } else {
           this.animEngine.isStopped = false;
-          this.animEngine.setWMTSSource(infoWMTS.dataSet, infoWMTS.dataSet.animation);
+          this.animEngine.setWMTSSource(infoWMTS);
         }
         return
       } 

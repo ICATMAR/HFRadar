@@ -2,6 +2,7 @@
 import SourceWMS from './SourceWMS.js';
 import {SourceHFRadar, SourceCombinedRadar} from './SourceHFRadars.js';
 import {ParticleSystem, ParticleSystemHF} from './ParticleSystems.js';
+import SourceWMTS from './SourceWMTS.js';
 
 // Classes defined here:
 
@@ -86,6 +87,26 @@ class AnimationEngine {
       // Start drawing loop (only once)
       this.update();
     }
+    
+    // Create WMTS source
+    if (animInfo.isWMTS) {
+      debugger;
+      this.source = new SourceWMTS(animInfo);
+      // Create particle system
+      this.particles = new ParticleSystem(this.canvasParticles, this.source, this.map);
+      this.particles.clear();
+      // Define if using arrows
+      this.useArrows = animInfo.animation.useArrows == true;
+
+      // Define callback when data is loaded
+      this.source.defineOnLoadCallback(this.onSourceLoad.bind(this));
+
+      // Load data
+      this.source.updateWMTSSource(animInfo);
+
+      // Start drawing loop (only once)
+      this.update();
+    }
 
     // Create HFRadar source
     if (animInfo.HFRadarData){
@@ -144,6 +165,21 @@ class AnimationEngine {
 
     // Load data
     this.source.updateWMSSource(wmsURL, animation);
+  }
+
+
+  setWMTSSource(infoWMTS){
+    // Create source
+    this.source = new SourceWMTS(infoWMTS.dataSet.animation);
+    // Create particle system
+    this.particles = new ParticleSystem(this.canvasParticles, this.source, this.map);
+    this.particles.clear();
+
+    // Define callback when data is loaded
+    this.source.defineOnLoadCallback(this.onSourceLoad.bind(this));
+
+    // Load data
+    this.source.updateWMTSSource(infoWMTS);
   }
 
 
@@ -289,6 +325,13 @@ class AnimationEngine {
         this.particles.repositionParticles();
         if (this.useArrows) // Update and draw once for arrows
           this.update();
+      }
+      // Source is not ready
+      else {
+        // TODO: 
+        // In the case of dynamically loading WMTS Tiles (instead of loading the whole MED once), something should be done here.
+        // Some kind of callback? What if the map keeps moving? The callbacks should be cancelled. Probably better to use promises, because they can be cancelled.
+        debugger;
       }
     }
     if (this.legend)
