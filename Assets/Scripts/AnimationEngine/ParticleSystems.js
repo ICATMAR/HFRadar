@@ -950,6 +950,9 @@ class ParticleCombinedRadar extends Particle {
     let steps = this.legend.colorsStr.length;
     let range = this.legend.legendRange; // Source could also contain the legendRange. but user can modify legend and legend rage. Source maybe should have the default
     //let unitStep = (range[1] - range[0])/steps;
+    // HACK-TODO: sometimes range is undefined (probably legend is not loaded yet?)
+    range = range == undefined ? [0, 100] : range;
+
     
     // Find color according to magnitude and legend
     let normValue = Math.min(1 , Math.max(0,(value - range[0]) / (range[1] - range[0])));
