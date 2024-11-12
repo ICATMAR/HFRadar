@@ -24,6 +24,7 @@ class AnimationEngine {
   // Variables
   prevTime = 0;
   canvasParticles = undefined;
+  bbox = [];
   source = undefined;
   particles = undefined;
   frameTime = 0;
@@ -90,7 +91,6 @@ class AnimationEngine {
     
     // Create WMTS source
     if (animInfo.isWMTS) {
-      debugger;
       this.source = new SourceWMTS(animInfo);
       // Create particle system
       this.particles = new ParticleSystem(this.canvasParticles, this.source, this.map);
@@ -101,8 +101,9 @@ class AnimationEngine {
       // Define callback when data is loaded
       this.source.defineOnLoadCallback(this.onSourceLoad.bind(this));
 
-      // Load data
-      this.source.updateWMTSSource(animInfo);
+      // Load data only in the view
+      this.calculateCanvasGeographicExtent();
+      this.source.updateWMTSSource(animInfo, this.bbox);
 
       // Start drawing loop (only once)
       this.update();
@@ -170,7 +171,7 @@ class AnimationEngine {
 
   setWMTSSource(infoWMTS){
     // Create source
-    this.source = new SourceWMTS(infoWMTS.dataSet.animation);
+    this.source = new SourceWMTS(infoWMTS);
     // Create particle system
     this.particles = new ParticleSystem(this.canvasParticles, this.source, this.map);
     this.particles.clear();
@@ -308,10 +309,10 @@ class AnimationEngine {
     let extent = this.map.getView().calculateExtent();
     let mapExtentMin = ol.proj.transform([extent[0], extent[1]], 'EPSG:3857', 'EPSG:4326');
     let mapExtentMax = ol.proj.transform([extent[2], extent[3]], 'EPSG:3857', 'EPSG:4326');
-    this.canvasParticles.mapMinLong = mapExtentMin[0];
-    this.canvasParticles.mapMinLat = mapExtentMin[1];
-    this.canvasParticles.mapMaxLong = mapExtentMax[0];
-    this.canvasParticles.mapMaxLat = mapExtentMax[1];
+    this.canvasParticles.mapMinLong = this.bbox[1] = mapExtentMin[0];
+    this.canvasParticles.mapMinLat = this.bbox[0] = mapExtentMin[1];
+    this.canvasParticles.mapMaxLong = this.bbox[3] = mapExtentMax[0];
+    this.canvasParticles.mapMaxLat = this.bbox[2] = mapExtentMax[1];
   }
 
 
@@ -321,6 +322,9 @@ class AnimationEngine {
     this.resizeCanvas();
     this.mapIsMoving = false;
     if (this.source) {
+      // WMTSSource (dynamic loading)
+      if (this.source.constructor.name == 'SourceWMTS')
+        this.source.viewportChange(this.bbox);
       if (this.source.isReady){
         this.particles.repositionParticles();
         if (this.useArrows) // Update and draw once for arrows
@@ -331,7 +335,7 @@ class AnimationEngine {
         // TODO: 
         // In the case of dynamically loading WMTS Tiles (instead of loading the whole MED once), something should be done here.
         // Some kind of callback? What if the map keeps moving? The callbacks should be cancelled. Probably better to use promises, because they can be cancelled.
-        debugger;
+        // Actually when the tiles are loaded a callback is called
       }
     }
     if (this.legend)
