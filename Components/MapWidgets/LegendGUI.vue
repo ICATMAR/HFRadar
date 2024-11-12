@@ -44,7 +44,7 @@ export default {
     'legendName': {default: 'absModifiedOccam', type: String},
     'legendRange':{default: [0, 100], type: Array},
     'defaultUnits': {default: 'cm/s', type: String},
-    'selectedLegends': {default: ['absModifiedOccam.png', 'absColdOccam.png', 'white.png', 'black.png' ], type: Array},
+    'selectedLegends': {default: ['absModifiedOccam', 'absColdOccam', 'white', 'black' ], type: Array},
   },
   created() {
     this.units = this.defaultUnits;
@@ -82,6 +82,20 @@ export default {
 
     // Advanced interface
     window.eventBus.on('AdvancedInterfaceOnOff', state => this.isAdvancedInterfaceOnOff = state);
+
+    // Clima Layer visible
+    // When clima layer is visible the currents should be shown as black
+    window.eventBus.on('WidgetWeatherLayers_ClimaLayerChange', (climaLayer) => {
+      if (climaLayer != undefined){
+        // Black
+        let index = this.legends.findIndex(leg => leg.legendName == "black");
+        this.legendClicked(undefined, index);
+      } else {
+        // Default
+        let index = this.legends.findIndex(leg => leg.legendName == "absModifiedOccam"); // HARDCODED
+        this.legendClicked(undefined, index);
+      }
+    } )
 
   },
   data (){

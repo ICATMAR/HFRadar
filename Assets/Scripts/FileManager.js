@@ -10,15 +10,28 @@
 
 class FileManager {
 
-  LEGENDURLS = [
-    './Assets/Legends/GreenBlueWhiteOrangeRed.png',
-    './Assets/Legends/BlueWhiteRed.png',
-    './Assets/Legends/ModifiedOccam.png',
-    './Assets/Legends/white.png',
-    './Assets/Legends/black.png',
-    './Assets/Legends/DarkScaleColors.png',
-    './Assets/Legends/absModifiedOccam.png',
-    './Assets/Legends/absColdOccam.png',
+  legendsFilePath = './Assets/Legends/';
+
+  LEGENDNAMES = [
+    'GreenBlueWhiteOrangeRed',
+    'BlueWhiteRed',
+    'ModifiedOccam',
+    'white',
+    'black',
+    'DarkScaleColors',
+    'absModifiedOccam',
+    'absColdOccam',
+    'Alg2',
+    'Green',
+    'Inferno',
+    'Occam',
+    'OccamCold',
+    'OccamPastel',
+    'TwoSidedBlueWhiteRed',
+    'TwoSidedDarkScaleColors',
+    'TwoSidedGreenBlueWhiteOrangeRed',
+    'TwoSidedOccam',
+    'Zebra'
   ];
 
   BASELAYERURLS = [
@@ -518,24 +531,27 @@ loadDataAvailability = function(){
 
   // LEGENDS
   // Load legends
+  // TODO: DO NOT LOAD THEM TWICE
   loadLegends = function(steps){
     let promises = [];
     steps = steps || 50;
 
-    for (let i = 0; i < this.LEGENDURLS.length; i++){
-      promises.push(this.getLegend(this.LEGENDURLS[i], steps));
+    for (let i = 0; i < this.LEGENDNAMES.length; i++){
+      promises.push(this.getLegend(this.LEGENDNAMES[i], steps));
     }
 
     return new Promise(resolve => resolve(Promise.allSettled(promises)));
   }
 
   // Get legends
-  getLegend = function(url, steps){
+  getLegend = function(legendName, steps){
 
     return new Promise ((resolve, reject) => {
 
+      if (legendName == undefined) {debugger};
+
       let img = new Image();
-      img.src = url;
+      img.src = this.legendsFilePath + legendName + '.png';
       
 
       img.onload = () => {
@@ -572,10 +588,6 @@ loadDataAvailability = function(){
           colorsFloat32[i*3 + 1] = pixels[pixelPosition*4 + 1];
           colorsFloat32[i*3 + 2] = pixels[pixelPosition*4 + 2];
         }
-
-        // Legend name
-        let str = url.split('/');
-        let legendName = str[str.length-1];
 
         resolve({colorsStr, colorsRGB, colorsFloat32, img, legendName});
       }

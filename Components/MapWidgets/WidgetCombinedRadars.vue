@@ -70,7 +70,7 @@ export default {
     // Load default legend
     if (!this.legend){
       console.log('./Assets/Legends/' + this.defaultLegendName + '.png');
-      window.FileManager.getLegend('./Assets/Legends/' + this.defaultLegendName + '.png', 20)
+      window.FileManager.getLegend(this.defaultLegendName, 20)
         .then(legend => {
           // Set default legend
           this.legend = legend;
@@ -166,7 +166,7 @@ export default {
         defaultLegendName: 'absModifiedOccam',
         defaultLegendRange: [0, 100], // TODO: this is defined in the data manager, or it should be in DataTypes somewhere?
         defaultUnits: 'cm/s',
-        selectedLegends: ['absModifiedOccam.png', 'absColdOccam.png', 'white.png', 'black.png' ],
+        selectedLegends: ['absModifiedOccam', 'absColdOccam', 'white', 'black' ],
         isVisible: true,
         areParticlesVisible: true,
         arePointsVisible: false,

@@ -83,7 +83,7 @@ export default {
     // Load default legend
     if (!this.legend){
       console.log('./Assets/Legends/' + this.defaultLegendName + '.png');
-      window.FileManager.getLegend('./Assets/Legends/' + this.defaultLegendName + '.png', 20)
+      window.FileManager.getLegend(this.defaultLegendName, 20)
         .then(legend => {
           // Set default legend
           this.legend = legend;
@@ -200,7 +200,7 @@ export default {
       defaultLegendName: 'BlueWhiteRed',
       defaultLegendRange: [-100, 100], // TODO: this is defined in the data manager, or it should be in DataTypes somewhere?
       defaultUnits: 'cm/s',
-      selectedLegends: ['BlueWhiteRed.png', 'GreenBlueWhiteOrangeRed.png', 'ModifiedOccam.png', 'DarkScaleColors.png' ],
+      selectedLegends: ['BlueWhiteRed', 'GreenBlueWhiteOrangeRed', 'ModifiedOccam', 'DarkScaleColors' ],
       isVisible: false,
       isDataManagerLoading: false,
       radarsVue: {},

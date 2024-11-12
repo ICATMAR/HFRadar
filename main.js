@@ -21,7 +21,7 @@ import FileManager from './Assets/Scripts/FileManager.js';
 import DataManager from './Assets/Scripts/DataManager.js';
 import GUIManager from './Assets/Scripts/GUIManager.js';
 import GAnalyticsManager from './Assets/Scripts/GAnalyticsManager.js';
-import AnimationEngine from './Assets/Scripts/AnimationEngine.js';
+import AnimationEngine from './Assets/Scripts/AnimationEngine/AnimationEngine.js';
 
 
 // Web worker
@@ -39,6 +39,13 @@ window.DataManager = new DataManager();
 window.GUIManager = new GUIManager();
 window.GAnalyticsManager = new GAnalyticsManager();
 window.AnimationEngine = AnimationEngine;
+
+// Import WMTSDataRetriever
+import WMTSDataRetrieverClass from './Assets/Scripts/WMTS/WMTSDataRetriever.js';
+window.WMTSDataRetriever = new WMTSDataRetrieverClass();
+// Import tile manager
+import WMTSTileManagerClass from './Assets/Scripts/WMTS/WMTSTileManager.js'
+window.WMTSTileManager = new WMTSTileManagerClass();
 
 
 
