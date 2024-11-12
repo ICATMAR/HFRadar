@@ -103,10 +103,11 @@ class AnimationEngine {
 
       // Load data only in the view
       this.calculateCanvasGeographicExtent();
+      // Load tiles. this.update is called with the callback (see lines above) when the tiles are loaded.
       this.source.updateWMTSSource(animInfo, this.bbox);
 
       // Start drawing loop (only once)
-      this.update();
+      //this.update();
     }
 
     // Create HFRadar source
@@ -180,7 +181,7 @@ class AnimationEngine {
     this.source.defineOnLoadCallback(this.onSourceLoad.bind(this));
 
     // Load data
-    this.source.updateWMTSSource(infoWMTS);
+    this.source.updateWMTSSource(infoWMTS, this.bbox);
   }
 
 
@@ -324,10 +325,10 @@ class AnimationEngine {
     if (this.source) {
       // WMTSSource (dynamic loading)
       if (this.source.constructor.name == 'SourceWMTS')
-        this.source.viewportChange(this.bbox);
+        this.source.viewportChange(this.bbox); // Draw call when tiles are all loaded
       if (this.source.isReady){
         this.particles.repositionParticles();
-        if (this.useArrows) // Update and draw once for arrows
+        if (this.useArrows && this.source.constructor.name != 'SourceWMTS') // Update and draw once for arrows
           this.update();
       }
       // Source is not ready

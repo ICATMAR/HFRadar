@@ -17,7 +17,6 @@ class SourceWMTS {
 
   // Constructor
   constructor(infoWMTS) {
-    this.isReady = false;
     this.animation = infoWMTS.dataSet.animation;
     this.dataSet = infoWMTS.dataSet;
     this.timestamp = infoWMTS.tmst;
@@ -54,8 +53,8 @@ class SourceWMTS {
 
     // Get tile columns and rows
     let tilesToLoad = [];
-    for (let row = rowLeft; row <= rowRight; row++) {
-      for (let col = colTop; col <= colBottom; col++) {
+    for (let row = rowLeft; row <= rowRight + 1; row++) {
+      for (let col = colTop; col <= colBottom + 1; col++) {
         tilesToLoad.push([row, col]);
       }
     }
@@ -96,17 +95,18 @@ class SourceWMTS {
 
 
     // Check if it must load, use FileManager
-    let notLoadedURLS = [];
+    let mustLoad = false;
     let promises = [];
     for (let i = 0; i < urls.length; i++) {
-      if (window.WMTSTileManager.loadedTiles[urls[i]] == undefined) {
-        notLoadedURLS.push(urls[i]);
+      if (!window.WMTSTileManager.isTileURLLoaded(urls[i])) {
+        mustLoad = true;
         promises.push(window.WMTSDataRetriever.getTileFromURL(urls[i]));
       }
     }
 
     // Exit if all tiles are already loaded
-    if (notLoadedURLS.length == 0) {
+    if (!mustLoad) {
+      this.isReady = true;
       // Callback
       if (this.callbackFunc)
         this.callbackFunc();
@@ -115,8 +115,9 @@ class SourceWMTS {
 
     // Load tiles
     this.isReady = false;
-
-    Promise.allSettled(promises).then(() => {
+    console.log("Loading WMTS tiles for " + this.dataSet.id);
+    
+    Promise.allSettled(promises).then((values) => {
       this.isReady = true;
       // Callback
       if (this.callbackFunc)
@@ -151,13 +152,14 @@ class SourceWMTS {
       templateURL = templateURL.replace('/' + this.dataSet.id + '&', '/' + this.animData.layerNames[1] + '&');  //url = WMTSDataRetriever.setWMSParameter(url, 'LAYERS', animData.layerNames[1]);
       templateURL = window.WMTSDataRetriever.setWMTSParameter(templateURL, 'style', 'range:0/360,cmap:gray'); // url = WMTSDataRetriever.setWMSParameter(url, 'COLORSCALERANGE', String([-360,360]));
       // Get img from WMTSTileManager
-      if (window.WMTSTileManager.loadedTiles[templateURL] == undefined) {
+      if (!window.WMTSTileManager.isTileURLLoaded(templateURL)) {
         console.warn('WMTS Tile was not loaded in SourceWMTS. Requesting now.');
         window.WMTSDataRetriever.getTileFromURL(templateURL);
         value[0] = undefined; value[1] = undefined; // Reset value
         return value;
       }
       // Get angle from image
+      templateURL = window.WMTSTileManager.standardizeURL(templateURL);
       let img = window.WMTSTileManager.loadedTiles[templateURL].grayImage;
       let angleNorm = window.WMTSDataRetriever.getNormValueFromImage(img, long, lat, this.tileMatrixZoomLevel);
       // Outside of bounds
@@ -180,7 +182,7 @@ class SourceWMTS {
       let urlEast = templateURL.replace('/' + this.dataSet.id, '/' + this.animData.layerNames[0]);
       let urlNorth = templateURL.replace('/' + this.dataSet.id, '/' + this.animData.layerNames[1]);
       // Get img from WMTSTileManager
-      if (window.WMTSTileManager.loadedTiles[urlEast] == undefined || window.WMTSTileManager.loadedTiles[urlNorth] == undefined) {
+      if (!window.WMTSTileManager.isTileURLLoaded(urlEast) || !window.WMTSTileManager.isTileURLLoaded(urlNorth)) {
         console.warn('WMTS Tile was not loaded in SourceWMTS. Requesting now.');
         window.WMTSDataRetriever.getTileFromURL(urlEast);
         window.WMTSDataRetriever.getTileFromURL(urlNorth);
@@ -188,6 +190,9 @@ class SourceWMTS {
         return value;
       }
       // Get values from image
+      // Standardize urls
+      urlEast = window.WMTSTileManager.standardizeURL(urlEast);
+      urlNorth = window.WMTSTileManager.standardizeURL(urlNorth);
       let imgEast = window.WMTSTileManager.loadedTiles[urlEast].grayImage;
       let imgNorth = window.WMTSTileManager.loadedTiles[urlNorth].grayImage;
       let eastNormValue = window.WMTSDataRetriever.getNormValueFromImage(imgEast, long, lat, this.tileMatrixZoomLevel);
