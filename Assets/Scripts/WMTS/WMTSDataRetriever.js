@@ -570,7 +570,7 @@ export class WMTSDataRetriever {
 
     // Get image data
     let pixels;
-    if (window.WMTSTileManager.loadedTiles[img.src].imageData){
+    if (window.WMTSTileManager.loadedTiles[img.src].imageData) {
       pixels = window.WMTSTileManager.loadedTiles[img.src].imageData;
     } else {
       let ctx = canvas.getContext('2d');
@@ -594,6 +594,8 @@ export class WMTSDataRetriever {
   // HACK: errors are not catched when fetching image urls. If errors are catched, the data does not load
   getTileFromURL = function (url) {
     return new Promise((resolve, reject) => {
+      // Standardize url
+      url = window.WMTSTileManager.standardizeURL(url);
       // If tile was already loaded resolve
       if (window.WMTSTileManager.loadedTiles[url] != undefined) {
         resolve(WMTSTileManager.loadedTiles[url].grayImage);
