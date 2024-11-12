@@ -6,7 +6,7 @@
     <template class="isHiddenInMobile">
       <div class="vertical-container">
         <div class="clickable cLayerContainer" :key="cLayer" v-for="(cLayer, index) in climaLayers">
-          <button :class="[selClimaLayer == cLayer ? 'button-active' : 'clickable']" @click='climaLayerClicked(cLayer)'
+          <button :class="[climaLayerUnavailable == cLayer ? 'unavailable' : selClimaLayer == cLayer ? 'button-active' : 'clickable']" @click='climaLayerClicked(cLayer)'
             :title="$t(cLayer)">
             <span class="fa" v-html="climaIcons[index]"></span>
           </button>
@@ -28,7 +28,7 @@
         <!-- Other clima layers-->
         <div class="horizontal-container">
           <div class="clickable cLayerContainer cLayerIconOnly" :key="cLayer" v-for="(cLayer, index) in climaLayers">
-            <button :class="[selClimaLayer == cLayer ? 'button-active' : 'clickable']"
+            <button :class="[climaLayerUnavailable == cLayer ? 'unavailable' : selClimaLayer == cLayer ? 'button-active' : 'clickable']"
               @click='climaLayerClicked(cLayer)' :title="$t(cLayer)">
               <span class="fa" v-html="climaIcons[index]"></span>
             </button>
@@ -100,6 +100,7 @@ export default {
         //'&#xf72e', 
       ],
       selClimaLayer: '',
+      climaLayerUnavailable: '',
       isClimaLayerVisible: false,
       climaOpacity: 1,
       // Defaults
@@ -113,6 +114,7 @@ export default {
     // USER INTERACTION
     climaLayerClicked: function (cLayer) {
       this.selClimaLayer = cLayer;
+      this.climaLayerUnavailable = '';
       // Update clima layer
       this.updateClimaLayer();
     },
@@ -151,7 +153,9 @@ export default {
         // --> Should I also check if the URLs work? maybe try a getValueAt? It doubles the requests, but it improves the UI. 
         // Actually the best would be to catch the error of requesting a wmts tile. Can we get this from Openlayers? Otherwise, force getValueAt
         // Maybe the WMTS always provides data, as the service now returns the closest timestamp.
-        debugger;
+        this.climaLayerUnavailable = this.selClimaLayer;
+        window.eventBus.emit('WidgetWeatherLayers_ClimaLayerChange', undefined);
+        return;
       }
       // Attribution link
       this.sourceDoi = dataSet.doi;
@@ -185,7 +189,9 @@ export default {
     mapMouseMove: async function(screenPos_coord){
       let coord = [screenPos_coord[2], screenPos_coord[3]];
       if (!this.isClimaLayerVisible)
-        return;        
+        return;   
+      if (this.climaLayerUnavailable != '')
+        return;     
       let value = await window.WMTSDataRetriever.getDataAtPoint(this.selClimaLayer, this.currentTmst, coord[1], coord[0], this.timeScale); // dataName, tmst, lat, long, timeScale, direction
       if (this.dataSetAnimation){
         let dir = await window.WMTSDataRetriever.getDataAtPoint(this.selClimaLayer, this.currentTmst, coord[1], coord[0], this.timeScale, true);
