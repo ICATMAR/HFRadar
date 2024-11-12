@@ -568,12 +568,21 @@ export class WMTSDataRetriever {
     let latTop = 90 - tileRow * tileSize;
     let indexRow = ((latTop - lat) / tileSize) * canvas.height;
 
-    let ctx = canvas.getContext('2d');
-    ctx.drawImage(img, 0, 0); // Instead of painting the whole image, maybe paint just a pixel?
-    let pixels = ctx.getImageData(Math.floor(indexCol), Math.floor(indexRow), 1, 1);
-    let pixel = pixels.data[0];
+    // Get image data
+    let pixels;
+    if (window.WMTSTileManager.loadedTiles[img.src].imageData){
+      pixels = window.WMTSTileManager.loadedTiles[img.src].imageData;
+    } else {
+      let ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0);
+      pixels = ctx.getImageData(0, 0, img.width, img.height);
+      window.WMTSTileManager.loadedTiles[img.src].imageData = pixels;
+    }
+    // Get target pixel
+    let index = Math.floor(indexCol) + Math.floor(indexRow) * img.width;
+    let pixel = pixels.data[index * 4];
     // Alpha
-    let alpha = pixels.data[3];
+    let alpha = pixels.data[index * 4 + 3];
     if (alpha == 0)
       return undefined;
     return pixel / 255;
