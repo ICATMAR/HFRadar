@@ -69,6 +69,8 @@ export default {
           // removeEventListener Map events for animation
           this.$parent.map.un('moveend', this.animEngine.onMapMoveEnd);
           this.$parent.map.un('movestart', this.animEngine.onMapMoveStart);
+          // Set to stopped
+          this.animEngine.isStopped = true;
         }
         return;
       } else {
