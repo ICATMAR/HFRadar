@@ -96,7 +96,7 @@ class AnimationEngine {
       this.particles = new ParticleSystem(this.canvasParticles, this.source, this.map);
       this.particles.clear();
       // Define if using arrows
-      this.useArrows = animInfo.animation.useArrows == true;
+      this.useArrows = animInfo.dataSet.animation.useArrows == true;
 
       // Define callback when data is loaded
       this.source.defineOnLoadCallback(this.onSourceLoad.bind(this));
