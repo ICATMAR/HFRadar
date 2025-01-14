@@ -411,10 +411,10 @@ class ParticleSystem {
       this.ctx.globalCompositeOperation = "source-over";
     }
     // Trail color
-    this.ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+    //this.ctx.fillStyle = 'rgba(0, 0, 0, 0.7)'; // Commenting these lines fixes #99
 
     // Line style
-    this.ctx.strokeStyle = 'rgba(0, 0, 0, 0.7)';
+    //this.ctx.strokeStyle = 'rgba(0, 0, 0, 0.7)'; // Commenting these lines fixes #99
     this.ctx.lineWidth = 1;
     this.ctx.beginPath();
     for (let i = 0; i < this.numParticles; i++)
