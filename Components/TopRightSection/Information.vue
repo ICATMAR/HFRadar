@@ -38,6 +38,25 @@
            <a href="https://github.com/ICATMAR/HFRadar" target="_blank">github repository</a>.
         </span>
       </div>
+
+      <!-- Acknolwedgements -->
+      <div class="banner-text">
+        <span>
+          ICATMAR HF Radar Network has been established with the support of the European Maritime and Fisheries Fund, the European Maritime, Fisheries and Aquaculture Fund and the fund provided by the Government of Catalonia. The network has been designed, implemented and managed through the efforts of the Direcció General de Política Marítima i Pesca Sostenible (Government of Catalonia) and the Insitut de Ciències del Mar (CSIC), Barcelona.
+        </span>
+      </div><div class="banner-text">
+        <span>
+          These data were collected and made freely available by ICATMAR and the programs that contribute to it. Data was collected by the Government of Catalonia and processed by ICATMAR with the support of the European Maritime, Fisheries and Aquaculture Fund (EMFAF) and the Climatic Funds Program of the Government of Catalonia.
+        </span>
+      </div><div class="banner-text">
+        <span>
+          These data follow Copernicus standards; they are public and free of charge. User assumes all risk for use of data. User must display citation in any publication o product using data. User must contact ICATMAR prior to any commercial use of data.
+        </span>
+      </div><div class="banner-text">
+        <span>
+          HF radar sea surface current velocity dataset by ICATMAR is licensed under a Creative Commons Attribution 4.0 International License. You should have received a copy of the license along with this work. If not, see http://creativecommons.org/licenses/by/4.0/.
+        </span>
+      </div>
       
       <!-- Accept button -->
       <div class="buttons-container">
