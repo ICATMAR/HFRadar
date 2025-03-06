@@ -545,7 +545,7 @@ class DataManager {
         let fileExtension = file.name.split('.').pop().toLowerCase();
         // Read files
         if (fileExtension == 'wls' || fileExtension == 'tuv' || fileExtension == 'ruv')
-          promisesHFFiles.push(window.FileManager.readFile(file));
+          promisesHFFiles.push(window.FileManager.readFile(file, fileExtension));
         else if (fileExtension == 'geojson')
           promisesGeoJSON.push(window.FileManager.readFile(file, fileExtension))
     }
