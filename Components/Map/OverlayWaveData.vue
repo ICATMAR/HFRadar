@@ -152,6 +152,8 @@ export default {
               element: this.$refs[radar.UUID],
               stopEvent: false,
             });
+            waveInfo.getElement().classList.add('no-pointer-events');
+            waveInfo.getElement().parentElement.classList.add('no-pointer-events');
             this.map.addOverlay(waveInfo);
             waveInfo.element.parentElement.style.zIndex = '1';
           })

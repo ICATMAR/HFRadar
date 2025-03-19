@@ -416,6 +416,9 @@ h4 {
   visibility: visible;
   transition: all 1s;
 }
+.no-pointer-events {
+  pointer-events: none !important;
+}
 
 
 

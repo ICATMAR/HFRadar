@@ -37,6 +37,10 @@
     <!-- Overlay obsea buoys data -->
     <overlay-obsea-data ref="overlayOBSEAData"></overlay-obsea-data>
 
+    <!-- Overlay NOAA ERDDAP data -->
+    <overlay-erddap-data ref="overlayERDDAPData"></overlay-erddap-data>
+
+
     <!-- <time-slider></time-slider> -->
 
     <!-- Bottom Section -->
@@ -70,6 +74,7 @@ import BottomSection from "../BottomSection/BottomSection.vue";
 import OverlayWaveData from "./OverlayWaveData.vue";
 import OverlayBuoyData from "./OverlayBuoyData.vue";
 import OverlayOBSEAData from "./OverlayOBSEAData.vue";
+import OverlayERDDAPData from "./OverlayERDDAPData.vue";
 
 export default {
   name: 'app-map',
@@ -845,6 +850,10 @@ export default {
       if (this.$refs.overlayOBSEAData) {
         this.$refs.overlayOBSEAData.updatePanel(zoomLevel);
       }
+      // Hide/show obsea info
+      if (this.$refs.overlayERDDAPData) {
+        this.$refs.overlayERDDAPData.updatePanel(zoomLevel);
+      }
 
     },
     onMapMoveStart: function () {
@@ -947,7 +956,7 @@ export default {
 
       // Get data
       this.layerData = ctx.getImageData(0, 0, tmpCnv.width, tmpCnv.height);
-      // For mobile versions, the canvas is scaled through a style. Openlayers does not have build in function 
+      // For mobile versions, the canvas is scaled through a style. Openlayers does not have build in function
       // to provide this scaling factor.
       // Get the width of the map container
       let mapEl = map.getTargetElement();
@@ -979,7 +988,7 @@ export default {
       // let el = document.getElementById('tmpCnv');
       // if (el)
       //   el.remove();
-      // document.body.appendChild(tmpCnv); 
+      // document.body.appendChild(tmpCnv);
 
 
       // Restore map
@@ -1168,6 +1177,7 @@ export default {
     "overlay-wave-data": OverlayWaveData,
     "overlay-buoy-data": OverlayBuoyData,
     "overlay-obsea-data": OverlayOBSEAData,
+    "overlay-erddap-data": OverlayERDDAPData,
   },
   computed: {
     //foo: function () {}
