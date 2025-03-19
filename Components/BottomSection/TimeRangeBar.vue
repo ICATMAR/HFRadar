@@ -141,7 +141,7 @@ export default {
       // Initial load and user changing hash TIME in URL
       window.eventBus.on('GUIManager_URLDateChanged', tmst => this.calendarComponentChangedDate());
       // User clicked on Active sync and turned it on
-      window.eventBus.on('TopRightCanvas_ActiveSyncClickedAndOn', tmst => this.calendarComponentChangedDate());
+      window.eventBus.on('TopRightCanvas_ActiveSyncClickedAndOn', tmst => this.activeSyncOn());
       // Create event listener
       window.addEventListener('resize', this.windowIsResizing);
     },
@@ -258,6 +258,31 @@ export default {
         this.reproduceTimeline();
         this.isPlaying = false;
       },
+
+
+      activeSyncOn: function(){
+        // Get current date
+        let currentTmst = window.GUIManager.currentTmst;
+        this.currentDate = new Date(currentTmst);
+
+        // Define start and end dates
+        let timespanDays = 3; // days
+        this.endDate = new Date(currentTmst);
+        this.startDate = new Date(currentTmst);
+        this.startDate.setUTCDate(this.startDate.getUTCDate() - timespanDays);
+        
+        // Update simulation
+        if (this.$refs.dataStreamsBar){
+          this.$refs.dataStreamsBar.setStartEndDates(this.startDate, this.endDate);
+          this.$refs.dataStreamsBar.updateCurrentDate(this.currentDate.toISOString());
+        }
+        // Center on date. It also calls this.updateHTMLTimeline()
+        this.currentDate.setUTCDate(this.currentDate.getUTCDate() - timespanDays/3)
+        this.centerOnDate(this.currentDate);
+
+      },
+
+
       // Calendar.vue changes
       calendarComponentChangedDate: function(){
         // Get current date

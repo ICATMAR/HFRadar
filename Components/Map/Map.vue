@@ -18,10 +18,10 @@
       </div>
     </div>
 
-    <!-- Progress bar load WMS tiles -->
-    <div v-show="!wmsProgress.isLoaded" class="position-absolute m-0 btn-dark"
+    <!-- Progress bar load WMTS tiles -->
+    <div v-show="!WMTSProgress.isLoaded" class="position-absolute m-0 btn-dark"
       style="background: var(--blue); width: 100%; height: 5px; opacity: 0.8; top:0px"
-      :style="{ 'max-width': wmsProgress.progressPercent + '%' }">
+      :style="{ 'max-width': WMTSProgress.progressPercent + '%' }">
       <div class="spinner-border" style="position: relative; margin-top: 20px; margin-left: 40px; color:var(--blue)"
         role="status">
         <span class="visually-hidden">Loading...</span>
@@ -46,7 +46,7 @@
     <!-- Bottom Section -->
     <bottom-section></bottom-section>
 
-    <!-- Direction for WMS layers -->
+    <!-- Direction for WMTS layers -->
     <climaDirectionCanvas ref="climaDirectionCanvas"></climaDirectionCanvas>
 
 
@@ -258,6 +258,11 @@ export default {
     window.eventBus.on('WidgetMapOptions_BaseLayerClicked', (baseLayerName) => {
       this.setBaseLayer(baseLayerName);
     });
+    // Change clima layer stayle. Legend WMTS changed
+    window.eventBus.on('WMTSLegend_LegendChange', () => {
+      // Reload WMTS source
+      this.getMapLayer('data').getSource().refresh();
+    });
     // Change isobaths
     window.eventBus.on('WidgetMapOptions_IsobathsVisibilityChange', (isVisible) => {
       //
@@ -309,11 +314,11 @@ export default {
 
 
     // Clima layer
-    window.eventBus.on('WidgetWeatherLayers_ClimaLayerChange', infoWMS => {
-      this.setClimaLayer(infoWMS);
+    window.eventBus.on('WidgetWeatherLayers_ClimaLayerChange', infoWMTS => {
+      this.setClimaLayer(infoWMTS);
     });
     // Change clima layer style
-    window.eventBus.on('WMSLegend_LegendClicked', style => {
+    window.eventBus.on('WMTSLegend_LegendClicked', style => {
       this.changeStyle(style);
     });
 
@@ -348,8 +353,8 @@ export default {
         loading: 0,
         loaded: 1
       },
-      // WMS Data layer
-      wmsProgress: {
+      // WMTS Data layer
+      WMTSProgress: {
         loading: 0,
         loaded: 1,
         isLoaded: true,
@@ -775,8 +780,9 @@ export default {
     },
 
     // INTERNAL EVENTS
-    // Change the styles (WMSLegend.vue emit)
+    // Change the styles (WMTSLegend.vue emit)
     changeStyle: function (newStyle) {
+      debugger;
       // Get params
       let params = this.getMapLayer('data').getSource().getParams();
       // Check if the new style is the current
@@ -789,7 +795,7 @@ export default {
       // Source needs to reload (previous line triggers onTilesLoad)
       this.isLayerDataReady = false;
       // Update ForecastBar if it exists
-      // this.$emit('changeWMSStyle', newStyle);
+      // this.$emit('changeWMTSStyle', newStyle);
     },
 
 
@@ -806,14 +812,7 @@ export default {
       this.$emit('mouseMove', coord);
       // LEGEND TOOLTIPS
       // Change currents tooltip
-      window.eventBus.emit('Map_MouseMove', [event.clientX, event.clientY, coord[0], coord[1]]);
-
-
-      // Change legend tooltip value
-      if (this.isLayerDataReady && !this.isRendering) {
-        let color = this.getDataAtPixel(event.clientX, event.clientY);
-        window.eventBus.emit('Map_MouseOnData_WMSColor', color);
-      }
+      window.eventBus.emit('Map_mouseMove', [event.clientX, event.clientY, coord[0], coord[1]]);
 
     },
 
@@ -898,7 +897,7 @@ export default {
 
     // Store pixel information once tiles are loaded
     onTilesLoaded: function (e) {
-      if (e.target.name == 'wmsSource') {
+      if (e.target.name == 'WMTSSource') {
         this.isLayerDataReady = true;
         this.updateSourceData();
       }
@@ -1003,18 +1002,6 @@ export default {
     },
 
 
-    // Get pixel data
-    getDataAtPixel: function (x, y) {
-      let imgArrayPos = (x + y * this.layerDataWidth) * 4; // + 1,2,3 if you want (R)GBA
-      let imgData = this.layerData.data;
-      let color = this.pixelColor;
-      color[0] = imgData[imgArrayPos]
-      color[1] = imgData[imgArrayPos + 1]
-      color[2] = imgData[imgArrayPos + 2]
-      color[3] = imgData[imgArrayPos + 3];
-      return color;
-    },
-
     // Center on the coordinate
     centerOnCoord(coord, forceCenter) {
       // Center map to track
@@ -1071,34 +1058,67 @@ export default {
 
 
 
-    // Update WMS data source. This function is called from AppManager.vue
-    updateSourceWMS: function (infoWMS) {
-      // Create tile grid for faster rendering for low resolution WMS
-      let extent = ol.proj.get('EPSG:3857').getExtent();
-      let tileSize = 512;
-      let maxResolution = ol.extent.getWidth(extent) / tileSize;
+    // Update WMTS data source. This function is called from AppManager.vue
+    updateSourceWMTS: function (wmtsParams) {
+      // Create Tile Grid
+      // https://openlayers.org/en/latest/examples/wmts.html
+      let size = ol.extent.getWidth(ol.proj.get('EPSG:3857').getExtent())/256;
       let resolutions = new Array(6);
-      for (let i = 0; i < resolutions.length; i++) {
-        resolutions[i] = maxResolution / Math.pow(2, i);
+      let matrixIds = new Array(6);
+      for (let i = 0; i < resolutions.length; i++){
+        resolutions[i] = size / Math.pow(2, i);
+        matrixIds[i] = i;
       }
-      // Assign to openlayers WMS tile source
-      infoWMS.tileGrid = new ol.tilegrid.TileGrid({
-        extent: extent,
-        resolutions: resolutions,
-        tileSize: tileSize
-      });
 
-      // Avoid cross origin problems when getting pixel data (The canvas has been tainted by cross-origin data.)
-      infoWMS.crossOrigin = 'anonymous';
-      infoWMS.cacheSize = 500;
+      // URL parameters
+      let templateURL = wmtsParams.dataSet.template;
+      let baseURL = templateURL.split('/?')[0];
+      let layerName = WMTSDataRetriever.getWMTSParameter(templateURL, 'layer');
 
-      // Create OL source from ForecastBar.vue object
-      let source = new ol.source.TileWMS(infoWMS);
-      source.name = "wmsSource";
+      let options = {
+        dimensions: {
+          //elevation: "-1.0182366371154785", // REMOVE?
+          time: wmtsParams.tmst,//"2024-06-11T00:00:00Z",
+        },
+        style: 'range:' + wmtsParams.dataSet.range[0] + '/' + wmtsParams.dataSet.range[1] + ',cmap:gray',  //'cmap:dense', // FROM INPUT
+        url: baseURL,//'http://wmts.marine.copernicus.eu/teroWmts', // FROM INPUT
+        layer: layerName,//"MEDSEA_ANALYSISFORECAST_BGC_006_014/cmems_mod_med_bgc-nut_anfc_4.2km_P1D-m_202211/nh4", 
+        tileGrid: new ol.tilegrid.WMTS ({
+          extent: ol.proj.get('EPSG:3857').getExtent(),
+          resolutions,
+          matrixIds,
+          // https://openlayers.org/en/latest/apidoc/module-ol_tilegrid_WMTS-WMTSTileGrid.html
+          //minZoom: 0,
+          //sizes: [],
+          //tileSize: [256, 256]
+        }),
+
+        matrixSet: 'EPSG:3857',
+        projection: ol.proj.get('EPSG:3857'),
+        requestEncoding: 'KVP',
+        format: 'image/png',
+        // Avoid cross origin problems when getting pixel data (The canvas has been tainted by cross-origin data.)
+        crossOrigin: 'anonymous',
+        cacheSize: 500,
+        wrapX: false,
+        attributions: '© <a style="color:black" href=' + wmtsParams.dataSet.doi + 
+          ' target="_blank">'+ wmtsParams.dataSet.productProvider +'</a>',
+      }
+
+      // Create OL source
+      let source = new ol.source.WMTS(options);
+      source.name="WMTSSource";
+      
+      // Also smart storage and reuse of tiles
+      source.tileLoadFunction = (imageTile, src) => {
+        WMTSTileManager.loadProcessStoreTile(imageTile, src, undefined); // Could define legend here, but legends are managed in WMTSLenged.vue
+      }
+      // Set the source to the layer
       this.getMapLayer('data').setSource(source);
+
       // Tracking the load progress
       this.isLayerDataReady = false;
-      this.registerLoadTilesEvents(source, this.wmsProgress);
+      this.registerLoadTilesEvents(source, this.WMTSProgress);
 
     },
 
@@ -1141,7 +1161,7 @@ export default {
       if (climaLayer == undefined)
         this.map.addLayer(this.layers.data);
       // Update parameters
-      this.updateSourceWMS(urlParams);
+      this.updateSourceWMTS(urlParams);
 
     },
 
@@ -1191,21 +1211,4 @@ export default {
 }
 
 
-/* #time-range-bar {
-  background:white;
-  bottom: 0;
-  height: 90px;
-  width: 100%;
-}
-
-#wmsLegend {
-  top: 130px;
-  left: 15px;
-  position: absolute;
-  z-index: 2;
-  box-shadow: 0 0 4px black;
-  background: #527db3cf;
-  padding: 10px;
-  max-height: 200px;
-} */
 </style>

@@ -1,9 +1,10 @@
 <template>
-  
-  <div class="logo-cookie-banner icon-str clickable" @click="isVisible = !isVisible" v-if="!isVisible" title="Cookies and privacy">
+
+  <div class="logo-cookie-banner icon-str clickable" @click="isVisible = !isVisible" v-if="!isVisible"
+    title="Cookies and privacy">
     <span class="fa">&#xf563</span>
   </div>
-  
+
 
 
   <Transition>
@@ -16,10 +17,10 @@
       <!-- Text -->
       <div class="banner-text">
         <span>We use cookies and collect information to improve the user
-          experience and track our impact. No commercial use is given to the data. 
+          experience and track our impact. No commercial use is given to the data.
         </span>
       </div>
-      
+
       <!-- Accept and deny buttons -->
       <div class="buttons-container">
         <!-- Accept -->
@@ -35,14 +36,25 @@
 
 export default {
   name: "CookieBanner",
-  mounted(){
+  mounted() {
     this.isVisible = true;
     // If cookies are set, hide banner
-    if (localStorage.getItem('cookie-analytics')){
+    if (localStorage.getItem('cookie-analytics')) {
       let paramsStr = localStorage.getItem('cookie-analytics');
       let params = JSON.parse(paramsStr);
-      if (params.analytics_storage == 'granted')
+      if (params.analytics_storage == 'granted') {
         this.isVisible = false;
+      }
+    }
+    // Clear cache
+    if (!localStorage.getItem('cache-cleared')){
+      localStorage.setItem('cache-cleared', new Date().toISOString());
+      this.clearCachedFiles();
+    } else {
+      let date = new Date(localStorage.getItem('cache-cleared'));
+      let now = new Date();
+      // Clear cache every 7 days?
+      
     }
   },
   data() {
@@ -53,7 +65,7 @@ export default {
   methods: {
     // USER INTERACTION
     // Information about cookies settings is in index.html
-    acceptClicked: function(e){
+    acceptClicked: function (e) {
       this.isVisible = false;
       // Google analytics and cookies
       let params = {
@@ -68,7 +80,7 @@ export default {
       localStorage.setItem('cookie-analytics', JSON.stringify(params));
     },
     // Deny cookies (update ga and delete cookies)
-    denyClicked: function(e){
+    denyClicked: function (e) {
       this.isVisible = false;
       // Google analytics and delete cookies
       let params = {
@@ -83,6 +95,22 @@ export default {
       localStorage.clear();
     },
 
+    // Clear cached files
+    clearCachedFiles: function () {
+      if ('caches' in window) {
+        // Clear all caches
+        caches.keys().then(function (cacheNames) {
+          cacheNames.forEach(function (cacheName) {
+            caches.delete(cacheName);
+          });
+          // Reload the page after clearing the cache
+          window.location.reload(true);
+        });
+      } else {
+        console.warn('Cache API not supported in this browser.');
+      }
+    }
+
   }
 }
 
@@ -91,16 +119,16 @@ export default {
 
 
 <style scoped>
-
-.logo-cookie-banner{
+.logo-cookie-banner {
   width: 28px;
   height: 28px;
 
   margin: 0px;
   margin-left: 3px;
   margin-right: 3px;
-  
+
 }
+
 .container {
   position: fixed;
   bottom: 100px;
@@ -119,7 +147,7 @@ export default {
   user-select: none;
 }
 
-.banner-title > span {
+.banner-title>span {
   font-size: large;
 }
 
@@ -138,6 +166,7 @@ export default {
   border: 2px solid gray;
   cursor: auto;
 }
+
 .btn-deny:hover {
   background-color: rgb(136, 136, 136);
   border: 2px solid gray;
@@ -157,5 +186,4 @@ export default {
   opacity: 0;
   transform: translate(40vw, -70vh) scale(0.5);
 }
-
 </style>

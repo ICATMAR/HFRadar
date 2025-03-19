@@ -186,7 +186,7 @@ class GUIManager {
     window.eventBus.on('DeselectedDataPoint', () => this.isDataPointSelected = false);
     // Mouse events
     // Mouse move in map
-    window.eventBus.on('Map_MouseMove', screenPosCoords => this.mouseMoveInMap(screenPosCoords));
+    window.eventBus.on('Map_mouseMove', screenPosCoords => this.mouseMoveInMap(screenPosCoords));
     
 
 

@@ -12,7 +12,7 @@
           <a href="https://www.icatmar.cat/visors/xarxa-observacional" target="_blank" rel="noopener noreferrer" class="icon-str">i</a>
         </div>
         <!-- Data -->
-        <div v-if="radarData[key].hasData">
+        <div v-if="radarData[key].hasData" v-show="isRadarDataVisible">
           <!-- Wave data -->
           <div v-show="radarData[key].waveHeight != undefined">
             <span><strong>Waves: </strong>{{ radarData[key].waveHeight }} m, {{ radarData[key].wavePeriod }} s, {{ radarData[key].waveBearing }}</span>
@@ -77,12 +77,19 @@ export default {
     window.eventBus.on('GUIManager_URLDateChanged', this.updateContent);
     // User clicked on Active sync and turned it on
     window.eventBus.on('TopRightCanvas_ActiveSyncClickedAndOn', this.updateContent);
+    // Change the visibility of the radar data
+    window.addEventListener('keypress', (event) => {
+      // Check if the pressed key is 'P'
+      if (event.key === 'W' || event.key === 'w') {
+          this.isRadarDataVisible = !this.isRadarDataVisible;
+      }
+    });
   },
   data () {
     return {
       radarData: {},
       isTooFar: false,
-
+      isRadarDataVisible: false,
     }
   },
   methods: {

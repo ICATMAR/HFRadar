@@ -1,647 +1,9 @@
-// Classes defined here:
 
-// AnimationEngine
-// SourceWMS
-// SourceHFRadar
-// ParticleSystem
-// Particle
+const EARTHRADIUS = 6378;
 
-// Constants
-const earthRadius = 6378;
-const LEGENDURLS = [
-  './Assets/Legends/GreenBlueWhiteOrangeRed.png',
-  './Assets/Legends/BlueWhiteRed.png',
-  './Assets/Legends/ModifiedOccam.png'
-];
 
-class AnimationEngine {
-  // Static variables
-  static numActiveAnimations = 0;
 
-  // Variables
-  prevTime = 0;
-  canvasParticles = undefined;
-  source = undefined;
-  particles = undefined;
-  frameTime = 0;
-  FRAMERATE = 40; // in ms
-  isDestroyed = false;
-  isStopped = false;
-  
-  useArrows = false;
-  
-
-  // Constructor
-  /*
-  * inCanvas: canvas element
-  * inMap: OLmap
-  * animInfo: {
-  *   wmsURL: ..
-  *   animation: {
-  *     type: 'velocity', 'wave', or 'whiteWave'
-  *     format: 'value_angle' or 'east_north'
-  *   }
-  * } or {
-  *   HFRadarData: [Length][Latitude(deg), Longitude (deg), U-Comp (cms/s), V-comp (cms/s)]
-  * }
-  * 
-  * isHFRadar: radar flag data
-  */
-  constructor(inCanvas, inMap, animInfo, legend){
-    AnimationEngine.numActiveAnimations += 1; // Count the active animations
-
-    this.canvasParticles = inCanvas; // Canvas
-    this.map = inMap; // OL map
-    // Set height and width of the canvas
-    this.canvasParticles.width = this.map.getViewport().offsetWidth;
-    this.canvasParticles.height = this.map.getViewport().offsetHeight;
-    // Calculate geographic extent of the canvas
-    this.calculateCanvasGeographicExtent();
-    // Set up variable for when map is moving
-    this.mapIsMoving = false;
-    // https://stackoverflow.com/questions/11565471/removing-event-listener-which-was-added-with-bind
-    // Bind the event listeners
-    this.onMapMoveStart = this.onMapMoveStart.bind(this);
-    this.onMapMoveEnd = this.onMapMoveEnd.bind(this);
-
-    // Create WMS source
-    if (animInfo.wmsURL){
-      this.source = new SourceWMS(animInfo.animation);
-      // Create particle system
-      this.particles = new ParticleSystem(this.canvasParticles, this.source, this.map);
-      this.particles.clear();
-
-      // Define if using arrows
-      this.useArrows = animInfo.animation.useArrows == true;
-
-      // Define callback when data is loaded
-      //this.source.defineOnLoadCallback(this.particles.repositionParticles.bind(this.particles));
-      this.source.defineOnLoadCallback(this.onSourceLoad.bind(this));
-
-      // Load data
-      this.source.updateWMSSource(animInfo.wmsURL, animInfo.animation);
-
-      // Start drawing loop (only once)
-      this.update();
-    }
-
-    // Create HFRadar source
-    if (animInfo.HFRadarData){
-      this.source = new SourceHFRadar(animInfo.HFRadarData);
-      // Create particle system
-      this.particles = new ParticleSystemHF(this.canvasParticles, this.source, this.map, legend);
-      this.particles.clear();
-      // Start drawing loop (must call it only once)
-      this.update();
-    }
-
-    // Create CombinedRadar source
-    if (animInfo.CombinedRadarData){
-      //this.useArrows = true;
-      this.source = new SourceCombinedRadar(animInfo.CombinedRadarData);
-      //this.source.animation.useArrows = true;
-      // Create particle system
-      this.particles = new ParticleSystem(this.canvasParticles, this.source, this.map);
-      this.particles.clear();
-      this.particles.repositionParticles();
-      // Start drawing loop (only once)
-      this.update();
-    }
-
-    // Load color legends if it was not passed as a constructor
-    // TODO: THIS SHOULD NOT BE NECESSARY
-    if (!legend){
-      window.FileManager.getLegend(LEGENDURLS[3], 20)
-        .then(legend => {
-          this.legend = legend;
-          this.particles.updateLegend(legend);
-          console.log("Legend was undefined")
-        });
-    } else {
-      this.legend = legend;
-      this.particles.updateLegend(legend);
-    }
-  }
-
-  destroyer(){
-    AnimationEngine.numActiveAnimations += -1;
-    this.isDestroyed = true;
-  }
-
-  // Functions
-  setWMSSource(wmsURL, animation){
-    // Create source
-    this.source = new SourceWMS(animation);
-    // Create particle system
-    this.particles = new ParticleSystem(this.canvasParticles, this.source, this.map);
-    this.particles.clear();
-
-    // Define callback when data is loaded
-    //this.source.defineOnLoadCallback(this.particles.repositionParticles.bind(this.particles));
-    this.source.defineOnLoadCallback(this.onSourceLoad.bind(this));
-
-    // Load data
-    this.source.updateWMSSource(wmsURL, animation);
-  }
-
-
-  setHFRadarData(HFRadarData){
-    this.source.updateData(HFRadarData);
-    this.particles.updateSource(this.source);
-    this.particles.clear();
-  }
-
-  setCombinedRadarData (CombinedRadarData){
-    this.source.updateData(CombinedRadarData);
-    this.particles.updateSource(this.source);
-    //this.particles.clear();
-    this.particles.repositionParticles();
-  }
-
-
-  // Update legend colors
-  updateLegend(legend){
-    this.legend = legend;
-    this.particles.updateLegend(legend);
-  }
-
-
-  // Update the animation
-  update(){
-    // Check if it is deleted before anything else, to stop de loop
-    if (this.canvasParticles.parentElement == null){
-      console.log("destroyed")
-      return;
-    }
-    if (this.isDestroyed){
-      console.log("destroyed by destroyer");
-      return;
-    }
-    if (this.isStopped){
-      console.log("Animation stopped");
-      return;
-    }
-    
-    // Update timer
-    let timeNow = performance.now();
-    let dt = (timeNow - this.prevTime) / 1000; // in seconds;
-    
-    this.frameTime = dt;
-    this.prevTime = timeNow;
-
-
-    // DEBUGGER FRAME RATE
-    //***********************************************
-    if (false) {
-      if (this.timeCounter == undefined){
-        this.timeCounter = 0;
-        this.fpsArray = [];
-        this.particles.drawCalls = 0;
-      }
-      this.timeCounter += dt;
-      this.fpsArray.push(dt);
-      if (this.timeCounter > 1){
-        let sum = 0;
-        this.fpsArray.forEach(el => sum+= el);
-        let avg = sum/this.fpsArray.length;
-
-        // Debug message
-        console.log("Average FPS from last second: " + this.fpsArray.length/this.timeCounter + ". Average time: " + avg);
-        console.log("Framerate: " + this.FRAMERATE);
-        console.log("Num particles: " + this.particles.numParticles);
-        console.log("Num draw calls / nºparticles: " + this.particles.drawCalls/this.particles.numParticles);
-        console.log("Num draw calls: " + this.particles.drawCalls); 
-
-        // Reset
-        this.timeCounter = 0;
-        this.fpsArray = [];
-        this.particles.drawCalls = 0;
-
-      }
-    }
-    // **********************************************
-    
-
-    // If data is loaded and layer is visible
-    if (this.source){
-      //console.log(this.source.wmsURL);
-      if (this.source.isReady)
-        if (!this.mapIsMoving){
-          this.particles.draw(dt);
-        }
-    }
-
-    // Do not loop if using arrows and particles have been painted
-    if (this.useArrows)
-      return;
-
-    // Loop otherwise
-    setTimeout(() => this.update() , this.FRAMERATE); // Frame rate in milliseconds
-  }
-
-
-  // Callback when source is loaded
-  onSourceLoad(){
-    console.log("Source loaded!");
-    // Reposition particles when data is loaded
-    this.particles.repositionParticles();
-    // Update with draw for arrows
-    if (this.useArrows)
-      this.update();
-  }
-
-  clearCanvas(){
-    if (this.particles)
-      this.particles.clear();
-  }
-
-  resizeCanvas(){
-    // Resize animation canvas
-    this.canvasParticles.width = this.map.getViewport().offsetWidth;
-    this.canvasParticles.height = this.map.getViewport().offsetHeight;
-    // Resize num of particles
-    if (typeof this.particles.resizeNumParticles === 'function')
-      this.particles.resizeNumParticles();
-    
-  }
-
-  calculateCanvasGeographicExtent(){
-    // Calculate map extent in long lat
-    let extent = this.map.getView().calculateExtent();
-    let mapExtentMin = ol.proj.transform([extent[0], extent[1]], 'EPSG:3857', 'EPSG:4326');
-    let mapExtentMax = ol.proj.transform([extent[2], extent[3]], 'EPSG:3857', 'EPSG:4326');
-    this.canvasParticles.mapMinLong = mapExtentMin[0];
-    this.canvasParticles.mapMinLat = mapExtentMin[1];
-    this.canvasParticles.mapMaxLong = mapExtentMax[0];
-    this.canvasParticles.mapMaxLat = mapExtentMax[1];
-  }
-
-
-  // Callback when map size changes
-  onMapMoveEnd(){
-    this.calculateCanvasGeographicExtent();
-    this.resizeCanvas();
-    this.mapIsMoving = false;
-    if (this.source) {
-      if (this.source.isReady){
-        this.particles.repositionParticles();
-        if (this.useArrows) // Update and draw once for arrows
-          this.update();
-      }
-    }
-    if (this.legend)
-      this.updateLegend(this.legend);
-  }
-  onMapMoveStart() {
-    if (this.particles)
-      this.particles.clear();
-    this.mapIsMoving = true;
-  }
-
-
-
-
-  // PUBLIC METHOD
-  static getNumActiveAnimations(){
-    return AnimationEngine.numActiveAnimations;
-  }
-  
-}
-
-
-
-
-
-
-
-
-// Class that defines the source from a single WMS image
-class SourceWMS {
-  // Variables
-  imgDataEast;
-  imgDataNorth;
-
-  canvasLongLatStep = 0.02;
-  colorrange;
-
-  //medBBOX = [-19, 36, 31, 45]; // LONG, LAT -18.12, 36.3, 45.98, 30.18 from https://resources.marine.copernicus.eu/product-detail/MEDSEA_ANALYSISFORECAST_WAV_006_017/INFORMATION
-  // WMS service does not always provide the BBOX given, be careful. Check with the URL
-  medBBOX = [30, -17, 45, 30]; // NOW IT IS LAT
-  catseaBBOX = [-1, 36, 9, 44]; // LONG, LAT
-
-
-
-  // Constructor
-  constructor(animation) {
-    this.isReady = false;
-    this.animation = animation;
-  }
-
-  // When all tiles from layer are loaded, call a function
-  defineOnLoadCallback(callbackOnLoad) {
-    this.callbackFunc = callbackOnLoad; // Defined in Animation Engine
-  }
-
-  // Update/Change the WMS Source
-  updateWMSSource(wmsURL, animation) {
-    // Keep track of images loaded
-    this.isReady = false;
-    this.loaded = 0;
-    // Store animation information defined in ForecastBar.vue
-    this.animation = animation;
-    this.wmsURL = wmsURL; // Only for debuggin;
-
-
-    // Define WMS image url with a standard size
-    // SIZE TODO: could be random size or according to lat-long extension?
-    wmsURL = SourceWMS.setWMSParameter(wmsURL, 'WIDTH', '2048');
-    wmsURL = SourceWMS.setWMSParameter(wmsURL, 'HEIGHT', '1024');
-
-    // BBOX
-    this.bbox = this.medBBOX;//this.catseaBBOX;
-    //this.bbox3857 = this.medBBOX3857;
-    wmsURL = SourceWMS.setWMSParameter(wmsURL, 'BBOX', JSON.stringify(this.bbox).replace('[', '').replace(']', ''));
-    // CRS for BBOX (some services only accept 3857 boundaries?)
-    //wmsURL = SourceWMS.setWMSParameter(wmsURL, 'CRS', 'EPSG:3857');
-
-    // STYLE gray
-    let style = 'boxfill/greyscale';
-    wmsURL = SourceWMS.setWMSParameter(wmsURL, 'STYLES', style);
-
-    // PROJECTION EPSG:4326 (lat and long are equally distributed in pixels)
-    wmsURL = SourceWMS.setWMSParameter(wmsURL, 'PROJECTION', 'EPSG:4326');
-
-    // OUT OF RANGE PIXELS &ABOVEMAXCOLOR=extend&BELOWMINCOLOR=extend
-    wmsURL = SourceWMS.setWMSParameter(wmsURL, 'ABOVEMAXCOLOR', 'extend');
-    wmsURL = SourceWMS.setWMSParameter(wmsURL, 'BELOWMINCOLOR', 'extend');
-
-    // COLORRANGE
-    this.colorrange = SourceWMS.getWMSParameter(wmsURL, 'COLORSCALERANGE').split('%2C');
-    if (this.colorrange.length == 1) // Split by comma
-      this.colorrange = SourceWMS.getWMSParameter(wmsURL, 'COLORSCALERANGE').split(',');
-    this.colorrange = this.colorrange.map((e) => parseFloat(e));
-
-
-    // Paint this image streched in a canvas of width and height related to the bounding box
-    // Each pixel corresponds to a lat-long
-    this.longExtension = Math.abs(this.bbox[0] - this.bbox[1]);
-    this.latExtension = Math.abs(this.bbox[2] - this.bbox[3]);
-
-    // Make canvas lat-long relationship
-    let canvas = document.createElement('canvas');
-    canvas.width = this.longExtension / this.canvasLongLatStep;
-    canvas.height = this.latExtension / this.canvasLongLatStep;
-
-    let ctx = canvas.getContext('2d', {willReadFrequently: false});
-    //document.body.append(canvas);
-
-    // WMS data layers
-    if (animation.layerNames.length == 2){
-      for (let i = 0; i < 2; i++) {
-        // LAYER east and north or intensity and angle
-        wmsURL = SourceWMS.setWMSParameter(wmsURL, 'LAYERS', animation.layerNames[i]);
-        // For data stored in intensity and angle, the colorrange of the angle should go from 0 to 360
-        if (animation.format == 'value_angle' && i == 1)
-          wmsURL = SourceWMS.setWMSParameter(wmsURL, 'COLORSCALERANGE', '0,360');
-        // For data stored in east-north, there range should have negative values too
-          else if (animation.format == 'east_north'){
-            this.colorrange[0] = -this.colorrange[1];
-          wmsURL = SourceWMS.setWMSParameter(wmsURL, 'COLORSCALERANGE', this.colorrange.toString());
-        } 
-        
-        // Get WMS image data
-        console.log("Loading data source WMS images...");
-        let img = new Image();
-        img.crossOrigin = "Anonymous";
-        // Image is loaded, paint it in the canvas and get the data
-        img.onload = () => {
-          // Paint streched WMS image in canvas
-          // For more details: https://developer.mozilla.org/es/docs/Web/CSS/image-rendering
-          ctx.clearRect(img, 0, 0, canvas.width, canvas.height);
-          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-          if (i == 0)
-            this.imgDataEast = ctx.getImageData(0, 0, canvas.width, canvas.height); // Store image data
-          else
-            this.imgDataNorth = ctx.getImageData(0, 0, canvas.width, canvas.height); // Store image data
-
-          this.loaded++;
-
-          // Both layers are loaded
-          if (this.loaded == 2) {
-            this.isReady = true;
-            //document.body.append(canvas);
-            // Callback
-            if (this.callbackFunc)
-              this.callbackFunc();
-          }
-        };
-        // Start loading image
-        img.src = wmsURL;
-        console.log(wmsURL);
-      }
-    }
-    
-  }
-
-
-
-  // Set WMS parameter
-  static setWMSParameter(wmsURL, paramName, paramContent) {
-    // If parameter does not exist
-    if (wmsURL.indexOf(paramName + "=") == -1) {
-      console.log("Parameter ", paramName, " does not exist in WMS URL");
-      return wmsURL + '&' + paramName + '=' + paramContent;
-    }
-    let currentContent = SourceWMS.getWMSParameter(wmsURL, paramName);
-    return wmsURL.replace(paramName + '=' + currentContent, paramName + '=' + paramContent);
-  }
-
-
-  // Get WMS parameter
-  static getWMSParameter(wmsURL, paramName) {
-    // If parameter does not exist
-    if (wmsURL.indexOf(paramName + "=") == -1) {
-      console.log("Parameter ", paramName, " does not exist in WMS URL");
-      return '';
-    }
-    let tmpSTR = wmsURL.substr(wmsURL.indexOf(paramName + "="));
-    let endOfContent = tmpSTR.indexOf('&') == -1 ? tmpSTR.length : tmpSTR.indexOf('&');
-    return tmpSTR.substring(paramName.length + 1, endOfContent);
-  }
-
-
-  // Get value at Long Lat
-  getValueAtLongLat(long, lat, value) {
-
-    // If is outside bbox
-    let minLong = Math.min(this.bbox[0], this.bbox[1]);
-    let minLat = Math.min(this.bbox[2], this.bbox[3]);
-    if (lat < minLat || lat > Math.max(this.bbox[2], this.bbox[3]) || // lat
-      long < minLong || long > Math.max(this.bbox[0], this.bbox[1])) { // long
-      value[0] = undefined; value[1] = undefined; // Reset value
-      return value;
-    }
-
-    // If image is not loaded
-    if (this.isReady == false){
-      value[0] = undefined; value[1] = undefined; // Reset value
-      return value;
-    }
-      
-
-    // Get closest pixel to long lat (nearest-neighbour interpolation)
-    let colPixelPos = Math.round((long - minLong) / this.canvasLongLatStep);
-    let rowPixelPos = Math.round((lat - minLat) / this.canvasLongLatStep);
-    // Invert row pixel position (mirror data on the horizontal axis)
-    rowPixelPos = this.imgDataEast.height - rowPixelPos;
-
-    // Index
-    let index = rowPixelPos * this.imgDataEast.width + colPixelPos;
-    // Get RGB values (grayscale)
-    let redE = this.imgDataEast.data[index * 4] / 255; //R east
-    let redN = this.imgDataNorth.data[index * 4] / 255; //R north
-    let alphaE = this.imgDataEast.data[index * 4 + 3] / 255; // Alpha
-
-    // Low alpha
-    if (alphaE < 0.1) {
-      value[0] = undefined; value[1] = undefined; // Reset value
-      return value;
-    }
-
-
-    // Rescale RGB value to real unit
-    // Images store East and North intensity
-    if (this.animation.format == 'east_north'){
-      value[0] = redE * (this.colorrange[1] - this.colorrange[0]) + this.colorrange[0]; // lat
-      value[1] = redN * (this.colorrange[1] - this.colorrange[0]) + this.colorrange[0]; // long
-    }
-    // Images store Intensity and Angle in degrees
-    else if (this.animation.format == 'value_angle'){
-      let intensity = redE * (this.colorrange[1] - this.colorrange[0]) + this.colorrange[0];
-      let angle = redN * 360;
-      value[1] = - 0.1 * Math.cos(angle * Math.PI / 180) * intensity;
-      value[0] = - 0.1 * Math.sin(angle * Math.PI / 180) * intensity;
-    }
-
-    //console.log(long + ", " + lat + ", " + value);
-
-    return value;
-  }
-
-  /*getValueAtPixel(pixel, value) {
-
-    let index = pixel[0] * this.imgDataEast.width + pixel[1];
-    if (index > this.imgDataEast.data.length)
-      return [0, 0];
-
-    // Get RGB values (grayscale)
-    let redE = this.imgDataEast.data[index * 4] / 255; //R east
-    let redN = this.imgDataNorth.data[index * 4] / 255; //R north
-    // Rescale RGB value to real unit
-    value[0] = redE * (this.colorrange[1] - this.colorrange[0]) + this.colorrange[0]; // lat
-    value[1] = redN * (this.colorrange[1] - this.colorrange[0]) + this.colorrange[0]; // long
-
-    return value
-  }*/
-
-}
-
-
-
-
-
-
-
-
-
-
-
-
-// HFRadar data source
-class SourceHFRadar {
-
-  constructor(HFRadarData){
-    this.data = HFRadarData;
-    this.isReady = true;
-  }
-
-  updateData(HFRadarData){
-    this.data = HFRadarData;
-  }
-}
-
-
-// Combined Radar data source
-class SourceCombinedRadar {
-
-  constructor (CombinedRadarData){
-    this.dataGrid = CombinedRadarData;
-    this.isReady = true;
-    this.animation = {
-      type: 'velocity'
-    };
-  }
-
-  updateData(CombinedRadarData) {
-    this.dataGrid = CombinedRadarData;
-    // SOMETHING ELSE HERE?
-  }
-
-
-  getValueAtLongLat(long, lat, value){
-    
-    let grid = this.dataGrid; 
-
-    let longIndex = Math.floor(grid.numLongPoints * (long - grid.minLong) / grid.rangeLong);
-    let latIndex = Math.floor(grid.numLatPoints * (lat - grid.minLat) / grid.rangeLat);
-    longIndex = longIndex == -1 ? 0 : longIndex;
-    latIndex = latIndex == -1 ? 0 : latIndex;
-
-    // Indices are outside the data grid
-    if (longIndex < 0 || latIndex < 0 || longIndex >= grid.numLongPoints || latIndex >= grid.numLatPoints){
-      //console.log("Index out of bounds. longIndex: " + longIndex + ", latIndex: " + latIndex + ", Resolution: " + grid.numLongPoints + "x" + grid.numLatPoints);
-      value[0] = undefined;
-      value[1] = undefined;
-      return value;
-    }
-
-    // Lat and long are on land
-    if (window.DataManager){
-      let coord = ol.proj.transform([long, lat], 'EPSG:4326', 'EPSG:3857');
-      // If point is found in land, write as undefined and return
-      if (window.DataManager.isThereLand(...coord)){
-        // Assign
-        value[0] = undefined;
-        value[1] = undefined;
-        return value;
-      }
-    }
-
-    // Find value
-    let index = latIndex * grid.numLongPoints + longIndex;
-    value[0] = grid.dataGrid[ index * 2];
-    value[1] = grid.dataGrid[ index * 2 + 1];
-    // dataGrid returns NaN when it does not have a value. Transform to undefined here
-    if (isNaN(value[0])) {
-      value[0] = undefined;
-      value[1] = undefined;
-    }
-
-    return value;
-  }
-}
-
-
-
-
-
-
-
-
-
-
-
-class ParticleSystemHF {
+class ParticleSystemHF {           
 
   constructor(canvas, source, olMap, legend){
     // Canvas
@@ -783,11 +145,11 @@ class ParticleHF {
 
     
     // From dataPoint origin, move along the dir to define start and ending points of drawing path
-    this.nextLong = dataPoint['Longitude (deg)'] + ((u/this.magnitude) / earthRadius) * (180 / Math.PI) / Math.cos(dataPoint['Latitude (deg)'] * Math.PI / 180);
-    this.nextLat = dataPoint['Latitude (deg)'] + ((v/this.magnitude) / earthRadius) * (180 / Math.PI);
+    this.nextLong = dataPoint['Longitude (deg)'] + ((u/this.magnitude) / EARTHRADIUS) * (180 / Math.PI) / Math.cos(dataPoint['Latitude (deg)'] * Math.PI / 180);
+    this.nextLat = dataPoint['Latitude (deg)'] + ((v/this.magnitude) / EARTHRADIUS) * (180 / Math.PI);
     // Move the starting point a bit backward
-    this.long = dataPoint['Longitude (deg)'] + ((-u*0.5/this.magnitude) / earthRadius) * (180 / Math.PI) / Math.cos(dataPoint['Latitude (deg)'] * Math.PI / 180);
-    this.lat = dataPoint['Latitude (deg)'] + ((-v*0.5/this.magnitude) / earthRadius) * (180 / Math.PI);
+    this.long = dataPoint['Longitude (deg)'] + ((-u*0.5/this.magnitude) / EARTHRADIUS) * (180 / Math.PI) / Math.cos(dataPoint['Latitude (deg)'] * Math.PI / 180);
+    this.lat = dataPoint['Latitude (deg)'] + ((-v*0.5/this.magnitude) / EARTHRADIUS) * (180 / Math.PI);
 
     // Get points in pixel coordinates and position particle's path on screen
     this.repositionParticle();
@@ -1049,10 +411,10 @@ class ParticleSystem {
       this.ctx.globalCompositeOperation = "source-over";
     }
     // Trail color
-    this.ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+    //this.ctx.fillStyle = 'rgba(0, 0, 0, 0.7)'; // Commenting these lines fixes #99
 
     // Line style
-    this.ctx.strokeStyle = 'rgba(0, 0, 0, 0.7)';
+    //this.ctx.strokeStyle = 'rgba(0, 0, 0, 0.7)'; // Commenting these lines fixes #99
     this.ctx.lineWidth = 1;
     this.ctx.beginPath();
     for (let i = 0; i < this.numParticles; i++)
@@ -1146,8 +508,8 @@ class Particle {
       // Make step
       let step = this.stepInLongLat;
       // Step in long lat
-      let nextLong = coord[0] + ((this.valueVec2[0] * step) / earthRadius) * (180 / Math.PI) / Math.cos(coord[0] * Math.PI / 180);
-      let nextLat = coord[1] + ((this.valueVec2[1] * step) / earthRadius) * (180 / Math.PI);
+      let nextLong = coord[0] + ((this.valueVec2[0] * step) / EARTHRADIUS) * (180 / Math.PI) / Math.cos(coord[0] * Math.PI / 180);
+      let nextLat = coord[1] + ((this.valueVec2[1] * step) / EARTHRADIUS) * (180 / Math.PI);
       // Convert to pixel coordinates
       coord[0] = nextLong;
       coord[1] = nextLat;
@@ -1400,8 +762,8 @@ class ParticleCombinedRadar extends Particle {
       // Make step
       let step = this.stepInLongLat;
       // Step in long lat
-      let nextLong = coord[0] + ((this.valueVec2[0] * step) / earthRadius) * (180 / Math.PI) / Math.cos(coord[0] * Math.PI / 180);
-      let nextLat = coord[1] + ((this.valueVec2[1] * step) / earthRadius) * (180 / Math.PI);
+      let nextLong = coord[0] + ((this.valueVec2[0] * step) / EARTHRADIUS) * (180 / Math.PI) / Math.cos(coord[0] * Math.PI / 180);
+      let nextLat = coord[1] + ((this.valueVec2[1] * step) / EARTHRADIUS) * (180 / Math.PI);
 
       
       // Convert to pixel coordinates
@@ -1588,6 +950,9 @@ class ParticleCombinedRadar extends Particle {
     let steps = this.legend.colorsStr.length;
     let range = this.legend.legendRange; // Source could also contain the legendRange. but user can modify legend and legend rage. Source maybe should have the default
     //let unitStep = (range[1] - range[0])/steps;
+    // HACK-TODO: sometimes range is undefined (probably legend is not loaded yet?)
+    range = range == undefined ? [0, 100] : range;
+
     
     // Find color according to magnitude and legend
     let normValue = Math.min(1 , Math.max(0,(value - range[0]) / (range[1] - range[0])));
@@ -1714,8 +1079,8 @@ class Arrow {
   // Return pixel position according to step in lat long
   pixelPosWithStepInLongLat(long, lat, dirVec2, step, nextLongLatVec2){
     // Step in long lat
-    let nextLong = long + ((dirVec2[0] * step) / earthRadius) * (180 / Math.PI) / Math.cos(lat * Math.PI / 180);
-    let nextLat = lat + ((dirVec2[1] * step) / earthRadius) * (180 / Math.PI);
+    let nextLong = long + ((dirVec2[0] * step) / EARTHRADIUS) * (180 / Math.PI) / Math.cos(lat * Math.PI / 180);
+    let nextLat = lat + ((dirVec2[1] * step) / EARTHRADIUS) * (180 / Math.PI);
     nextLongLatVec2[0] = nextLong;
     nextLongLatVec2[1] = nextLat;
     // Convert to screen pixel
@@ -1840,12 +1205,4 @@ class Arrow {
 }
 
 
-
-export default AnimationEngine;
-
-
-
-
-
-
-
+export {ParticleSystem, ParticleSystemHF}
