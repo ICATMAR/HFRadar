@@ -179,7 +179,7 @@
 
 
 // This component requires a proxy server to avoid CORS policies from the ERDDAP server. 
-// https://github.com/ICATMAR/proxyServer
+// https://github.com/ICATMAR/ProxyServerAPI
 
 
 
@@ -218,6 +218,7 @@ export default {
   },
   data() {
     return {
+      proxyURL: 'https://api.icatmar.cat/proxy/',//"http://localhost:3000/proxy",
       isExternalObsVisible: false,
       isAdvancedInterfaceOnOff: false,
       isTooFar: false,
@@ -364,8 +365,8 @@ export default {
 
         console.log(url.replace('jsonlKVP', 'htmlTable'));
         const encodedUrl = encodeURIComponent(url);
-        let proxyURL = "http://localhost:3000/proxy?url=" + encodedUrl;
-        let promise = this.getDataFromURL(proxyURL)
+        let proxyFullURL = this.proxyURL + '?url=' + encodedUrl;
+        let promise = this.getDataFromURL(proxyFullURL)
           .then(res => {
             // Store response
             this.requestedDailyData[dayTmst] = res;
