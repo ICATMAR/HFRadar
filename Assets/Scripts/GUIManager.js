@@ -21,9 +21,11 @@ class GUIManager {
     radarsVisible: {
       'CREU': true,
       'BEGU': true,
+      'TOSS': true,
       'AREN': true,
       'PBCN': true,
       'GNST': true,
+      'SCAL': true,
     }
   };
 
