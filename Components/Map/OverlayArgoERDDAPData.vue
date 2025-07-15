@@ -351,7 +351,6 @@ export default {
           }
         });
         // Define platform
-        debugger;
         if (platforms[jsRow.platform_number] == undefined) {
           platforms[jsRow.platform_number] = {
             "platform_type": jsRow.platform_type,
