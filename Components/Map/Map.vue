@@ -40,6 +40,9 @@
     <!-- Overlay NOAA ERDDAP data -->
     <overlay-noaa-erddap-data ref="overlayNOAAERDDAPData"></overlay-noaa-erddap-data>
 
+    <!-- Overlay Argo ERDDAP data -->
+    <overlay-argo-erddap-data ref="overlayArgoERDDAPData"></overlay-argo-erddap-data>
+
 
     <!-- <time-slider></time-slider> -->
 
@@ -75,6 +78,7 @@ import OverlayWaveData from "./OverlayWaveData.vue";
 import OverlayPuertosBuoyData from "./OverlayPuertosBuoyData.vue";
 import OverlayOBSEAData from "./OverlayOBSEAData.vue";
 import OverlayNOAAERDDAPData from "./OverlayNOAAERDDAPData.vue";
+import OverlayArgoERDDAPData from "./OverlayArgoERDDAPData.vue";
 
 export default {
   name: 'app-map',
@@ -850,10 +854,15 @@ export default {
       if (this.$refs.overlayOBSEAData) {
         this.$refs.overlayOBSEAData.updatePanel(zoomLevel);
       }
-      // Hide/show obsea info
+      // Hide/show NOAA info
       if (this.$refs.overlayNOAAERDDAPData) {
         this.$refs.overlayNOAAERDDAPData.updatePanel(zoomLevel);
       }
+      // Hide/show Argo info
+      if (this.$refs.overlayArgoERDDAPData) {
+        this.$refs.overlayArgoERDDAPData.updatePanel(zoomLevel);
+      }
+
 
     },
     onMapMoveStart: function () {
@@ -1178,6 +1187,7 @@ export default {
     "overlay-puertos-buoy-data": OverlayPuertosBuoyData,
     "overlay-obsea-data": OverlayOBSEAData,
     "overlay-noaa-erddap-data": OverlayNOAAERDDAPData,
+    "overlay-argo-erddap-data": OverlayArgoERDDAPData,
   },
   computed: {
     //foo: function () {}

@@ -2,7 +2,7 @@
 
   <div id="overlay-argo-erddap-data" ref="containerErddapInfo">
     <!-- Container -->
-    <div v-for="(platformCode, index) in Object.keys(platformsData)" :id="platformCode" :ref="platformCode"
+    <div v-for="(platformNumber, index) in Object.keys(platformsData)" :id="platformNumber" :ref="platformNumber"
       class="ERDDAPContainer"
       :class="[!isTooFar && isAdvancedInterfaceOnOff && isExternalObsVisible ? 'showOverlayMap' : 'hideOverlayMap']">
 
@@ -10,10 +10,10 @@
 
       <!-- Platform panel -->
       <Transition>
-        <div class="platformPanel" v-if="platformsData[platformCode].showInfo && platformsData[platformCode].hasData">
+        <div class="platformPanel" v-if="platformsData[platformNumber].showInfo && platformsData[platformNumber].hasData">
           <!-- Site -->
           <div class="platformTitle">
-            <div v-show="platformsData[platformCode].isLoading" class="lds-ring">
+            <div v-show="platformsData[platformNumber].isLoading" class="lds-ring">
               <div></div>
               <div></div>
               <div></div>
@@ -25,36 +25,36 @@
           </div>
 
           <!-- Platform data -->
-          <div v-if="platformsData[platformCode].hasData">
+          <div v-if="platformsData[platformNumber].hasData">
 
             <!-- Platform number -->
-            <div v-if="Object.keys(platformsData[platformCode].data).includes('platform_number')">
+            <div v-if="Object.keys(platformsData[platformNumber].data).includes('platform_number')">
               <span>
                 <strong title="platform_number / fileNumber">ID: </strong>
-                {{ platformsData[platformCode].data['platform_number'] }}
+                {{ platformsData[platformNumber].data['platform_number'] }}
               </span>
             </div>
 
             <!-- Project name -->
-            <div v-if="Object.keys(platformsData[platformCode].data).includes('project_name')">
+            <div v-if="Object.keys(platformsData[platformNumber].data).includes('project_name')">
               <span>
                 <strong title="project_name">Project: </strong>
-                {{ platformsData[platformCode].data['project_name'] }}
+                {{ platformsData[platformNumber].data['project_name'] }}
               </span>
             </div>
 
             <!-- Platform type -->
-            <div v-if="Object.keys(platformsData[platformCode].data).includes('platform_type')">
+            <div v-if="Object.keys(platformsData[platformNumber].data).includes('platform_type')">
               <span>
                 <strong title="platform_type">Argo type: </strong>
-                {{ platformsData[platformCode].data['platform_type'] }}
+                {{ platformsData[platformNumber].data['platform_type'] }}
               </span>
             </div>
 
             <!-- Cycle number -->
-            <div v-if="Object.keys(platformsData[platformCode].data).includes('cycle_number')">
+            <div v-if="Object.keys(platformsData[platformNumber].data).includes('cycle_number')">
               <span>
-                {{ platformsData[platformCode].data['cycle_number'] }} cycles
+                {{ platformsData[platformNumber].data['cycle_number'] }} cycles
               </span>
             </div>
 
@@ -65,10 +65,10 @@
 
             <!-- Button showAllData ON OFF-->
             <div class="button-container">
-              <button v-show="!platforms[platformCode].showAllData" class="more-data-button"
-                @click="platforms[platformCode].showAllData = true">+</button>
-              <button v-show="platforms[platformCode].showAllData" class="more-data-button"
-                @click="platforms[platformCode].showAllData = false">-</button>
+              <button v-show="!platforms[platformNumber].showAllData" class="more-data-button"
+                @click="platforms[platformNumber].showAllData = true">+</button>
+              <button v-show="platforms[platformNumber].showAllData" class="more-data-button"
+                @click="platforms[platformNumber].showAllData = false">-</button>
             </div>
 
           </div>
@@ -78,8 +78,8 @@
 
 
       <!-- Platform icon -->
-      <img class="icon-str icon-medium icon-img panel-icon-right" @click="ERDDAPIconClicked(platformCode)"
-        src='/HFRadar/Assets/Images/argo.svg' v-show="platformsData[platformCode].hasData">
+      <img class="icon-str icon-medium icon-img panel-icon-right" @click="ERDDAPIconClicked(platformNumber)"
+        src='/HFRadar/Assets/Images/ocea-mini-1.svg' v-show="platformsData[platformNumber].hasData">
 
 
     </div>
@@ -175,8 +175,8 @@ export default {
   },
   methods: {
     // USER ACTIONS
-    ERDDAPIconClicked: function (platformCode) {
-      this.platformsData[platformCode].showInfo = !this.platformsData[platformCode].showInfo;
+    ERDDAPIconClicked: function (platformNumber) {
+      this.platformsData[platformNumber].showInfo = !this.platformsData[platformNumber].showInfo;
     },
     // INTERNAL
     selectedDateChanged: function (tmst) {
@@ -197,9 +197,9 @@ export default {
       let platforms = this.platforms;
 
       // Hide all data from platforms
-      Object.keys(platforms).forEach(platformCode => {
-        let platform = platforms[platformCode];
-        this.platformsData[platformCode].hasData = false;
+      Object.keys(platforms).forEach(platformNumber => {
+        let platform = platforms[platformNumber];
+        this.platformsData[platformNumber].hasData = false;
         // Iterate tmst
         let halfHourinMs = 1000 * 60 * 29;
         let closestTimeDiff = 10e12;
@@ -208,13 +208,13 @@ export default {
           let timeDiff = Math.abs(new Date(dataTmst).getTime() - new Date(tmst).getTime());
           if (timeDiff < halfHourinMs && timeDiff < closestTimeDiff) {
             closestTimeDiff = timeDiff;
-            this.platformsData[platformCode].hasData = true;
+            this.platformsData[platformNumber].hasData = true;
             // Empty observed properties
-            this.platformsData[platformCode].data = {};
+            this.platformsData[platformNumber].data = {};
 
             // Iterate props and assign to platformsData (vue uses this object)
             Object.keys(platform.data[dataTmst]).forEach(key => {
-              this.platformsData[platformCode].data[key] = platform.data[dataTmst][key];
+              this.platformsData[platformNumber].data[key] = platform.data[dataTmst][key];
             });
 
             // Change layer location
@@ -222,13 +222,13 @@ export default {
               platform.coord3857 = ol.proj.fromLonLat([platform.data[dataTmst].longitude, platform.data[dataTmst].latitude]);
 
               if (platform.olLayer != undefined) {
-                platform.olLayer.setElement(this.$refs[platformCode]);
+                platform.olLayer.setElement(this.$refs[platformNumber]);
                 platform.olLayer.setPosition(platform.coord3857); // For some reason vue and the map element have to be redefined
               } else {
                 debugger;
               }
 
-              if (platformCode != platform.olLayer.C.element.id) {
+              if (platformNumber != platform.olLayer.C.element.id) {
                 debugger;
               }
             });
@@ -253,8 +253,8 @@ export default {
       // Load the data
       else {
         // Set all platforms to loading
-        Object.keys(this.platforms).forEach(platformCode => {
-          this.platformsData[platformCode].isLoading = true;
+        Object.keys(this.platforms).forEach(platformNumber => {
+          this.platformsData[platformNumber].isLoading = true;
         });
 
         // Prepare start / end of day
@@ -276,8 +276,8 @@ export default {
             // Store response
             this.requestedDailyData[dayTmst] = res;
             // All platforms loaded
-            Object.keys(this.platforms).forEach(platformCode => {
-              this.platformsData[platformCode].isLoading = false;
+            Object.keys(this.platforms).forEach(platformNumber => {
+              this.platformsData[platformNumber].isLoading = false;
             });
             // Create data structure
             this.parseRawTextAndStructureData(res);
@@ -313,19 +313,21 @@ export default {
         });
         // Define platform
         debugger;
-        if (platforms[jsRow.platform_code] == undefined) {
-          platforms[jsRow.platform_code] = {
-            "type": jsRow.platform_type,
-            "location": [jsRow.longitude, jsRow.latitude],
-            "id": jsRow.platform_id,
-            "code": jsRow.platform_code,
+        if (platforms[jsRow.platform_number] == undefined) {
+          platforms[jsRow.platform_number] = {
+            "platform_type": jsRow.platform_type,
+            "platform_number": jsRow.platform_number,
+            "float_serial_no": jsRow.float_serial_no,
+            "project_name": jsRow.project_name,
+            "location": [jsRow.longitude, jsRow.latitude], // Initializing location?
             "data": {},
           }
         }
         // Fill the platform with data on given timestamps
-        let platform = platforms[jsRow.platform_code];
-        // Unexpectedly, it can happen that two platforms share the same id and code. This was found for ships.
+        let platform = platforms[jsRow.platform_number];
+        // Fill with profile data?
         if (platform.data[jsRow.time] != undefined) {
+          debugger;
           // Keep the one with more data
           if (Object.keys(jsRow).length - 3 > Object.keys(platform.data[jsRow.time]).length) {
             // TODO: WHAT ABOUT DUPLICATED DATA? ERDDAP PROBLEM'S
@@ -346,19 +348,15 @@ export default {
 
         else {
           platform.data[jsRow.time] = {};
-          // Add parameters to data
-          for (let i = 3; i < this.parameters.length; i++) {
+          // Add all parameters to data
+          // TODO: should there be a profile here? there is one profile per TMST
+          // TODO: request on demand from user? or at least the SST and SSS?
+          for (let i = 0; i < this.parameters.length; i++) {
             if (jsRow[this.parameters[i]] != undefined) {
               platform.data[jsRow.time][this.parameters[i]] = jsRow[this.parameters[i]];
             }
           }
 
-        }
-
-        // Check if it is a drifter (lat long changes)
-        // When platform is moving, it is a drifter. // TODO: mooring buoys also move (borneo), is it reflected here? does it matter?
-        if (jsRow.longitude != platform.longitude || jsRow.latitude != platform.latitude) {
-          platform.isDrifting = true;
         }
 
       });
@@ -367,26 +365,26 @@ export default {
     // Update vue and map
     addPlatformsToMap() {
       // Iterate platforms to create vue objects and map layers
-      Object.keys(this.platforms).forEach(platformCode => {
-        this.addPlatformToMap(platformCode, 0);
+      Object.keys(this.platforms).forEach(platformNumber => {
+        this.addPlatformToMap(platformNumber, 0);
       });
     },
     // Add platform to map
-    addPlatformToMap(platformCode, count) {
-      let platform = this.platforms[platformCode];
+    addPlatformToMap(platformNumber, count) {
+      let platform = this.platforms[platformNumber];
 
       // Platform was already added to map
       if (platform.olLayer != undefined)
         return;
 
       // Create vue object
-      if (this.platformsData[platformCode] == undefined) {
-        this.platformsData[platformCode] = { "hasData": false, "showInfo": false, "isLoading": false };
-        this.platforms[platformCode].coord3857 = ol.proj.fromLonLat([this.platforms[platformCode].location[0], this.platforms[platformCode].location[1]]);
+      if (this.platformsData[platformNumber] == undefined) {
+        this.platformsData[platformNumber] = { "hasData": false, "showInfo": false, "isLoading": false };
+        this.platforms[platformNumber].coord3857 = ol.proj.fromLonLat([this.platforms[platformNumber].location[0], this.platforms[platformNumber].location[1]]);
       }
 
       this.$nextTick(() => {
-        if (this.$refs[platformCode] == undefined) {
+        if (this.$refs[platformNumber] == undefined) {
           if (count > 2) {
             debugger;
             console.error("Could not find html element with vue ref")
@@ -402,17 +400,17 @@ export default {
         // Relate overlay with map
         // Platform info
         const platformInfo = new ol.Overlay({
-          name: platformCode,
-          position: this.platforms[platformCode].coord3857,
+          name: platformNumber,
+          position: this.platforms[platformNumber].coord3857,
           positioning: 'center-right',//Object.keys(this.platforms).length % 2 == 1 ? 'center-right' : 'center-left',
-          element: this.$refs[platformCode],
+          element: this.$refs[platformNumber],
           stopEvent: false,
         });
         platformInfo.getElement().classList.add('no-pointer-events');
         platformInfo.getElement().parentElement.classList.add('no-pointer-events');
         platformInfo.element.classList.add('no-pointer-events'); // Remove pointer events, container takes more space than necessary and blocks visible icons
         this.map.addOverlay(platformInfo);
-        console.log("Added NOAA ERDDAP platform");
+        console.log("Added Argo float from ERDDAP");
         platform.olLayer = platformInfo;
       });
     },
