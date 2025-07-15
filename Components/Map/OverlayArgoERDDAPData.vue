@@ -1,6 +1,6 @@
 <template>
 
-  <div id="overlay-erddap-data" ref="containerErddapInfo">
+  <div id="overlay-argo-erddap-data" ref="containerErddapInfo">
     <!-- Container -->
     <div v-for="(platformCode, index) in Object.keys(platformsData)" :id="platformCode" :ref="platformCode"
       class="ERDDAPContainer"
@@ -169,14 +169,10 @@
 
 <script>
 
-// ERDDAP AOML NOAA
-// https://erddap.aoml.noaa.gov/gdp/erddap/index.html
-// Balearic sea platforms in real-time
-// Graph website: https://erddap.aoml.noaa.gov/gdp/erddap/tabledap/OSMC_RealTime.graph?longitude,latitude,platform_id&time>=2024-08-16T00:00:00Z&time<=2024-08-23T00:00:00Z&longitude>=0&longitude<=5&latitude>=39.5&latitude<=44&.draw=markers&.marker=5%7C5&.color=0x000000&.colorBar=%7C%7C%7C%7C%7C&.bgColor=0xffccccff
-// Dataset url (html): https://osmc.noaa.gov/erddap/tabledap/OSMC_flattened.htmlTable?longitude,latitude,time,platform_type,platform_id&time>=2024-08-16T00:00:00Z&time<=2024-08-23T00:00:00Z&longitude>=0&longitude<=5&latitude>=39.5&latitude<=44&.draw=markers&.marker=5%7C5&.color=0x000000&.colorBar=%7C%7C%7C%7C%7C&.bgColor=0xffccccff
-// All data: https://osmc.noaa.gov/erddap/tabledap/OSMC_flattened.htmlTable?platform_id%2Cplatform_code%2Cplatform_type%2Ccountry%2Ctime%2Clatitude%2Clongitude%2Cobservation_depth%2Csst%2Catmp%2Cprecip%2Csss%2Cztmp%2Czsal%2Cslp%2Cwindspd%2Cwinddir%2Cwvht%2Cwaterlevel%2Cclouds%2Cdewpoint%2Cuo%2Cvo%2Cwo%2Crainfall_rate%2Chur%2Csea_water_elec_conductivity%2Csea_water_pressure%2Crlds%2Crsds%2Cwaterlevel_met_res%2Cwaterlevel_wrt_lcd%2Cwater_col_ht%2Cwind_to_direction%2Clon360&time%3E=2024-08-15T00%3A00%3A00Z&latitude%3E=29&latitude%3C=46&longitude%3E=-6&longitude%3C=20
+// ERDDAP ARGO IFREMER
+// https://erddap.ifremer.fr/erddap/index.html
 
-
+// Data website: https://erddap.ifremer.fr/erddap/tabledap/ArgoFloats.html
 
 // This component requires a proxy server to avoid CORS policies from the ERDDAP server. 
 // https://github.com/ICATMAR/ProxyServerAPI
@@ -186,7 +182,7 @@
 
 
 export default {
-  name: 'overlay-erddap-data',
+  name: 'overlay-argo-erddap-data',
   created() { },
   mounted() {
 
@@ -222,45 +218,33 @@ export default {
       isExternalObsVisible: false,
       isAdvancedInterfaceOnOff: false,
       isTooFar: false,
-      queryPlatformsURL: "https://osmc.noaa.gov/erddap/tabledap/OSMC_flattened.jsonlKVP" +
+      queryPlatformsURL: "https://erddap.ifremer.fr/erddap/tabledap/ArgoFloats.jsonlKVP" +
         "?{parameters}" +
-        "&time>={startDate}&time<={endDate}&longitude>={longMin}&longitude<={longMax}&latitude>={latMin}&latitude<={latMax}" +
-        "&observation_depth<0.5",// + // Avoid subsurface data
-      //'&platform_type="DRIFTING BUOYS"', // Restric to drifters
+        "&time>={startDate}&time<={endDate}&longitude>={longMin}&longitude<={longMax}&latitude>={latMin}&latitude<={latMax}",
       bbox: [0, 5, 39.5, 44], // long, lat
       parameters: [
-        'platform_type',
-        'platform_code',
-        'platform_id',
-        'longitude',
-        'latitude',
+        'fileNumber',
+        'data_type',
+        'date_creation',
+        'platform_number',
+        'project_name',
+        'pi_name',
+        'cycle_number',
+        'data_center',
+        'dc_reference', // data center convention ?
+        'data_mode', // R-> real-time, A -> real-time with adjustments, D -> delayed mode
+        'platform_type', // ARVOR, PROVOR, NAVIS, etc.
+        'float_serial_no', // ?
         'time',
-        'observation_depth',
-        'sst',
-        'atmp',
-        'precip',
-        'sss',
-        'ztmp',
-        'zsal',
-        'slp',
-        'windspd',
-        'winddir',
-        'wvht',
-        'waterlevel',
-        'clouds',
-        'dewpoint',
-        'uo',
-        'vo',
-        'wo',
-        'rainfall_rate',
-        'hur',
-        'sea_water_elec_conductivity',
-        'rlds',
-        'rsds',
-        'waterlevel_met_res',
-        'waterlevel_wrt_lcd',
-        'water_col_ht',
-        'wind_to_direction',
+        'latitude',
+        'longitude',
+        // wmo_inst_type? (836-882)
+        // config_mission_number ? (5-227)
+        // time_qc, position_qc
+        // profile_pres_qc, profile_temp_qc, profile_psal_qc
+        // pres_qc, pres_adjusted, pres_adjusted_qc, pres_adjusted_error,
+        // temp_qc, temp_adjusted, temp_adjusted_qc, temp_adjusted_error,
+        // ...
       ],
       platforms: {},
       platformsData: {},
@@ -407,6 +391,7 @@ export default {
           }
         });
         // Define platform
+        debugger;
         if (platforms[jsRow.platform_code] == undefined) {
           platforms[jsRow.platform_code] = {
             "type": jsRow.platform_type,
