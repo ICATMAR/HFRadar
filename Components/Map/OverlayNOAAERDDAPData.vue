@@ -157,7 +157,7 @@
       <!-- Platform icon -->
       <img class="icon-str icon-medium icon-img panel-icon-right" @click="ERDDAPIconClicked(platformCode)" :src="[platforms[platformCode]['type'].includes('SHIP') ? '/HFRadar/Assets/Images/boat.svg' :
         platforms[platformCode]['type'].includes('DRIFTING') ? '/HFRadar/Assets/Images/drifter.svg' :
-          platforms[platformCode]['type'].includes('GLIDERS') ? '/HFRadar/Assets/Images/drifter.svg' :
+          platforms[platformCode]['type'].includes('GLIDERS') ? '/HFRadar/Assets/Images/argo.svg' :
             '/HFRadar/Assets/Images/buoy.svg']" v-show="platformsData[platformCode].hasData">
 
 

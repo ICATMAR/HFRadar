@@ -10,7 +10,8 @@
 
       <!-- Platform panel -->
       <Transition>
-        <div class="platformPanel" v-if="platformsData[platformNumber].showInfo && platformsData[platformNumber].hasData">
+        <div class="platformPanel"
+          v-if="platformsData[platformNumber].showInfo && platformsData[platformNumber].hasData">
           <!-- Site -->
           <div class="platformTitle">
             <div v-show="platformsData[platformNumber].isLoading" class="lds-ring">
@@ -54,14 +55,52 @@
             <!-- Cycle number -->
             <div v-if="Object.keys(platformsData[platformNumber].data).includes('cycle_number')">
               <span>
-                {{ platformsData[platformNumber].data['cycle_number'] }} cycles
+                <strong title="platform_type">Number of cycles: </strong>
+                {{ platformsData[platformNumber].data['cycle_number'] }}
               </span>
             </div>
 
             <!-- Show trajectory -->
             <!-- Show profile -->
 
+            <!-- Extra data -->
+            <Transition>
+              <div v-if="platforms[platformNumber].showAllData">
+                <!-- Principal investigator -->
+                <div v-if="Object.keys(platformsData[platformNumber].data).includes('pi_name')">
+                  <span>
+                    <strong>Principal investigator(s): </strong>
+                    {{ platformsData[platformNumber].data['pi_name'] }}
+                  </span>
+                </div>
+                <!-- Data mode -->
+                <div v-if="Object.keys(platformsData[platformNumber].data).includes('data_mode')">
+                  <span>
+                    <strong>Mode: </strong>
+                    {{ platformsData[platformNumber].data['data_mode'] == 'R' ? 'Real-time' :
+                      platformsData[platformNumber].data['data_mode'] == 'A' ? 'Real-time with adjustments' :
+                        platformsData[platformNumber].data['data_mode'] == 'D' ? 'Delayed mode' :
+                          platformsData[platformNumber].data['data_mode'] }}
+                  </span>
+                </div>
+                <!-- Data center -->
+                <div v-if="Object.keys(platformsData[platformNumber].data).includes('data_center')">
+                  <span>
+                    <strong>Data center: </strong>
+                    {{ platformsData[platformNumber].data['data_center'] }}
+                  </span>
+                </div>
+                <!-- Date of creation -->
+                <div v-if="Object.keys(platformsData[platformNumber].data).includes('date_creation')">
+                  <span>
+                    <strong>Date of creation: </strong>
+                    {{ new Date(platformsData[platformNumber].data['date_creation']).toLocaleDateString() }}
+                  </span>
+                </div>
 
+
+              </div>
+            </Transition>
 
             <!-- Button showAllData ON OFF-->
             <div class="button-container">
@@ -79,7 +118,7 @@
 
       <!-- Platform icon -->
       <img class="icon-str icon-medium icon-img panel-icon-right" @click="ERDDAPIconClicked(platformNumber)"
-        src='/HFRadar/Assets/Images/ocea-mini-1.svg' v-show="platformsData[platformNumber].hasData">
+        src='/HFRadar/Assets/Images/argo.svg' v-show="platformsData[platformNumber].hasData">
 
 
     </div>
