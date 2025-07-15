@@ -19,126 +19,49 @@
               <div></div>
               <div></div>
             </div>
-            <span><strong>{{ platforms[platformCode]["type"] }}</strong></span>
-            <a href="https://erddap.aoml.noaa.gov/gdp/erddap/index.html" target="_blank" rel="noopener noreferrer"
+            <span><strong>Argo float</strong></span>
+            <a href="https://erddap.ifremer.fr/erddap/index.html" target="_blank" rel="noopener noreferrer"
               class="icon-str">i</a>
           </div>
 
           <!-- Platform data -->
           <div v-if="platformsData[platformCode].hasData">
 
-            <!-- Wind -->
-            <div v-if="Object.keys(platformsData[platformCode].data).includes('windspd')">
+            <!-- Platform number -->
+            <div v-if="Object.keys(platformsData[platformCode].data).includes('platform_number')">
               <span>
-                <strong>Wind: </strong>
-                {{ platformsData[platformCode].data['windspd'].toFixed(1) }} m/s,
-                {{ bearing2compassRose(platformsData[platformCode].data['winddir']) }}
-                <span class="fa"
-                  :style="{ transform: 'rotate(' + (platformsData[platformCode].data['winddir'] - 45 + 180) + 'deg)' }">&#xf124;</span>
-              </span>
-            </div>
-            <!-- Currents -->
-            <div v-if="Object.keys(platformsData[platformCode].data).includes('currentspd')">
-              <span>
-                <strong>Current: </strong>
-                {{ platformsData[platformCode].data['currentspd'].toFixed(1) }} m/s,
-                {{ bearing2compassRose(platformsData[platformCode].data['currentdir']) }}
-                <span class="fa"
-                  :style="{ transform: 'rotate(' + (platformsData[platformCode].data['currentdir'] - 45) + 'deg)' }">&#xf124;</span>
-              </span>
-            </div>
-            <!-- Current UO -->
-            <div v-if="Object.keys(platformsData[platformCode].data).includes('uo')">
-              <span>
-                <strong>UO: </strong>
-                {{ platformsData[platformCode].data['uo'].toFixed(1) }} m/s
-              </span>
-            </div>
-            <!-- Waves -->
-            <div v-if="Object.keys(platformsData[platformCode].data).includes('wvht')">
-              <span>
-                <strong>Waves: </strong>
-                {{ platformsData[platformCode].data['wvht'].toFixed(1) }} m
-                <!-- {{ platformsData[platformCode].data['Tm02(s)'].toFixed(1) }} s, -->
-                <!-- {{ bearing2compassRose(platformsData[platformCode].data['MeanDir(º)']) }} -->
-                <!-- <span class="fa"
-                  :style="{ transform: 'rotate(' + (platformsData[platformCode].data['MeanDir(º)'] - 45 + 180) + 'deg)' }">&#xf124;</span> -->
+                <strong title="platform_number / fileNumber">ID: </strong>
+                {{ platformsData[platformCode].data['platform_number'] }}
               </span>
             </div>
 
-            <!-- Extra data -->
-            <Transition>
-              <div v-if="platforms[platformCode].showAllData">
-                <!-- Sea water temperature -->
-                <div v-if="Object.keys(platformsData[platformCode].data).includes('sst')">
-                  <span>
-                    <strong>Water temperature: </strong>
-                    {{ platformsData[platformCode].data['sst'].toFixed(1) }} ºC
-                  </span>
-                </div>
-                <!-- Sea water salinity -->
-                <div v-if="Object.keys(platformsData[platformCode].data).includes('sss')">
-                  <span>
-                    <strong>Sea water salinity: </strong>
-                    {{ platformsData[platformCode].data['sss'].toFixed(1) }} psu
-                  </span>
-                </div>
-                <!-- Water level -->
-                <div v-if="Object.keys(platformsData[platformCode].data).includes('waterlevel')">
-                  <span>
-                    <strong>Water level: </strong>
-                    {{ platformsData[platformCode].data['waterlevel'].toFixed(1) }} m
-                  </span>
-                </div>
+            <!-- Project name -->
+            <div v-if="Object.keys(platformsData[platformCode].data).includes('project_name')">
+              <span>
+                <strong title="project_name">Project: </strong>
+                {{ platformsData[platformCode].data['project_name'] }}
+              </span>
+            </div>
+
+            <!-- Platform type -->
+            <div v-if="Object.keys(platformsData[platformCode].data).includes('platform_type')">
+              <span>
+                <strong title="platform_type">Argo type: </strong>
+                {{ platformsData[platformCode].data['platform_type'] }}
+              </span>
+            </div>
+
+            <!-- Cycle number -->
+            <div v-if="Object.keys(platformsData[platformCode].data).includes('cycle_number')">
+              <span>
+                {{ platformsData[platformCode].data['cycle_number'] }} cycles
+              </span>
+            </div>
+
+            <!-- Show trajectory -->
+            <!-- Show profile -->
 
 
-                <!-- Sea water potential temperature -->
-                <div v-if="Object.keys(platformsData[platformCode].data).includes('ztmp')">
-                  <span>
-                    <strong>Water potential temperature: </strong>
-                    {{ platformsData[platformCode].data['ztmp'].toFixed(1) }} ºC
-                  </span>
-                </div>
-                <!-- Sea water potential salinity -->
-                <div v-if="Object.keys(platformsData[platformCode].data).includes('zsal')">
-                  <span>
-                    <strong>Water potential salinity: </strong>
-                    {{ platformsData[platformCode].data['zsal'].toFixed(1) }} psu
-                  </span>
-                </div>
-
-
-                <!-- Air temperature -->
-                <div v-if="Object.keys(platformsData[platformCode].data).includes('atmp')">
-                  <span>
-                    <strong>Air temperature: </strong>
-                    {{ platformsData[platformCode].data['atmp'].toFixed(1) }} ºC
-                  </span>
-                </div>
-                <!-- Relative humidity -->
-                <div v-if="Object.keys(platformsData[platformCode].data).includes('hur')">
-                  <span>
-                    <strong>Humidity: </strong>
-                    {{ platformsData[platformCode].data['hur'].toFixed(1) }} %
-                  </span>
-                </div>
-                <!-- Atmospheric pressure -->
-                <div v-if="Object.keys(platformsData[platformCode].data).includes('slp')">
-                  <span>
-                    <strong>Atms. pressure: </strong>
-                    {{ platformsData[platformCode].data['slp'].toFixed(1) }} hPa
-                  </span>
-                </div>
-
-                <!-- Code -->
-                <div>
-                  <span>
-                    <strong>Code: </strong>
-                    {{ platformCode }}
-                  </span>
-                </div>
-              </div>
-            </Transition>
 
             <!-- Button showAllData ON OFF-->
             <div class="button-container">
@@ -155,10 +78,8 @@
 
 
       <!-- Platform icon -->
-      <img class="icon-str icon-medium icon-img panel-icon-right" @click="ERDDAPIconClicked(platformCode)" :src="[platforms[platformCode]['type'].includes('SHIP') ? '/HFRadar/Assets/Images/boat.svg' :
-        platforms[platformCode]['type'].includes('DRIFTING') ? '/HFRadar/Assets/Images/drifter.svg' :
-          platforms[platformCode]['type'].includes('GLIDERS') ? '/HFRadar/Assets/Images/drifter.svg' :
-            '/HFRadar/Assets/Images/buoy.svg']" v-show="platformsData[platformCode].hasData">
+      <img class="icon-str icon-medium icon-img panel-icon-right" @click="ERDDAPIconClicked(platformCode)"
+        src='/HFRadar/Assets/Images/argo.svg' v-show="platformsData[platformCode].hasData">
 
 
     </div>
