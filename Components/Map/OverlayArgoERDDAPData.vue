@@ -47,25 +47,35 @@
             <!-- Platform type -->
             <div v-if="Object.keys(platformsData[platformNumber].data).includes('platform_type')">
               <span>
-                <strong title="platform_type">Argo type: </strong>
+                <strong title="platform_type">Type: </strong>
                 {{ platformsData[platformNumber].data['platform_type'] }}
               </span>
             </div>
 
-            <!-- Cycle number -->
-            <div v-if="Object.keys(platformsData[platformNumber].data).includes('cycle_number')">
-              <span>
-                <strong title="platform_type">Number of cycles: </strong>
-                {{ platformsData[platformNumber].data['cycle_number'] }}
-              </span>
-            </div>
 
             <!-- Show trajectory -->
             <!-- Show profile -->
+            <!-- Go to date -->
 
             <!-- Extra data -->
             <Transition>
               <div v-if="platforms[platformNumber].showAllData">
+
+                <!-- Cycle number -->
+                <div v-if="Object.keys(platformsData[platformNumber].data).includes('cycle_number')">
+                  <span>
+                    <strong title="platform_type">Number of cycles: </strong>
+                    {{ platformsData[platformNumber].data['cycle_number'] }}
+                  </span>
+                </div>
+
+                <!-- Time difference from now -->
+                <div v-if="Object.keys(platformsData[platformNumber].data).includes('tmstTimeDiffStr')">
+                  <span>
+                    <strong>Collected </strong>
+                    {{ platformsData[platformNumber].data.tmstTimeDiffStr }}
+                  </span>
+                </div>
                 <!-- Principal investigator -->
                 <div v-if="Object.keys(platformsData[platformNumber].data).includes('pi_name')">
                   <span>
@@ -118,7 +128,8 @@
 
       <!-- Platform icon -->
       <img class="icon-str icon-medium icon-img panel-icon-right" @click="ERDDAPIconClicked(platformNumber)"
-        src='/HFRadar/Assets/Images/argo.svg' v-show="platformsData[platformNumber].hasData">
+        src='/HFRadar/Assets/Images/argo.svg' v-if="platformsData[platformNumber].hasData"
+        :style="{ 'opacity': Object.keys(platformsData[platformNumber].data).includes('tmstTimeDiffStr') ? 0.5 : 1 }">
 
 
     </div>
@@ -240,12 +251,14 @@ export default {
         let platform = platforms[platformNumber];
         this.platformsData[platformNumber].hasData = false;
         // Iterate tmst
-        let halfHourinMs = 1000 * 60 * 29;
-        let closestTimeDiff = 10e12;
+        let halfHourinMs = 1000 * 60 * 29; // Only show half an hour?
+        let visibleTimeSpan = 1000 * 60 * 60 * 24 * 11; // 11 days (11 ahead, 11 behind)
+        let closestTimeDiff = 10e12; // Variable to store the closest time difference from a platform with several data points
         // Pick up closest data
         Object.keys(platform.data).forEach(dataTmst => {
           let timeDiff = Math.abs(new Date(dataTmst).getTime() - new Date(tmst).getTime());
-          if (timeDiff < halfHourinMs && timeDiff < closestTimeDiff) {
+          let isAhead = new Date(dataTmst).getTime() > new Date(tmst).getTime() > 0; // Is the data ahead of the current time?
+          if (timeDiff < visibleTimeSpan && timeDiff < closestTimeDiff) {
             closestTimeDiff = timeDiff;
             this.platformsData[platformNumber].hasData = true;
             // Empty observed properties
@@ -263,6 +276,14 @@ export default {
               if (platform.olLayer != undefined) {
                 platform.olLayer.setElement(this.$refs[platformNumber]);
                 platform.olLayer.setPosition(platform.coord3857); // For some reason vue and the map element have to be redefined
+                // Opacity if it not in the closest time, and show when it sampled
+                if (closestTimeDiff > halfHourinMs) {
+                  // Show time difference from now in hours or days
+                  this.platformsData[platformNumber].data.tmstTimeDiffStr = closestTimeDiff > 1000 * 60 * 60 * 24 ?
+                    Math.round(closestTimeDiff / (1000 * 60 * 60 * 24)) + ' days' :
+                    Math.round(closestTimeDiff / (1000 * 60 * 60)) + ' hours';
+                  this.platformsData[platformNumber].data.tmstTimeDiffStr += isAhead ? ' ahead' : ' ago';
+                }
               } else {
                 debugger;
               }
@@ -299,7 +320,8 @@ export default {
         // Prepare start / end of day
         let startDate = new Date(dayTmst + 'T00:00Z');
         let endDate = new Date(dayTmst + 'T00:00Z');
-        endDate.setUTCDate(endDate.getUTCDate() + 1);
+        endDate.setUTCDate(endDate.getUTCDate() + 10); // 10 days after to get all data
+        startDate.setUTCDate(startDate.getUTCDate() - 10); // 10 days before to get all data
 
         // Prepare url
         let url = this.queryPlatformsURL.replace('{parameters}', this.parameters.join());
