@@ -245,7 +245,7 @@ export default {
           // Add the layer to the map
           this.map.addLayer(this.platforms[platformNumber].olTrajectoryLayer);
       } else if (!this.platformsData[platformNumber].showInfo) {
-        // Remove all trajectories from map
+        // Remove trajectory from map
         // Find layers with trajectory on the map and remove them
         let layersToRemove = [];
         this.map.getLayers().forEach(layer => {
@@ -327,6 +327,18 @@ export default {
           }
 
         });
+
+        // Update trajectories points and opacities
+        if (platform.olTrajectoryLayer != undefined) {
+          // If layer is in map, update it
+          let ll = this.$parent.getMapLayer(platform.olTrajectoryLayer.get('name'));
+          if (ll != undefined) {
+            this.map.removeLayer(ll);
+            // Update trajectory layer
+            this.addTrajectoryToMap(platformNumber);
+          }
+        }
+
       });
     },
 
@@ -451,7 +463,7 @@ export default {
         let platform = platforms[jsRow.platform_number];
         // Fill with profile data?
         if (platform.data[jsRow.time] != undefined) {
-          debugger;
+          //TODO: data is reloaded with the same values debugger;
           // Keep the one with more data
           if (Object.keys(jsRow).length - 3 > Object.keys(platform.data[jsRow.time]).length) {
             // TODO: WHAT ABOUT DUPLICATED DATA? ERDDAP PROBLEM'S
@@ -566,14 +578,23 @@ export default {
       });
     },
     // Add trajectory to map
-    addTrajectoryToMap(platformNumber) {
+    addTrajectoryToMap(platformNumber, numPoints) {
       let trajectory = this.platforms[platformNumber].trajectory;
-      // Already created trajectory layer
-      if (this.platforms[platformNumber].olTrajectoryLayer != undefined) {
-        // Add to map
-        this.map.addLayer(this.platforms[platformNumber].olTrajectoryLayer);
-        return;
-      }
+      // Remove all trajectories from map
+      // Find layers with trajectory on the map and remove them
+      let layersToRemove = [];
+      this.map.getLayers().forEach(layer => {
+        if (layer.get('name').includes('argoTrajectory')) {
+          layersToRemove.push(layer);
+        }
+      });
+      // Remove layers
+      layersToRemove.forEach(layer => {
+        this.map.removeLayer(layer);
+      });
+
+      // Do not reuse already created trajectory layer as opacity changes with time
+      //if (this.platforms[platformNumber].olTrajectoryLayer != undefined)
 
       // No data in trajectory
       if (trajectory == undefined || trajectory.length == 0) {
@@ -587,41 +608,68 @@ export default {
         this.map = this.$parent.map;
       }
 
-      // Line feature
+      // Line and point features
       let coords3857 = trajectory.map(p => ol.proj.fromLonLat([p.longitude, p.latitude]));
-      let lineFeature = new ol.Feature({
-        geometry: new ol.geom.LineString(coords3857),
-      });
-      // Line style
-      lineFeature.setStyle(new ol.style.Style({
-        stroke: new ol.style.Stroke({
-          color: '#007AFF',
-          width: 3,
-        }),
-      }));
+      numPoints = numPoints == undefined ? coords3857.length : numPoints;
+      let lineFeatures = [];
+      let pointFeatures = [];
+      // Overlay time
+      let tmst = this.platformsData[platformNumber].data.time;
+      let tmstGetTime = new Date(tmst).getTime();
+      // Create line segments and points with different opacity
+      for (let i = 0; i < numPoints; i++) {
 
-      // Profile points
-      let pointFeatures = trajectory.map((point, index) => {
-        const feature = new ol.Feature({
-          geometry: new ol.geom.Point(coords3857[index]),
-          data: point, // Store metadata for click interaction
+        // Set style with opacity based on time difference
+        let timeDiff = Math.abs(new Date(trajectory[i].time).getTime() - tmstGetTime);
+        //let opacity = timeDiff < 1000 * 60 * 60 ? 1 : timeDiff < 1000 * 60 * 60 * 24 ? 0.8 : timeDiff < 1000 * 60 * 60 * 24 * 7 ? 0.6 : 0.4;
+        let opacity = Math.max(1 - timeDiff / (1000 * 60 * 60 * 24 * 30), 0.15); // 30 days max opacity
+        // Do not create point if it is the overlay
+        if (trajectory[i].time != tmst) {
+
+          // Create point features
+          let pointFeature = new ol.Feature({
+            geometry: new ol.geom.Point(coords3857[i]),
+            data: trajectory[i], // Store metadata for click interaction
+          });
+
+          pointFeature.setStyle(new ol.style.Style({
+            image: new ol.style.Circle({
+              radius: 6 * opacity,
+              fill: new ol.style.Fill({ color: 'rgba(0, 153, 255, ' + opacity + ')' }),
+              stroke: new ol.style.Stroke({ color: '#fff', width: 2 * opacity }),
+            }),
+          }));
+          pointFeatures.push(pointFeature);
+        }
+
+
+        // Create line segment feature
+        if (i == coords3857.length - 1) {
+          // Last point, no line segment
+          continue;
+        }
+        // Create line segment feature
+        let lineFeature = new ol.Feature({
+          geometry: new ol.geom.LineString([coords3857[i], coords3857[i + 1]])
         });
 
-        feature.setStyle(new ol.style.Style({
-          image: new ol.style.Circle({
-            radius: 6,
-            fill: new ol.style.Fill({ color: 'rgba(0, 153, 255, 0.8)' }),
-            stroke: new ol.style.Stroke({ color: '#fff', width: 2 }),
+        lineFeature.setStyle(new ol.style.Style({
+          stroke: new ol.style.Stroke({
+            color: 'rgba(0, 122, 255, ' + opacity + ')', // Blue with opacity
+            width: 3 * opacity,
           }),
         }));
+        lineFeatures.push(lineFeature);
 
-        return feature;
-      });
+
+      }
+
+
 
       // Create vector layer for trajectory
       let olTrajectoryLayer = new ol.layer.Vector({
         source: new ol.source.Vector({
-          features: [lineFeature, ...pointFeatures], // Add line and points
+          features: [...lineFeatures, ...pointFeatures], // Add line and points
         }),
       });
       olTrajectoryLayer.set('name', 'argoTrajectory_' + platformNumber); // Set name for easy identification
