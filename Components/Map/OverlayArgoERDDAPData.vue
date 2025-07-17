@@ -194,6 +194,9 @@ export default {
         "?{parameters}" +
         "&time>={startDate}&time<={endDate}&longitude>={longMin}&longitude<={longMax}&latitude>={latMin}&latitude<={latMax}",
       bbox: [0, 5, 39.5, 44], // long, lat
+      queryTrajectoryURL: 'https://erddap.ifremer.fr/erddap/tabledap/ArgoFloats.jsonlKVP?' +
+        'platform_number,cycle_number,time,latitude,longitude' +
+        '&platform_number={platformNumber}',
       parameters: [
         'fileNumber',
         'data_type',
@@ -221,13 +224,40 @@ export default {
       platforms: {},
       platformsData: {},
       requestStatus: {}, // Stores requested timestamps
-      requestedDailyData: {} // Stores promises and results of promises by daily tmst
+      requestedDailyData: {}, // Stores promises and results of promises by daily tmst
+      requestedTrajectories: {}, // Stores requested trajectories by platform number
     }
   },
   methods: {
     // USER ACTIONS
     ERDDAPIconClicked: function (platformNumber) {
       this.platformsData[platformNumber].showInfo = !this.platformsData[platformNumber].showInfo;
+      // Show / hide trajectory
+      if (this.platformsData[platformNumber].showInfo) {
+        // Show trajectory
+        if (this.platforms[platformNumber].olTrajectoryLayer == undefined) {
+          // Load trajectory
+          this.getTrajectoryFrom(platformNumber).then(() => {
+            // Add trajectory to map
+            this.addTrajectoryToMap(platformNumber);
+          });
+        } else
+          // Add the layer to the map
+          this.map.addLayer(this.platforms[platformNumber].olTrajectoryLayer);
+      } else if (!this.platformsData[platformNumber].showInfo) {
+        // Remove all trajectories from map
+        // Find layers with trajectory on the map and remove them
+        let layersToRemove = [];
+        this.map.getLayers().forEach(layer => {
+          if (layer.get('name').includes('argoTrajectory_' + platformNumber)) {
+            layersToRemove.push(layer);
+          }
+        });
+        // Remove layers
+        layersToRemove.forEach(layer => {
+          this.map.removeLayer(layer);
+        });
+      }
     },
     // INTERNAL
     selectedDateChanged: function (tmst) {
@@ -353,6 +383,39 @@ export default {
     },
 
 
+    // Get the trajectory from a platform number
+    getTrajectoryFrom(platformNumber) {
+      if (this.requestedTrajectories[platformNumber] != undefined) {
+        return new Promise((resolve, reject) => {
+          resolve(this.requestedTrajectories[platformNumber]);
+        });
+      }
+      // Load the data
+      else {
+        // Set platform to loading
+        this.platformsData[platformNumber].isLoading = true;
+        // Prepare url
+        let url = this.queryTrajectoryURL.replace('{platformNumber}', '"' + platformNumber + '"');
+
+        console.log(url.replace('jsonlKVP', 'htmlTable'));
+        const encodedUrl = encodeURIComponent(url);
+        let proxyFullURL = this.proxyURL + '?url=' + encodedUrl;
+        let promise = this.getDataFromURL(proxyFullURL)
+          .then(res => {
+            // Store response
+            this.requestedTrajectories[platformNumber] = res;
+            // Platform trajectory loaded
+            this.platformsData[platformNumber].isLoading = false;
+            // Parse raw text and structure data
+            this.parseTrajectoryRawTextAndStructureData(res, platformNumber);
+          });
+        this.requestedTrajectories[platformNumber] = promise;
+        return promise;
+      }
+
+    },
+
+
     // Get data from URL
     getDataFromURL(url) {
       return fetch(url).then(r => r.text())
@@ -423,6 +486,33 @@ export default {
       });
       //console.log(platforms);
     },
+
+    // Parse trajectories raw text
+    parseTrajectoryRawTextAndStructureData(res, platformNumber) {
+      let rows = res.split('\n');
+      rows.pop(); // Delete empty
+
+      this.platforms[platformNumber].trajectory = [];
+      // Iterate data rows
+      rows.forEach(row => {
+        let jsRow = JSON.parse(row);
+        // Remove nulls
+        Object.keys(jsRow).forEach((key) => {
+          if (jsRow[key] === null) {
+            delete jsRow[key];
+          }
+        });
+        // Define trajectory
+        this.platforms[platformNumber].trajectory.push({
+          "time": jsRow.time,
+          "latitude": jsRow.latitude,
+          "longitude": jsRow.longitude,
+          "cycle_number": jsRow.cycle_number
+        });
+      });
+
+      return this.platforms[platformNumber].trajectory;
+    },
     // Update vue and map
     addPlatformsToMap() {
       // Iterate platforms to create vue objects and map layers
@@ -474,6 +564,70 @@ export default {
         console.log("Added Argo float from ERDDAP");
         platform.olLayer = platformInfo;
       });
+    },
+    // Add trajectory to map
+    addTrajectoryToMap(platformNumber) {
+      let trajectory = this.platforms[platformNumber].trajectory;
+      // Already created trajectory layer
+      if (this.platforms[platformNumber].olTrajectoryLayer != undefined) {
+        // Add to map
+        this.map.addLayer(this.platforms[platformNumber].olTrajectoryLayer);
+        return;
+      }
+
+      // No data in trajectory
+      if (trajectory == undefined || trajectory.length == 0) {
+        debugger;
+        console.warn("No trajectory for platform " + platformNumber);
+        return;
+      }
+
+      // Get map
+      if (this.map == undefined) {
+        this.map = this.$parent.map;
+      }
+
+      // Line feature
+      let coords3857 = trajectory.map(p => ol.proj.fromLonLat([p.longitude, p.latitude]));
+      let lineFeature = new ol.Feature({
+        geometry: new ol.geom.LineString(coords3857),
+      });
+      // Line style
+      lineFeature.setStyle(new ol.style.Style({
+        stroke: new ol.style.Stroke({
+          color: '#007AFF',
+          width: 3,
+        }),
+      }));
+
+      // Profile points
+      let pointFeatures = trajectory.map((point, index) => {
+        const feature = new ol.Feature({
+          geometry: new ol.geom.Point(coords3857[index]),
+          data: point, // Store metadata for click interaction
+        });
+
+        feature.setStyle(new ol.style.Style({
+          image: new ol.style.Circle({
+            radius: 6,
+            fill: new ol.style.Fill({ color: 'rgba(0, 153, 255, 0.8)' }),
+            stroke: new ol.style.Stroke({ color: '#fff', width: 2 }),
+          }),
+        }));
+
+        return feature;
+      });
+
+      // Create vector layer for trajectory
+      let olTrajectoryLayer = new ol.layer.Vector({
+        source: new ol.source.Vector({
+          features: [lineFeature, ...pointFeatures], // Add line and points
+        }),
+      });
+      olTrajectoryLayer.set('name', 'argoTrajectory_' + platformNumber); // Set name for easy identification
+      // Add the layer to the map
+      this.map.addLayer(olTrajectoryLayer);
+      this.platforms[platformNumber].olTrajectoryLayer = olTrajectoryLayer;
     },
 
 
