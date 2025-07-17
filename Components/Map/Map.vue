@@ -32,13 +32,16 @@
     <overlay-wave-data ref="overlayWaveData"></overlay-wave-data>
 
     <!-- Overlay puertos del estado buoys data -->
-    <overlay-buoy-data ref="overlayBuoyData"></overlay-buoy-data>
+    <overlay-puertos-buoy-data ref="overlayPuertosBuoyData"></overlay-puertos-buoy-data>
 
     <!-- Overlay obsea buoys data -->
     <overlay-obsea-data ref="overlayOBSEAData"></overlay-obsea-data>
 
     <!-- Overlay NOAA ERDDAP data -->
-    <overlay-erddap-data ref="overlayERDDAPData"></overlay-erddap-data>
+    <overlay-noaa-erddap-data ref="overlayNOAAERDDAPData"></overlay-noaa-erddap-data>
+
+    <!-- Overlay Argo ERDDAP data -->
+    <overlay-argo-erddap-data ref="overlayArgoERDDAPData"></overlay-argo-erddap-data>
 
 
     <!-- <time-slider></time-slider> -->
@@ -72,9 +75,10 @@ import AnimationCanvas from "./AnimationCanvas.vue";
 import ClimaDirectionCanvas from "./ClimaDirectionCanvas.vue";
 import BottomSection from "../BottomSection/BottomSection.vue";
 import OverlayWaveData from "./OverlayWaveData.vue";
-import OverlayBuoyData from "./OverlayBuoyData.vue";
+import OverlayPuertosBuoyData from "./OverlayPuertosBuoyData.vue";
 import OverlayOBSEAData from "./OverlayOBSEAData.vue";
-import OverlayERDDAPData from "./OverlayERDDAPData.vue";
+import OverlayNOAAERDDAPData from "./OverlayNOAAERDDAPData.vue";
+import OverlayArgoERDDAPData from "./OverlayArgoERDDAPData.vue";
 
 export default {
   name: 'app-map',
@@ -843,17 +847,22 @@ export default {
         this.$refs.overlayWaveData.updatePanel(zoomLevel);
       }
       // Hide/show buoy info
-      if (this.$refs.overlayBuoyData) {
-        this.$refs.overlayBuoyData.updatePanel(zoomLevel);
+      if (this.$refs.overlayPuertosBuoyData) {
+        this.$refs.overlayPuertosBuoyData.updatePanel(zoomLevel);
       }
       // Hide/show obsea info
       if (this.$refs.overlayOBSEAData) {
         this.$refs.overlayOBSEAData.updatePanel(zoomLevel);
       }
-      // Hide/show obsea info
-      if (this.$refs.overlayERDDAPData) {
-        this.$refs.overlayERDDAPData.updatePanel(zoomLevel);
+      // Hide/show NOAA info
+      if (this.$refs.overlayNOAAERDDAPData) {
+        this.$refs.overlayNOAAERDDAPData.updatePanel(zoomLevel);
       }
+      // Hide/show Argo info
+      if (this.$refs.overlayArgoERDDAPData) {
+        this.$refs.overlayArgoERDDAPData.updatePanel(zoomLevel);
+      }
+
 
     },
     onMapMoveStart: function () {
@@ -1175,9 +1184,10 @@ export default {
     "climaDirectionCanvas": ClimaDirectionCanvas,
     "bottom-section": BottomSection,
     "overlay-wave-data": OverlayWaveData,
-    "overlay-buoy-data": OverlayBuoyData,
+    "overlay-puertos-buoy-data": OverlayPuertosBuoyData,
     "overlay-obsea-data": OverlayOBSEAData,
-    "overlay-erddap-data": OverlayERDDAPData,
+    "overlay-noaa-erddap-data": OverlayNOAAERDDAPData,
+    "overlay-argo-erddap-data": OverlayArgoERDDAPData,
   },
   computed: {
     //foo: function () {}

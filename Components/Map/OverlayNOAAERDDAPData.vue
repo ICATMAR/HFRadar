@@ -1,6 +1,6 @@
 <template>
 
-  <div id="overlay-erddap-data" ref="containerErddapInfo">
+  <div id="overlay-noaa-erddap-data" ref="containerErddapInfo">
     <!-- Container -->
     <div v-for="(platformCode, index) in Object.keys(platformsData)" :id="platformCode" :ref="platformCode"
       class="ERDDAPContainer"
@@ -157,7 +157,7 @@
       <!-- Platform icon -->
       <img class="icon-str icon-medium icon-img panel-icon-right" @click="ERDDAPIconClicked(platformCode)" :src="[platforms[platformCode]['type'].includes('SHIP') ? '/HFRadar/Assets/Images/boat.svg' :
         platforms[platformCode]['type'].includes('DRIFTING') ? '/HFRadar/Assets/Images/drifter.svg' :
-          platforms[platformCode]['type'].includes('GLIDERS') ? '/HFRadar/Assets/Images/drifter.svg' :
+          platforms[platformCode]['type'].includes('GLIDERS') ? '/HFRadar/Assets/Images/argo.svg' :
             '/HFRadar/Assets/Images/buoy.svg']" v-show="platformsData[platformCode].hasData">
 
 
@@ -186,7 +186,7 @@
 
 
 export default {
-  name: 'overlay-erddap-data',
+  name: 'overlay-noaa-erddap-data',
   created() { },
   mounted() {
 
