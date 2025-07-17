@@ -314,6 +314,7 @@ export default {
                     Math.round(closestTimeDiff / (1000 * 60 * 60 * 24)) + ' days' :
                     Math.round(closestTimeDiff / (1000 * 60 * 60)) + ' hours';
                   this.platformsData[platformNumber].data.tmstTimeDiffStr += isAhead ? ' ahead' : ' ago';
+                  this.platformsData[platformNumber].data.tmstTimeDiffStr += ' from selected time';
                 }
               } else {
                 debugger;
