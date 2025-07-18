@@ -2,7 +2,7 @@
 
   <div id="overlay-drifters-icatmar-erddap-data" ref="containerErddapInfo">
     <!-- Container -->
-    <div v-for="(platformNumber, index) in Object.keys(platformsData)" :id="platformNumber" :ref="platformNumber"
+    <div v-for="(deployment_id, index) in Object.keys(platformsData)" :id="deployment_id" :ref="deployment_id"
       class="ERDDAPContainer"
       :class="[!isTooFar && isAdvancedInterfaceOnOff && isExternalObsVisible ? 'showOverlayMap' : 'hideOverlayMap']">
 
@@ -11,33 +11,33 @@
       <!-- Platform panel -->
       <Transition>
         <div class="platformPanel"
-          v-if="platformsData[platformNumber].showInfo && platformsData[platformNumber].hasData">
+          v-if="platformsData[deployment_id].showInfo && platformsData[deployment_id].hasData">
           <!-- Site -->
           <div class="platformTitle">
-            <div v-show="platformsData[platformNumber].isLoading" class="lds-ring">
+            <div v-show="platformsData[deployment_id].isLoading" class="lds-ring">
               <div></div>
               <div></div>
               <div></div>
               <div></div>
             </div>
-            <span><strong>{{platforms[platformCode]['drifter_type']}} Drifter</strong></span>
+            <span><strong>{{platforms[deployment_id]['drifter_type']}} Drifter</strong></span>
             <a href="https://erddap.ifremer.fr/erddap/index.html" target="_blank" rel="noopener noreferrer"
               class="icon-str">i</a>
           </div>
 
           <!-- Platform data -->
-          <div v-if="platformsData[platformNumber].hasData">
+          <div v-if="platformsData[deployment_id].hasData">
 
 
             <!-- 3D widget -->
             <Transition>
               <div class="sketchfab-embed-wrapper"
-                v-show="platforms[platformNumber].hide3Dwidget == undefined || !platforms[platformNumber].hide3Dwidget">
+                v-show="platforms[deployment_id].hide3Dwidget == undefined || !platforms[deployment_id].hide3Dwidget">
                 <iframe title="Drifter" frameborder="0" allowfullscreen mozallowfullscreen="true"
                   webkitallowfullscreen="true" allow="autoplay; fullscreen; xr-spatial-tracking" xr-spatial-tracking
-                  execution-while-out-of-viewport execution-while-not-rendered web-share :src="[platforms[platformCode]['drifter_type'].includes('SVP') ? 'https://sketchfab.com/models/5a689f0b306e4f25b5d25dd6b80de7e9/embed' :
-                    platforms[platformCode]['drifter_type'].includes('CODE') ? 'https://sketchfab.com/models/b7cb794037b446449cef213427231317/embed' :
-                      platforms[platformCode]['drifter_type'].includes('STOKES') ? 'https://sketchfab.com/models/57a114fa7a8f466e828942bd7d32da5a/embed' :
+                  execution-while-out-of-viewport execution-while-not-rendered web-share :src="[platforms[deployment_id]['drifter_type'].includes('SVP') ? 'https://sketchfab.com/models/5a689f0b306e4f25b5d25dd6b80de7e9/embed' :
+                    platforms[deployment_id]['drifter_type'].includes('CODE') ? 'https://sketchfab.com/models/b7cb794037b446449cef213427231317/embed' :
+                      platforms[deployment_id]['drifter_type'].includes('STOKES') ? 'https://sketchfab.com/models/57a114fa7a8f466e828942bd7d32da5a/embed' :
                         '']"> </iframe>
                 <!-- <p style="font-size: 13px; font-weight: normal; margin: 5px; color: #4A4A4A;"> <a
                     href="https://sketchfab.com/3d-models/oceanographic-argo-profiling-float-439474c830744c95b48dc90cfff6fdbe?utm_medium=embed&utm_campaign=share-popup&utm_content=439474c830744c95b48dc90cfff6fdbe"
@@ -49,10 +49,10 @@
 
             <!-- Button show / hide 3D widget-->
             <div class="button-container">
-              <button v-show="!platforms[platformNumber].hide3Dwidget" class="more-data-button hide3Dwidget"
-                @click="platforms[platformNumber].hide3Dwidget = true">Hide 3D</button>
-              <button v-show="platforms[platformNumber].hide3Dwidget" class="more-data-button hide3Dwidget"
-                @click="platforms[platformNumber].hide3Dwidget = false">Show 3D</button>
+              <button v-show="!platforms[deployment_id].hide3Dwidget" class="more-data-button hide3Dwidget"
+                @click="platforms[deployment_id].hide3Dwidget = true">Hide 3D</button>
+              <button v-show="platforms[deployment_id].hide3Dwidget" class="more-data-button hide3Dwidget"
+                @click="platforms[deployment_id].hide3Dwidget = false">Show 3D</button>
             </div>
 
 
@@ -64,53 +64,53 @@
 
             <!-- Extra data -->
             <Transition>
-              <div v-if="platforms[platformNumber].showAllData">
+              <div v-if="platforms[deployment_id].showAllData">
 
                 <!-- Time difference from now -->
-                <div v-if="Object.keys(platformsData[platformNumber].data).includes('tmstTimeDiffStr')">
+                <div v-if="Object.keys(platformsData[deployment_id].data).includes('tmstTimeDiffStr')">
                   <span>
                     <strong>Collected </strong>
-                    {{ platformsData[platformNumber].data.tmstTimeDiffStr }}
+                    {{ platformsData[deployment_id].data.tmstTimeDiffStr }}
                   </span>
                 </div>
 
                 <!-- Institution -->
-                <div v-if="Object.keys(platformsData[platformNumber].data).includes('institution')">
+                <div v-if="Object.keys(platformsData[deployment_id].data).includes('institution')">
                   <span>
                     <strong title="institution">Institution: </strong>
-                    {{ platformsData[platformNumber].data['institution'] }}
+                    {{ platformsData[deployment_id].data['institution'] }}
                   </span>
                 </div>
 
                 <!-- Project -->
-                <div v-if="Object.keys(platformsData[platformNumber].data).includes('project')">
+                <div v-if="Object.keys(platformsData[deployment_id].data).includes('project')">
                   <span>
                     <strong title="project">Project: </strong>
-                    {{ platformsData[platformNumber].data['project'] }}
+                    {{ platformsData[deployment_id].data['project'] }}
                   </span>
                 </div>
 
                 <!-- Principal investigator -->
-                <div v-if="Object.keys(platformsData[platformNumber].data).includes('pi_name')">
+                <div v-if="Object.keys(platformsData[deployment_id].data).includes('pi_name')">
                   <span>
                     <strong>Principal investigator(s): </strong>
-                    {{ platformsData[platformNumber].data['pi_name'] }}
+                    {{ platformsData[deployment_id].data['pi_name'] }}
                   </span>
                 </div>
 
                 <!-- Exercise (campanya) -->
-                <div v-if="Object.keys(platformsData[platformNumber].data).includes('exercise')">
+                <div v-if="Object.keys(platformsData[deployment_id].data).includes('exercise')">
                   <span>
                     <strong>Exercise: </strong>
-                    {{ platformsData[platformNumber].data['exercise'] }}
+                    {{ platformsData[deployment_id].data['exercise'] }}
                   </span>
                 </div>
 
                 <!-- Deployment id-->
-                <div v-if="Object.keys(platformsData[platformNumber].data).includes('deployment_id')">
+                <div v-if="Object.keys(platformsData[deployment_id].data).includes('deployment_id')">
                   <span>
                     <strong title="deployment_id / fileNumber">Deployment Id: </strong>
-                    {{ platformsData[platformNumber].data['deployment_id'] }}
+                    {{ platformsData[deployment_id].data['deployment_id'] }}
                   </span>
                 </div>
 
@@ -120,10 +120,10 @@
 
             <!-- Button showAllData ON OFF-->
             <div class="button-container">
-              <button v-show="!platforms[platformNumber].showAllData" class="more-data-button"
-                @click="platforms[platformNumber].showAllData = true">+</button>
-              <button v-show="platforms[platformNumber].showAllData" class="more-data-button"
-                @click="platforms[platformNumber].showAllData = false">-</button>
+              <button v-show="!platforms[deployment_id].showAllData" class="more-data-button"
+                @click="platforms[deployment_id].showAllData = true">+</button>
+              <button v-show="platforms[deployment_id].showAllData" class="more-data-button"
+                @click="platforms[deployment_id].showAllData = false">-</button>
             </div>
 
           </div>
@@ -133,10 +133,10 @@
 
 
       <!-- Platform icon -->
-      <img class="icon-str icon-medium icon-img panel-icon-right" @click="ERDDAPIconClicked(platformNumber)"
-        src='/HFRadar/Assets/Images/drifter.svg' v-if="platformsData[platformNumber].hasData"
-        :style="{ 'opacity': Object.keys(platformsData[platformNumber].data).includes('tmstTimeDiffStr') ? (platformsData[platformNumber].data.tmstTimeDiffStr.includes('hour') ? 0.5 : 0.1) : 1 }"
-        :title="Object.keys(platformsData[platformNumber].data).includes('tmstTimeDiffStr') ? 'Drifter, ' + platformsData[platformNumber].data.tmstTimeDiffStr : ''">
+      <img class="icon-str icon-medium icon-img panel-icon-right" @click="ERDDAPIconClicked(deployment_id)"
+        src='/HFRadar/Assets/Images/drifter.svg' v-if="platformsData[deployment_id].hasData"
+        :style="{ 'opacity': Object.keys(platformsData[deployment_id].data).includes('tmstTimeDiffStr') ? (platformsData[deployment_id].data.tmstTimeDiffStr.includes('hour') ? 0.5 : 0.1) : 1 }"
+        :title="Object.keys(platformsData[deployment_id].data).includes('tmstTimeDiffStr') ? 'Drifter, ' + platformsData[deployment_id].data.tmstTimeDiffStr : ''">
 
 
     </div>
@@ -204,7 +204,7 @@ export default {
       //DEBUGGING LINE FOR GALICIA'S DRIFTERS, PLEASE UNCOMMENT
       bbox: [-15, 6, 35, 46], // long, lat
       queryTrajectoryURL: 'https://erddap.icatmar.cat/erddap/tabledap/socat_data_drifters_ICATMAR.jsonlKVP' +
-        'time,latitude,longitude, temperature' +
+        'time,latitude,longitude,temperature' +
         '&deployment_id="{deploymentId}"',
       parameters: [
         'deployment_id',
@@ -227,26 +227,26 @@ export default {
   },
   methods: {
     // USER ACTIONS
-    ERDDAPIconClicked: function (platformNumber) {
-      this.platformsData[platformNumber].showInfo = !this.platformsData[platformNumber].showInfo;
+    ERDDAPIconClicked: function (deployment_id) {
+      this.platformsData[deployment_id].showInfo = !this.platformsData[deployment_id].showInfo;
       // Show / hide trajectory
-      if (this.platformsData[platformNumber].showInfo) {
+      if (this.platformsData[deployment_id].showInfo) {
         // Show trajectory
-        if (this.platforms[platformNumber].olTrajectoryLayer == undefined) {
+        if (this.platforms[deployment_id].olTrajectoryLayer == undefined) {
           // Load trajectory
-          this.getTrajectoryFrom(platformNumber).then(() => {
+          this.getTrajectoryFrom(deployment_id).then(() => {
             // Add trajectory to map
-            this.addTrajectoryToMap(platformNumber);
+            this.addTrajectoryToMap(deployment_id);
           });
         } else
           // Add the layer to the map
-          this.map.addLayer(this.platforms[platformNumber].olTrajectoryLayer);
-      } else if (!this.platformsData[platformNumber].showInfo) {
+          this.map.addLayer(this.platforms[deployment_id].olTrajectoryLayer);
+      } else if (!this.platformsData[deployment_id].showInfo) {
         // Remove trajectory from map
         // Find layers with trajectory on the map and remove them
         let layersToRemove = [];
         this.map.getLayers().forEach(layer => {
-          if (layer.get('name').includes('drifterTrajectory_' + platformNumber)) {
+          if (layer.get('name').includes('drifterTrajectory_' + deployment_id)) {
             layersToRemove.push(layer);
           }
         });
@@ -276,9 +276,9 @@ export default {
       let platforms = this.platforms;
 
       // Hide all data from platforms
-      Object.keys(platforms).forEach(platformNumber => {
-        let platform = platforms[platformNumber];
-        this.platformsData[platformNumber].hasData = false;
+      Object.keys(platforms).forEach(deployment_id => {
+        let platform = platforms[deployment_id];
+        this.platformsData[deployment_id].hasData = false;
         // Iterate tmst
         let halfHourinMs = 1000 * 60 * 29; // Only show half an hour?
         let visibleTimeSpan = 1000 * 60 * 60 * 24 * 11; // 11 days (11 ahead, 11 behind)
@@ -289,13 +289,13 @@ export default {
           let isAhead = new Date(dataTmst).getTime() > new Date(tmst).getTime() > 0; // Is the data ahead of the current time?
           if (timeDiff < visibleTimeSpan && timeDiff < closestTimeDiff) {
             closestTimeDiff = timeDiff;
-            this.platformsData[platformNumber].hasData = true;
+            this.platformsData[deployment_id].hasData = true;
             // Empty observed properties
-            this.platformsData[platformNumber].data = {};
+            this.platformsData[deployment_id].data = {};
 
             // Iterate props and assign to platformsData (vue uses this object)
             Object.keys(platform.data[dataTmst]).forEach(key => {
-              this.platformsData[platformNumber].data[key] = platform.data[dataTmst][key];
+              this.platformsData[deployment_id].data[key] = platform.data[dataTmst][key];
             });
 
             // Change layer location
@@ -303,22 +303,22 @@ export default {
               platform.coord3857 = ol.proj.fromLonLat([platform.data[dataTmst].longitude, platform.data[dataTmst].latitude]);
 
               if (platform.olLayer != undefined) {
-                platform.olLayer.setElement(this.$refs[platformNumber]);
+                platform.olLayer.setElement(this.$refs[deployment_id]);
                 platform.olLayer.setPosition(platform.coord3857); // For some reason vue and the map element have to be redefined
                 // Opacity if it not in the closest time, and show when it sampled
                 if (closestTimeDiff > halfHourinMs) {
                   // Show time difference from now in hours or days
-                  this.platformsData[platformNumber].data.tmstTimeDiffStr = closestTimeDiff > 1000 * 60 * 60 * 24 ?
+                  this.platformsData[deployment_id].data.tmstTimeDiffStr = closestTimeDiff > 1000 * 60 * 60 * 24 ?
                     Math.round(closestTimeDiff / (1000 * 60 * 60 * 24)) + ' days' :
                     Math.round(closestTimeDiff / (1000 * 60 * 60)) + ' hours';
-                  this.platformsData[platformNumber].data.tmstTimeDiffStr += isAhead ? ' ahead' : ' ago';
-                  this.platformsData[platformNumber].data.tmstTimeDiffStr += ' from selected time';
+                  this.platformsData[deployment_id].data.tmstTimeDiffStr += isAhead ? ' ahead' : ' ago';
+                  this.platformsData[deployment_id].data.tmstTimeDiffStr += ' from selected time';
                 }
               } else {
                 debugger;
               }
 
-              if (platformNumber != platform.olLayer.C.element.id) {
+              if (deployment_id != platform.olLayer.C.element.id) {
                 debugger;
               }
             });
@@ -334,7 +334,7 @@ export default {
           if (ll != undefined) {
             this.map.removeLayer(ll);
             // Update trajectory layer
-            this.addTrajectoryToMap(platformNumber);
+            this.addTrajectoryToMap(deployment_id);
           }
         }
 
@@ -355,8 +355,8 @@ export default {
       // Load the data
       else {
         // Set all platforms to loading
-        Object.keys(this.platforms).forEach(platformNumber => {
-          this.platformsData[platformNumber].isLoading = true;
+        Object.keys(this.platforms).forEach(deployment_id => {
+          this.platformsData[deployment_id].isLoading = true;
         });
 
         // Prepare start / end of day
@@ -379,8 +379,8 @@ export default {
             // Store response
             this.requestedDailyData[dayTmst] = res;
             // All platforms loaded
-            Object.keys(this.platforms).forEach(platformNumber => {
-              this.platformsData[platformNumber].isLoading = false;
+            Object.keys(this.platforms).forEach(deployment_id => {
+              this.platformsData[deployment_id].isLoading = false;
             });
             // Create data structure
             this.parseRawTextAndStructureData(res);
@@ -395,18 +395,18 @@ export default {
 
 
     // Get the trajectory from a platform number
-    getTrajectoryFrom(platformNumber) {
-      if (this.requestedTrajectories[platformNumber] != undefined) {
+    getTrajectoryFrom(deployment_id) {
+      if (this.requestedTrajectories[deployment_id] != undefined) {
         return new Promise((resolve, reject) => {
-          resolve(this.requestedTrajectories[platformNumber]);
+          resolve(this.requestedTrajectories[deployment_id]);
         });
       }
       // Load the data
       else {
         // Set platform to loading
-        this.platformsData[platformNumber].isLoading = true;
+        this.platformsData[deployment_id].isLoading = true;
         // Prepare url
-        let url = this.queryTrajectoryURL.replace('{platformNumber}', platformNumber);
+        let url = this.queryTrajectoryURL.replace('{deployment_id}', deployment_id);
 
         console.log(url.replace('jsonlKVP', 'htmlTable'));
         const encodedUrl = encodeURIComponent(url);
@@ -414,13 +414,13 @@ export default {
         let promise = this.getDataFromURL(proxyFullURL)
           .then(res => {
             // Store response
-            this.requestedTrajectories[platformNumber] = res;
+            this.requestedTrajectories[deployment_id] = res;
             // Platform trajectory loaded
-            this.platformsData[platformNumber].isLoading = false;
+            this.platformsData[deployment_id].isLoading = false;
             // Parse raw text and structure data
-            this.parseTrajectoryRawTextAndStructureData(res, platformNumber);
+            this.parseTrajectoryRawTextAndStructureData(res, deployment_id);
           });
-        this.requestedTrajectories[platformNumber] = promise;
+        this.requestedTrajectories[deployment_id] = promise;
         return promise;
       }
 
@@ -451,8 +451,8 @@ export default {
           }
         });
         // Define platform
-        if (platforms[jsRow.platform_number] == undefined) {
-          platforms[jsRow.platform_number] = {
+        if (platforms[jsRow.deployment_id] == undefined) {
+          platforms[jsRow.deployment_id] = {
             "deployment_id": jsRow.deployment_id,
             "drifter_type": jsRow.drifter_type,
             "institution": jsRow.institution,
@@ -464,7 +464,7 @@ export default {
           }
         }
         // Fill the platform with data on given timestamps
-        let platform = platforms[jsRow.platform_number];
+        let platform = platforms[jsRow.deployment_id];
         // Fill with profile data?
         if (platform.data[jsRow.time] != undefined) {
           //TODO: data is reloaded with the same values debugger;
@@ -504,11 +504,11 @@ export default {
     },
 
     // Parse trajectories raw text
-    parseTrajectoryRawTextAndStructureData(res, platformNumber) {
+    parseTrajectoryRawTextAndStructureData(res, deployment_id) {
       let rows = res.split('\n');
       rows.pop(); // Delete empty
 
-      this.platforms[platformNumber].trajectory = [];
+      this.platforms[deployment_id].trajectory = [];
       // Iterate data rows
       rows.forEach(row => {
         let jsRow = JSON.parse(row);
@@ -519,15 +519,15 @@ export default {
           }
         });
         // Define trajectory
-        this.platforms[platformNumber].trajectory.push({
+        this.platforms[deployment_id].trajectory.push({
           "time": jsRow.time,
           "latitude": jsRow.latitude,
           "longitude": jsRow.longitude,
-          "cycle_number": jsRow.cycle_number
+          "temperature": jsRow.temperature
         });
       });
 
-      return this.platforms[platformNumber].trajectory;
+      return this.platforms[deployment_id].trajectory;
     },
 
 
@@ -535,26 +535,26 @@ export default {
     // Update vue and map
     addPlatformsToMap() {
       // Iterate platforms to create vue objects and map layers
-      Object.keys(this.platforms).forEach(platformNumber => {
-        this.addPlatformToMap(platformNumber, 0);
+      Object.keys(this.platforms).forEach(deployment_id => {
+        this.addPlatformToMap(deployment_id, 0);
       });
     },
     // Add platform to map
-    addPlatformToMap(platformNumber, count) {
-      let platform = this.platforms[platformNumber];
+    addPlatformToMap(deployment_id, count) {
+      let platform = this.platforms[deployment_id];
 
       // Platform was already added to map
       if (platform.olLayer != undefined)
         return;
 
       // Create vue object
-      if (this.platformsData[platformNumber] == undefined) {
-        this.platformsData[platformNumber] = { "hasData": false, "showInfo": false, "isLoading": false };
-        this.platforms[platformNumber].coord3857 = ol.proj.fromLonLat([this.platforms[platformNumber].location[0], this.platforms[platformNumber].location[1]]);
+      if (this.platformsData[deployment_id] == undefined) {
+        this.platformsData[deployment_id] = { "hasData": false, "showInfo": false, "isLoading": false };
+        this.platforms[deployment_id].coord3857 = ol.proj.fromLonLat([this.platforms[deployment_id].location[0], this.platforms[deployment_id].location[1]]);
       }
 
       this.$nextTick(() => {
-        if (this.$refs[platformNumber] == undefined) {
+        if (this.$refs[deployment_id] == undefined) {
           if (count > 2) {
             debugger;
             console.error("Could not find html element with vue ref")
@@ -570,10 +570,10 @@ export default {
         // Relate overlay with map
         // Platform info
         const platformInfo = new ol.Overlay({
-          name: platformNumber,
-          position: this.platforms[platformNumber].coord3857,
+          name: deployment_id,
+          position: this.platforms[deployment_id].coord3857,
           positioning: 'center-right',//Object.keys(this.platforms).length % 2 == 1 ? 'center-right' : 'center-left',
-          element: this.$refs[platformNumber],
+          element: this.$refs[deployment_id],
           stopEvent: false,
         });
         platformInfo.getElement().classList.add('no-pointer-events');
@@ -585,8 +585,8 @@ export default {
       });
     },
     // Add trajectory to map
-    addTrajectoryToMap(platformNumber, numPoints) {
-      let trajectory = this.platforms[platformNumber].trajectory;
+    addTrajectoryToMap(deployment_id, numPoints) {
+      let trajectory = this.platforms[deployment_id].trajectory;
       // Remove all trajectories from map
       // Find layers with trajectory on the map and remove them
       let layersToRemove = [];
@@ -601,12 +601,12 @@ export default {
       });
 
       // Do not reuse already created trajectory layer as opacity changes with time
-      //if (this.platforms[platformNumber].olTrajectoryLayer != undefined)
+      //if (this.platforms[deployment_id].olTrajectoryLayer != undefined)
 
       // No data in trajectory
       if (trajectory == undefined || trajectory.length == 0) {
         debugger;
-        console.warn("No trajectory for platform " + platformNumber);
+        console.warn("No trajectory for platform " + deployment_id);
         return;
       }
 
@@ -621,7 +621,7 @@ export default {
       let lineFeatures = [];
       let pointFeatures = [];
       // Overlay time
-      let tmst = this.platformsData[platformNumber].data.time;
+      let tmst = this.platformsData[deployment_id].data.time;
       let tmstGetTime = new Date(tmst).getTime();
       // Create line segments and points with different opacity
       for (let i = 0; i < numPoints; i++) {
@@ -679,10 +679,10 @@ export default {
           features: [...lineFeatures, ...pointFeatures], // Add line and points
         }),
       });
-      olTrajectoryLayer.set('name', 'drifterTrajectory_' + platformNumber); // Set name for easy identification
+      olTrajectoryLayer.set('name', 'drifterTrajectory_' + deployment_id); // Set name for easy identification
       // Add the layer to the map
       this.map.addLayer(olTrajectoryLayer);
-      this.platforms[platformNumber].olTrajectoryLayer = olTrajectoryLayer;
+      this.platforms[deployment_id].olTrajectoryLayer = olTrajectoryLayer;
     },
 
 
