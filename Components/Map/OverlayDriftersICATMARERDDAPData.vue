@@ -204,8 +204,8 @@ export default {
       //DEBUGGING LINE FOR GALICIA'S DRIFTERS, PLEASE UNCOMMENT
       bbox: [-15, 6, 35, 46], // long, lat
       queryTrajectoryURL: 'https://erddap.icatmar.cat/erddap/tabledap/socat_data_drifters_ICATMAR.jsonlKVP' +
-        'time,latitude,longitude,temperature' +
-        '&deployment_id="{deploymentId}"',
+        '?time,latitude,longitude,temperature' +
+        '&deployment_id={deployment_id}',
       parameters: [
         'deployment_id',
         'drifter_type',
