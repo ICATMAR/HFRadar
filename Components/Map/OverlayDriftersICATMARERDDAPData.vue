@@ -20,7 +20,7 @@
               <div></div>
               <div></div>
             </div>
-            <span><strong>Drifter</strong></span>
+            <span><strong>{{platforms[platformCode]['drifter_type']}} Drifter</strong></span>
             <a href="https://erddap.ifremer.fr/erddap/index.html" target="_blank" rel="noopener noreferrer"
               class="icon-str">i</a>
           </div>
@@ -33,11 +33,12 @@
             <Transition>
               <div class="sketchfab-embed-wrapper"
                 v-show="platforms[platformNumber].hide3Dwidget == undefined || !platforms[platformNumber].hide3Dwidget">
-                <iframe title="Drifter" frameborder="0" allowfullscreen
-                  mozallowfullscreen="true" webkitallowfullscreen="true"
-                  allow="autoplay; fullscreen; xr-spatial-tracking" xr-spatial-tracking execution-while-out-of-viewport
-                  execution-while-not-rendered web-share
-                  src="https://sketchfab.com/models/439474c830744c95b48dc90cfff6fdbe/embed"> </iframe>
+                <iframe title="Drifter" frameborder="0" allowfullscreen mozallowfullscreen="true"
+                  webkitallowfullscreen="true" allow="autoplay; fullscreen; xr-spatial-tracking" xr-spatial-tracking
+                  execution-while-out-of-viewport execution-while-not-rendered web-share :src="[platforms[platformCode]['drifter_type'].includes('SVP') ? 'https://sketchfab.com/models/5a689f0b306e4f25b5d25dd6b80de7e9/embed' :
+                    platforms[platformCode]['drifter_type'].includes('CODE') ? 'https://sketchfab.com/models/b7cb794037b446449cef213427231317/embed' :
+                      platforms[platformCode]['drifter_type'].includes('STOKES') ? 'https://sketchfab.com/models/57a114fa7a8f466e828942bd7d32da5a/embed' :
+                        '']"> </iframe>
                 <!-- <p style="font-size: 13px; font-weight: normal; margin: 5px; color: #4A4A4A;"> <a
                     href="https://sketchfab.com/3d-models/oceanographic-argo-profiling-float-439474c830744c95b48dc90cfff6fdbe?utm_medium=embed&utm_campaign=share-popup&utm_content=439474c830744c95b48dc90cfff6fdbe"
                     target="_blank" rel="nofollow" style="font-weight: bold; color: #1CAAD9;"> Oceanographic Argo
@@ -222,7 +223,7 @@ export default {
       isTooFar: false,
       queryPlatformsURL: "https://erddap.icatmar.cat/erddap/tabledap/socat_data_drifters_ICATMAR.jsonlKVP" +
         "?{parameters}" +
-        "&time>={startDate}&time<={endDate}&longitude>={longMin}&longitude<={longMax}&latitude>={latMin}&latitude<={latMax}"+
+        "&time>={startDate}&time<={endDate}&longitude>={longMin}&longitude<={longMax}&latitude>={latMin}&latitude<={latMax}" +
         "&distinct()",
       bbox: [0, 5, 39.5, 44], // long, lat
       queryTrajectoryURL: 'https://erddap.icatmar.cat/erddap/tabledap/socat_data_drifters_ICATMAR.jsonlKVP' +
