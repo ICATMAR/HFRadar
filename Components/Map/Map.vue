@@ -43,6 +43,9 @@
     <!-- Overlay Argo ERDDAP data -->
     <overlay-argo-erddap-data ref="overlayArgoERDDAPData"></overlay-argo-erddap-data>
 
+    <!-- Overlay ICATMAR drifters ERDDAP data -->
+    <overlay-drifters-icatmar-erddap-data ref="overlayDriftersICATMARERDDAPData"></overlay-drifters-icatmar-erddap-data>
+
 
     <!-- <time-slider></time-slider> -->
 
@@ -79,6 +82,7 @@ import OverlayPuertosBuoyData from "./OverlayPuertosBuoyData.vue";
 import OverlayOBSEAData from "./OverlayOBSEAData.vue";
 import OverlayNOAAERDDAPData from "./OverlayNOAAERDDAPData.vue";
 import OverlayArgoERDDAPData from "./OverlayArgoERDDAPData.vue";
+import OverlayDriftersICATMARERDDAPData from "./OverlayDriftersICATMARERDDAPData.vue";
 
 export default {
   name: 'app-map',
@@ -862,6 +866,10 @@ export default {
       if (this.$refs.overlayArgoERDDAPData) {
         this.$refs.overlayArgoERDDAPData.updatePanel(zoomLevel);
       }
+      // Hide/show ICATMAR info
+      if (this.$refs.overlayDriftersICATMARERDDAPData) {
+        this.$refs.overlayDriftersICATMARERDDAPData.updatePanel(zoomLevel);
+      }
 
 
     },
@@ -1188,6 +1196,7 @@ export default {
     "overlay-obsea-data": OverlayOBSEAData,
     "overlay-noaa-erddap-data": OverlayNOAAERDDAPData,
     "overlay-argo-erddap-data": OverlayArgoERDDAPData,
+    "overlay-drifters-icatmar-erddap-data": OverlayDriftersICATMARERDDAPData,
   },
   computed: {
     //foo: function () {}

@@ -1,6 +1,6 @@
 <template>
 
-  <div id="overlay-drifter-icatmar-erddap-data" ref="containerErddapInfo">
+  <div id="overlay-drifters-icatmar-erddap-data" ref="containerErddapInfo">
     <!-- Container -->
     <div v-for="(platformNumber, index) in Object.keys(platformsData)" :id="platformNumber" :ref="platformNumber"
       class="ERDDAPContainer"
@@ -60,45 +60,11 @@
 
 
             <!-- Show trajectory -->
-            <!-- Show profile -->
             <!-- Go to date -->
 
             <!-- Extra data -->
             <Transition>
               <div v-if="platforms[platformNumber].showAllData">
-
-
-                <!-- Platform number -->
-                <div v-if="Object.keys(platformsData[platformNumber].data).includes('platform_number')">
-                  <span>
-                    <strong title="platform_number / fileNumber">ID: </strong>
-                    {{ platformsData[platformNumber].data['platform_number'] }}
-                  </span>
-                </div>
-
-                <!-- Project name -->
-                <div v-if="Object.keys(platformsData[platformNumber].data).includes('project_name')">
-                  <span>
-                    <strong title="project_name">Project: </strong>
-                    {{ platformsData[platformNumber].data['project_name'] }}
-                  </span>
-                </div>
-
-                <!-- Platform type -->
-                <div v-if="Object.keys(platformsData[platformNumber].data).includes('platform_type')">
-                  <span>
-                    <strong title="platform_type">Type: </strong>
-                    {{ platformsData[platformNumber].data['platform_type'] }}
-                  </span>
-                </div>
-
-                <!-- Cycle number -->
-                <div v-if="Object.keys(platformsData[platformNumber].data).includes('cycle_number')">
-                  <span>
-                    <strong title="platform_type">Number of cycles: </strong>
-                    {{ platformsData[platformNumber].data['cycle_number'] }}
-                  </span>
-                </div>
 
                 <!-- Time difference from now -->
                 <div v-if="Object.keys(platformsData[platformNumber].data).includes('tmstTimeDiffStr')">
@@ -107,6 +73,23 @@
                     {{ platformsData[platformNumber].data.tmstTimeDiffStr }}
                   </span>
                 </div>
+
+                <!-- Institution -->
+                <div v-if="Object.keys(platformsData[platformNumber].data).includes('institution')">
+                  <span>
+                    <strong title="institution">Institution: </strong>
+                    {{ platformsData[platformNumber].data['institution'] }}
+                  </span>
+                </div>
+
+                <!-- Project -->
+                <div v-if="Object.keys(platformsData[platformNumber].data).includes('project')">
+                  <span>
+                    <strong title="project">Project: </strong>
+                    {{ platformsData[platformNumber].data['project'] }}
+                  </span>
+                </div>
+
                 <!-- Principal investigator -->
                 <div v-if="Object.keys(platformsData[platformNumber].data).includes('pi_name')">
                   <span>
@@ -114,28 +97,20 @@
                     {{ platformsData[platformNumber].data['pi_name'] }}
                   </span>
                 </div>
-                <!-- Data mode -->
-                <div v-if="Object.keys(platformsData[platformNumber].data).includes('data_mode')">
+
+                <!-- Exercise (campanya) -->
+                <div v-if="Object.keys(platformsData[platformNumber].data).includes('exercise')">
                   <span>
-                    <strong>Mode: </strong>
-                    {{ platformsData[platformNumber].data['data_mode'] == 'R' ? 'Real-time' :
-                      platformsData[platformNumber].data['data_mode'] == 'A' ? 'Real-time with adjustments' :
-                        platformsData[platformNumber].data['data_mode'] == 'D' ? 'Delayed mode' :
-                          platformsData[platformNumber].data['data_mode'] }}
+                    <strong>Exercise: </strong>
+                    {{ platformsData[platformNumber].data['exercise'] }}
                   </span>
                 </div>
-                <!-- Data center -->
-                <div v-if="Object.keys(platformsData[platformNumber].data).includes('data_center')">
+
+                <!-- Deployment id-->
+                <div v-if="Object.keys(platformsData[platformNumber].data).includes('deployment_id')">
                   <span>
-                    <strong>Data center: </strong>
-                    {{ platformsData[platformNumber].data['data_center'] }}
-                  </span>
-                </div>
-                <!-- Date of creation -->
-                <div v-if="Object.keys(platformsData[platformNumber].data).includes('date_creation')">
-                  <span>
-                    <strong>Date of creation: </strong>
-                    {{ new Date(platformsData[platformNumber].data['date_creation']).toLocaleDateString() }}
+                    <strong title="deployment_id / fileNumber">Deployment Id: </strong>
+                    {{ platformsData[platformNumber].data['deployment_id'] }}
                   </span>
                 </div>
 
@@ -185,7 +160,7 @@
 
 
 export default {
-  name: 'overlay-drifter-icatmar-erddap-data',
+  name: 'overlay-drifters-icatmar-erddap-data',
   created() { },
   mounted() {
 
@@ -225,7 +200,9 @@ export default {
         "?{parameters}" +
         "&time>={startDate}&time<={endDate}&longitude>={longMin}&longitude<={longMax}&latitude>={latMin}&latitude<={latMax}" +
         "&distinct()",
-      bbox: [0, 5, 39.5, 44], // long, lat
+      //bbox: [0, 5, 39.5, 44], // long, lat
+      //DEBUGGING LINE FOR GALICIA'S DRIFTERS, PLEASE UNCOMMENT
+      bbox: [-15, 6, 35, 46], // long, lat
       queryTrajectoryURL: 'https://erddap.icatmar.cat/erddap/tabledap/socat_data_drifters_ICATMAR.jsonlKVP' +
         'time,latitude,longitude, temperature' +
         '&deployment_id="{deploymentId}"',
@@ -236,6 +213,10 @@ export default {
         'project',
         'pi_name',
         'exercise',
+        'latitude',
+        'longitude',
+        'time',
+        'temperature'
       ],
       platforms: {},
       platformsData: {},
@@ -472,11 +453,13 @@ export default {
         // Define platform
         if (platforms[jsRow.platform_number] == undefined) {
           platforms[jsRow.platform_number] = {
-            "platform_type": jsRow.platform_type,
-            "platform_number": jsRow.platform_number,
-            "float_serial_no": jsRow.float_serial_no,
-            "project_name": jsRow.project_name,
-            "location": [jsRow.longitude, jsRow.latitude], // Initializing location?
+            "deployment_id": jsRow.deployment_id,
+            "drifter_type": jsRow.drifter_type,
+            "institution": jsRow.institution,
+            "project": jsRow.project,
+            "pi_name": jsRow.pi_name,
+            "exercise": jsRow.exercise,
+            "location": [jsRow.longitude, jsRow.latitude], // Initializing location
             "data": {},
           }
         }
@@ -487,7 +470,7 @@ export default {
           //TODO: data is reloaded with the same values debugger;
           // Keep the one with more data
           if (Object.keys(jsRow).length - 3 > Object.keys(platform.data[jsRow.time]).length) {
-            // TODO: WHAT ABOUT DUPLICATED DATA? ERDDAP PROBLEM'S
+            // TODO: WHAT ABOUT DUPLICATED DATA? ERDDAP PROBLEM'S --> TODO use &distinct() in the query!
             //console.log('Duplicated data for platform type: ' + platform.type + ', id: ' + platform.code + '. Overwritting data.');
             platform.data[jsRow.time] = {};
             // Add parameters to data
