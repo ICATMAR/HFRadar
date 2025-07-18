@@ -795,6 +795,7 @@ a {
 
 .hide3Dwidget {
   font-size: small;
+  height: 14px;
 }
 
 
