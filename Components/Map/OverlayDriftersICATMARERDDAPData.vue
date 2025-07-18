@@ -10,8 +10,7 @@
 
       <!-- Platform panel -->
       <Transition>
-        <div class="platformPanel"
-          v-if="platformsData[deployment_id].showInfo && platformsData[deployment_id].hasData">
+        <div class="platformPanel" v-if="platformsData[deployment_id].showInfo && platformsData[deployment_id].hasData">
           <!-- Site -->
           <div class="platformTitle">
             <div v-show="platformsData[deployment_id].isLoading" class="lds-ring">
@@ -20,7 +19,7 @@
               <div></div>
               <div></div>
             </div>
-            <span><strong>{{platforms[deployment_id]['drifter_type']}} Drifter</strong></span>
+            <span><strong>{{ platforms[deployment_id]['drifter_type'] }} Drifter</strong></span>
             <a href="https://erddap.ifremer.fr/erddap/index.html" target="_blank" rel="noopener noreferrer"
               class="icon-str">i</a>
           </div>
@@ -56,7 +55,13 @@
             </div>
 
 
-
+            <!-- Temperature -->
+            <div v-if="Object.keys(platformsData[deployment_id].data).includes('temperature')">
+              <span>
+                <strong>Water temperature: </strong>
+                {{ platformsData[deployment_id].data.temperature }} ºC
+              </span>
+            </div>
 
 
             <!-- Show trajectory -->
@@ -460,6 +465,7 @@ export default {
             "pi_name": jsRow.pi_name,
             "exercise": jsRow.exercise,
             "location": [jsRow.longitude, jsRow.latitude], // Initializing location
+            "temperature": jsRow.temperature,
             "data": {},
           }
         }
