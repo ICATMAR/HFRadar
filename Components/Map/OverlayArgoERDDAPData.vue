@@ -20,7 +20,7 @@
               <div></div>
               <div></div>
             </div>
-            <span><strong>Argo float</strong></span>
+            <span><strong>Argo profiling float</strong></span>
             <a href="https://erddap.ifremer.fr/erddap/index.html" target="_blank" rel="noopener noreferrer"
               class="icon-str">i</a>
           </div>
@@ -29,16 +29,26 @@
           <div v-if="platformsData[platformNumber].hasData">
 
 
-            <div class="sketchfab-embed-wrapper">
-              <iframe title="Oceanographic Argo Profiling Float" frameborder="0" allowfullscreen
-                mozallowfullscreen="true" webkitallowfullscreen="true" allow="autoplay; fullscreen; xr-spatial-tracking"
-                xr-spatial-tracking execution-while-out-of-viewport execution-while-not-rendered web-share
-                src="https://sketchfab.com/models/439474c830744c95b48dc90cfff6fdbe/embed"> </iframe>
-              <!-- <p style="font-size: 13px; font-weight: normal; margin: 5px; color: #4A4A4A;"> <a
-                  href="https://sketchfab.com/3d-models/oceanographic-argo-profiling-float-439474c830744c95b48dc90cfff6fdbe?utm_medium=embed&utm_campaign=share-popup&utm_content=439474c830744c95b48dc90cfff6fdbe"
-                  target="_blank" rel="nofollow" style="font-weight: bold; color: #1CAAD9;"> Oceanographic Argo
-                  Profiling Float </a>
-              </p> -->
+            <Transition>
+              <div class="sketchfab-embed-wrapper" v-show="platforms[platformNumber].hide3Dwidget == undefined || !platforms[platformNumber].hide3Dwidget">
+                <iframe title="Oceanographic Argo Profiling Float" frameborder="0" allowfullscreen
+                  mozallowfullscreen="true" webkitallowfullscreen="true" allow="autoplay; fullscreen; xr-spatial-tracking"
+                  xr-spatial-tracking execution-while-out-of-viewport execution-while-not-rendered web-share
+                  src="https://sketchfab.com/models/439474c830744c95b48dc90cfff6fdbe/embed"> </iframe>
+                <!-- <p style="font-size: 13px; font-weight: normal; margin: 5px; color: #4A4A4A;"> <a
+                    href="https://sketchfab.com/3d-models/oceanographic-argo-profiling-float-439474c830744c95b48dc90cfff6fdbe?utm_medium=embed&utm_campaign=share-popup&utm_content=439474c830744c95b48dc90cfff6fdbe"
+                    target="_blank" rel="nofollow" style="font-weight: bold; color: #1CAAD9;"> Oceanographic Argo
+                    Profiling Float </a>
+                </p> -->
+              </div>
+            </Transition>
+
+            <!-- Button show / hide 3D widget-->
+            <div class="button-container">
+              <button v-show="!platforms[platformNumber].hide3Dwidget" class="more-data-button hide3Dwidget"
+                @click="platforms[platformNumber].hide3Dwidget = true">Hide 3D</button>
+              <button v-show="platforms[platformNumber].hide3Dwidget" class="more-data-button hide3Dwidget"
+                @click="platforms[platformNumber].hide3Dwidget = false">Show 3D</button>
             </div>
 
 
@@ -781,6 +791,10 @@ a {
 
 .more-data-button:hover {
   background: var(--lightBlue);
+}
+
+.hide3Dwidget {
+  font-size: small;
 }
 
 
