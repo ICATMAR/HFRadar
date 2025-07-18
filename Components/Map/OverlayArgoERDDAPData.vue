@@ -88,18 +88,20 @@
               <div v-if="platforms[platformNumber].showAllData">
 
                 <!-- Salinity -->
-                <div v-if="Object.keys(platformsData[platformNumber].data.surfaceData).includes('psal_adjusted')">
-                  <span>
-                    <strong title="Surface salinity">Salinity: </strong>
-                    {{ platformsData[platformNumber].data.surfaceData.psal_adjusted.toFixed(1) }} psu
+                <template v-if="Object.keys(platformsData[platformNumber].data).includes('surfaceData')">
+                  <div v-if="Object.keys(platformsData[platformNumber].data.surfaceData).includes('psal_adjusted')">
+                    <span>
+                      <strong title="Surface salinity">Salinity: </strong>
+                      {{ platformsData[platformNumber].data.surfaceData.psal_adjusted.toFixed(1) }} psu
 
-                    <!-- Depth -->
-                    <template
-                      v-if="Object.keys(platformsData[platformNumber].data.surfaceData).includes('pres_adjusted')">
-                      at {{ platformsData[platformNumber].data.surfaceData.pres_adjusted.toFixed(1) }} m depth
-                    </template>
-                  </span>
-                </div>
+                      <!-- Depth -->
+                      <template
+                        v-if="Object.keys(platformsData[platformNumber].data.surfaceData).includes('pres_adjusted')">
+                        at {{ platformsData[platformNumber].data.surfaceData.pres_adjusted.toFixed(1) }} m depth
+                      </template>
+                    </span>
+                  </div>
+                </template>
 
                 <!-- Platform number -->
                 <div v-if="Object.keys(platformsData[platformNumber].data).includes('platform_number')">
