@@ -20,7 +20,7 @@
               <div></div>
               <div></div>
             </div>
-            <span><strong>Argo float</strong></span>
+            <span><strong>Argo profiling float</strong></span>
             <a href="https://erddap.ifremer.fr/erddap/index.html" target="_blank" rel="noopener noreferrer"
               class="icon-str">i</a>
           </div>
@@ -28,29 +28,55 @@
           <!-- Platform data -->
           <div v-if="platformsData[platformNumber].hasData">
 
-            <!-- Platform number -->
-            <div v-if="Object.keys(platformsData[platformNumber].data).includes('platform_number')">
-              <span>
-                <strong title="platform_number / fileNumber">ID: </strong>
-                {{ platformsData[platformNumber].data['platform_number'] }}
-              </span>
+
+            <!-- 3D widget -->
+            <Transition>
+              <div class="sketchfab-embed-wrapper"
+                v-show="platforms[platformNumber].hide3Dwidget == undefined || !platforms[platformNumber].hide3Dwidget">
+                <iframe title="Oceanographic Argo Profiling Float" frameborder="0" allowfullscreen
+                  mozallowfullscreen="true" webkitallowfullscreen="true"
+                  allow="autoplay; fullscreen; xr-spatial-tracking" xr-spatial-tracking execution-while-out-of-viewport
+                  execution-while-not-rendered web-share
+                  src="https://sketchfab.com/models/439474c830744c95b48dc90cfff6fdbe/embed"> </iframe>
+                <!-- <p style="font-size: 13px; font-weight: normal; margin: 5px; color: #4A4A4A;"> <a
+                    href="https://sketchfab.com/3d-models/oceanographic-argo-profiling-float-439474c830744c95b48dc90cfff6fdbe?utm_medium=embed&utm_campaign=share-popup&utm_content=439474c830744c95b48dc90cfff6fdbe"
+                    target="_blank" rel="nofollow" style="font-weight: bold; color: #1CAAD9;"> Oceanographic Argo
+                    Profiling Float </a>
+                </p> -->
+              </div>
+            </Transition>
+
+            <!-- Button show / hide 3D widget-->
+            <div class="button-container">
+              <button v-show="!platforms[platformNumber].hide3Dwidget" class="more-data-button hide3Dwidget"
+                @click="platforms[platformNumber].hide3Dwidget = true">Hide 3D</button>
+              <button v-show="platforms[platformNumber].hide3Dwidget" class="more-data-button hide3Dwidget"
+                @click="platforms[platformNumber].hide3Dwidget = false">Show 3D</button>
             </div>
 
-            <!-- Project name -->
-            <div v-if="Object.keys(platformsData[platformNumber].data).includes('project_name')">
-              <span>
-                <strong title="project_name">Project: </strong>
-                {{ platformsData[platformNumber].data['project_name'] }}
-              </span>
-            </div>
 
-            <!-- Platform type -->
-            <div v-if="Object.keys(platformsData[platformNumber].data).includes('platform_type')">
-              <span>
-                <strong title="platform_type">Type: </strong>
-                {{ platformsData[platformNumber].data['platform_type'] }}
-              </span>
-            </div>
+
+            <!-- Surface data-->
+            <template v-if="Object.keys(platformsData[platformNumber].data).includes('surfaceData')">
+
+              <!-- Surface water temperature -->
+              <div v-if="Object.keys(platformsData[platformNumber].data.surfaceData).includes('temp_adjusted')">
+                <span>
+                  <strong title="Surface water temperature">Water temperature: </strong>
+                  {{ platformsData[platformNumber].data.surfaceData.temp_adjusted.toFixed(1) }} °C
+
+                  <!-- Depth -->
+                  <template
+                    v-if="Object.keys(platformsData[platformNumber].data.surfaceData).includes('pres_adjusted')">
+                    at {{ platformsData[platformNumber].data.surfaceData.pres_adjusted.toFixed(1) }} m depth
+                  </template>
+                </span>
+              </div>
+
+            </template>
+
+
+
 
 
             <!-- Show trajectory -->
@@ -60,6 +86,44 @@
             <!-- Extra data -->
             <Transition>
               <div v-if="platforms[platformNumber].showAllData">
+
+                <!-- Salinity -->
+                <div v-if="Object.keys(platformsData[platformNumber].data.surfaceData).includes('psal_adjusted')">
+                  <span>
+                    <strong title="Surface salinity">Salinity: </strong>
+                    {{ platformsData[platformNumber].data.surfaceData.psal_adjusted.toFixed(1) }} psu
+
+                    <!-- Depth -->
+                    <template
+                      v-if="Object.keys(platformsData[platformNumber].data.surfaceData).includes('pres_adjusted')">
+                      at {{ platformsData[platformNumber].data.surfaceData.pres_adjusted.toFixed(1) }} m depth
+                    </template>
+                  </span>
+                </div>
+
+                <!-- Platform number -->
+                <div v-if="Object.keys(platformsData[platformNumber].data).includes('platform_number')">
+                  <span>
+                    <strong title="platform_number / fileNumber">ID: </strong>
+                    {{ platformsData[platformNumber].data['platform_number'] }}
+                  </span>
+                </div>
+
+                <!-- Project name -->
+                <div v-if="Object.keys(platformsData[platformNumber].data).includes('project_name')">
+                  <span>
+                    <strong title="project_name">Project: </strong>
+                    {{ platformsData[platformNumber].data['project_name'] }}
+                  </span>
+                </div>
+
+                <!-- Platform type -->
+                <div v-if="Object.keys(platformsData[platformNumber].data).includes('platform_type')">
+                  <span>
+                    <strong title="platform_type">Type: </strong>
+                    {{ platformsData[platformNumber].data['platform_type'] }}
+                  </span>
+                </div>
 
                 <!-- Cycle number -->
                 <div v-if="Object.keys(platformsData[platformNumber].data).includes('cycle_number')">
@@ -196,7 +260,10 @@ export default {
       bbox: [0, 5, 39.5, 44], // long, lat
       queryTrajectoryURL: 'https://erddap.ifremer.fr/erddap/tabledap/ArgoFloats.jsonlKVP?' +
         'platform_number,cycle_number,time,latitude,longitude' +
-        '&platform_number={platformNumber}',
+        '&platform_number="{platformNumber}"',
+      querySurfaceData: 'https://erddap.ifremer.fr/erddap/tabledap/ArgoFloats.jsonlKVP?' +
+        'platform_number,cycle_number,time,pres_adjusted,temp_adjusted,psal_adjusted,doxy,temp_doxy,turbidity,chla,nitrate' +
+        '&platform_number="{platformNumber}"&cycle_number={cycleNumber}&pres_adjusted>=0&pres_adjusted<=5', // 0 - 5 meters
       parameters: [
         'fileNumber',
         'data_type',
@@ -226,6 +293,7 @@ export default {
       requestStatus: {}, // Stores requested timestamps
       requestedDailyData: {}, // Stores promises and results of promises by daily tmst
       requestedTrajectories: {}, // Stores requested trajectories by platform number
+      requestedSurfaceData: {}, // Stores requested surface data by platform number and cycle number
     }
   },
   methods: {
@@ -256,6 +324,15 @@ export default {
         // Remove layers
         layersToRemove.forEach(layer => {
           this.map.removeLayer(layer);
+        });
+      }
+
+      // Load surface data
+      if (this.platformsData[platformNumber].showInfo) {
+        // Get surface data
+        let cycleNumber = this.platformsData[platformNumber].data.cycle_number;
+        this.getSurfaceData(platformNumber, cycleNumber).then(() => {
+          this.updateContent(window.GUIManager.currentTmst);
         });
       }
     },
@@ -408,7 +485,7 @@ export default {
         // Set platform to loading
         this.platformsData[platformNumber].isLoading = true;
         // Prepare url
-        let url = this.queryTrajectoryURL.replace('{platformNumber}', '"' + platformNumber + '"');
+        let url = this.queryTrajectoryURL.replace('{platformNumber}', platformNumber);
 
         console.log(url.replace('jsonlKVP', 'htmlTable'));
         const encodedUrl = encodeURIComponent(url);
@@ -423,6 +500,43 @@ export default {
             this.parseTrajectoryRawTextAndStructureData(res, platformNumber);
           });
         this.requestedTrajectories[platformNumber] = promise;
+        return promise;
+      }
+
+    },
+
+
+    // Get surface data (water temperature, salinity, etc.) of a given profile
+    getSurfaceData(platformNumber, cycleNumber) {
+      // Check if the data was already requested
+      if (this.requestedSurfaceData[platformNumber + cycleNumber] != undefined) {
+        return new Promise((resolve, reject) => {
+          resolve(this.requestedSurfaceData[platformNumber + cycleNumber]);
+        });
+      }
+
+      // Load the data
+      // Is this else necessary?
+      else {
+        // Set platform to loading
+        // TODO: there are several loading processes! The loading will be set to false by one of them before the others finishes. Create an array or a counter
+        this.platformsData[platformNumber].isLoading = true;
+        // Prepare url
+        let url = this.querySurfaceData.replace('{platformNumber}', platformNumber).replace('{cycleNumber}', cycleNumber);
+
+        console.log(url.replace('jsonlKVP', 'htmlTable'));
+        const encodedUrl = encodeURIComponent(url);
+        let proxyFullURL = this.proxyURL + '?url=' + encodedUrl;
+        let promise = this.getDataFromURL(proxyFullURL)
+          .then(res => {
+            // Store response
+            this.requestedSurfaceData[platformNumber + cycleNumber] = res;
+            // Parse raw text and structure data
+            this.parseSurfaceRawTextAndStructureData(res, platformNumber, cycleNumber);
+            // Platform trajectory loaded
+            this.platformsData[platformNumber].isLoading = false;
+          });
+        this.requestedSurfaceData[platformNumber + cycleNumber] = promise;
         return promise;
       }
 
@@ -526,6 +640,61 @@ export default {
 
       return this.platforms[platformNumber].trajectory;
     },
+
+    // Parse surface data raw text
+    parseSurfaceRawTextAndStructureData(res, platformNumber, cycleNumber) {
+      let rows = res.split('\n');
+      rows.pop(); // Delete empty
+
+      let platforms = this.platforms;
+
+      // Keep the data with the lowest pressure (surface data)
+      let min = 5;
+      let indexMin = -1;
+      for (let i = 0; i < rows.length; i++) {
+        let jsRow = JSON.parse(rows[i]);
+        if (jsRow.pres_adjusted != undefined && jsRow.pres_adjusted < min) {
+          min = jsRow.pres_adjusted;
+          indexMin = i;
+        }
+      }
+      if (indexMin == -1) {
+        // No surface data found
+        // Store the query response as empty or somehow? In update content maybe it is needed some definitions or declarations.
+        return;
+      }
+      // Surface row data
+      let jsRow = JSON.parse(rows[indexMin]);
+      // Remove nulls
+      Object.keys(jsRow).forEach((key) => {
+        if (jsRow[key] === null) {
+          delete jsRow[key];
+        }
+      });
+
+      // Define surface data
+      if (platforms[platformNumber].data[jsRow.time] == undefined) {
+        platforms[platformNumber].data[jsRow.time] = {};
+
+        if (platforms[platformNumber].data[jsRow.time].surfaceData == undefined) {
+          platforms[platformNumber].data[jsRow.time].surfaceData = {};
+        }
+      }
+
+      // Fill with surface data
+      platforms[platformNumber].data[jsRow.time].surfaceData = {
+        "pres_adjusted": jsRow.pres_adjusted,
+        "temp_adjusted": jsRow.temp_adjusted,
+        "psal_adjusted": jsRow.psal_adjusted,
+        "doxy": jsRow.doxy,
+        "temp_doxy": jsRow.temp_doxy,
+        "turbidity": jsRow.turbidity,
+        "chla": jsRow.chla,
+        "nitrate": jsRow.nitrate,
+      };
+
+    },
+
     // Update vue and map
     addPlatformsToMap() {
       // Iterate platforms to create vue objects and map layers
@@ -766,6 +935,11 @@ a {
 
 .more-data-button:hover {
   background: var(--lightBlue);
+}
+
+.hide3Dwidget {
+  font-size: small;
+  height: 14px;
 }
 
 
