@@ -28,29 +28,20 @@
           <!-- Platform data -->
           <div v-if="platformsData[platformNumber].hasData">
 
-            <!-- Platform number -->
-            <div v-if="Object.keys(platformsData[platformNumber].data).includes('platform_number')">
-              <span>
-                <strong title="platform_number / fileNumber">ID: </strong>
-                {{ platformsData[platformNumber].data['platform_number'] }}
-              </span>
+
+            <div class="sketchfab-embed-wrapper">
+              <iframe title="Oceanographic Argo Profiling Float" frameborder="0" allowfullscreen
+                mozallowfullscreen="true" webkitallowfullscreen="true" allow="autoplay; fullscreen; xr-spatial-tracking"
+                xr-spatial-tracking execution-while-out-of-viewport execution-while-not-rendered web-share
+                src="https://sketchfab.com/models/439474c830744c95b48dc90cfff6fdbe/embed"> </iframe>
+              <!-- <p style="font-size: 13px; font-weight: normal; margin: 5px; color: #4A4A4A;"> <a
+                  href="https://sketchfab.com/3d-models/oceanographic-argo-profiling-float-439474c830744c95b48dc90cfff6fdbe?utm_medium=embed&utm_campaign=share-popup&utm_content=439474c830744c95b48dc90cfff6fdbe"
+                  target="_blank" rel="nofollow" style="font-weight: bold; color: #1CAAD9;"> Oceanographic Argo
+                  Profiling Float </a>
+              </p> -->
             </div>
 
-            <!-- Project name -->
-            <div v-if="Object.keys(platformsData[platformNumber].data).includes('project_name')">
-              <span>
-                <strong title="project_name">Project: </strong>
-                {{ platformsData[platformNumber].data['project_name'] }}
-              </span>
-            </div>
 
-            <!-- Platform type -->
-            <div v-if="Object.keys(platformsData[platformNumber].data).includes('platform_type')">
-              <span>
-                <strong title="platform_type">Type: </strong>
-                {{ platformsData[platformNumber].data['platform_type'] }}
-              </span>
-            </div>
 
 
             <!-- Show trajectory -->
@@ -60,6 +51,30 @@
             <!-- Extra data -->
             <Transition>
               <div v-if="platforms[platformNumber].showAllData">
+
+                <!-- Platform number -->
+                <div v-if="Object.keys(platformsData[platformNumber].data).includes('platform_number')">
+                  <span>
+                    <strong title="platform_number / fileNumber">ID: </strong>
+                    {{ platformsData[platformNumber].data['platform_number'] }}
+                  </span>
+                </div>
+
+                <!-- Project name -->
+                <div v-if="Object.keys(platformsData[platformNumber].data).includes('project_name')">
+                  <span>
+                    <strong title="project_name">Project: </strong>
+                    {{ platformsData[platformNumber].data['project_name'] }}
+                  </span>
+                </div>
+
+                <!-- Platform type -->
+                <div v-if="Object.keys(platformsData[platformNumber].data).includes('platform_type')">
+                  <span>
+                    <strong title="platform_type">Type: </strong>
+                    {{ platformsData[platformNumber].data['platform_type'] }}
+                  </span>
+                </div>
 
                 <!-- Cycle number -->
                 <div v-if="Object.keys(platformsData[platformNumber].data).includes('cycle_number')">
