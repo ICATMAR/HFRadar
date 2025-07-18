@@ -20,7 +20,7 @@
               <div></div>
               <div></div>
             </div>
-            <span><strong>Argo profiling float</strong></span>
+            <span><strong>Drifter</strong></span>
             <a href="https://erddap.ifremer.fr/erddap/index.html" target="_blank" rel="noopener noreferrer"
               class="icon-str">i</a>
           </div>
@@ -33,7 +33,7 @@
             <Transition>
               <div class="sketchfab-embed-wrapper"
                 v-show="platforms[platformNumber].hide3Dwidget == undefined || !platforms[platformNumber].hide3Dwidget">
-                <iframe title="Oceanographic Argo Profiling Float" frameborder="0" allowfullscreen
+                <iframe title="Drifter" frameborder="0" allowfullscreen
                   mozallowfullscreen="true" webkitallowfullscreen="true"
                   allow="autoplay; fullscreen; xr-spatial-tracking" xr-spatial-tracking execution-while-out-of-viewport
                   execution-while-not-rendered web-share
@@ -56,27 +56,6 @@
 
 
 
-            <!-- Surface data-->
-            <template v-if="Object.keys(platformsData[platformNumber].data).includes('surfaceData')">
-
-              <!-- Surface water temperature -->
-              <div v-if="Object.keys(platformsData[platformNumber].data.surfaceData).includes('temp_adjusted')">
-                <span>
-                  <strong title="Surface water temperature">Water temperature: </strong>
-                  {{ platformsData[platformNumber].data.surfaceData.temp_adjusted.toFixed(1) }} °C
-
-                  <!-- Depth -->
-                  <template
-                    v-if="Object.keys(platformsData[platformNumber].data.surfaceData).includes('pres_adjusted')">
-                    at {{ platformsData[platformNumber].data.surfaceData.pres_adjusted.toFixed(1) }} m depth
-                  </template>
-                </span>
-              </div>
-
-            </template>
-
-
-
 
 
             <!-- Show trajectory -->
@@ -87,19 +66,6 @@
             <Transition>
               <div v-if="platforms[platformNumber].showAllData">
 
-                <!-- Salinity -->
-                <div v-if="Object.keys(platformsData[platformNumber].data.surfaceData).includes('psal_adjusted')">
-                  <span>
-                    <strong title="Surface salinity">Salinity: </strong>
-                    {{ platformsData[platformNumber].data.surfaceData.psal_adjusted.toFixed(1) }} psu
-
-                    <!-- Depth -->
-                    <template
-                      v-if="Object.keys(platformsData[platformNumber].data.surfaceData).includes('pres_adjusted')">
-                      at {{ platformsData[platformNumber].data.surfaceData.pres_adjusted.toFixed(1) }} m depth
-                    </template>
-                  </span>
-                </div>
 
                 <!-- Platform number -->
                 <div v-if="Object.keys(platformsData[platformNumber].data).includes('platform_number')">
@@ -192,9 +158,9 @@
 
       <!-- Platform icon -->
       <img class="icon-str icon-medium icon-img panel-icon-right" @click="ERDDAPIconClicked(platformNumber)"
-        src='/HFRadar/Assets/Images/argo.svg' v-if="platformsData[platformNumber].hasData"
+        src='/HFRadar/Assets/Images/drifter.svg' v-if="platformsData[platformNumber].hasData"
         :style="{ 'opacity': Object.keys(platformsData[platformNumber].data).includes('tmstTimeDiffStr') ? (platformsData[platformNumber].data.tmstTimeDiffStr.includes('hour') ? 0.5 : 0.1) : 1 }"
-        :title="Object.keys(platformsData[platformNumber].data).includes('tmstTimeDiffStr') ? 'Argo float, ' + platformsData[platformNumber].data.tmstTimeDiffStr : ''">
+        :title="Object.keys(platformsData[platformNumber].data).includes('tmstTimeDiffStr') ? 'Drifter, ' + platformsData[platformNumber].data.tmstTimeDiffStr : ''">
 
 
     </div>
@@ -254,46 +220,27 @@ export default {
       isExternalObsVisible: false,
       isAdvancedInterfaceOnOff: false,
       isTooFar: false,
-      queryPlatformsURL: "https://erddap.ifremer.fr/erddap/tabledap/ArgoFloats.jsonlKVP" +
+      queryPlatformsURL: "https://erddap.icatmar.cat/erddap/tabledap/socat_data_drifters_ICATMAR.jsonlKVP" +
         "?{parameters}" +
-        "&time>={startDate}&time<={endDate}&longitude>={longMin}&longitude<={longMax}&latitude>={latMin}&latitude<={latMax}",
+        "&time>={startDate}&time<={endDate}&longitude>={longMin}&longitude<={longMax}&latitude>={latMin}&latitude<={latMax}"+
+        "&distinct()",
       bbox: [0, 5, 39.5, 44], // long, lat
-      queryTrajectoryURL: 'https://erddap.ifremer.fr/erddap/tabledap/ArgoFloats.jsonlKVP?' +
-        'platform_number,cycle_number,time,latitude,longitude' +
-        '&platform_number="{platformNumber}"',
-      querySurfaceData: 'https://erddap.ifremer.fr/erddap/tabledap/ArgoFloats.jsonlKVP?' +
-        'platform_number,cycle_number,time,pres_adjusted,temp_adjusted,psal_adjusted,doxy,temp_doxy,turbidity,chla,nitrate' +
-        '&platform_number="{platformNumber}"&cycle_number={cycleNumber}&pres_adjusted>=0&pres_adjusted<=5', // 0 - 5 meters
+      queryTrajectoryURL: 'https://erddap.icatmar.cat/erddap/tabledap/socat_data_drifters_ICATMAR.jsonlKVP' +
+        'time,latitude,longitude, temperature' +
+        '&deployment_id="{deploymentId}"',
       parameters: [
-        'fileNumber',
-        'data_type',
-        'date_creation',
-        'platform_number',
-        'project_name',
+        'deployment_id',
+        'drifter_type',
+        'institution',
+        'project',
         'pi_name',
-        'cycle_number',
-        'data_center',
-        'dc_reference', // data center convention ?
-        'data_mode', // R-> real-time, A -> real-time with adjustments, D -> delayed mode
-        'platform_type', // ARVOR, PROVOR, NAVIS, etc.
-        'float_serial_no', // ?
-        'time',
-        'latitude',
-        'longitude',
-        // wmo_inst_type? (836-882)
-        // config_mission_number ? (5-227)
-        // time_qc, position_qc
-        // profile_pres_qc, profile_temp_qc, profile_psal_qc
-        // pres_qc, pres_adjusted, pres_adjusted_qc, pres_adjusted_error,
-        // temp_qc, temp_adjusted, temp_adjusted_qc, temp_adjusted_error,
-        // ...
+        'exercise',
       ],
       platforms: {},
       platformsData: {},
       requestStatus: {}, // Stores requested timestamps
       requestedDailyData: {}, // Stores promises and results of promises by daily tmst
       requestedTrajectories: {}, // Stores requested trajectories by platform number
-      requestedSurfaceData: {}, // Stores requested surface data by platform number and cycle number
     }
   },
   methods: {
@@ -327,14 +274,6 @@ export default {
         });
       }
 
-      // Load surface data
-      if (this.platformsData[platformNumber].showInfo) {
-        // Get surface data
-        let cycleNumber = this.platformsData[platformNumber].data.cycle_number;
-        this.getSurfaceData(platformNumber, cycleNumber).then(() => {
-          this.updateContent(window.GUIManager.currentTmst);
-        });
-      }
     },
     // INTERNAL
     selectedDateChanged: function (tmst) {
@@ -506,41 +445,7 @@ export default {
     },
 
 
-    // Get surface data (water temperature, salinity, etc.) of a given profile
-    getSurfaceData(platformNumber, cycleNumber) {
-      // Check if the data was already requested
-      if (this.requestedSurfaceData[platformNumber + cycleNumber] != undefined) {
-        return new Promise((resolve, reject) => {
-          resolve(this.requestedSurfaceData[platformNumber + cycleNumber]);
-        });
-      }
 
-      // Load the data
-      // Is this else necessary?
-      else {
-        // Set platform to loading
-        // TODO: there are several loading processes! The loading will be set to false by one of them before the others finishes. Create an array or a counter
-        this.platformsData[platformNumber].isLoading = true;
-        // Prepare url
-        let url = this.querySurfaceData.replace('{platformNumber}', platformNumber).replace('{cycleNumber}', cycleNumber);
-
-        console.log(url.replace('jsonlKVP', 'htmlTable'));
-        const encodedUrl = encodeURIComponent(url);
-        let proxyFullURL = this.proxyURL + '?url=' + encodedUrl;
-        let promise = this.getDataFromURL(proxyFullURL)
-          .then(res => {
-            // Store response
-            this.requestedSurfaceData[platformNumber + cycleNumber] = res;
-            // Parse raw text and structure data
-            this.parseSurfaceRawTextAndStructureData(res, platformNumber, cycleNumber);
-            // Platform trajectory loaded
-            this.platformsData[platformNumber].isLoading = false;
-          });
-        this.requestedSurfaceData[platformNumber + cycleNumber] = promise;
-        return promise;
-      }
-
-    },
 
 
     // Get data from URL
@@ -641,59 +546,7 @@ export default {
       return this.platforms[platformNumber].trajectory;
     },
 
-    // Parse surface data raw text
-    parseSurfaceRawTextAndStructureData(res, platformNumber, cycleNumber) {
-      let rows = res.split('\n');
-      rows.pop(); // Delete empty
 
-      let platforms = this.platforms;
-
-      // Keep the data with the lowest pressure (surface data)
-      let min = 5;
-      let indexMin = -1;
-      for (let i = 0; i < rows.length; i++) {
-        let jsRow = JSON.parse(rows[i]);
-        if (jsRow.pres_adjusted != undefined && jsRow.pres_adjusted < min) {
-          min = jsRow.pres_adjusted;
-          indexMin = i;
-        }
-      }
-      if (indexMin == -1) {
-        // No surface data found
-        // Store the query response as empty or somehow? In update content maybe it is needed some definitions or declarations.
-        return;
-      }
-      // Surface row data
-      let jsRow = JSON.parse(rows[indexMin]);
-      // Remove nulls
-      Object.keys(jsRow).forEach((key) => {
-        if (jsRow[key] === null) {
-          delete jsRow[key];
-        }
-      });
-
-      // Define surface data
-      if (platforms[platformNumber].data[jsRow.time] == undefined) {
-        platforms[platformNumber].data[jsRow.time] = {};
-
-        if (platforms[platformNumber].data[jsRow.time].surfaceData == undefined) {
-          platforms[platformNumber].data[jsRow.time].surfaceData = {};
-        }
-      }
-
-      // Fill with surface data
-      platforms[platformNumber].data[jsRow.time].surfaceData = {
-        "pres_adjusted": jsRow.pres_adjusted,
-        "temp_adjusted": jsRow.temp_adjusted,
-        "psal_adjusted": jsRow.psal_adjusted,
-        "doxy": jsRow.doxy,
-        "temp_doxy": jsRow.temp_doxy,
-        "turbidity": jsRow.turbidity,
-        "chla": jsRow.chla,
-        "nitrate": jsRow.nitrate,
-      };
-
-    },
 
     // Update vue and map
     addPlatformsToMap() {
