@@ -260,7 +260,7 @@ export default {
       queryPlatformsURL: "https://erddap.ifremer.fr/erddap/tabledap/ArgoFloats.jsonlKVP" +
         "?{parameters}" +
         "&time>={startDate}&time<={endDate}&longitude>={longMin}&longitude<={longMax}&latitude>={latMin}&latitude<={latMax}",
-      bbox: [0, 5, 39.5, 44], // long, lat
+      bbox: [0, 9, 38, 44.5], // long, lat
       queryTrajectoryURL: 'https://erddap.ifremer.fr/erddap/tabledap/ArgoFloats.jsonlKVP?' +
         'platform_number,cycle_number,time,latitude,longitude' +
         '&platform_number="{platformNumber}"',
@@ -368,7 +368,7 @@ export default {
         // Pick up closest data
         Object.keys(platform.data).forEach(dataTmst => {
           let timeDiff = Math.abs(new Date(dataTmst).getTime() - new Date(tmst).getTime());
-          let isAhead = new Date(dataTmst).getTime() > new Date(tmst).getTime() > 0; // Is the data ahead of the current time?
+          let isAhead = new Date(dataTmst).getTime() > new Date(tmst).getTime(); // Is the data ahead of the current time?
           if (timeDiff < visibleTimeSpan && timeDiff < closestTimeDiff) {
             closestTimeDiff = timeDiff;
             this.platformsData[platformNumber].hasData = true;
