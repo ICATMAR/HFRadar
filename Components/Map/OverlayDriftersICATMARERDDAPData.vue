@@ -20,7 +20,7 @@
               <div></div>
             </div>
             <span><strong>{{ platforms[deployment_id]['drifter_type'] }} Drifter</strong></span>
-            <a href="https://erddap.ifremer.fr/erddap/index.html" target="_blank" rel="noopener noreferrer"
+            <a href="https://erddap.icatmar.cat/erddap/index.html" target="_blank" rel="noopener noreferrer"
               class="icon-str">i</a>
           </div>
 
