@@ -30,7 +30,7 @@
 
             <!-- 3D widget -->
             <Transition>
-              <div class="sketchfab-embed-wrapper"
+              <div class="threed-widget"
                 v-show="platforms[deployment_id].hide3Dwidget == undefined || !platforms[deployment_id].hide3Dwidget">
                 <iframe title="Drifter" frameborder="0" allowfullscreen mozallowfullscreen="true"
                   webkitallowfullscreen="true" allow="autoplay; fullscreen; xr-spatial-tracking" xr-spatial-tracking
@@ -63,6 +63,18 @@
               </span>
             </div>
 
+            <!-- Estimated currents -->
+            <div v-if="Object.keys(platformsData[deployment_id].data).includes('estVelocity')">
+              <span>
+                <strong>Estimated current: </strong>
+                {{ platformsData[deployment_id].data.estVelocity.toFixed(2) }} m/s,
+                {{ bearing2compassRose(platformsData[deployment_id].data['estDirection']) }}
+                <span class="fa"
+                  :style="{ transform: 'rotate(' + (platformsData[deployment_id].data['estDirection'] - 45) + 'deg)' }">&#xf124;
+                </span>
+                 at 15 m depth
+              </span>
+            </div>
 
             <!-- Show trajectory -->
             <!-- Go to date -->
@@ -246,6 +258,8 @@ export default {
           this.getTrajectoryFrom(deployment_id).then(() => {
             // Add trajectory to map
             this.addTrajectoryToMap(deployment_id);
+            // Update content as the currents were estimated with the trajectories
+            this.updateContent(window.GUIManager.currentTmst);
           });
         } else
           // Add the layer to the map
@@ -306,6 +320,14 @@ export default {
             Object.keys(platform.data[dataTmst]).forEach(key => {
               this.platformsData[deployment_id].data[key] = platform.data[dataTmst][key];
             });
+
+            // Check if estimated current exists
+            if (platform.estVelocity != undefined && platform.estDirection != undefined) {
+              if (platform.estVelocity[dataTmst] != undefined) {
+                this.platformsData[deployment_id].data.estVelocity = platform.estVelocity[dataTmst];
+                this.platformsData[deployment_id].data.estDirection = (platform.estDirection[dataTmst] + 360) % 360;
+              }
+            }
 
             // Change layer location
             this.$nextTick(() => {
@@ -428,6 +450,8 @@ export default {
             this.platformsData[deployment_id].isLoading = false;
             // Parse raw text and structure data
             this.parseTrajectoryRawTextAndStructureData(res, deployment_id);
+            // Estimate current direction and velocity from points
+            this.estimateCurrentFromPoints(deployment_id);
           });
         this.requestedTrajectories[deployment_id] = promise;
         return promise;
@@ -711,6 +735,107 @@ export default {
 
 
 
+
+    // Estimate current direction and velocity from points
+    estimateCurrentFromPoints(deployment_id) {
+      // Check if trajectory has more than two points
+      if (this.platforms[deployment_id].trajectory.length < 2) {
+        console.warn("Not enough points to estimate current for platform " + deployment_id);
+        return;
+      }
+      // Calculate estimated velocity and direction
+      for (let i = 0; i < this.platforms[deployment_id].trajectory.length; i++) {
+
+        let curr = this.platforms[deployment_id].trajectory[i];
+        let dirNext, velNext, dirPrev, velPrev;
+
+        // Velocity and direction from present to next point
+        if (i != this.platforms[deployment_id].trajectory.length - 1) {
+          let next = this.platforms[deployment_id].trajectory[i + 1];
+          // Calculate distance in meters
+          let distance = this.calculateDistance(curr, next);
+          // Calculate time difference in seconds
+          let timeDiff = (new Date(next.time).getTime() - new Date(curr.time).getTime()) / 1000; // in seconds
+          // Calculate velocity in m/s
+          velNext = distance / timeDiff;
+          // Calculate direction in degrees
+          dirNext = this.calculateBearing(curr, next); // Bearing in degrees
+        }
+
+        if (i != 0) {
+          let prev = this.platforms[deployment_id].trajectory[i - 1];
+          // Velocity and direction from previous to present point
+          let distance = this.calculateDistance(curr, prev);
+          // Calculate time difference in seconds
+          let timeDiff = (new Date(curr.time).getTime() - new Date(prev.time).getTime()) / 1000; // in seconds
+          // Calculate velocity in m/s
+          velPrev = Math.abs(distance / timeDiff);
+          // Calculate direction in degrees
+          dirPrev = this.calculateBearing(prev, curr); // Bearing in degrees
+        }
+        // Average direction and velocity
+        let avgDir, avgVel;
+        if (dirNext != undefined && dirPrev != undefined) {
+          // Compute average direction and velocity
+          // Average direction is the average of the two bearings, taking into account the circular nature of angles
+          // https://rosettacode.org/wiki/Averages/Mean_angle
+          let y = Math.sin(dirNext * Math.PI / 180) + Math.sin(dirPrev * Math.PI / 180);
+          let x = Math.cos(dirNext * Math.PI / 180) + Math.cos(dirPrev * Math.PI / 180);
+          avgDir = (Math.atan2(y, x) * 180 / Math.PI + 360) % 360; // Normalize to 0-360 degrees
+          avgVel = (velNext + velPrev) / 2;
+        } else if (dirNext != undefined) {
+          avgDir = dirNext;
+          avgVel = velNext;
+        } else if (dirPrev != undefined) {
+          avgDir = dirPrev;
+          avgVel = velPrev;
+        }
+        // Add velocity and direction to trajectory
+        this.platforms[deployment_id].trajectory[i].velocity = avgVel; // in m/s
+        this.platforms[deployment_id].trajectory[i].direction = avgDir; // in degrees
+        // Add velocity and direction to platform
+        if (this.platforms[deployment_id].estVelocity == undefined) {
+          this.platforms[deployment_id].estVelocity = {};
+        }
+        if (this.platforms[deployment_id].estDirection == undefined) {
+          this.platforms[deployment_id].estDirection = {};
+        }
+        let tmst = this.platforms[deployment_id].trajectory[i].time;
+        this.platforms[deployment_id].estVelocity[tmst] = avgVel; // in m/s
+        this.platforms[deployment_id].estDirection[tmst] = avgDir; // in degrees
+
+      }
+    },
+
+
+
+    // Calculate distance in meters https://www.movable-type.co.uk/scripts/latlong.html
+    calculateDistance(curr, prev) {
+      const R = 6371e3; // Radius of the Earth in meters
+      const φ1 = curr.latitude * Math.PI / 180; // φ in radians
+      const φ2 = prev.latitude * Math.PI / 180; // φ in radians
+      const Δφ = (prev.latitude - curr.latitude) * Math.PI / 180; // Δφ in radians
+      const Δλ = (prev.longitude - curr.longitude) * Math.PI / 180; // Δλ in radians
+      // Haversine formula to calculate distance
+      let a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+        Math.cos(φ1) * Math.cos(φ2) *
+        Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      return R * c; // in meters
+    },
+
+
+    // Calculate bearing in degrees https://www.movable-type.co.uk/scripts/latlong.html
+    calculateBearing(startP, endP) {
+      // Calculate bearing in degrees
+      let y = Math.sin(endP.longitude - startP.longitude) * Math.cos(endP.latitude);
+      let x = Math.cos(startP.latitude) * Math.sin(endP.latitude) -
+        Math.sin(startP.latitude) * Math.cos(endP.latitude) * Math.cos(endP.longitude - startP.longitude);
+      let bearing = Math.atan2(y, x) * (180 / Math.PI); // Convert to degrees
+      return (bearing + 360) % 360; // Normalize to 0-360 degrees
+    },
+
+
     // Bearing to direction
     bearing2compassRose(bearing) {
       if (bearing == undefined)
@@ -796,6 +921,10 @@ a {
 
 .more-data-button:hover {
   background: var(--lightBlue);
+}
+
+.threed-widget {
+  text-align: center;
 }
 
 .hide3Dwidget {
