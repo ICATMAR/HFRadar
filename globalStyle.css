@@ -56,10 +56,11 @@ span {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  z-index:20;
+  z-index: 20;
   /* user-select: all;
   pointer-events: all; */
 }
+
 .loading-circle::before,
 .loading-circle::after {
   content: '';
@@ -69,10 +70,12 @@ span {
   position: absolute;
   animation: loading-anim 0.5s infinite cubic-bezier(0.165, 0.84, 0.44, 1) alternate;
 }
+
 .loading-circle::after {
   width: 100%;
-  height: 100%; 
+  height: 100%;
 }
+
 .loading-circle::before {
   width: 50%;
   height: 50%;
@@ -83,16 +86,23 @@ span {
   0% {
     transform: scale(0.5);
   }
+
   100% {
     transform: scale(1);
   }
 }
 
 /* Fade animation (used to open and close loading circle by vue) */
-.fade-enter-active, .fade-leave-active {
+.fade-enter-active,
+.fade-leave-active {
   transition: opacity 0.5s ease;
 }
-.fade-enter, .fade-leave-to /* .fade-leave-active in <2.1.8 */ {
+
+.fade-enter,
+.fade-leave-to
+
+/* .fade-leave-active in <2.1.8 */
+  {
   opacity: 0;
 }
 
@@ -108,7 +118,7 @@ button {
   border-radius: 50px;
   border: none;
 
-  display:flex;
+  display: flex;
   align-items: center;
   justify-content: center;
 }
@@ -128,6 +138,7 @@ button:hover {
   box-shadow: 0px 0px 4px black;
   transition: all 0.2s ease-in-out;
 }
+
 .button-active:hover {
   background-color: var(--red);
 }
@@ -144,15 +155,17 @@ button:hover {
   pointer-events: auto;
   user-select: none;
 }
+
 .clickable:hover {
   transform: scale(1.05);
   transition: all 0.2s ease-in-out;
 }
+
 .unavailable {
   background-color: rgb(136, 136, 136);
   border: 2px solid gray;
   pointer-events: none;
-  cursor:auto;
+  cursor: auto;
 }
 
 
@@ -203,7 +216,7 @@ button:hover {
   margin-left: 3px;
   margin-right: 3px;
 
-  display:flex;
+  display: flex;
   align-items: center;
   justify-content: center;
   pointer-events: all;
@@ -213,31 +226,37 @@ button:hover {
 .icon-str:hover {
   background-color: var(--blue);
 }
+
 /* Close icon */
 .icon-str-close {
   /* background-color: var(--red); */
   background-color: gray;
 }
+
 .icon-str-close::after {
   content: "\2715";
 }
-.icon-str-close:hover{
+
+.icon-str-close:hover {
   background-color: lightgray;
 }
+
 /* Open icon */
 .icon-str-open {
   background-color: var(--lightBlue);
 }
+
 .icon-str-open::after {
   font-family: initial;
   content: "\1F441";
 }
-.icon-str-open:hover{
+
+.icon-str-open:hover {
   background-color: green;
 }
 
 
-.icon-big{
+.icon-big {
   width: 35px;
   height: 35px;
 }
@@ -247,16 +266,25 @@ button:hover {
   height: 1.6em;
 }
 
-.icon-small{
+.icon-small {
   width: 25px;
   height: 25px;
 }
 
 .icon-img:hover {
   border: 2px solid var(--lightBlue);
-  cursor:pointer;
+  cursor: pointer;
 }
 
+/* ICON MARKER FOR DRIFTERS/HFRadar PROVIDED BY ICATMAR */
+.icon-marker-icatmar {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--red);
+  border: solid 1px black;
+  translate: 9px -9px;
+}
 
 
 
@@ -268,7 +296,7 @@ button:hover {
   width: 300px;
 
   user-select: none;
-  
+
   padding: 20px;
 
   display: flex;
@@ -288,11 +316,13 @@ button:hover {
   z-index: 5;
   padding: 5px;
 }
+
 .widgetDataSource {
-  width:100%;
+  width: 100%;
   padding: 20px;
 }
-.widgetDataSource > * {
+
+.widgetDataSource>* {
   font-size: clamp(0.6rem, 1.2vw, 0.8rem);
 }
 
@@ -303,6 +333,7 @@ button:hover {
     width: 200px;
     padding: 10px;
   }
+
   .widgetDataSource {
     padding: 0px;
   }
@@ -322,6 +353,7 @@ button:hover {
 
   pointer-events: all;
 }
+
 .titleWidget-closed {
   width: 100%;
   justify-content: flex-end;
@@ -339,8 +371,9 @@ h4 {
   padding-right: 10px;
   margin: 0px;
 }
+
 .widgetButtonContainer {
-  display:flex;
+  display: flex;
   flex-wrap: nowrap;
   padding: 10px;
   align-items: center;
@@ -353,6 +386,7 @@ h4 {
   padding-left: 3px;
   padding-right: 3px;
 }
+
 .widgetButtonHFRadar {
   color: white;
   background-color: darkgray;
@@ -369,13 +403,14 @@ h4 {
   pointer-events: all;
   cursor: pointer;
 }
+
 .widgetButtonHFRadar-active {
   background-color: var(--red);
   border: 2px solid rgb(255, 90, 90);
   cursor: pointer;
   color: white;
 }
-  
+
 
 .widgetButtonHFRadar-active:hover {
   background-color: var(--red);
@@ -388,7 +423,7 @@ h4 {
   background-color: rgb(136, 136, 136);
   border: 2px solid gray;
   pointer-events: none;
-  cursor:auto;
+  cursor: auto;
   color: darkgray;
 }
 
@@ -396,7 +431,7 @@ h4 {
   background-color: rgb(136, 136, 136);
   border: 2px solid gray;
   pointer-events: none;
-  cursor:auto;
+  cursor: auto;
 }
 
 
@@ -411,11 +446,13 @@ h4 {
   /* display: none; */
   /* pointer-events: none !important; */
 }
+
 .showOverlayMap {
   opacity: 1;
   visibility: visible;
   transition: all 1s;
 }
+
 .no-pointer-events {
   pointer-events: none !important;
 }
@@ -430,13 +467,14 @@ h4 {
 /* Works on Firefox */
 * {
   scrollbar-width: auto;
-  scrollbar-color:  lightblue var(--blue);
+  scrollbar-color: lightblue var(--blue);
 }
 
 /* Works on Chrome, Edge, and Safari */
 *::-webkit-scrollbar {
   width: 10px;
 }
+
 *::-webkit-scrollbar-track {
   background: lightblue
 }
@@ -469,13 +507,13 @@ input[type='range']::-webkit-slider-thumb {
 } */
 
 .accordion-button {
-  color:white;
+  color: white;
   background: var(--darkBlue);
 }
 
-.accordion-button:not(.collapsed){
+.accordion-button:not(.collapsed) {
   background: var(--blue);
-  color:white;
+  color: white;
 }
 
 
@@ -497,5 +535,3 @@ input[type='range']::-webkit-slider-thumb {
     display: none;
   }
 }
-
-

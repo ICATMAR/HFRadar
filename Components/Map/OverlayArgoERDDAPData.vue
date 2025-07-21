@@ -87,8 +87,9 @@
             <Transition>
               <div v-if="platforms[platformNumber].showAllData">
 
-                <!-- Salinity -->
+                <!-- Surface data-->
                 <template v-if="Object.keys(platformsData[platformNumber].data).includes('surfaceData')">
+                  <!-- Salinity -->
                   <div v-if="Object.keys(platformsData[platformNumber].data.surfaceData).includes('psal_adjusted')">
                     <span>
                       <strong title="Surface salinity">Salinity: </strong>
@@ -467,11 +468,18 @@ export default {
             this.parseRawTextAndStructureData(res);
             // Map and vue data structure if required
             this.addPlatformsToMap();
+          })
+          .catch(e => {
+            debugger;
+            console.error("Error loading ERDDAP data: ", e);
+            // Set all platforms to not loading
+            Object.keys(this.platforms).forEach(platformNumber => {
+              this.platformsData[platformNumber].isLoading = false;
+            });
           });
         this.requestedDailyData[dayTmst] = promise;
         return promise
       }
-
     },
 
 
