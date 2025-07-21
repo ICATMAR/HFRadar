@@ -30,7 +30,7 @@
 
             <!-- 3D widget -->
             <Transition>
-              <div class="sketchfab-embed-wrapper"
+              <div class="threed-widget"
                 v-show="platforms[deployment_id].hide3Dwidget == undefined || !platforms[deployment_id].hide3Dwidget">
                 <iframe title="Drifter" frameborder="0" allowfullscreen mozallowfullscreen="true"
                   webkitallowfullscreen="true" allow="autoplay; fullscreen; xr-spatial-tracking" xr-spatial-tracking
@@ -70,8 +70,9 @@
                 {{ platformsData[deployment_id].data.estVelocity.toFixed(2) }} m/s,
                 {{ bearing2compassRose(platformsData[deployment_id].data['estDirection']) }}
                 <span class="fa"
-                  :style="{ transform: 'rotate(' + (platformsData[deployment_id].data['estDirection'] - 45 + 180) + 'deg)' }">&#xf124;
+                  :style="{ transform: 'rotate(' + (platformsData[deployment_id].data['estDirection'] - 45) + 'deg)' }">&#xf124;
                 </span>
+                 at 15 m depth
               </span>
             </div>
 
@@ -321,7 +322,6 @@ export default {
             // Check if estimated current exists
             if (platform.estVelocity != undefined && platform.estDirection != undefined) {
               if (platform.estVelocity[dataTmst] != undefined) {
-                debugger;
                 this.platformsData[deployment_id].data.estVelocity = platform.estVelocity[dataTmst];
                 this.platformsData[deployment_id].data.estDirection = (platform.estDirection[dataTmst] + 360) % 360;
               }
@@ -736,7 +736,6 @@ export default {
 
     // Estimate current direction and velocity from points
     estimateCurrentFromPoints(deployment_id) {
-      debugger;
       // Check if trajectory has more than two points
       if (this.platforms[deployment_id].trajectory.length < 2) {
         console.warn("Not enough points to estimate current for platform " + deployment_id);
@@ -752,41 +751,35 @@ export default {
         if (i != this.platforms[deployment_id].trajectory.length - 1) {
           let next = this.platforms[deployment_id].trajectory[i + 1];
           // Calculate distance in meters
-          let distance = ol.sphere.getDistance(
-            ol.proj.fromLonLat([curr.longitude, curr.latitude]),
-            ol.proj.fromLonLat([next.longitude, next.latitude])
-          );
+          let distance = this.calculateDistance(curr, next);
           // Calculate time difference in seconds
           let timeDiff = (new Date(next.time).getTime() - new Date(curr.time).getTime()) / 1000; // in seconds
           // Calculate velocity in m/s
           velNext = distance / timeDiff;
           // Calculate direction in degrees
-          dirNext = Math.atan2(
-            next.latitude - curr.latitude,
-            next.longitude - curr.longitude
-          ) * (180 / Math.PI); // Convert to degrees
+          dirNext = this.calculateBearing(curr, next); // Bearing in degrees
         }
 
         if (i != 0) {
           let prev = this.platforms[deployment_id].trajectory[i - 1];
           // Velocity and direction from previous to present point
-
-
-
+          let distance = this.calculateDistance(curr, prev);
           // Calculate time difference in seconds
           let timeDiff = (new Date(curr.time).getTime() - new Date(prev.time).getTime()) / 1000; // in seconds
           // Calculate velocity in m/s
           velPrev = Math.abs(distance / timeDiff);
           // Calculate direction in degrees
-          dirPrev = Math.atan2(
-            curr.latitude - prev.latitude,
-            curr.longitude - prev.longitude
-          ) * (180 / Math.PI); // Convert to degrees
+          dirPrev = this.calculateBearing(prev, curr); // Bearing in degrees
         }
         // Average direction and velocity
         let avgDir, avgVel;
         if (dirNext != undefined && dirPrev != undefined) {
-          avgDir = (dirNext + dirPrev) / 2;
+          // Compute average direction and velocity
+          // Average direction is the average of the two bearings, taking into account the circular nature of angles
+          // https://rosettacode.org/wiki/Averages/Mean_angle
+          let y = Math.sin(dirNext * Math.PI / 180) + Math.sin(dirPrev * Math.PI / 180);
+          let x = Math.cos(dirNext * Math.PI / 180) + Math.cos(dirPrev * Math.PI / 180);
+          avgDir = (Math.atan2(y, x) * 180 / Math.PI + 360) % 360; // Normalize to 0-360 degrees
           avgVel = (velNext + velPrev) / 2;
         } else if (dirNext != undefined) {
           avgDir = dirNext;
@@ -926,6 +919,10 @@ a {
 
 .more-data-button:hover {
   background: var(--lightBlue);
+}
+
+.threed-widget {
+  text-align: center;
 }
 
 .hide3Dwidget {
