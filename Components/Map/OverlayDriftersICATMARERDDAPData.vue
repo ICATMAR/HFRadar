@@ -209,7 +209,7 @@ export default {
         "?{parameters}" +
         "&time>={startDate}&time<={endDate}&longitude>={longMin}&longitude<={longMax}&latitude>={latMin}&latitude<={latMax}" +
         "&distinct()",
-      //bbox: [0, 5, 39.5, 44], // long, lat
+      //bbox: [0, 9, 38, 44.5], // long, lat
       //DEBUGGING LINE FOR GALICIA'S DRIFTERS, PLEASE UNCOMMENT
       bbox: [-15, 6, 35, 46], // long, lat
       queryTrajectoryURL: 'https://erddap.icatmar.cat/erddap/tabledap/socat_data_drifters_ICATMAR.jsonlKVP' +

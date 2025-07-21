@@ -227,7 +227,7 @@ export default {
         "&time>={startDate}&time<={endDate}&longitude>={longMin}&longitude<={longMax}&latitude>={latMin}&latitude<={latMax}" +
         "&observation_depth<0.5",// + // Avoid subsurface data
       //'&platform_type="DRIFTING BUOYS"', // Restric to drifters
-      bbox: [0, 5, 39.5, 44], // long, lat
+      bbox: [0, 9, 38, 44.5], // long, lat
       parameters: [
         'platform_type',
         'platform_code',
