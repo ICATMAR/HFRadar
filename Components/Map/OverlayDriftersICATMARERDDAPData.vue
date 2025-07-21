@@ -144,7 +144,8 @@
         :title="Object.keys(platformsData[deployment_id].data).includes('tmstTimeDiffStr') ? 'Drifter, ' + platformsData[deployment_id].data.tmstTimeDiffStr : ''">
       <!-- Indicator of ICATMAR -->
       <div class="icon-marker-icatmar" v-if="platformsData[deployment_id].hasData"
-      :style="{ 'opacity': Object.keys(platformsData[deployment_id].data).includes('tmstTimeDiffStr') ? (platformsData[deployment_id].data.tmstTimeDiffStr.includes('hour') ? 0.5 : 0.25) : 1 }"></div>
+        :style="{ 'opacity': Object.keys(platformsData[deployment_id].data).includes('tmstTimeDiffStr') ? (platformsData[deployment_id].data.tmstTimeDiffStr.includes('hour') ? 0.5 : 0.25) : 1 }">
+      </div>
 
 
     </div>
@@ -636,9 +637,9 @@ export default {
       for (let i = 0; i < numPoints; i++) {
 
         // Set style with opacity based on time difference
-        let timeDiff = Math.abs(new Date(trajectory[i].time).getTime() - tmstGetTime);
+        let timeDiff = new Date(trajectory[i].time).getTime() - tmstGetTime;
         //let opacity = timeDiff < 1000 * 60 * 60 ? 1 : timeDiff < 1000 * 60 * 60 * 24 ? 0.8 : timeDiff < 1000 * 60 * 60 * 24 * 7 ? 0.6 : 0.4;
-        let opacity = Math.max(1 - timeDiff / (1000 * 60 * 60 * 24 * 30), 0.15); // 30 days max opacity
+        let opacity = Math.max(1 - Math.abs(timeDiff) / (1000 * 60 * 60 * 24 * 30), 0.15); // 30 days max opacity
         // Do not create point if it is the overlay
         if (trajectory[i].time != tmst) {
 
@@ -650,9 +651,9 @@ export default {
 
           pointFeature.setStyle(new ol.style.Style({
             image: new ol.style.Circle({
-              radius: 6 * opacity,
+              radius: 3 * opacity,
               fill: new ol.style.Fill({ color: 'rgba(0, 153, 255, ' + opacity + ')' }),
-              stroke: new ol.style.Stroke({ color: '#fff', width: 2 * opacity }),
+              stroke: new ol.style.Stroke({ color: '#fff', width: 1 * opacity }),
             }),
           }));
           pointFeatures.push(pointFeature);
@@ -669,12 +670,25 @@ export default {
           geometry: new ol.geom.LineString([coords3857[i], coords3857[i + 1]])
         });
 
-        lineFeature.setStyle(new ol.style.Style({
-          stroke: new ol.style.Stroke({
-            color: 'rgba(0, 122, 255, ' + opacity + ')', // Blue with opacity
-            width: 3 * opacity,
-          }),
-        }));
+        // If is in the past
+        if (timeDiff < 0) {
+          lineFeature.setStyle(new ol.style.Style({
+            stroke: new ol.style.Stroke({
+              color: 'rgba(0, 122, 255, ' + opacity + ')', // Blue with opacity
+              width: 3 * opacity,
+            }),
+          }));
+        }
+        // If it is in the future
+        else {
+          lineFeature.setStyle(new ol.style.Style({
+            stroke: new ol.style.Stroke({
+              color: 'rgba(0, 122, 255, ' + opacity + ')', // Blue with opacity
+              width: 0.77 * opacity,
+              lineDash: [10, 10], // Dash of 10px and gap of 5px
+            }),
+          }));
+        }
         lineFeatures.push(lineFeature);
 
 
@@ -686,6 +700,7 @@ export default {
       let olTrajectoryLayer = new ol.layer.Vector({
         source: new ol.source.Vector({
           features: [...lineFeatures, ...pointFeatures], // Add line and points
+          //features: [...lineFeatures], // Add line // TODO IF THIS LINE IS USED, REMOVE THE LINES TO CREATE POINTS
         }),
       });
       olTrajectoryLayer.set('name', 'drifterTrajectory_' + deployment_id); // Set name for easy identification
