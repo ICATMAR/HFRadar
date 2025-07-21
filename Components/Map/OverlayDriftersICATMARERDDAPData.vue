@@ -639,7 +639,7 @@ export default {
         // Set style with opacity based on time difference
         let timeDiff = new Date(trajectory[i].time).getTime() - tmstGetTime;
         //let opacity = timeDiff < 1000 * 60 * 60 ? 1 : timeDiff < 1000 * 60 * 60 * 24 ? 0.8 : timeDiff < 1000 * 60 * 60 * 24 * 7 ? 0.6 : 0.4;
-        let opacity = Math.max(1 - Math.abs(timeDiff) / (1000 * 60 * 60 * 24 * 30), 0.15); // 30 days max opacity
+        let opacity = Math.max(1 - Math.abs(timeDiff) / (1000 * 60 * 60 * 24 * 5), 0.15); // 5 days max opacity
         // Do not create point if it is the overlay
         if (trajectory[i].time != tmst) {
 
