@@ -258,6 +258,8 @@ export default {
           this.getTrajectoryFrom(deployment_id).then(() => {
             // Add trajectory to map
             this.addTrajectoryToMap(deployment_id);
+            // Update content as the currents were estimated with the trajectories
+            this.updateContent(window.GUIManager.currentTmst);
           });
         } else
           // Add the layer to the map
