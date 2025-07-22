@@ -47,9 +47,9 @@
 
             <!-- Button show / hide 3D widget-->
             <div class="button-container">
-              <button v-show="!platforms[deployment_id].hide3Dwidget" class="more-data-button hide3Dwidget"
+              <button v-show="!platforms[deployment_id].hide3Dwidget" class="more-data-button narrow-button-text"
                 @click="platforms[deployment_id].hide3Dwidget = true">Hide 3D</button>
-              <button v-show="platforms[deployment_id].hide3Dwidget" class="more-data-button hide3Dwidget"
+              <button v-show="platforms[deployment_id].hide3Dwidget" class="more-data-button narrow-button-text"
                 @click="platforms[deployment_id].hide3Dwidget = false">Show 3D</button>
             </div>
 
@@ -79,6 +79,15 @@
             </div>
 
             <!-- Show trajectory -->
+            <!-- Button show trajectory only -->
+            <div class="button-container">
+              <button v-show="!platforms[deployment_id].showTrajectoryOnly" class="more-data-button narrow-button-text"
+                @click="() => { platforms[deployment_id].showTrajectoryOnly = true; ERDDAPIconClicked(deployment_id); }">Show
+                trajectory only</button>
+              <button v-show="platforms[deployment_id].showTrajectoryOnly" class="more-data-button narrow-button-text"
+                @click="() => { platforms[deployment_id].showTrajectoryOnly = false; ERDDAPIconClicked(deployment_id); }">Hide
+                trajectory</button>
+            </div>
             <!-- Go to date -->
 
             <!-- Extra data -->
@@ -258,7 +267,9 @@ export default {
         } else
           // Add the layer to the map
           this.map.addLayer(this.platforms[deployment_id].olTrajectoryLayer);
-      } else if (!this.platformsData[deployment_id].showInfo) {
+      }
+      // Remove trajectory if panel is hidden and if showTrajectoryOnly is false
+      else if (!this.platformsData[deployment_id].showInfo && !this.platforms[deployment_id].showTrajectoryOnly) {
         // Remove trajectory from map
         // Find layers with trajectory on the map and remove them
         let layersToRemove = [];
@@ -577,7 +588,7 @@ export default {
 
       // Create vue object
       if (this.platformsData[deployment_id] == undefined) {
-        this.platformsData[deployment_id] = { "hasData": false, "showInfo": false, "isLoading": false };
+        this.platformsData[deployment_id] = { "hasData": false, "showInfo": false, "isLoading": false, "showTrajectoryOnly": false };
         this.platforms[deployment_id].coord3857 = ol.proj.fromLonLat([this.platforms[deployment_id].location[0], this.platforms[deployment_id].location[1]]);
       }
 
@@ -615,18 +626,6 @@ export default {
     // Add trajectory to map
     addTrajectoryToMap(deployment_id, numPoints) {
       let trajectory = this.platforms[deployment_id].trajectory;
-      // Remove all trajectories from map
-      // Find layers with trajectory on the map and remove them
-      let layersToRemove = [];
-      this.map.getLayers().forEach(layer => {
-        if (layer.get('name').includes('drifterTrajectory')) {
-          layersToRemove.push(layer);
-        }
-      });
-      // Remove layers
-      layersToRemove.forEach(layer => {
-        this.map.removeLayer(layer);
-      });
 
       // Do not reuse already created trajectory layer as opacity changes with time
       //if (this.platforms[deployment_id].olTrajectoryLayer != undefined)
@@ -923,7 +922,7 @@ a {
   text-align: center;
 }
 
-.hide3Dwidget {
+.narrow-button-text {
   font-size: small;
   height: 14px;
 }
