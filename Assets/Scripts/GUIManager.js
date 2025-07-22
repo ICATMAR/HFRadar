@@ -51,23 +51,23 @@ class GUIManager {
   // Memory allocation
   tempArray = [undefined, undefined];
 
-  constructor(){
+  constructor() {
     // HASH - URL configuration
     // Get configuration from window location hash
     // Time <TIME=2024-02-14T11:00:00.000Z>
     let tmst = window.location.getHashValue('TIME');
-    if (tmst == undefined){
+    if (tmst == undefined) {
       this.activeSync = true;
-    } 
+    }
     this.setNewTmst(tmst);
     window.location.isInternalChange = false;
-    
+
     // Map View <VIEW=long,lat,zoom>
     this.mapView = window.location.getHashValue('VIEW');
 
     // Radials <RADIALS=BEGU,CREU,AREN,PBCN...>
     this.radials = window.location.getHashValue('RADIALS');
-    if (this.radials != undefined){
+    if (this.radials != undefined) {
       // Show radials if defined on URL at start
       this.isAdvancedInterface = true;
       this.widgetHFRadars.isVisible = true;
@@ -92,7 +92,7 @@ class GUIManager {
       else {
         // Check if timestamp changed
         let tmst = window.location.getHashValue('TIME');
-        if (tmst != this.currentTmst){
+        if (tmst != this.currentTmst) {
           this.setNewTmst(tmst);
           // Check if event.newURL and event.oldURL have different time
           let oldTmst = window.location.getHashValue("TIME", event.oldURL);
@@ -102,17 +102,17 @@ class GUIManager {
         }
         // Check if map view changed
         let mapView = window.location.getHashValue('VIEW');
-        if (mapView != undefined){
-          if (mapView != this.mapView){
+        if (mapView != undefined) {
+          if (mapView != this.mapView) {
             this.setMapView(mapView);
             window.eventBus.emit('GUIManager_URLViewChanged', this.mapView);
           }
         }
         // Radials changed
         let radials = window.location.getHashValue('RADIALS');
-        if (this.radials != radials){
+        if (this.radials != radials) {
           // No radials
-          if (radials == undefined){
+          if (radials == undefined) {
             this.radials = undefined;
             // User deleted radials parameter -> turn to normal interface and show currents?
             // For sure hide radials
@@ -124,19 +124,19 @@ class GUIManager {
             window.eventBus.emit('GUIManager_URLRadialsChanged', radials);
           }
         }
-        
+
       }
-      window.location.isInternalChange = false;      
+      window.location.isInternalChange = false;
     };
     // New HFRadar data
-    window.eventBus.on('HFRadarDataLoaded', (tmst) =>{
+    window.eventBus.on('HFRadarDataLoaded', (tmst) => {
       if (tmst != undefined)
         this.selectedDateChanged(tmst);
       // If latestDate is bigger than current date, add TIME to hash
-      if (window.DataManager.latestDataTmst != this.currentTmst){
+      if (window.DataManager.latestDataTmst != this.currentTmst) {
         // Show TIME hash
         window.location.setHashValue('TIME', this.currentTmst);
-      } 
+      }
       // If we are in the latest date and activeSync is on
       else {
         if (this.activeSync && !this.activeSyncLoopOn) {
@@ -145,7 +145,7 @@ class GUIManager {
       }
     });
     // Selected date changed (slider moves or drag and drop files)
-    window.eventBus.on('DataStreamsBar_SelectedDateChanged', (tmst) =>{
+    window.eventBus.on('DataStreamsBar_SelectedDateChanged', (tmst) => {
       this.selectedDateChanged(tmst);
     });
 
@@ -168,7 +168,7 @@ class GUIManager {
     // Radials
     // Radials all on/off
     window.eventBus.on("WidgetHFRadars_VisibilityChanged", areVisible => {
-      if (!areVisible){
+      if (!areVisible) {
         // Remove hash
         // GUIManager is updated in the other vue component (WidgetHFRadars)
         window.location.removeHash('RADIALS');
@@ -189,7 +189,7 @@ class GUIManager {
     // Mouse events
     // Mouse move in map
     window.eventBus.on('Map_mouseMove', screenPosCoords => this.mouseMoveInMap(screenPosCoords));
-    
+
 
 
   }
@@ -199,27 +199,27 @@ class GUIManager {
   // INTERNAL
 
   // TIMESTAMP TMST
-  setNewTmst(tmst){
+  setNewTmst(tmst) {
     let d = new Date(tmst);
     let isInvalid = isNaN(d.getTime());
 
     // Invalid date, 
-    if (isInvalid){
+    if (isInvalid) {
       if (tmst != undefined)
         console.warn('Invalid timestamp on URL, please use ISO standard i.e., TIME=2024-02-12T05:00:00.000Z');
-    } 
+    }
     // Outside of range
     else {
       let latestTmst = window.DataManager.latestDataTmst || new Date().toISOString();
-      
+
       let latestDate = new Date(latestTmst);
       if (d < this.firstDate || d > latestDate) console.warn('Timestamp outside of range (before April 2023 or after current time now');
       // Set to last or first tmst
-      if (d < this.firstDate){
+      if (d < this.firstDate) {
         tmst = this.firstDate.toISOString();
-      } 
+      }
       // Last date
-      else if (d >= latestDate){
+      else if (d >= latestDate) {
         tmst = latestDate.toISOString();
       }
     }
@@ -229,7 +229,7 @@ class GUIManager {
       let now = new Date();
       let str = now.toISOString();
       let nowISODate = str.substring(0, 14) + '00:00.000Z';
-      
+
       if (tmst == undefined)
         this.currentTmst = window.DataManager.latestDataTmst || nowISODate;
       else
@@ -241,36 +241,36 @@ class GUIManager {
     }
 
     // If we are in the latest data value, remove hash
-    if (this.currentTmst == window.DataManager.latestDataTmst){
+    if (this.currentTmst == window.DataManager.latestDataTmst) {
       window.location.removeHash('TIME');
     } else {
       window.location.setHashValue('TIME', this.currentTmst);
     }
-    
+
   }
 
   // MAP
   // Input is a string
-  setMapView(values){
+  setMapView(values) {
     let itemsIn = values.split(",");
     // Three values must be provided
-    if (itemsIn.length == 3){
+    if (itemsIn.length == 3) {
       let isAnyNaN = itemsIn.some(el => isNaN(parseFloat(el)));
       if (!isAnyNaN)
         this.mapView = values;
     }
-      
+
     window.location.setHashValue('VIEW', this.mapView);
   }
 
 
   // RADAR
   // Updates radar visibility variable according to hash string
-  updateWidgetHFRadarAccordingToHash(radialsStr){
+  updateWidgetHFRadarAccordingToHash(radialsStr) {
     let rStr = radialsStr.toLowerCase();
     let radialsNames = rStr.split(",");
-    Object.keys(this.widgetHFRadars.radarsVisible).forEach( rName => {
-      if (radialsNames.includes(rName.toLowerCase())){
+    Object.keys(this.widgetHFRadars.radarsVisible).forEach(rName => {
+      if (radialsNames.includes(rName.toLowerCase())) {
         this.widgetHFRadars.radarsVisible[rName] = true;
       } else
         this.widgetHFRadars.radarsVisible[rName] = false;
@@ -278,16 +278,16 @@ class GUIManager {
   };
 
   // Generate string according to radar variables
-  setHashValueAccordingToWidgetHFRadar(){
+  setHashValueAccordingToWidgetHFRadar() {
     let str = '';
-    Object.keys(this.widgetHFRadars.radarsVisible).forEach( rName => {
+    Object.keys(this.widgetHFRadars.radarsVisible).forEach(rName => {
       if (this.widgetHFRadars.radarsVisible[rName]) {
         str += rName + ",";
       }
     });
-    str = str.substring(0, str.length-1); // Remove extra comma
+    str = str.substring(0, str.length - 1); // Remove extra comma
     // If all radars are deactivated
-    if (str == ''){
+    if (str == '') {
       this.radials = undefined;
       window.location.removeHash("RADIALS");
     } else {
@@ -300,30 +300,30 @@ class GUIManager {
 
   // TMST
   // Selected date changes
-  selectedDateChanged(tmst){
+  selectedDateChanged(tmst) {
     // Set current timestamp
     this.currentTmst = tmst;
     // Get radars on that date
     this.currentRadars = window.DataManager.getRadarsDataOn(this.currentTmst);
     // Set URL config
     // If we are in the latest data value, remove hash
-    if (this.currentTmst == window.DataManager.latestDataTmst){
+    if (this.currentTmst == window.DataManager.latestDataTmst) {
       window.location.removeHash('TIME');
-    }else
+    } else
       window.location.setHashValue('TIME', this.currentTmst);
   }
 
 
   // AUTO UPDATE - Active sync
-  activeSyncRadarData(){
-    if (this.activeSync == false){
-      if (this.activeSyncLoopOn == false){debugger;}// Trying to stop a loop that was already stop (double initialization of loop)
+  activeSyncRadarData() {
+    if (this.activeSync == false) {
+      if (this.activeSyncLoopOn == false) { debugger; }// Trying to stop a loop that was already stop (double initialization of loop)
       return
     }
-    let minDiff = (new Date().getTime() - new Date(window.DataManager.latestDataTmst).getTime()) / (1000*60);
+    let minDiff = (new Date().getTime() - new Date(window.DataManager.latestDataTmst).getTime()) / (1000 * 60);
 
     let latestDate = new Date(window.DataManager.latestDataTmst);
-    
+
     let startDate;
     // Recent file exists but maybe needs to be updated
     if (minDiff < this.minCouldFileChanged)
@@ -333,17 +333,17 @@ class GUIManager {
       startDate = new Date(latestDate.setUTCHours(latestDate.getUTCHours() + 1)); // Add one hour to the latest hour
     let startTmst = startDate.toISOString();
 
-    if (minDiff > this.minToCallFromLastData || minDiff < this.minCouldFileChanged){
+    if (minDiff > this.minToCallFromLastData || minDiff < this.minCouldFileChanged) {
       // Force reload
       // But not the first time when opening the app
-      if (this.firstReloadDone == undefined){
+      if (this.firstReloadDone == undefined) {
         this.firstReloadDone = true;
       } else {
         // Force reload (FileManager uses this.activeSync to know if the urls need to be re-requested)
         console.log("Active sync - Requesting new files")
         // Load data
         window.DataManager.loadStaticFilesRepository(startTmst, new Date().toISOString(), ['tuv']).then(hfRadar => {
-          if (hfRadar != undefined){
+          if (hfRadar != undefined) {
             window.eventBus.emit('HFRadarDataLoaded', window.DataManager.latestDataTmst);
           }
           // Load wave files (and radials if required)
@@ -357,11 +357,11 @@ class GUIManager {
       }
 
       // Loop - Set timeout
-      if (this.activeSync){
+      if (this.activeSync) {
         this.activeSyncLoopOn = true;
         setTimeout(() => this.activeSyncRadarData(), this.minBetweenCalls * 60 * 1000);
       } else {
-        if (this.activeSyncLoopOn == false){
+        if (this.activeSyncLoopOn == false) {
           debugger;
           // Trying to stop a loop that was already stop (double initialization of loop)
         }
@@ -372,28 +372,28 @@ class GUIManager {
 
 
   // Mouse is moving in map
-  mouseMoveInMap(screenPosCoords){
+  mouseMoveInMap(screenPosCoords) {
     //debugger;
     // Particles are visible and no point is selected
-    if (this.widgetCombinedRadars.isVisible && this.widgetCombinedRadars.areParticlesVisible && !this.isDataPointSelected){
+    if (this.widgetCombinedRadars.isVisible && this.widgetCombinedRadars.areParticlesVisible && !this.isDataPointSelected) {
       // Get combined radar
       let combinedRadar;
       let radars = this.currentRadars || window.DataManager.getRadarsDataOn(this.currentTmst);
-      if (radars.length != 0 ){
-        for (let i = 0; i < radars.length; i++){
+      if (radars.length != 0) {
+        for (let i = 0; i < radars.length; i++) {
           let HFRadar = radars[i];
-          if (HFRadar.constructor.name == 'CombinedRadars'){
+          if (HFRadar.constructor.name == 'CombinedRadars') {
             combinedRadar = HFRadar;
           }
         }
       }
       // Get value and send it
-      if (combinedRadar !== undefined){
+      if (combinedRadar !== undefined) {
         let value = this.tempArray;
         combinedRadar.getValueAtTmstLongLat(this.currentTmst, screenPosCoords[2], screenPosCoords[3], value);
 
         window.eventBus.emit('GUIManager_MouseMovingCurrentsValue', value);
-        
+
       }
     }
 
