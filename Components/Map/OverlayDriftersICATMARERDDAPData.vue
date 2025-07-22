@@ -3,8 +3,7 @@
   <div id="overlay-drifters-icatmar-erddap-data" ref="containerErddapInfo">
     <!-- Container -->
     <div v-for="(deployment_id, index) in Object.keys(platformsData)" :id="deployment_id" :ref="deployment_id"
-      class="ERDDAPContainer"
-      :class="[!isTooFar ? 'showOverlayMap' : 'hideOverlayMap']">
+      class="ERDDAPContainer" :class="[!isTooFar ? 'showOverlayMap' : 'hideOverlayMap']">
 
 
 
@@ -75,7 +74,7 @@
                 <template v-if="platforms[deployment_id]['drifter_type'].includes('SVP')">
                   at 15 m depth
                 </template>
-                 
+
               </span>
             </div>
 
@@ -153,13 +152,15 @@
 
 
       <!-- Platform icon -->
-      <img class="icon-str icon-medium icon-img panel-icon-right" @click="ERDDAPIconClicked(deployment_id)"
-        src='/HFRadar/Assets/Images/drifter.svg' v-if="platformsData[deployment_id].hasData"
-        :style="{ 'opacity': Object.keys(platformsData[deployment_id].data).includes('tmstTimeDiffStr') ? (platformsData[deployment_id].data.tmstTimeDiffStr.includes('hour') ? 0.5 : 0.1) : 1 }"
-        :title="Object.keys(platformsData[deployment_id].data).includes('tmstTimeDiffStr') ? 'Drifter, ' + platformsData[deployment_id].data.tmstTimeDiffStr : ''">
-      <!-- Indicator of ICATMAR -->
-      <div class="icon-marker-icatmar" v-if="platformsData[deployment_id].hasData"
-        :style="{ 'opacity': Object.keys(platformsData[deployment_id].data).includes('tmstTimeDiffStr') ? (platformsData[deployment_id].data.tmstTimeDiffStr.includes('hour') ? 0.5 : 0.25) : 1 }">
+      <div style="position: relative; display: flex">
+        <img class="icon-str icon-medium icon-img panel-icon-right" @click="ERDDAPIconClicked(deployment_id)"
+          src='/HFRadar/Assets/Images/drifter.svg' v-if="platformsData[deployment_id].hasData"
+          :style="{ 'opacity': Object.keys(platformsData[deployment_id].data).includes('tmstTimeDiffStr') ? (platformsData[deployment_id].data.tmstTimeDiffStr.includes('hour') ? 0.5 : 0.1) : 1 }"
+          :title="Object.keys(platformsData[deployment_id].data).includes('tmstTimeDiffStr') ? 'Drifter, ' + platformsData[deployment_id].data.tmstTimeDiffStr : ''">
+        <!-- Indicator of ICATMAR -->
+        <div class="icon-marker-icatmar" v-if="platformsData[deployment_id].hasData"
+          :style="{ 'opacity': Object.keys(platformsData[deployment_id].data).includes('tmstTimeDiffStr') ? (platformsData[deployment_id].data.tmstTimeDiffStr.includes('hour') ? 0.5 : 0.25) : 1 }">
+        </div>
       </div>
 
 

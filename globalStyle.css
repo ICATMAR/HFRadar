@@ -283,7 +283,8 @@ button:hover {
   border-radius: 50%;
   background: var(--red);
   border: solid 1px black;
-  translate: 9px -9px;
+  translate: 22px;
+  position: absolute;
 }
 
 

@@ -194,15 +194,17 @@
 
 
       <!-- Platform icon -->
-      <img class="icon-str icon-medium icon-img panel-icon-right" @click="ERDDAPIconClicked(platformNumber)"
-        src='/HFRadar/Assets/Images/argo.svg' v-if="platformsData[platformNumber].hasData"
-        :style="{ 'opacity': Object.keys(platformsData[platformNumber].data).includes('tmstTimeDiffStr') ? (platformsData[platformNumber].data.tmstTimeDiffStr.includes('hour') ? 0.5 : 0.1) : 1 }"
-        :title="Object.keys(platformsData[platformNumber].data).includes('tmstTimeDiffStr') ? 'Argo float, ' + platformsData[platformNumber].data.tmstTimeDiffStr : ''">
-      <!-- Indicator of ICATMAR -->
+      <div style="position: relative; display: flex">
+        <img class="icon-str icon-medium icon-img panel-icon-right" @click="ERDDAPIconClicked(platformNumber)"
+          src='/HFRadar/Assets/Images/argo.svg' v-if="platformsData[platformNumber].hasData"
+          :style="{ 'opacity': Object.keys(platformsData[platformNumber].data).includes('tmstTimeDiffStr') ? (platformsData[platformNumber].data.tmstTimeDiffStr.includes('hour') ? 0.5 : 0.1) : 1 }"
+          :title="Object.keys(platformsData[platformNumber].data).includes('tmstTimeDiffStr') ? 'Argo float, ' + platformsData[platformNumber].data.tmstTimeDiffStr : ''">
+        <!-- Indicator of ICATMAR -->
         <div class="icon-marker-icatmar"
           v-if="platformsData[platformNumber].hasData && platforms[platformNumber].pi_name == 'Emilio GARCýA-LADONA'"
           :style="{ 'opacity': Object.keys(platformsData[platformNumber].data).includes('tmstTimeDiffStr') ? (platformsData[platformNumber].data.tmstTimeDiffStr.includes('hour') ? 0.5 : 0.25) : 1 }">
         </div>
+      </div>
 
 
     </div>
