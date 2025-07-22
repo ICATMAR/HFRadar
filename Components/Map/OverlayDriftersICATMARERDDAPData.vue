@@ -4,7 +4,7 @@
     <!-- Container -->
     <div v-for="(deployment_id, index) in Object.keys(platformsData)" :id="deployment_id" :ref="deployment_id"
       class="ERDDAPContainer"
-      :class="[!isTooFar && isAdvancedInterfaceOnOff && isExternalObsVisible ? 'showOverlayMap' : 'hideOverlayMap']">
+      :class="[!isTooFar ? 'showOverlayMap' : 'hideOverlayMap']">
 
 
 
@@ -184,7 +184,6 @@ export default {
   name: 'overlay-drifters-icatmar-erddap-data',
   created() { },
   mounted() {
-
     // EVENTS
     // HFRadarLoaded
     window.eventBus.on('HFRadarDataLoaded', tmst => {
@@ -197,32 +196,20 @@ export default {
     window.eventBus.on('GUIManager_URLDateChanged', this.selectedDateChanged);
     // User clicked on Active sync and turned it on
     window.eventBus.on('TopRightCanvas_ActiveSyncClickedAndOn', this.selectedDateChanged);
-    // Advanced interface
-    window.eventBus.on("AdvancedInterfaceOnOff", state => {
-      this.isAdvancedInterfaceOnOff = state;
-      // Get ERDDAP sites and load data
-      if (this.once == undefined && state == true) {
-        this.once = true;
-        this.selectedDateChanged(window.GUIManager.currentTmst);
-      }
-    });
-    // External observations visible
-    window.eventBus.on("WidgetMapOptions_ExternalObsVisibilityChanged", state => {
-      this.isExternalObsVisible = state;
-    });
+
+    this.selectedDateChanged(window.GUIManager.currentTmst);
+
   },
   data() {
     return {
       proxyURL: 'https://api.icatmar.cat/proxy/',//"http://localhost:3000/proxy",
-      isExternalObsVisible: false,
-      isAdvancedInterfaceOnOff: false,
       isTooFar: false,
       queryPlatformsURL: "https://erddap.icatmar.cat/erddap/tabledap/socat_data_drifters_ICATMAR.jsonlKVP" +
         "?{parameters}" +
         "&time>={startDate}&time<={endDate}&longitude>={longMin}&longitude<={longMax}&latitude>={latMin}&latitude<={latMax}" +
         "&distinct()",
       //bbox: [0, 9, 38, 44.5], // long, lat
-      //DEBUGGING LINE FOR GALICIA'S DRIFTERS, PLEASE UNCOMMENT
+      //DEBUGGING LINE FOR GALICIA'S DRIFTERS, PLEASE UNCOMMENT?
       bbox: [-15, 6, 35, 46], // long, lat
       queryTrajectoryURL: 'https://erddap.icatmar.cat/erddap/tabledap/socat_data_drifters_ICATMAR.jsonlKVP' +
         '?time,latitude,longitude,temperature' +
@@ -282,7 +269,7 @@ export default {
     },
     // INTERNAL
     selectedDateChanged: function (tmst) {
-      if (tmst == undefined || this.once == undefined)
+      if (tmst == undefined)
         return;
 
       // Get day
@@ -827,10 +814,12 @@ export default {
 
     // Calculate bearing in degrees https://www.movable-type.co.uk/scripts/latlong.html
     calculateBearing(startP, endP) {
+      // deg2rad
+      let deg2rad = Math.PI / 180;
       // Calculate bearing in degrees
-      let y = Math.sin(endP.longitude - startP.longitude) * Math.cos(endP.latitude);
-      let x = Math.cos(startP.latitude) * Math.sin(endP.latitude) -
-        Math.sin(startP.latitude) * Math.cos(endP.latitude) * Math.cos(endP.longitude - startP.longitude);
+      let y = Math.sin(endP.longitude * deg2rad - startP.longitude * deg2rad) * Math.cos(endP.latitude * deg2rad);
+      let x = Math.cos(startP.latitude * deg2rad) * Math.sin(endP.latitude * deg2rad) -
+        Math.sin(startP.latitude * deg2rad) * Math.cos(endP.latitude * deg2rad) * Math.cos(endP.longitude * deg2rad - startP.longitude * deg2rad);
       let bearing = Math.atan2(y, x) * (180 / Math.PI); // Convert to degrees
       return (bearing + 360) % 360; // Normalize to 0-360 degrees
     },
