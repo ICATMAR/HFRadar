@@ -72,7 +72,10 @@
                 <span class="fa"
                   :style="{ transform: 'rotate(' + (platformsData[deployment_id].data['estDirection'] - 45) + 'deg)' }">&#xf124;
                 </span>
-                 at 15 m depth
+                <template v-if="platforms[deployment_id]['drifter_type'].includes('SVP')">
+                  at 15 m depth
+                </template>
+                 
               </span>
             </div>
 
