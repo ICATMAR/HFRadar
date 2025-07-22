@@ -5,188 +5,189 @@
     <div v-for="(deployment_id, index) in Object.keys(platformsData)" :id="deployment_id" :ref="deployment_id"
       :key="deployment_id" class="ERDDAPContainer">
 
-      <!-- Hide / show depending on zoom level -->
-      <div :class="[!isTooFar ? 'showOverlayMap' : 'hideOverlayMap']">
+      
 
 
 
-        <!-- Platform panel -->
-        <Transition>
-          <div class="platformPanel"
-            v-if="platformsData[deployment_id].showInfo && platformsData[deployment_id].hasData">
-            <!-- Site -->
-            <div class="platformTitle">
-              <div v-show="platformsData[deployment_id].isLoading" class="lds-ring">
-                <div></div>
-                <div></div>
-                <div></div>
-                <div></div>
-              </div>
-              <span><strong>{{ platforms[deployment_id]['drifter_type'] }} Drifter</strong></span>
-              <a href="https://erddap.icatmar.cat/erddap/index.html" target="_blank" rel="noopener noreferrer"
-                class="icon-str">i</a>
+      <!-- Platform panel -->
+       <!-- Hide / show depending on zoom level -->
+      <Transition>
+        <div class="platformPanel" v-if="platformsData[deployment_id].showInfo && platformsData[deployment_id].hasData" :class="[!isTooFar ? 'showOverlayMap' : 'hideOverlayMap']">
+          <!-- Site -->
+          <div class="platformTitle">
+            <div v-show="platformsData[deployment_id].isLoading" class="lds-ring">
+              <div></div>
+              <div></div>
+              <div></div>
+              <div></div>
             </div>
+            <span><strong>{{ platforms[deployment_id]['drifter_type'] }} Drifter</strong></span>
+            <a href="https://erddap.icatmar.cat/erddap/index.html" target="_blank" rel="noopener noreferrer"
+              class="icon-str">i</a>
+          </div>
 
-            <!-- Platform data -->
-            <div v-if="platformsData[deployment_id].hasData">
+          <!-- Platform data -->
+          <div v-if="platformsData[deployment_id].hasData">
 
 
-              <!-- 3D widget -->
-              <Transition>
-                <div class="threed-widget"
-                  v-show="platforms[deployment_id].hide3Dwidget == undefined || !platforms[deployment_id].hide3Dwidget">
-                  <iframe title="Drifter" frameborder="0" allowfullscreen mozallowfullscreen="true"
-                    webkitallowfullscreen="true" allow="autoplay; fullscreen; xr-spatial-tracking" xr-spatial-tracking
-                    execution-while-out-of-viewport execution-while-not-rendered web-share :src="[platforms[deployment_id]['drifter_type'].includes('SVP') ? 'https://sketchfab.com/models/5a689f0b306e4f25b5d25dd6b80de7e9/embed' :
-                      platforms[deployment_id]['drifter_type'].includes('CODE') ? 'https://sketchfab.com/models/b7cb794037b446449cef213427231317/embed' :
-                        platforms[deployment_id]['drifter_type'].includes('STOKES') ? 'https://sketchfab.com/models/57a114fa7a8f466e828942bd7d32da5a/embed' :
-                          '']"> </iframe>
-                  <!-- <p style="font-size: 13px; font-weight: normal; margin: 5px; color: #4A4A4A;"> <a
+            <!-- 3D widget -->
+            <Transition>
+              <div class="threed-widget"
+                v-show="platforms[deployment_id].hide3Dwidget == undefined || !platforms[deployment_id].hide3Dwidget">
+                <iframe title="Drifter" frameborder="0" allowfullscreen mozallowfullscreen="true"
+                  webkitallowfullscreen="true" allow="autoplay; fullscreen; xr-spatial-tracking" xr-spatial-tracking
+                  execution-while-out-of-viewport execution-while-not-rendered web-share :src="[platforms[deployment_id]['drifter_type'].includes('SVP') ? 'https://sketchfab.com/models/5a689f0b306e4f25b5d25dd6b80de7e9/embed' :
+                    platforms[deployment_id]['drifter_type'].includes('CODE') ? 'https://sketchfab.com/models/b7cb794037b446449cef213427231317/embed' :
+                      platforms[deployment_id]['drifter_type'].includes('STOKES') ? 'https://sketchfab.com/models/57a114fa7a8f466e828942bd7d32da5a/embed' :
+                        '']"> </iframe>
+                <!-- <p style="font-size: 13px; font-weight: normal; margin: 5px; color: #4A4A4A;"> <a
                     href="https://sketchfab.com/3d-models/oceanographic-argo-profiling-float-439474c830744c95b48dc90cfff6fdbe?utm_medium=embed&utm_campaign=share-popup&utm_content=439474c830744c95b48dc90cfff6fdbe"
                     target="_blank" rel="nofollow" style="font-weight: bold; color: #1CAAD9;"> Oceanographic Argo
                     Profiling Float </a>
                 </p> -->
-                </div>
-              </Transition>
-
-              <!-- Button show / hide 3D widget-->
-              <div class="button-container">
-                <button v-show="!platforms[deployment_id].hide3Dwidget" class="more-data-button narrow-button-text"
-                  @click="platforms[deployment_id].hide3Dwidget = true">Hide 3D</button>
-                <button v-show="platforms[deployment_id].hide3Dwidget" class="more-data-button narrow-button-text"
-                  @click="platforms[deployment_id].hide3Dwidget = false">Show 3D</button>
               </div>
+            </Transition>
+
+            <!-- Button show / hide 3D widget-->
+            <div class="button-container">
+              <button v-show="!platforms[deployment_id].hide3Dwidget" class="more-data-button narrow-button-text"
+                @click="platforms[deployment_id].hide3Dwidget = true">Hide 3D</button>
+              <button v-show="platforms[deployment_id].hide3Dwidget" class="more-data-button narrow-button-text"
+                @click="platforms[deployment_id].hide3Dwidget = false">Show 3D</button>
+            </div>
 
 
-              <!-- Temperature -->
-              <div v-if="Object.keys(platformsData[deployment_id].data).includes('temperature')">
-                <span>
-                  <strong>Water temperature: </strong>
-                  {{ platformsData[deployment_id].data.temperature }} ºC
+            <!-- Temperature -->
+            <div v-if="Object.keys(platformsData[deployment_id].data).includes('temperature')">
+              <span>
+                <strong>Water temperature: </strong>
+                {{ platformsData[deployment_id].data.temperature }} ºC
+              </span>
+            </div>
+
+            <!-- Estimated currents -->
+            <div v-if="Object.keys(platformsData[deployment_id].data).includes('estVelocity')">
+              <span>
+                <strong>Estimated current: </strong>
+                {{ platformsData[deployment_id].data.estVelocity.toFixed(2) }} m/s,
+                {{ bearing2compassRose(platformsData[deployment_id].data['estDirection']) }}
+                <span class="fa"
+                  :style="{ transform: 'rotate(' + (platformsData[deployment_id].data['estDirection'] - 45) + 'deg)' }">&#xf124;
                 </span>
-              </div>
+                <template v-if="platforms[deployment_id]['drifter_type'].includes('SVP')">
+                  at 15 m depth
+                </template>
 
-              <!-- Estimated currents -->
-              <div v-if="Object.keys(platformsData[deployment_id].data).includes('estVelocity')">
-                <span>
-                  <strong>Estimated current: </strong>
-                  {{ platformsData[deployment_id].data.estVelocity.toFixed(2) }} m/s,
-                  {{ bearing2compassRose(platformsData[deployment_id].data['estDirection']) }}
-                  <span class="fa"
-                    :style="{ transform: 'rotate(' + (platformsData[deployment_id].data['estDirection'] - 45) + 'deg)' }">&#xf124;
+              </span>
+            </div>
+
+            <!-- Show trajectory -->
+            <!-- Button show trajectory only -->
+            <div class="button-container">
+              <button v-show="!platforms[deployment_id].showTrajectoryOnly" class="more-data-button narrow-button-text"
+                @click="() => { platforms[deployment_id].showTrajectoryOnly = true; ERDDAPIconClicked(deployment_id); }">Show
+                trajectory only</button>
+              <button v-show="platforms[deployment_id].showTrajectoryOnly" class="more-data-button narrow-button-text"
+                @click="() => { platforms[deployment_id].showTrajectoryOnly = false; ERDDAPIconClicked(deployment_id); }">Hide
+                trajectory</button>
+            </div>
+            <!-- Go to date -->
+
+            <!-- Extra data -->
+            <Transition>
+              <div v-if="platforms[deployment_id].showAllData">
+
+                <!-- Time difference from now -->
+                <div v-if="Object.keys(platformsData[deployment_id].data).includes('tmstTimeDiffStr')">
+                  <span>
+                    <strong>Collected </strong>
+                    {{ platformsData[deployment_id].data.tmstTimeDiffStr }}
                   </span>
-                  <template v-if="platforms[deployment_id]['drifter_type'].includes('SVP')">
-                    at 15 m depth
-                  </template>
-
-                </span>
-              </div>
-
-              <!-- Show trajectory -->
-              <!-- Button show trajectory only -->
-              <div class="button-container">
-                <button v-show="!platforms[deployment_id].showTrajectoryOnly"
-                  class="more-data-button narrow-button-text"
-                  @click="() => { platforms[deployment_id].showTrajectoryOnly = true; ERDDAPIconClicked(deployment_id); }">Show
-                  trajectory only</button>
-                <button v-show="platforms[deployment_id].showTrajectoryOnly" class="more-data-button narrow-button-text"
-                  @click="() => { platforms[deployment_id].showTrajectoryOnly = false; ERDDAPIconClicked(deployment_id); }">Hide
-                  trajectory</button>
-              </div>
-              <!-- Go to date -->
-
-              <!-- Extra data -->
-              <Transition>
-                <div v-if="platforms[deployment_id].showAllData">
-
-                  <!-- Time difference from now -->
-                  <div v-if="Object.keys(platformsData[deployment_id].data).includes('tmstTimeDiffStr')">
-                    <span>
-                      <strong>Collected </strong>
-                      {{ platformsData[deployment_id].data.tmstTimeDiffStr }}
-                    </span>
-                  </div>
-
-                  <!-- Institution -->
-                  <div v-if="Object.keys(platformsData[deployment_id].data).includes('institution')">
-                    <span>
-                      <strong title="institution">Institution: </strong>
-                      {{ platformsData[deployment_id].data['institution'] }}
-                    </span>
-                  </div>
-
-                  <!-- Project -->
-                  <div v-if="Object.keys(platformsData[deployment_id].data).includes('project')">
-                    <span>
-                      <strong title="project">Project: </strong>
-                      {{ platformsData[deployment_id].data['project'] }}
-                    </span>
-                  </div>
-
-                  <!-- Principal investigator -->
-                  <div v-if="Object.keys(platformsData[deployment_id].data).includes('pi_name')">
-                    <span>
-                      <strong>Principal investigator(s): </strong>
-                      {{ platformsData[deployment_id].data['pi_name'] }}
-                    </span>
-                  </div>
-
-                  <!-- Exercise (campanya) -->
-                  <div v-if="Object.keys(platformsData[deployment_id].data).includes('exercise')">
-                    <span>
-                      <strong>Exercise: </strong>
-                      {{ platformsData[deployment_id].data['exercise'] }}
-                    </span>
-                  </div>
-
-                  <!-- Deployment id-->
-                  <div v-if="Object.keys(platformsData[deployment_id].data).includes('deployment_id')">
-                    <span>
-                      <strong title="deployment_id / fileNumber">Deployment Id: </strong>
-                      {{ platformsData[deployment_id].data['deployment_id'] }}
-                    </span>
-                  </div>
-
-
                 </div>
-              </Transition>
 
-              <!-- Button showAllData ON OFF-->
-              <div class="button-container">
-                <button v-show="!platforms[deployment_id].showAllData" class="more-data-button"
-                  @click="platforms[deployment_id].showAllData = true">+</button>
-                <button v-show="platforms[deployment_id].showAllData" class="more-data-button"
-                  @click="platforms[deployment_id].showAllData = false">-</button>
+                <!-- Institution -->
+                <div v-if="Object.keys(platformsData[deployment_id].data).includes('institution')">
+                  <span>
+                    <strong title="institution">Institution: </strong>
+                    {{ platformsData[deployment_id].data['institution'] }}
+                  </span>
+                </div>
+
+                <!-- Project -->
+                <div v-if="Object.keys(platformsData[deployment_id].data).includes('project')">
+                  <span>
+                    <strong title="project">Project: </strong>
+                    {{ platformsData[deployment_id].data['project'] }}
+                  </span>
+                </div>
+
+                <!-- Principal investigator -->
+                <div v-if="Object.keys(platformsData[deployment_id].data).includes('pi_name')">
+                  <span>
+                    <strong>Principal investigator(s): </strong>
+                    {{ platformsData[deployment_id].data['pi_name'] }}
+                  </span>
+                </div>
+
+                <!-- Exercise (campanya) -->
+                <div v-if="Object.keys(platformsData[deployment_id].data).includes('exercise')">
+                  <span>
+                    <strong>Exercise: </strong>
+                    {{ platformsData[deployment_id].data['exercise'] }}
+                  </span>
+                </div>
+
+                <!-- Deployment id-->
+                <div v-if="Object.keys(platformsData[deployment_id].data).includes('deployment_id')">
+                  <span>
+                    <strong title="deployment_id / fileNumber">Deployment Id: </strong>
+                    {{ platformsData[deployment_id].data['deployment_id'] }}
+                  </span>
+                </div>
+
+
               </div>
+            </Transition>
 
+            <!-- Button showAllData ON OFF-->
+            <div class="button-container">
+              <button v-show="!platforms[deployment_id].showAllData" class="more-data-button"
+                @click="platforms[deployment_id].showAllData = true">+</button>
+              <button v-show="platforms[deployment_id].showAllData" class="more-data-button"
+                @click="platforms[deployment_id].showAllData = false">-</button>
             </div>
 
           </div>
-        </Transition>
+
+        </div>
+      </Transition>
 
 
-        <!-- Platform icon -->
-        <div style="position: relative; display: flex">
-          <img class="icon-str icon-medium icon-img panel-icon-right" @click="ERDDAPIconClicked(deployment_id)"
-            v-if="platformsData[deployment_id].hasData" :src="[platforms[deployment_id]['drifter_type'].includes('SVP') ? '/HFRadar/Assets/Images/svp.svg' :
-              platforms[deployment_id]['drifter_type'].includes('CODE') ? '/HFRadar/Assets/Images/code.svg' :
-                platforms[deployment_id]['drifter_type'].includes('ARGO') ? '/HFRadar/Assets/Images/argo.svg' :
-                  '/HFRadar/Assets/Images/drifter.svg']"
-            :style="{ 'opacity': Object.keys(platformsData[deployment_id].data).includes('tmstTimeDiffStr') ? (platformsData[deployment_id].data.tmstTimeDiffStr.includes('hour') ? 0.5 : 0.1) : 1 }"
-            :title="Object.keys(platformsData[deployment_id].data).includes('tmstTimeDiffStr') ? 'Drifter, ' + platformsData[deployment_id].data.tmstTimeDiffStr : ''">
-          <!-- Indicator of ICATMAR -->
-          <div class="icon-marker-icatmar" v-if="platformsData[deployment_id].hasData"
-            :style="{ 'opacity': Object.keys(platformsData[deployment_id].data).includes('tmstTimeDiffStr') ? (platformsData[deployment_id].data.tmstTimeDiffStr.includes('hour') ? 0.5 : 0.25) : 1 }">
-          </div>
+      <!-- Platform icon -->
+       <!-- Hide / show depending on zoom level -->
+      <div style="position: relative; display: flex" :class="[!isTooFar ? 'showOverlayMap' : 'hideOverlayMap']">
+        <img class="icon-str icon-medium icon-img panel-icon-right" @click="ERDDAPIconClicked(deployment_id)"
+          v-if="platformsData[deployment_id].hasData" :src="[platforms[deployment_id]['drifter_type'].includes('SVP') ? '/HFRadar/Assets/Images/svp.svg' :
+            platforms[deployment_id]['drifter_type'].includes('CODE') ? '/HFRadar/Assets/Images/code.svg' :
+              platforms[deployment_id]['drifter_type'].includes('ARGO') ? '/HFRadar/Assets/Images/argo.svg' :
+                '/HFRadar/Assets/Images/drifter.svg']"
+          :style="{ 'opacity': Object.keys(platformsData[deployment_id].data).includes('tmstTimeDiffStr') ? (platformsData[deployment_id].data.tmstTimeDiffStr.includes('hour') ? 0.5 : 0.1) : 1 }"
+          :title="Object.keys(platformsData[deployment_id].data).includes('tmstTimeDiffStr') ? 'Drifter, ' + platformsData[deployment_id].data.tmstTimeDiffStr : ''">
+        <!-- Indicator of ICATMAR -->
+        <div class="icon-marker-icatmar" v-if="platformsData[deployment_id].hasData"
+          :style="{ 'opacity': Object.keys(platformsData[deployment_id].data).includes('tmstTimeDiffStr') ? (platformsData[deployment_id].data.tmstTimeDiffStr.includes('hour') ? 0.5 : 0.25) : 1 }">
         </div>
       </div>
 
+
+      
       <!-- Marker when far away -->
+       <!-- Hide / show depending on zoom level -->
       <div :class="[isTooFar ? 'showOverlayMap' : 'hideOverlayMap']">
         <!-- Marker -->
-        <div class="map-marker"
-        v-if="platformsData[deployment_id].hasData"
-        :style="{ 'opacity': Object.keys(platformsData[deployment_id].data).includes('tmstTimeDiffStr') ? (platformsData[deployment_id].data.tmstTimeDiffStr.includes('hour') ? 0.75 : 0.33) : 1 }"></div>
+        <div class="map-marker" v-if="platformsData[deployment_id].hasData"
+          :style="{ 'opacity': Object.keys(platformsData[deployment_id].data).includes('tmstTimeDiffStr') ? (platformsData[deployment_id].data.tmstTimeDiffStr.includes('hour') ? 0.75 : 0.33) : 1 }">
+        </div>
       </div>
 
     </div>
