@@ -198,6 +198,11 @@
         src='/HFRadar/Assets/Images/argo.svg' v-if="platformsData[platformNumber].hasData"
         :style="{ 'opacity': Object.keys(platformsData[platformNumber].data).includes('tmstTimeDiffStr') ? (platformsData[platformNumber].data.tmstTimeDiffStr.includes('hour') ? 0.5 : 0.1) : 1 }"
         :title="Object.keys(platformsData[platformNumber].data).includes('tmstTimeDiffStr') ? 'Argo float, ' + platformsData[platformNumber].data.tmstTimeDiffStr : ''">
+      <!-- Indicator of ICATMAR -->
+        <div class="icon-marker-icatmar"
+          v-if="platformsData[platformNumber].hasData && platforms[platformNumber].pi_name == 'Emilio GARCýA-LADONA'"
+          :style="{ 'opacity': Object.keys(platformsData[platformNumber].data).includes('tmstTimeDiffStr') ? (platformsData[platformNumber].data.tmstTimeDiffStr.includes('hour') ? 0.5 : 0.25) : 1 }">
+        </div>
 
 
     </div>
@@ -580,6 +585,7 @@ export default {
             "platform_number": jsRow.platform_number,
             "float_serial_no": jsRow.float_serial_no,
             "project_name": jsRow.project_name,
+            "pi_name": jsRow.pi_name,
             "location": [jsRow.longitude, jsRow.latitude], // Initializing location?
             "data": {},
           }
