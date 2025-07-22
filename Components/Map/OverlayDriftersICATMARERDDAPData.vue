@@ -154,7 +154,10 @@
       <!-- Platform icon -->
       <div style="position: relative; display: flex">
         <img class="icon-str icon-medium icon-img panel-icon-right" @click="ERDDAPIconClicked(deployment_id)"
-          src='/HFRadar/Assets/Images/drifter.svg' v-if="platformsData[deployment_id].hasData"
+          v-if="platformsData[deployment_id].hasData" :src="[platforms[deployment_id]['drifter_type'].includes('SVP') ? '/HFRadar/Assets/Images/svp.svg' :
+            platforms[deployment_id]['drifter_type'].includes('CODE') ? '/HFRadar/Assets/Images/code.svg' :
+              platforms[deployment_id]['drifter_type'].includes('ARGO') ? '/HFRadar/Assets/Images/argo.svg' :
+                '/HFRadar/Assets/Images/drifter.svg']"
           :style="{ 'opacity': Object.keys(platformsData[deployment_id].data).includes('tmstTimeDiffStr') ? (platformsData[deployment_id].data.tmstTimeDiffStr.includes('hour') ? 0.5 : 0.1) : 1 }"
           :title="Object.keys(platformsData[deployment_id].data).includes('tmstTimeDiffStr') ? 'Drifter, ' + platformsData[deployment_id].data.tmstTimeDiffStr : ''">
         <!-- Indicator of ICATMAR -->
