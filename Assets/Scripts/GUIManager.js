@@ -44,6 +44,9 @@ class GUIManager {
 
   // Auto-update
   activeSync = false;
+  lastUpdate = new Date(); // First page load. Maybe this does not apply to elements that are loaded on demand by the user.
+  minMinutesBetweenUpdates = 0.5; // Minimum time between updates
+
   minBetweenCalls = 5;
   minToCallFromLastData = 50; // July update: T+00:50 first try, then at T+01:03 and at T+01:16.
   minCouldFileChanged = 30; // Some files are generated and then updated later when new data comes.
@@ -191,6 +194,10 @@ class GUIManager {
     window.eventBus.on('Map_mouseMove', screenPosCoords => this.mouseMoveInMap(screenPosCoords));
 
 
+    // Update loop
+    setInterval(() => {
+      this.update();
+    }, 1000);
 
   }
 
@@ -313,6 +320,17 @@ class GUIManager {
       window.location.setHashValue('TIME', this.currentTmst);
   }
 
+
+  // UPDATE
+  update() {
+    let minutesBetweenUpdates = (new Date().getTime() - this.lastUpdate.getTime()) / (1000 * 60); // in minutes
+    if (minutesBetweenUpdates >= this.minMinutesBetweenUpdates) {
+      // Update lastUpdate
+      this.lastUpdate = new Date();
+      // Emit event
+      window.eventBus.emit('GUIManager_Update', this.currentTmst);
+    }
+  }
 
   // AUTO UPDATE - Active sync
   activeSyncRadarData() {

@@ -5,14 +5,15 @@
     <div v-for="(deployment_id, index) in Object.keys(platformsData)" :id="deployment_id" :ref="deployment_id"
       :key="deployment_id" class="ERDDAPContainer">
 
-      
+
 
 
 
       <!-- Platform panel -->
-       <!-- Hide / show depending on zoom level -->
+      <!-- Hide / show depending on zoom level -->
       <Transition>
-        <div class="platformPanel" v-if="platformsData[deployment_id].showInfo && platformsData[deployment_id].hasData" :class="[!isTooFar ? 'showOverlayMap' : 'hideOverlayMap']">
+        <div class="platformPanel" v-if="platformsData[deployment_id].showInfo && platformsData[deployment_id].hasData"
+          :class="[!isTooFar ? 'showOverlayMap' : 'hideOverlayMap']">
           <!-- Site -->
           <div class="platformTitle">
             <div v-show="platformsData[deployment_id].isLoading" class="lds-ring">
@@ -164,7 +165,7 @@
 
 
       <!-- Platform icon -->
-       <!-- Hide / show depending on zoom level -->
+      <!-- Hide / show depending on zoom level -->
       <div style="position: relative; display: flex" :class="[!isTooFar ? 'showOverlayMap' : 'hideOverlayMap']">
         <img class="icon-str icon-medium icon-img panel-icon-right" @click="ERDDAPIconClicked(deployment_id)"
           v-if="platformsData[deployment_id].hasData" :src="[platforms[deployment_id]['drifter_type'].includes('SVP') ? '/HFRadar/Assets/Images/svp.svg' :
@@ -180,9 +181,9 @@
       </div>
 
 
-      
+
       <!-- Marker when far away -->
-       <!-- Hide / show depending on zoom level -->
+      <!-- Hide / show depending on zoom level -->
       <div :class="[isTooFar ? 'showOverlayMap' : 'hideOverlayMap']">
         <!-- Marker -->
         <div class="map-marker" v-if="platformsData[deployment_id].hasData"
@@ -228,6 +229,16 @@ export default {
     window.eventBus.on('GUIManager_URLDateChanged', this.selectedDateChanged);
     // User clicked on Active sync and turned it on
     window.eventBus.on('TopRightCanvas_ActiveSyncClickedAndOn', this.selectedDateChanged);
+    // Auto-update loop
+    window.eventBus.on('GUIManager_Update', (tmst) => {
+      // Get day
+      let dayTmst = tmst.substring(0, 10);
+      // Remove previously requested data
+      this.requestedDailyData[dayTmst] = undefined;
+      console.log("Reloading ICATMAR ERDDAP drifters data for " + dayTmst);
+      // Reload data
+      this.selectedDateChanged(tmst);
+    });
 
     this.selectedDateChanged(window.GUIManager.currentTmst);
 
@@ -260,7 +271,6 @@ export default {
       ],
       platforms: {},
       platformsData: {},
-      requestStatus: {}, // Stores requested timestamps
       requestedDailyData: {}, // Stores promises and results of promises by daily tmst
       requestedTrajectories: {}, // Stores requested trajectories by platform number
     }
@@ -447,35 +457,48 @@ export default {
 
     // Get the trajectory from a platform number
     getTrajectoryFrom(deployment_id) {
+      // Trajectory already requested
       if (this.requestedTrajectories[deployment_id] != undefined) {
-        return new Promise((resolve, reject) => {
-          resolve(this.requestedTrajectories[deployment_id]);
-        });
+        // Was it requested recently?
+        let minutesSinceLastRequest = (new Date() - this.requestedTrajectories[deployment_id].reqTime) / (1000 * 60);
+        // Use GUIManager's minimum time between updates
+        if (minutesSinceLastRequest < window.GUIManager.minMinutesBetweenUpdates) {
+          // Return the promise
+          return new Promise((resolve, reject) => {
+            resolve(this.requestedTrajectories[deployment_id].result);
+          });
+        }
+        // Otherwise continue with script
+        else {
+          console.log("Reloading trajectory for " + deployment_id + " after " + minutesSinceLastRequest.toFixed(2) + " minutes");
+        }
       }
       // Load the data
-      else {
-        // Set platform to loading
-        this.platformsData[deployment_id].isLoading = true;
-        // Prepare url
-        let url = this.queryTrajectoryURL.replace('{deployment_id}', deployment_id);
+      // Set platform to loading
+      this.platformsData[deployment_id].isLoading = true;
+      // Prepare url
+      let url = this.queryTrajectoryURL.replace('{deployment_id}', deployment_id);
 
-        console.log(url.replace('jsonlKVP', 'htmlTable'));
-        const encodedUrl = encodeURIComponent(url);
-        let proxyFullURL = this.proxyURL + '?url=' + encodedUrl;
-        let promise = this.getDataFromURL(proxyFullURL)
-          .then(res => {
-            // Store response
-            this.requestedTrajectories[deployment_id] = res;
-            // Platform trajectory loaded
-            this.platformsData[deployment_id].isLoading = false;
-            // Parse raw text and structure data
-            this.parseTrajectoryRawTextAndStructureData(res, deployment_id);
-            // Estimate current direction and velocity from points
-            this.estimateCurrentFromPoints(deployment_id);
-          });
-        this.requestedTrajectories[deployment_id] = promise;
-        return promise;
-      }
+      console.log(url.replace('jsonlKVP', 'htmlTable'));
+      const encodedUrl = encodeURIComponent(url);
+      let proxyFullURL = this.proxyURL + '?url=' + encodedUrl;
+      let promise = this.getDataFromURL(proxyFullURL)
+        .then(res => {
+          // Store response
+          this.requestedTrajectories[deployment_id] = {
+            result: res,
+            reqTime: new Date()
+          };
+          // Platform trajectory loaded
+          this.platformsData[deployment_id].isLoading = false;
+          // Parse raw text and structure data
+          this.parseTrajectoryRawTextAndStructureData(res, deployment_id);
+          // Estimate current direction and velocity from points
+          this.estimateCurrentFromPoints(deployment_id);
+        });
+      this.requestedTrajectories[deployment_id] = promise;
+      return promise;
+
 
     },
 
