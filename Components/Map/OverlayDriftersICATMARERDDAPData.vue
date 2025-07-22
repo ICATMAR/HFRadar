@@ -271,17 +271,7 @@ export default {
       // Remove trajectory if panel is hidden and if showTrajectoryOnly is false
       else if (!this.platformsData[deployment_id].showInfo && !this.platforms[deployment_id].showTrajectoryOnly) {
         // Remove trajectory from map
-        // Find layers with trajectory on the map and remove them
-        let layersToRemove = [];
-        this.map.getLayers().forEach(layer => {
-          if (layer.get('name').includes('drifterTrajectory_' + deployment_id)) {
-            layersToRemove.push(layer);
-          }
-        });
-        // Remove layers
-        layersToRemove.forEach(layer => {
-          this.map.removeLayer(layer);
-        });
+        this.removeTrajectoryFromMap(deployment_id);
       }
 
     },
@@ -359,6 +349,15 @@ export default {
               }
             });
 
+          }
+
+          // Outside visible time span
+          else if (timeDiff > visibleTimeSpan) {
+            // Remove track layer from map (when users click on show trajectory only button and then change to a far away date)
+            // Reset
+            platform.showInfo = false;
+            platform.showTrajectoryOnly = false; 
+            this.removeTrajectoryFromMap(deployment_id);
           }
 
         });
@@ -725,7 +724,22 @@ export default {
       this.map.addLayer(olTrajectoryLayer);
       this.platforms[deployment_id].olTrajectoryLayer = olTrajectoryLayer;
     },
-
+    // Remove trajectory from map
+    removeTrajectoryFromMap(deployment_id) {
+      // Find layers with trajectory on the map and remove them
+      if (this.map) {
+        let layersToRemove = [];
+        this.map.getLayers().forEach(layer => {
+          if (layer.get('name').includes('drifterTrajectory_' + deployment_id)) {
+            layersToRemove.push(layer);
+          }
+        });
+        // Remove layers
+        layersToRemove.forEach(layer => {
+          this.map.removeLayer(layer);
+        });
+      }
+    },
 
 
 
