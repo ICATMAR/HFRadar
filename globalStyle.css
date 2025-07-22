@@ -287,6 +287,14 @@ button:hover {
   position: absolute;
 }
 
+.map-marker {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--lightBlue);
+  border: solid 1px black;
+}
+
 
 
 /* WIDGET */
