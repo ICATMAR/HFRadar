@@ -3,14 +3,14 @@
   <div id="overlay-noaa-erddap-data" ref="containerErddapInfo">
     <!-- Container -->
     <div v-for="(platformCode, index) in Object.keys(platformsData)" :id="platformCode" :ref="platformCode"
-      class="ERDDAPContainer"
-      :class="[!isTooFar && isAdvancedInterfaceOnOff && isExternalObsVisible ? 'showOverlayMap' : 'hideOverlayMap']">
+      class="ERDDAPContainer">
 
 
 
       <!-- Platform panel -->
       <Transition>
-        <div class="platformPanel" v-if="platformsData[platformCode].showInfo && platformsData[platformCode].hasData">
+        <div class="platformPanel" v-if="platformsData[platformCode].showInfo && platformsData[platformCode].hasData"
+          :class="[!isTooFar ? 'showOverlayMap' : 'hideOverlayMap']">
           <!-- Site -->
           <div class="platformTitle">
             <div v-show="platformsData[platformCode].isLoading" class="lds-ring">
@@ -155,10 +155,20 @@
 
 
       <!-- Platform icon -->
-      <img class="icon-str icon-medium icon-img panel-icon-right" @click="ERDDAPIconClicked(platformCode)" :src="[platforms[platformCode]['type'].includes('SHIP') ? '/HFRadar/Assets/Images/boat.svg' :
-        platforms[platformCode]['type'].includes('DRIFTING') ? '/HFRadar/Assets/Images/drifter.svg' :
-          platforms[platformCode]['type'].includes('GLIDERS') ? '/HFRadar/Assets/Images/argo.svg' :
-            '/HFRadar/Assets/Images/buoy.svg']" v-show="platformsData[platformCode].hasData">
+      <img class="icon-str icon-medium icon-img panel-icon-right" title="Source: NOAA"
+        :class="[!isTooFar ? 'showOverlayMap' : 'hideOverlayMap']" @click="ERDDAPIconClicked(platformCode)" :src="[platforms[platformCode]['type'].includes('SHIP') ? '/HFRadar/Assets/Images/boat.svg' :
+          platforms[platformCode]['type'].includes('DRIFTING') ? '/HFRadar/Assets/Images/drifter.svg' :
+            platforms[platformCode]['type'].includes('GLIDERS') ? '/HFRadar/Assets/Images/argo.svg' :
+              '/HFRadar/Assets/Images/buoy.svg']" v-show="platformsData[platformCode].hasData">
+
+      <!-- Marker when far away -->
+      <!-- Hide / show depending on zoom level -->
+      <div :class="[isTooFar ? 'showOverlayMap' : 'hideOverlayMap']">
+        <!-- Marker -->
+        <div class="map-marker" title="Source: NOAA" v-if="platformsData[platformCode].hasData"
+          :style="{ 'opacity': Object.keys(platformsData[platformCode].data).includes('tmstTimeDiffStr') ? (platformsData[platformCode].data.tmstTimeDiffStr.includes('hour') ? 0.75 : 0.33) : 1 }">
+        </div>
+      </div>
 
 
     </div>
@@ -202,31 +212,19 @@ export default {
     window.eventBus.on('GUIManager_URLDateChanged', this.selectedDateChanged);
     // User clicked on Active sync and turned it on
     window.eventBus.on('TopRightCanvas_ActiveSyncClickedAndOn', this.selectedDateChanged);
-    // Advanced interface
-    window.eventBus.on("AdvancedInterfaceOnOff", state => {
-      this.isAdvancedInterfaceOnOff = state;
-      // Get ERDDAP sites and load data
-      if (this.once == undefined && state == true) {
-        this.once = true;
-        this.selectedDateChanged(window.GUIManager.currentTmst);
-      }
-    });
-    // External observations visible
-    window.eventBus.on("WidgetMapOptions_ExternalObsVisibilityChanged", state => {
-      this.isExternalObsVisible = state;
-    });
   },
   data() {
     return {
       proxyURL: 'https://api.icatmar.cat/proxy/',//"http://localhost:3000/proxy",
-      isExternalObsVisible: false,
-      isAdvancedInterfaceOnOff: false,
       isTooFar: false,
       queryPlatformsURL: "https://osmc.noaa.gov/erddap/tabledap/OSMC_flattened.jsonlKVP" +
         "?{parameters}" +
         "&time>={startDate}&time<={endDate}&longitude>={longMin}&longitude<={longMax}&latitude>={latMin}&latitude<={latMax}" +
         "&observation_depth<0.5",// + // Avoid subsurface data
       //'&platform_type="DRIFTING BUOYS"', // Restric to drifters
+      queryTrajectoryURL: 'https://osmc.noaa.gov/erddap/tabledap/OSMC_flattened.jsonlKVP' +
+        '?platform_code,platform_id,longitude,latitude,time' +
+        '&platform_code="{platformCode}"&time>={oldestDate}&distinct()',
       bbox: [0, 9, 38, 44.5], // long, lat
       parameters: [
         'platform_type',
@@ -265,17 +263,45 @@ export default {
       platforms: {},
       platformsData: {},
       requestStatus: {}, // Stores requested timestamps
-      requestedDailyData: {} // Stores promises and results of promises by daily tmst
+      requestedDailyData: {}, // Stores promises and results of promises by daily tmst
+      requestedTrajectories: {}, // Stores requested trajectories
     }
   },
   methods: {
     // USER ACTIONS
     ERDDAPIconClicked: function (platformCode) {
       this.platformsData[platformCode].showInfo = !this.platformsData[platformCode].showInfo;
+
+      // Show / hide trajectory
+      if (this.platformsData[platformCode].showInfo) {
+        // Show trajectory
+        if (this.platforms[platformCode].olTrajectoryLayer == undefined) {
+          // Load trajectory
+          this.getTrajectoryFrom(platformCode).then(() => {
+            // Add trajectory to map
+            this.addTrajectoryToMap(platformCode);
+          });
+        } else
+          // Add the layer to the map
+          this.map.addLayer(this.platforms[platformCode].olTrajectoryLayer);
+      } else if (!this.platformsData[platformCode].showInfo) {
+        // Remove trajectory from map
+        // Find layers with trajectory on the map and remove them
+        let layersToRemove = [];
+        this.map.getLayers().forEach(layer => {
+          if (layer.get('name').includes('noaaDrifterTrajectory_' + platformCode)) {
+            layersToRemove.push(layer);
+          }
+        });
+        // Remove layers
+        layersToRemove.forEach(layer => {
+          this.map.removeLayer(layer);
+        });
+      }
     },
     // INTERNAL
     selectedDateChanged: function (tmst) {
-      if (tmst == undefined || this.once == undefined)
+      if (tmst == undefined)
         return;
 
       // Get day
@@ -319,6 +345,15 @@ export default {
               if (platform.olLayer != undefined) {
                 platform.olLayer.setElement(this.$refs[platformCode]);
                 platform.olLayer.setPosition(platform.coord3857); // For some reason vue and the map element have to be redefined
+                // Opacity if it not in the closest time, and show when it sampled
+                if (closestTimeDiff > halfHourinMs) {
+                  // Show time difference from now in hours or days
+                  this.platformsData[platformCode].data.tmstTimeDiffStr = closestTimeDiff > 1000 * 60 * 60 * 24 ?
+                    Math.round(closestTimeDiff / (1000 * 60 * 60 * 24)) + ' days' :
+                    Math.round(closestTimeDiff / (1000 * 60 * 60)) + ' hours';
+                  this.platformsData[platformCode].data.tmstTimeDiffStr += isAhead ? ' ahead' : ' ago';
+                  this.platformsData[platformCode].data.tmstTimeDiffStr += ' from selected time';
+                }
               } else {
                 debugger;
               }
@@ -331,6 +366,18 @@ export default {
           }
 
         });
+
+        // Update trajectories points and opacities
+        if (platform.olTrajectoryLayer != undefined) {
+          // If layer is in map, update it
+          let ll = this.$parent.getMapLayer(platform.olTrajectoryLayer.get('name'));
+          if (ll != undefined) {
+            this.map.removeLayer(ll);
+            // Update trajectory layer
+            this.addTrajectoryToMap(platformCode);
+          }
+        }
+
       });
     },
 
@@ -378,9 +425,53 @@ export default {
             this.parseRawTextAndStructureData(res);
             // Map and vue data structure if required
             this.addPlatformsToMap();
+          })
+          .catch(e => {
+            debugger;
+            console.error("Error loading NOAA ERDDAP data: ", e);
+            // Set all platforms to not loading
+            Object.keys(this.platforms).forEach(platformCode => {
+              this.platformsData[platformCode].isLoading = false;
+            });
           });
         this.requestedDailyData[dayTmst] = promise;
         return promise
+      }
+
+    },
+
+    // Get the trajectory from a platform number
+    getTrajectoryFrom(platformCode) {
+      if (this.requestedTrajectories[platformCode] != undefined) {
+        return new Promise((resolve, reject) => {
+          resolve(this.requestedTrajectories[platformCode]);
+        });
+      }
+      // Load the data
+      else {
+        // Set platform to loading
+        this.platformsData[platformCode].isLoading = true;
+        // Prepare url
+        let url = this.queryTrajectoryURL.replace('{platformCode}', platformCode);
+        // Get oldest date
+        let oldestDate = new Date();
+        oldestDate.setUTCFullYear(oldestDate.getUTCFullYear() - 0.5); // 0.5 year ago
+        url = url.replace('{oldestDate}', oldestDate.toISOString());
+
+        console.log(url.replace('jsonlKVP', 'htmlTable'));
+        const encodedUrl = encodeURIComponent(url);
+        let proxyFullURL = this.proxyURL + '?url=' + encodedUrl;
+        let promise = this.getDataFromURL(proxyFullURL)
+          .then(res => {
+            // Store response
+            this.requestedTrajectories[platformCode] = res;
+            // Platform trajectory loaded
+            this.platformsData[platformCode].isLoading = false;
+            // Parse raw text and structure data
+            this.parseTrajectoryRawTextAndStructureData(res, platformCode);
+          });
+        this.requestedTrajectories[platformCode] = promise;
+        return promise;
       }
 
     },
@@ -458,6 +549,35 @@ export default {
       });
       //console.log(platforms);
     },
+
+    // Parse trajectories raw text
+    parseTrajectoryRawTextAndStructureData(res, platformCode) {
+      let rows = res.split('\n');
+      rows.pop(); // Delete empty
+
+      this.platforms[platformCode].trajectory = [];
+      // Iterate data rows
+      rows.forEach(row => {
+        let jsRow = JSON.parse(row);
+        // Remove nulls
+        Object.keys(jsRow).forEach((key) => {
+          if (jsRow[key] === null) {
+            delete jsRow[key];
+          }
+        });
+        // Define trajectory
+        this.platforms[platformCode].trajectory.push({
+          "time": jsRow.time,
+          "latitude": jsRow.latitude,
+          "longitude": jsRow.longitude,
+        });
+      });
+
+      return this.platforms[platformCode].trajectory;
+    },
+
+
+
     // Update vue and map
     addPlatformsToMap() {
       // Iterate platforms to create vue objects and map layers
@@ -511,6 +631,107 @@ export default {
       });
     },
 
+
+    // Add trajectory to map
+    addTrajectoryToMap(platformCode, numPoints) {
+      let trajectory = this.platforms[platformCode].trajectory;
+      // Remove all trajectories from map
+      // Find layers with trajectory on the map and remove them
+      let layersToRemove = [];
+      this.map.getLayers().forEach(layer => {
+        if (layer.get('name').includes('noaaDrifterTrajectory')) {
+          layersToRemove.push(layer);
+        }
+      });
+      // Remove layers
+      layersToRemove.forEach(layer => {
+        this.map.removeLayer(layer);
+      });
+
+      // Do not reuse already created trajectory layer as opacity changes with time
+      //if (this.platforms[platformCode].olTrajectoryLayer != undefined)
+
+      // No data in trajectory
+      if (trajectory == undefined || trajectory.length == 0) {
+        debugger;
+        console.warn("No trajectory for platform " + platformCode);
+        return;
+      }
+
+      // Get map
+      if (this.map == undefined) {
+        this.map = this.$parent.map;
+      }
+
+      // Line and point features
+      let coords3857 = trajectory.map(p => ol.proj.fromLonLat([p.longitude, p.latitude]));
+      numPoints = numPoints == undefined ? coords3857.length : numPoints;
+      let lineFeatures = [];
+      let pointFeatures = [];
+      // Overlay time
+      let tmst = this.platformsData[platformCode].data.time;
+      let tmstGetTime = new Date(tmst).getTime();
+      // Create line segments and points with different opacity
+      for (let i = 0; i < numPoints; i++) {
+
+        // Set style with opacity based on time difference
+        let timeDiff = Math.abs(new Date(trajectory[i].time).getTime() - tmstGetTime);
+        //let opacity = timeDiff < 1000 * 60 * 60 ? 1 : timeDiff < 1000 * 60 * 60 * 24 ? 0.8 : timeDiff < 1000 * 60 * 60 * 24 * 7 ? 0.6 : 0.4;
+        let opacity = Math.max(1 - timeDiff / (1000 * 60 * 60 * 24 * 30), 0.15); // 30 days max opacity
+        // Do not create point if it is the overlay
+        if (trajectory[i].time != tmst) {
+
+          // Create point features
+          let pointFeature = new ol.Feature({
+            geometry: new ol.geom.Point(coords3857[i]),
+            data: trajectory[i], // Store metadata for click interaction
+          });
+
+          pointFeature.setStyle(new ol.style.Style({
+            image: new ol.style.Circle({
+              radius: 6 * opacity,
+              fill: new ol.style.Fill({ color: 'rgba(0, 153, 255, ' + opacity + ')' }),
+              stroke: new ol.style.Stroke({ color: '#fff', width: 2 * opacity }),
+            }),
+          }));
+          pointFeatures.push(pointFeature);
+        }
+
+
+        // Create line segment feature
+        if (i == coords3857.length - 1) {
+          // Last point, no line segment
+          continue;
+        }
+        // Create line segment feature
+        let lineFeature = new ol.Feature({
+          geometry: new ol.geom.LineString([coords3857[i], coords3857[i + 1]])
+        });
+
+        lineFeature.setStyle(new ol.style.Style({
+          stroke: new ol.style.Stroke({
+            color: 'rgba(0, 122, 255, ' + opacity + ')', // Blue with opacity
+            width: 3 * opacity,
+          }),
+        }));
+        lineFeatures.push(lineFeature);
+
+
+      }
+
+
+
+      // Create vector layer for trajectory
+      let olTrajectoryLayer = new ol.layer.Vector({
+        source: new ol.source.Vector({
+          features: [...lineFeatures, ...pointFeatures], // Add line and points
+        }),
+      });
+      olTrajectoryLayer.set('name', 'noaaDrifterTrajectory_' + platformCode); // Set name for easy identification
+      // Add the layer to the map
+      this.map.addLayer(olTrajectoryLayer);
+      this.platforms[platformCode].olTrajectoryLayer = olTrajectoryLayer;
+    },
 
 
     // Bearing to direction
