@@ -3,15 +3,14 @@
   <div id="overlay-argo-erddap-data" ref="containerErddapInfo">
     <!-- Container -->
     <div v-for="(platformNumber, index) in Object.keys(platformsData)" :id="platformNumber" :ref="platformNumber"
-      class="ERDDAPContainer"
-      :class="[!isTooFar && isAdvancedInterfaceOnOff && isExternalObsVisible ? 'showOverlayMap' : 'hideOverlayMap']">
+      class="ERDDAPContainer">
 
 
 
       <!-- Platform panel -->
       <Transition>
         <div class="platformPanel"
-          v-if="platformsData[platformNumber].showInfo && platformsData[platformNumber].hasData">
+          v-if="platformsData[platformNumber].showInfo && platformsData[platformNumber].hasData" :class="[!isTooFar ? 'showOverlayMap' : 'hideOverlayMap']">
           <!-- Site -->
           <div class="platformTitle">
             <div v-show="platformsData[platformNumber].isLoading" class="lds-ring">
@@ -194,7 +193,7 @@
 
 
       <!-- Platform icon -->
-      <div style="position: relative; display: flex">
+      <div style="position: relative; display: flex" :class="[!isTooFar ? 'showOverlayMap' : 'hideOverlayMap']">
         <img class="icon-str icon-medium icon-img panel-icon-right" @click="ERDDAPIconClicked(platformNumber)"
           src='/HFRadar/Assets/Images/argo.svg' v-if="platformsData[platformNumber].hasData"
           :style="{ 'opacity': Object.keys(platformsData[platformNumber].data).includes('tmstTimeDiffStr') ? (platformsData[platformNumber].data.tmstTimeDiffStr.includes('hour') ? 0.5 : 0.1) : 1 }"
@@ -203,6 +202,17 @@
         <div class="icon-marker-icatmar"
           v-if="platformsData[platformNumber].hasData && platforms[platformNumber].pi_name == 'Emilio GARCýA-LADONA'"
           :style="{ 'opacity': Object.keys(platformsData[platformNumber].data).includes('tmstTimeDiffStr') ? (platformsData[platformNumber].data.tmstTimeDiffStr.includes('hour') ? 0.5 : 0.25) : 1 }">
+        </div>
+      </div>
+
+
+
+      <!-- Marker when far away -->
+      <!-- Hide / show depending on zoom level -->
+      <div :class="[isTooFar ? 'showOverlayMap' : 'hideOverlayMap']">
+        <!-- Marker -->
+        <div class="map-marker" v-if="platformsData[platformNumber].hasData"
+          :style="{ 'opacity': Object.keys(platformsData[platformNumber].data).includes('tmstTimeDiffStr') ? (platformsData[platformNumber].data.tmstTimeDiffStr.includes('hour') ? 0.75 : 0.33) : 1 }">
         </div>
       </div>
 
@@ -244,25 +254,10 @@ export default {
     window.eventBus.on('GUIManager_URLDateChanged', this.selectedDateChanged);
     // User clicked on Active sync and turned it on
     window.eventBus.on('TopRightCanvas_ActiveSyncClickedAndOn', this.selectedDateChanged);
-    // Advanced interface
-    window.eventBus.on("AdvancedInterfaceOnOff", state => {
-      this.isAdvancedInterfaceOnOff = state;
-      // Get ERDDAP sites and load data
-      if (this.once == undefined && state == true) {
-        this.once = true;
-        this.selectedDateChanged(window.GUIManager.currentTmst);
-      }
-    });
-    // External observations visible
-    window.eventBus.on("WidgetMapOptions_ExternalObsVisibilityChanged", state => {
-      this.isExternalObsVisible = state;
-    });
   },
   data() {
     return {
       proxyURL: 'https://api.icatmar.cat/proxy/',//"http://localhost:3000/proxy",
-      isExternalObsVisible: false,
-      isAdvancedInterfaceOnOff: false,
       isTooFar: false,
       queryPlatformsURL: "https://erddap.ifremer.fr/erddap/tabledap/ArgoFloats.jsonlKVP" +
         "?{parameters}" +
@@ -348,7 +343,7 @@ export default {
     },
     // INTERNAL
     selectedDateChanged: function (tmst) {
-      if (tmst == undefined || this.once == undefined)
+      if (tmst == undefined)
         return;
 
       // Get day
