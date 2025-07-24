@@ -160,6 +160,7 @@ export default {
   data () {
     return {
       once: false,
+      proxyURL: 'https://api.icatmar.cat/proxy/',
       isHidden: true,
       isAdvancedInterfaceOnOff: false,
       isExternalObsVisible: false,
@@ -303,8 +304,11 @@ export default {
           url = url.replace('{{eHour}}', String(eDate.getUTCHours()).padStart(2,'0'));
           url = url.replace('{{eMinute}}', String(eDate.getUTCMinutes()).padStart(2,'0'));
           
+          // Proxy
+          let proxyFullURL = this.proxyURL + '?url=' + encodeURIComponent(url);
+
           // Fetch
-          fetch(url).then(res => res.json()).then(r => {
+          fetch(proxyFullURL).then(res => res.json()).then(r => {
             this.parseAPIResult(r, buoyName);
             // Update buoys content once loaded
             this.updateContent(buoyName, tmst);
