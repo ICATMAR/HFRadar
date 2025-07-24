@@ -167,7 +167,7 @@
       <img class="icon-str icon-medium icon-img panel-icon-right" title="Source: NOAA"
         v-if="platformsData[platformCode].hasData"
         :class="[!isTooFar ? 'showOverlayMap' : 'hideOverlayMap', { 'icon-selected': platformsData[platformCode].showInfo }]"
-        Pregunta-li a ChatGPT @click="ERDDAPIconClicked(platformCode)" :src="[platforms[platformCode]['type'].includes('SHIP') ? '/HFRadar/Assets/Images/boat.svg' :
+        Pregunta-li a ChatGPT @click="ERDDAPIconClicked(platformCode)" :src="[platforms[platformCode]['type'].includes('SHIP') ||platforms[platformCode]['type'].includes('VOSCLIM') ? '/HFRadar/Assets/Images/boat.svg' :
           platforms[platformCode]['type'].includes('DRIFTING') ? '/HFRadar/Assets/Images/drifter.svg' :
             platforms[platformCode]['type'].includes('GLIDERS') ? '/HFRadar/Assets/Images/argo.svg' :
               '/HFRadar/Assets/Images/buoy.svg']"
