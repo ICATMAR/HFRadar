@@ -5,14 +5,15 @@
     <div v-for="(deployment_id, index) in Object.keys(platformsData)" :id="deployment_id" :ref="deployment_id"
       :key="deployment_id" class="ERDDAPContainer">
 
-      
+
 
 
 
       <!-- Platform panel -->
-       <!-- Hide / show depending on zoom level -->
+      <!-- Hide / show depending on zoom level -->
       <Transition>
-        <div class="platformPanel" v-if="platformsData[deployment_id].showInfo && platformsData[deployment_id].hasData" :class="[!isTooFar ? 'showOverlayMap' : 'hideOverlayMap']">
+        <div class="platformPanel" v-if="platformsData[deployment_id].showInfo && platformsData[deployment_id].hasData"
+          :class="[!isTooFar ? 'showOverlayMap' : 'hideOverlayMap']">
           <!-- Site -->
           <div class="platformTitle">
             <div v-show="platformsData[deployment_id].isLoading" class="lds-ring">
@@ -164,15 +165,16 @@
 
 
       <!-- Platform icon -->
-       <!-- Hide / show depending on zoom level -->
+      <!-- Hide / show depending on zoom level -->
       <div style="position: relative; display: flex" :class="[!isTooFar ? 'showOverlayMap' : 'hideOverlayMap']">
-        <img class="icon-str icon-medium icon-img panel-icon-right" @click="ERDDAPIconClicked(deployment_id)"
+        <img class="icon-str icon-medium icon-img panel-icon-right clickable" @click="ERDDAPIconClicked(deployment_id)"
           v-if="platformsData[deployment_id].hasData" :src="[platforms[deployment_id]['drifter_type'].includes('SVP') ? '/HFRadar/Assets/Images/svp.svg' :
             platforms[deployment_id]['drifter_type'].includes('CODE') ? '/HFRadar/Assets/Images/code.svg' :
               platforms[deployment_id]['drifter_type'].includes('ARGO') ? '/HFRadar/Assets/Images/argo.svg' :
                 '/HFRadar/Assets/Images/drifter.svg']"
+          :class="{ 'icon-selected': platformsData[deployment_id].showInfo || platforms[deployment_id].showTrajectoryOnly }"
           :style="{ 'opacity': Object.keys(platformsData[deployment_id].data).includes('tmstTimeDiffStr') ? (platformsData[deployment_id].data.tmstTimeDiffStr.includes('hour') ? 0.5 : 0.1) : 1 }"
-          :title="Object.keys(platformsData[deployment_id].data).includes('tmstTimeDiffStr') ? platformsData[deployment_id].data.tmstTimeDiffStr + 'Source: ICATMAR': 'Source: ICATMAR'">
+          :title="Object.keys(platformsData[deployment_id].data).includes('tmstTimeDiffStr') ? platformsData[deployment_id].data.tmstTimeDiffStr + '. Source: ICATMAR' : 'Source: ICATMAR'">
         <!-- Indicator of ICATMAR -->
         <div class="icon-marker-icatmar" v-if="platformsData[deployment_id].hasData"
           :style="{ 'opacity': Object.keys(platformsData[deployment_id].data).includes('tmstTimeDiffStr') ? (platformsData[deployment_id].data.tmstTimeDiffStr.includes('hour') ? 0.5 : 0.25) : 1 }">
@@ -180,9 +182,9 @@
       </div>
 
 
-      
+
       <!-- Marker when far away -->
-       <!-- Hide / show depending on zoom level -->
+      <!-- Hide / show depending on zoom level -->
       <div :class="[isTooFar ? 'showOverlayMap' : 'hideOverlayMap']">
         <!-- Marker -->
         <div class="map-marker" v-if="platformsData[deployment_id].hasData"

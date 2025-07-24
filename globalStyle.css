@@ -258,6 +258,10 @@ button:hover {
 .icon-selected {
   background-color: var(--red);
 }
+.icon-selected:hover {
+  background: #CE5E56;
+  border: 2px solid #FFA9A3 !important;
+}
 
 .icon-big {
   width: 35px;
