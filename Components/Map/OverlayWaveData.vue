@@ -40,11 +40,18 @@
       
       <!-- Radar icon -->
       <!-- window.eventBus.emit('Map_ClickedHFRadar', closestRadar); -->
-      <img 
+      
+
+        <!-- Platform icon -->
+      <div style="position: relative; display: flex">
+        <img 
         class="icon-str icon-big icon-img radarIcon" 
         :class="[radarData[key].fileStatus == 0 ? 'iconNoFile' : radarData[key].fileStatus == 2 ? 'iconLoading' : '']" 
         @click="radarIconClicked(key)"
         src="/HFRadar/Assets/Images/radar.svg">
+        <!-- Indicator of ICATMAR -->
+        <div class="icon-marker-icatmar"></div>
+      </div>
 
     </div>
   </div>
