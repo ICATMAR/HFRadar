@@ -224,7 +224,7 @@ export default {
       //'&platform_type="DRIFTING BUOYS"', // Restric to drifters
       queryTrajectoryURL: 'https://osmc.noaa.gov/erddap/tabledap/OSMC_flattened.jsonlKVP' +
         '?platform_code,platform_id,longitude,latitude,time' +
-        '&platform_code="{platformCode}"&time>={oldestDate}&distinct()',
+        '&platform_code="{platformCode}"&time>={oldestDate}&distinct()&orderBy("time")',
       bbox: [0, 9, 38, 44.5], // long, lat
       parameters: [
         'platform_type',
@@ -455,7 +455,7 @@ export default {
         let url = this.queryTrajectoryURL.replace('{platformCode}', platformCode);
         // Get oldest date
         let oldestDate = new Date();
-        oldestDate.setUTCFullYear(oldestDate.getUTCFullYear() - 0.5); // 0.5 year ago
+        oldestDate.setUTCDate(oldestDate.getUTCDate() - 20); // 20 days ago
         url = url.replace('{oldestDate}', oldestDate.toISOString());
 
         console.log(url.replace('jsonlKVP', 'htmlTable'));
@@ -677,7 +677,7 @@ export default {
         // Set style with opacity based on time difference
         let timeDiff = Math.abs(new Date(trajectory[i].time).getTime() - tmstGetTime);
         //let opacity = timeDiff < 1000 * 60 * 60 ? 1 : timeDiff < 1000 * 60 * 60 * 24 ? 0.8 : timeDiff < 1000 * 60 * 60 * 24 * 7 ? 0.6 : 0.4;
-        let opacity = Math.max(1 - timeDiff / (1000 * 60 * 60 * 24 * 30), 0.15); // 30 days max opacity
+        let opacity = Math.max(1 - timeDiff / (1000 * 60 * 60 * 24 * 5), 0.15); // 5 days max opacity
         // Do not create point if it is the overlay
         if (trajectory[i].time != tmst) {
 
