@@ -172,7 +172,7 @@
               platforms[deployment_id]['drifter_type'].includes('ARGO') ? '/HFRadar/Assets/Images/argo.svg' :
                 '/HFRadar/Assets/Images/drifter.svg']"
           :style="{ 'opacity': Object.keys(platformsData[deployment_id].data).includes('tmstTimeDiffStr') ? (platformsData[deployment_id].data.tmstTimeDiffStr.includes('hour') ? 0.5 : 0.1) : 1 }"
-          :title="Object.keys(platformsData[deployment_id].data).includes('tmstTimeDiffStr') ? 'Drifter, ' + platformsData[deployment_id].data.tmstTimeDiffStr : ''">
+          :title="Object.keys(platformsData[deployment_id].data).includes('tmstTimeDiffStr') ? platformsData[deployment_id].data.tmstTimeDiffStr + 'Source: ICATMAR': 'Source: ICATMAR'">
         <!-- Indicator of ICATMAR -->
         <div class="icon-marker-icatmar" v-if="platformsData[deployment_id].hasData"
           :style="{ 'opacity': Object.keys(platformsData[deployment_id].data).includes('tmstTimeDiffStr') ? (platformsData[deployment_id].data.tmstTimeDiffStr.includes('hour') ? 0.5 : 0.25) : 1 }">
