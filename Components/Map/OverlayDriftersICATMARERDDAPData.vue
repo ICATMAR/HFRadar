@@ -282,7 +282,8 @@ export default {
             // Update content as the currents were estimated with the trajectories
             this.updateContent(window.GUIManager.currentTmst);
           });
-        } else
+        // Only add if the trajectory was not shown, otherwise it is trying to add the same layer when it already exists https://openlayers.org/en/v7.0.0/doc/errors/#58
+        } else if (!this.platforms[deployment_id].showTrajectoryOnly)
           // Add the layer to the map
           this.map.addLayer(this.platforms[deployment_id].olTrajectoryLayer);
       }
