@@ -255,6 +255,9 @@ button:hover {
   background-color: green;
 }
 
+.icon-selected {
+  background-color: var(--red);
+}
 
 .icon-big {
   width: 35px;

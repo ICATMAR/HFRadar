@@ -69,6 +69,15 @@
             <!-- Extra data -->
             <Transition>
               <div v-if="platforms[platformCode].showAllData">
+
+                <!-- Time difference from now -->
+                <div v-if="Object.keys(platformsData[platformCode].data).includes('tmstTimeDiffStr')">
+                  <span>
+                    <strong>Collected </strong>
+                    {{ platformsData[platformCode].data.tmstTimeDiffStr }}
+                  </span>
+                </div>
+
                 <!-- Sea water temperature -->
                 <div v-if="Object.keys(platformsData[platformCode].data).includes('sst')">
                   <span>
@@ -156,10 +165,14 @@
 
       <!-- Platform icon -->
       <img class="icon-str icon-medium icon-img panel-icon-right" title="Source: NOAA"
-        :class="[!isTooFar ? 'showOverlayMap' : 'hideOverlayMap']" @click="ERDDAPIconClicked(platformCode)" :src="[platforms[platformCode]['type'].includes('SHIP') ? '/HFRadar/Assets/Images/boat.svg' :
+        v-if="platformsData[platformCode].hasData"
+        :class="[!isTooFar ? 'showOverlayMap' : 'hideOverlayMap', { 'icon-selected': platformsData[platformCode].showInfo }]"
+        Pregunta-li a ChatGPT @click="ERDDAPIconClicked(platformCode)" :src="[platforms[platformCode]['type'].includes('SHIP') ? '/HFRadar/Assets/Images/boat.svg' :
           platforms[platformCode]['type'].includes('DRIFTING') ? '/HFRadar/Assets/Images/drifter.svg' :
             platforms[platformCode]['type'].includes('GLIDERS') ? '/HFRadar/Assets/Images/argo.svg' :
-              '/HFRadar/Assets/Images/buoy.svg']" v-show="platformsData[platformCode].hasData">
+              '/HFRadar/Assets/Images/buoy.svg']"
+        :style="{ 'opacity': Object.keys(platformsData[platformCode].data).includes('tmstTimeDiffStr') ? (platformsData[platformCode].data.tmstTimeDiffStr.includes('hour') ? 0.5 : 0.1) : 1 }"
+        :title="Object.keys(platformsData[platformCode].data).includes('tmstTimeDiffStr') ? 'Drifter, ' + platformsData[platformCode].data.tmstTimeDiffStr : ''">
 
       <!-- Marker when far away -->
       <!-- Hide / show depending on zoom level -->
@@ -278,6 +291,8 @@ export default {
         if (this.platforms[platformCode].olTrajectoryLayer == undefined) {
           // Load trajectory
           this.getTrajectoryFrom(platformCode).then(() => {
+            // Update content
+            this.updateContent(window.GUIManager.currentTmst);
             // Add trajectory to map
             this.addTrajectoryToMap(platformCode);
           });
@@ -323,11 +338,13 @@ export default {
         this.platformsData[platformCode].hasData = false;
         // Iterate tmst
         let halfHourinMs = 1000 * 60 * 29;
+        let visibleTimeSpan = 1000 * 60 * 60 * 24 * 11; // 11 days (11 ahead, 11 behind)
         let closestTimeDiff = 10e12;
         // Pick up closest data
         Object.keys(platform.data).forEach(dataTmst => {
           let timeDiff = Math.abs(new Date(dataTmst).getTime() - new Date(tmst).getTime());
-          if (timeDiff < halfHourinMs && timeDiff < closestTimeDiff) {
+          let isAhead = new Date(dataTmst).getTime() > new Date(tmst).getTime() > 0; // Is the data ahead of the current time?
+          if (timeDiff < visibleTimeSpan && timeDiff < closestTimeDiff) {
             closestTimeDiff = timeDiff;
             this.platformsData[platformCode].hasData = true;
             // Empty observed properties
@@ -691,6 +708,23 @@ export default {
             image: new ol.style.Circle({
               radius: 6 * opacity,
               fill: new ol.style.Fill({ color: 'rgba(0, 153, 255, ' + opacity + ')' }),
+              stroke: new ol.style.Stroke({ color: '#fff', width: 2 * opacity }),
+            }),
+          }));
+          pointFeatures.push(pointFeature);
+        }
+        // Point for current timestamp
+        else {
+          // Create point feature for current timestamp
+          let pointFeature = new ol.Feature({
+            geometry: new ol.geom.Point(coords3857[i]),
+            data: trajectory[i], // Store metadata for click interaction
+          });
+
+          pointFeature.setStyle(new ol.style.Style({
+            image: new ol.style.Circle({
+              radius: 8 * opacity,
+              fill: new ol.style.Fill({ color: 'rgba(255, 115, 105, ' + opacity + ')' }), // Red for current position
               stroke: new ol.style.Stroke({ color: '#fff', width: 2 * opacity }),
             }),
           }));
