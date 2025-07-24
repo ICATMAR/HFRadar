@@ -52,9 +52,9 @@
             <!-- Button show / hide 3D widget-->
             <div class="button-container">
               <button v-show="!platforms[deployment_id].hide3Dwidget" class="more-data-button narrow-button-text"
-                @click="platforms[deployment_id].hide3Dwidget = true">Hide 3D</button>
+                @click="platforms[deployment_id].hide3Dwidget = true">Hide 3D <span class="fa">&#xf1b2;</span></button>
               <button v-show="platforms[deployment_id].hide3Dwidget" class="more-data-button narrow-button-text"
-                @click="platforms[deployment_id].hide3Dwidget = false">Show 3D</button>
+                @click="platforms[deployment_id].hide3Dwidget = false">Show 3D <span class="fa">&#xf1b2;</span></button>
             </div>
 
 
@@ -87,10 +87,10 @@
             <div class="button-container">
               <button v-show="!platforms[deployment_id].showTrajectoryOnly" class="more-data-button narrow-button-text"
                 @click="() => { platforms[deployment_id].showTrajectoryOnly = true; ERDDAPIconClicked(deployment_id); }">Show
-                trajectory only</button>
+                trajectory only <span class="fa">&#xe51f;</span></button>
               <button v-show="platforms[deployment_id].showTrajectoryOnly" class="more-data-button narrow-button-text"
                 @click="() => { platforms[deployment_id].showTrajectoryOnly = false; ERDDAPIconClicked(deployment_id); }">Hide
-                trajectory</button>
+                trajectory <span class="fa">&#xf041;</span></button>
             </div>
             <!-- Go to date -->
 
@@ -103,6 +103,14 @@
                   <span>
                     <strong>Collected </strong>
                     {{ platformsData[deployment_id].data.tmstTimeDiffStr }}
+                  </span>
+                </div>
+
+                <!-- Institution -->
+                <div v-if="Object.keys(platformsData[deployment_id].data).includes('buoy_name')">
+                  <span>
+                    <strong>Buoy name: </strong>
+                    {{ platformsData[deployment_id].data['buoy_name'] }}
                   </span>
                 </div>
 
@@ -251,6 +259,7 @@ export default {
       parameters: [
         'deployment_id',
         'drifter_type',
+        'buoy_name',
         'institution',
         'project',
         'pi_name',
