@@ -291,7 +291,7 @@ export default {
             // Update content as the currents were estimated with the trajectories
             this.updateContent(window.GUIManager.currentTmst);
           });
-        // Only add if the trajectory was not shown, otherwise it is trying to add the same layer when it already exists https://openlayers.org/en/v7.0.0/doc/errors/#58
+          // Only add if the trajectory was not shown, otherwise it is trying to add the same layer when it already exists https://openlayers.org/en/v7.0.0/doc/errors/#58
         } else if (!this.platforms[deployment_id].showTrajectoryOnly)
           // Add the layer to the map
           this.map.addLayer(this.platforms[deployment_id].olTrajectoryLayer);
@@ -692,14 +692,26 @@ export default {
             geometry: new ol.geom.Point(coords3857[i]),
             data: trajectory[i], // Store metadata for click interaction
           });
-
-          pointFeature.setStyle(new ol.style.Style({
-            image: new ol.style.Circle({
-              radius: 3 * opacity,
-              fill: new ol.style.Fill({ color: 'rgba(0, 153, 255, ' + opacity + ')' }),
-              stroke: new ol.style.Stroke({ color: '#fff', width: 1 * opacity }),
-            }),
-          }));
+          // If is in the past
+          if (timeDiff < 0) {
+            pointFeature.setStyle(new ol.style.Style({
+              image: new ol.style.Circle({
+                radius: 3 * opacity,
+                fill: new ol.style.Fill({ color: 'rgba(0, 153, 255, ' + opacity + ')' }),
+                stroke: new ol.style.Stroke({ color: '#fff', width: 1 * opacity }),
+              }),
+            }));
+          } 
+          // It is in the future
+          else {
+            pointFeature.setStyle(new ol.style.Style({
+              image: new ol.style.Circle({
+                radius: 3 * opacity,
+                fill: new ol.style.Fill({ color: 'rgba(150, 150, 150, ' + opacity + ')' }),
+                stroke: new ol.style.Stroke({ color: '#ddd', width: 1 * opacity }),
+              }),
+            }));
+          }
           pointFeatures.push(pointFeature);
         }
 
@@ -727,7 +739,7 @@ export default {
         else {
           lineFeature.setStyle(new ol.style.Style({
             stroke: new ol.style.Stroke({
-              color: 'rgba(0, 122, 255, ' + opacity + ')', // Blue with opacity
+              color: 'rgba(150, 150, 150, ' + opacity + ')', // Blue with opacity
               width: 0.77 * opacity,
               lineDash: [10, 10], // Dash of 10px and gap of 5px
             }),
