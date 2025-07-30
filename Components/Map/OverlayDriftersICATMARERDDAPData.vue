@@ -675,7 +675,7 @@ export default {
       let lineFeatures = [];
       let pointFeatures = [];
       // Overlay time
-      let tmst = this.platformsData[deployment_id].data.time;
+      let tmst = window.GUIManager.currentTmst;
       let tmstGetTime = new Date(tmst).getTime();
       // Create line segments and points with different opacity
       for (let i = 0; i < numPoints; i++) {
