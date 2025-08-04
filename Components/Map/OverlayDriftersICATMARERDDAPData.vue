@@ -329,76 +329,82 @@ export default {
         let halfHourinMs = 1000 * 60 * 29; // Only show half an hour?
         let visibleTimeSpan = 1000 * 60 * 60 * 24 * 11; // 11 days (11 ahead, 11 behind)
         let closestTimeDiff = 10e12; // Variable to store the closest time difference from a platform with several data points
+        let closestTmst = undefined;
         // Pick up closest data
         Object.keys(platform.data).forEach(dataTmst => {
           let timeDiff = Math.abs(new Date(dataTmst).getTime() - new Date(tmst).getTime());
-          let isAhead = new Date(dataTmst).getTime() > new Date(tmst).getTime() > 0; // Is the data ahead of the current time?
           if (timeDiff < visibleTimeSpan && timeDiff < closestTimeDiff) {
             closestTimeDiff = timeDiff;
-            this.platformsData[deployment_id].hasData = true;
-            // Empty observed properties
-            this.platformsData[deployment_id].data = {};
-
-            // Iterate props and assign to platformsData (vue uses this object)
-            Object.keys(platform.data[dataTmst]).forEach(key => {
-              this.platformsData[deployment_id].data[key] = platform.data[dataTmst][key];
-            });
-
-            // Check if estimated current exists
-            if (platform.estVelocity != undefined && platform.estDirection != undefined) {
-              if (platform.estVelocity[dataTmst] != undefined) {
-                this.platformsData[deployment_id].data.estVelocity = platform.estVelocity[dataTmst];
-                this.platformsData[deployment_id].data.estDirection = (platform.estDirection[dataTmst] + 360) % 360;
-              }
-            }
-
-            // Change layer location
-            this.$nextTick(() => {
-              platform.coord3857 = ol.proj.fromLonLat([platform.data[dataTmst].longitude, platform.data[dataTmst].latitude]);
-
-              if (platform.olLayer != undefined) {
-                platform.olLayer.setElement(this.$refs[deployment_id]);
-                platform.olLayer.setPosition(platform.coord3857); // For some reason vue and the map element have to be redefined
-                // Opacity if it not in the closest time, and show when it sampled
-                if (closestTimeDiff > halfHourinMs) {
-                  // Show time difference from now in hours or days
-                  this.platformsData[deployment_id].data.tmstTimeDiffStr = closestTimeDiff > 1000 * 60 * 60 * 24 ?
-                    Math.round(closestTimeDiff / (1000 * 60 * 60 * 24)) + ' days' :
-                    Math.round(closestTimeDiff / (1000 * 60 * 60)) + ' hours';
-                  this.platformsData[deployment_id].data.tmstTimeDiffStr += isAhead ? ' ahead' : ' ago';
-                  this.platformsData[deployment_id].data.tmstTimeDiffStr += ' from selected time';
-                }
-              } else {
-                debugger;
-              }
-
-              if (deployment_id != platform.olLayer.C.element.id) {
-                debugger;
-              }
-            });
-
+            closestTmst = dataTmst;
           }
-
-          // Outside visible time span
-          else if (timeDiff > visibleTimeSpan) {
-            // Remove track layer from map (when users click on show trajectory only button and then change to a far away date)
-            // Reset
-            platform.showInfo = false;
-            platform.showTrajectoryOnly = false;
-            this.removeTrajectoryFromMap(deployment_id);
-          }
-
         });
 
-        // Update trajectories points and opacities
-        if (platform.olTrajectoryLayer != undefined) {
-          // If layer is in map, update it
-          let ll = this.$parent.getMapLayer(platform.olTrajectoryLayer.get('name'));
-          if (ll != undefined) {
-            this.map.removeLayer(ll);
-            // Update trajectory layer
-            this.addTrajectoryToMap(deployment_id);
+        // Found a closest date that is visible
+        if (closestTmst != undefined) {
+
+          let isAhead = new Date(closestTmst).getTime() > new Date(tmst).getTime() > 0; // Is the data ahead of the current time?
+
+          this.platformsData[deployment_id].hasData = true;
+          // Empty observed properties
+          this.platformsData[deployment_id].data = {};
+
+          // Iterate props and assign to platformsData (vue uses this object)
+          Object.keys(platform.data[closestTmst]).forEach(key => {
+            this.platformsData[deployment_id].data[key] = platform.data[closestTmst][key];
+          });
+
+          // Check if estimated current exists
+          if (platform.estVelocity != undefined && platform.estDirection != undefined) {
+            if (platform.estVelocity[closestTmst] != undefined) {
+              this.platformsData[deployment_id].data.estVelocity = platform.estVelocity[closestTmst];
+              this.platformsData[deployment_id].data.estDirection = (platform.estDirection[closestTmst] + 360) % 360;
+            }
           }
+
+          // Update trajectories points and opacities
+          if (platform.olTrajectoryLayer != undefined) {
+            // If layer is in map, update it
+            let ll = this.$parent.getMapLayer(platform.olTrajectoryLayer.get('name'));
+            if (ll != undefined) {
+              this.map.removeLayer(ll);
+              // Update trajectory layer
+              this.addTrajectoryToMap(deployment_id);
+            }
+          }
+
+          // Change layer location
+          this.$nextTick(() => {
+            platform.coord3857 = ol.proj.fromLonLat([platform.data[closestTmst].longitude, platform.data[closestTmst].latitude]);
+
+            if (platform.olLayer != undefined) {
+              platform.olLayer.setElement(this.$refs[deployment_id]);
+              platform.olLayer.setPosition(platform.coord3857); // For some reason vue and the map element have to be redefined
+              // Opacity if it not in the closest time, and show when it sampled
+              if (closestTimeDiff > halfHourinMs) {
+                // Show time difference from now in hours or days
+                this.platformsData[deployment_id].data.tmstTimeDiffStr = closestTimeDiff > 1000 * 60 * 60 * 24 ?
+                  Math.round(closestTimeDiff / (1000 * 60 * 60 * 24)) + ' days' :
+                  Math.round(closestTimeDiff / (1000 * 60 * 60)) + ' hours';
+                this.platformsData[deployment_id].data.tmstTimeDiffStr += isAhead ? ' ahead' : ' ago';
+                this.platformsData[deployment_id].data.tmstTimeDiffStr += ' from selected time';
+              }
+            } else {
+              debugger;
+            }
+
+            if (deployment_id != platform.olLayer.C.element.id) {
+              debugger;
+            }
+          });
+        }
+
+        // Outside visible time span
+        else {
+          // Remove track layer from map (when users click on show trajectory only button and then change to a far away date)
+          // Reset
+          platform.showInfo = false;
+          platform.showTrajectoryOnly = false;
+          this.removeTrajectoryFromMap(deployment_id);
         }
 
       });
@@ -701,7 +707,7 @@ export default {
                 stroke: new ol.style.Stroke({ color: '#fff', width: 1 * opacity }),
               }),
             }));
-          } 
+          }
           // It is in the future
           else {
             pointFeature.setStyle(new ol.style.Style({
