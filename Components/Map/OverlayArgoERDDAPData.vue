@@ -203,7 +203,7 @@
           :title="Object.keys(platformsData[platformNumber].data).includes('tmstTimeDiffStr') ? 'Argo float, ' + platformsData[platformNumber].data.tmstTimeDiffStr + '. Source: Ifremer' : 'Source: Ifremer'">
         <!-- Indicator of ICATMAR -->
         <div class="icon-marker-icatmar"
-          v-if="platformsData[platformNumber].hasData && platforms[platformNumber].pi_name == 'Emilio GARCýA-LADONA'"
+          v-if="platformsData[platformNumber].hasData && platforms[platformNumber].pi_name == 'Emilio GARCIA-LADONA'"
           :style="{ 'opacity': Object.keys(platformsData[platformNumber].data).includes('tmstTimeDiffStr') ? (platformsData[platformNumber].data.tmstTimeDiffStr.includes('hour') ? 0.5 : 0.25) : 1 }">
         </div>
       </div>
