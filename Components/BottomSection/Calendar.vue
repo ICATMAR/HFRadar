@@ -265,6 +265,11 @@ export default {
         startMonth = 0;
         endMonth = this.endDate.getUTCMonth();
       }
+      // Year in between
+      else {
+        startMonth = 0;
+        endMonth = 11;
+      }
 
       // Fill months
       for (let i = startMonth; i <= endMonth; i++){
