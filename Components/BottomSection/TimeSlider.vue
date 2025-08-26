@@ -4,7 +4,7 @@
     <!-- Tooltip -->
     <div id="toolTip" ref="toolTip">
       <button v-show="isDataAvailableAtHour.length > 0" class="bbArrow backTime clickable" @click="moveBackward">&lt;</button>
-      <div>{{ timeStr }}</div>
+      <div :title=currentTmst>{{ timeStr }}</div>
       <button v-show="isDataAvailableAtHour.length > 0" class="bbArrow forwardTime clickable" @click="moveForward">></button>
     </div>
 
@@ -117,6 +117,7 @@ export default {
       timeStr:'Loading latest data...',
       isDataAvailableAtHour: new Array(),
       numHours: 1,
+      currentTmst: undefined,
     }
   },
   methods: {

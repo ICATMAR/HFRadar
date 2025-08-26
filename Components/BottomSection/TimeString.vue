@@ -5,7 +5,7 @@
     <!-- Backward 1h -->
     <div class="white-text clickable" @click="changeSelectedDate(-1)">&lt;</div>
     <!-- Time string -->
-    <div class="white-text clickable" @click="isCalendarVisible = true">
+    <div class="white-text clickable" @click="isCalendarVisible = true" :title=currentTmst>
       <span class="fa">&#xf073; </span>{{ timeStr }}
     </div>
     <!-- Forward 1h -->
