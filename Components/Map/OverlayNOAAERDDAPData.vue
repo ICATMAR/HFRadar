@@ -287,6 +287,10 @@ export default {
     ERDDAPIconClicked: function (platformCode) {
       this.platformsData[platformCode].showInfo = !this.platformsData[platformCode].showInfo;
 
+      let isStaticPlatform = this.platforms[platformCode]['type'].includes('SHORE AND BOTTOM STATIONS') || this.platforms[platformCode]['type'].includes('MOORED BUOYS');
+      if (isStaticPlatform)
+        return; // Do not load trajectory for static platforms  
+
       // Show / hide trajectory
       if (this.platformsData[platformCode].showInfo) {
         // Show trajectory
