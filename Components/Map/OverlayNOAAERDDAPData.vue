@@ -167,7 +167,7 @@
       <img class="icon-str icon-medium icon-img panel-icon-right clickable"
         v-if="platformsData[platformCode].hasData"
         :class="[!isTooFar ? 'showOverlayMap' : 'hideOverlayMap', { 'icon-selected': platformsData[platformCode].showInfo }]"
-        Pregunta-li a ChatGPT @click="ERDDAPIconClicked(platformCode)" :src="[platforms[platformCode]['type'].includes('SHIP') ||platforms[platformCode]['type'].includes('VOSCLIM') ? '/HFRadar/Assets/Images/boat.svg' :
+        @click="ERDDAPIconClicked(platformCode)" :src="[platforms[platformCode]['type'].includes('SHIP') ||platforms[platformCode]['type'].includes('VOSCLIM') ? '/HFRadar/Assets/Images/boat.svg' :
           platforms[platformCode]['type'].includes('DRIFTING') ? '/HFRadar/Assets/Images/drifter.svg' :
             platforms[platformCode]['type'].includes('GLIDERS') ? '/HFRadar/Assets/Images/argo.svg' :
               '/HFRadar/Assets/Images/buoy.svg']"
@@ -694,11 +694,14 @@ export default {
       for (let i = 0; i < numPoints; i++) {
 
         // Set style with opacity based on time difference
-        let timeDiff = Math.abs(new Date(trajectory[i].time).getTime() - tmstGetTime);
+        let timeDiff = (new Date(trajectory[i].time).getTime() - tmstGetTime);
         //let opacity = timeDiff < 1000 * 60 * 60 ? 1 : timeDiff < 1000 * 60 * 60 * 24 ? 0.8 : timeDiff < 1000 * 60 * 60 * 24 * 7 ? 0.6 : 0.4;
-        let opacity = Math.max(1 - timeDiff / (1000 * 60 * 60 * 24 * 5), 0.15); // 5 days max opacity
-        // Do not create point if it is the overlay
-        if (trajectory[i].time != tmst) {
+        let daysToFade = 5;
+        let opacity = Math.max(1 - Math.abs(timeDiff) / (1000 * 60 * 60 * 24 * daysToFade), 0.15); // 5 days max opacity
+        let hasPointFeature = Math.abs(timeDiff) < 1000 * 60 * 60 * 24 * daysToFade; // Only create point features for points within 5 days of the current time
+
+        // Do not create point if it is the overlay or it is too far in time (performance)
+        if (trajectory[i].time != tmst && hasPointFeature) {
 
           // Create point features
           let pointFeature = new ol.Feature({
@@ -706,17 +709,30 @@ export default {
             data: trajectory[i], // Store metadata for click interaction
           });
 
-          pointFeature.setStyle(new ol.style.Style({
-            image: new ol.style.Circle({
-              radius: 6 * opacity,
-              fill: new ol.style.Fill({ color: 'rgba(0, 153, 255, ' + opacity + ')' }),
-              stroke: new ol.style.Stroke({ color: '#fff', width: 2 * opacity }),
-            }),
-          }));
+          // If is in the past
+          if (timeDiff < 0) {
+            pointFeature.setStyle(new ol.style.Style({
+              image: new ol.style.Circle({
+                radius: 3 * opacity,
+                fill: new ol.style.Fill({ color: 'rgba(0, 153, 255, ' + opacity + ')' }),
+                stroke: new ol.style.Stroke({ color: '#fff', width: 1 * opacity }),
+              }),
+            }));
+          }
+          // It is in the future
+          else {
+            pointFeature.setStyle(new ol.style.Style({
+              image: new ol.style.Circle({
+                radius: 3 * opacity,
+                fill: new ol.style.Fill({ color: 'rgba(150, 150, 150, ' + opacity + ')' }),
+                stroke: new ol.style.Stroke({ color: '#ddd', width: 1 * opacity }),
+              }),
+            }));
+          }
           pointFeatures.push(pointFeature);
         }
         // Point for current timestamp
-        else {
+        else if (trajectory[i].time == tmst){
           // Create point feature for current timestamp
           let pointFeature = new ol.Feature({
             geometry: new ol.geom.Point(coords3857[i]),
@@ -744,12 +760,25 @@ export default {
           geometry: new ol.geom.LineString([coords3857[i], coords3857[i + 1]])
         });
 
-        lineFeature.setStyle(new ol.style.Style({
-          stroke: new ol.style.Stroke({
-            color: 'rgba(0, 122, 255, ' + opacity + ')', // Blue with opacity
-            width: 3 * opacity,
-          }),
-        }));
+        // If is in the past
+        if (timeDiff < 0) {
+          lineFeature.setStyle(new ol.style.Style({
+            stroke: new ol.style.Stroke({
+              color: 'rgba(0, 122, 255, ' + opacity * 5 + ')', // Blue with opacity
+              width: 3 * opacity,
+            }),
+          }));
+        }
+        // If it is in the future
+        else {
+          lineFeature.setStyle(new ol.style.Style({
+            stroke: new ol.style.Stroke({
+              color: 'rgba(150, 150, 150, ' + opacity * 5 + ')', // Blue with opacity
+              width: 0.77 * opacity,
+              lineDash: [10, 10], // Dash of 10px and gap of 5px
+            }),
+          }));
+        }
         lineFeatures.push(lineFeature);
 
 
