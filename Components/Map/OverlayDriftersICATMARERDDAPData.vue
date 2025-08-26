@@ -690,9 +690,11 @@ export default {
         // Set style with opacity based on time difference
         let timeDiff = new Date(trajectory[i].time).getTime() - tmstGetTime;
         //let opacity = timeDiff < 1000 * 60 * 60 ? 1 : timeDiff < 1000 * 60 * 60 * 24 ? 0.8 : timeDiff < 1000 * 60 * 60 * 24 * 7 ? 0.6 : 0.4;
-        let opacity = Math.max(1 - Math.abs(timeDiff) / (1000 * 60 * 60 * 24 * 5), 0.15); // 5 days max opacity
-        // Do not create point if it is the overlay
-        if (trajectory[i].time != tmst) {
+        let daysToFade = 5;
+        let opacity = Math.max(1 - Math.abs(timeDiff) / (1000 * 60 * 60 * 24 * daysToFade), 0.15); // 5 days max opacity
+        let hasPointFeature = Math.abs(timeDiff) < 1000 * 60 * 60 * 24 * daysToFade; // Only create point features for points within 5 days of the current time
+        // Do not create point if it is the overlay or if it is too far away in time (performance)
+        if (trajectory[i].time != tmst && hasPointFeature) {
 
           // Create point features
           let pointFeature = new ol.Feature({
@@ -737,7 +739,7 @@ export default {
         if (timeDiff < 0) {
           lineFeature.setStyle(new ol.style.Style({
             stroke: new ol.style.Stroke({
-              color: 'rgba(0, 122, 255, ' + opacity + ')', // Blue with opacity
+              color: 'rgba(0, 122, 255, ' + opacity * 5 + ')', // Blue with opacity
               width: 3 * opacity,
             }),
           }));
@@ -746,7 +748,7 @@ export default {
         else {
           lineFeature.setStyle(new ol.style.Style({
             stroke: new ol.style.Stroke({
-              color: 'rgba(150, 150, 150, ' + opacity + ')', // Blue with opacity
+              color: 'rgba(150, 150, 150, ' + opacity * 5 + ')', // Blue with opacity
               width: 0.77 * opacity,
               lineDash: [10, 10], // Dash of 10px and gap of 5px
             }),
