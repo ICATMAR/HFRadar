@@ -245,7 +245,7 @@ export default {
       this.years = [{ num: startYear, name: startYear, wght: 1, isSelected: selYear == startYear}];
       // Fill years
       for (let i = 1; i<=totalYears; i++){
-          this.years.push({num: startYear + i, name: startYear + 1, wght: 1, isSelected: selYear == startYear + i});
+          this.years.push({num: startYear + i, name: startYear + i, wght: 1, isSelected: selYear == startYear + i});
       }
 
       // MONTHS
