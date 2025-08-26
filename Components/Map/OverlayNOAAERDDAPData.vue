@@ -238,7 +238,9 @@ export default {
       queryTrajectoryURL: 'https://osmc.noaa.gov/erddap/tabledap/OSMC_flattened.jsonlKVP' +
         '?platform_code,platform_id,longitude,latitude,time' +
         '&platform_code="{platformCode}"&time>={oldestDate}&distinct()&orderBy("time")',
-      bbox: [0, 9, 38, 44.5], // long, lat
+      //bbox: [0, 9, 38, 44.5], // long, lat
+      // Extended mediterrean and spanish atlantic
+      bbox: [-22, 38, 24, 50], // long, lat
       parameters: [
         'platform_type',
         'platform_code',

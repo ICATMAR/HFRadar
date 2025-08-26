@@ -199,7 +199,7 @@
         <img class="icon-str icon-medium icon-img panel-icon-right clickable" @click="ERDDAPIconClicked(platformNumber)"
           src='/HFRadar/Assets/Images/argo.svg' v-if="platformsData[platformNumber].hasData"
           :class="{ 'icon-selected': platformsData[platformNumber].showInfo }"
-          :style="{ 'opacity': Object.keys(platformsData[platformNumber].data).includes('tmstTimeDiffStr') ? (platformsData[platformNumber].data.tmstTimeDiffStr.includes('hour') ? 0.5 : 0.1) : 1 }"
+          :style="{ 'opacity': Object.keys(platformsData[platformNumber].data).includes('tmstTimeDiffStr') ? (platformsData[platformNumber].data.tmstTimeDiffStr.includes('hour') ? 0.5 : 0.25) : 1 }"
           :title="Object.keys(platformsData[platformNumber].data).includes('tmstTimeDiffStr') ? 'Argo float, ' + platformsData[platformNumber].data.tmstTimeDiffStr + '. Source: Ifremer' : 'Source: Ifremer'">
         <!-- Indicator of ICATMAR -->
         <div class="icon-marker-icatmar"
@@ -214,7 +214,7 @@
       <!-- Hide / show depending on zoom level -->
       <div :class="[isTooFar ? 'showOverlayMap' : 'hideOverlayMap']">
         <!-- Marker -->
-        <div class="map-marker" v-if="platformsData[platformNumber].hasData"
+        <div class="map-marker" :class="platforms[platformNumber].pi_name == 'Emilio GARCIA-LADONA' ? 'map-marker-icatmar' : ''" v-if="platformsData[platformNumber].hasData"
           :style="{ 'opacity': Object.keys(platformsData[platformNumber].data).includes('tmstTimeDiffStr') ? (platformsData[platformNumber].data.tmstTimeDiffStr.includes('hour') ? 0.75 : 0.33) : 1 }">
         </div>
       </div>
@@ -265,7 +265,9 @@ export default {
       queryPlatformsURL: "https://erddap.ifremer.fr/erddap/tabledap/ArgoFloats.jsonlKVP" +
         "?{parameters}" +
         "&time>={startDate}&time<={endDate}&longitude>={longMin}&longitude<={longMax}&latitude>={latMin}&latitude<={latMax}",
-      bbox: [0, 9, 38, 44.5], // long, lat
+      //bbox: [0, 9, 38, 44.5], // long, lat
+      // Extended mediterrean and spanish atlantic
+      bbox: [-22, 38, 24, 50], // long, lat
       queryTrajectoryURL: 'https://erddap.ifremer.fr/erddap/tabledap/ArgoFloats.jsonlKVP?' +
         'platform_number,cycle_number,time,latitude,longitude' +
         '&platform_number="{platformNumber}"',

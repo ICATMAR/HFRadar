@@ -302,6 +302,10 @@ button:hover {
   border: solid 1px black;
 }
 
+.map-marker-icatmar {
+  background: var(--red);
+}
+
 
 
 /* WIDGET */

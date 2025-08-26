@@ -195,7 +195,7 @@
       <!-- Hide / show depending on zoom level -->
       <div :class="[isTooFar ? 'showOverlayMap' : 'hideOverlayMap']">
         <!-- Marker -->
-        <div class="map-marker" v-if="platformsData[deployment_id].hasData"
+        <div class="map-marker map-marker-icatmar" v-if="platformsData[deployment_id].hasData"
           :style="{ 'opacity': Object.keys(platformsData[deployment_id].data).includes('tmstTimeDiffStr') ? (platformsData[deployment_id].data.tmstTimeDiffStr.includes('hour') ? 0.75 : 0.33) : 1 }">
         </div>
       </div>
@@ -252,7 +252,7 @@ export default {
         "&distinct()",
       //bbox: [0, 9, 38, 44.5], // long, lat
       //DEBUGGING LINE FOR GALICIA'S DRIFTERS, PLEASE UNCOMMENT?
-      bbox: [-15, 6, 35, 46], // long, lat
+      bbox: [-20, 38, 30, 50], // long, lat
       queryTrajectoryURL: 'https://erddap.icatmar.cat/erddap/tabledap/socat_data_drifters_ICATMAR.jsonlKVP' +
         '?time,latitude,longitude,temperature' +
         '&deployment_id={deployment_id}',
@@ -525,6 +525,7 @@ export default {
         if (platforms[jsRow.deployment_id] == undefined) {
           platforms[jsRow.deployment_id] = {
             "deployment_id": jsRow.deployment_id,
+            "buoy_name": jsRow.buoy_name,
             "drifter_type": jsRow.drifter_type,
             "institution": jsRow.institution,
             "project": jsRow.project,
