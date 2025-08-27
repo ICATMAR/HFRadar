@@ -54,7 +54,7 @@ def extract_timestamp(file_name):
         return file_name[10:-4]
     elif file_name.startswith("RDLm_PBCN_") and file_name.endswith(".ruv"):
         return file_name[10:-4]
-    elif file_name.startswith("RDLm_SCAL_") and file_name.endswith(".tuv"):
+    elif file_name.startswith("RDLm_SCAL_") and file_name.endswith(".ruv"):
         return file_name[10:-4]
     return None
 
@@ -73,7 +73,7 @@ def format_timestamp(timestamp):
 script_directory = os.path.dirname(os.path.abspath(__file__))
 
 # Specify the folders to search for files
-folders = ["L2/BEGU", "L2/CREU", "L2/TOSS", "L3/tuv", "L2/AREN", "L2/GNST", "L2/PBCN", "L3/SCAL"]
+folders = ["L2/BEGU", "L2/CREU", "L2/TOSS", "L3/tuv", "L2/AREN", "L2/GNST", "L2/PBCN", "L2/SCAL"]
 # Site names (useful for the web app)
 siteNames = ["BEGU", "CREU", "TOSS", "CATS", "AREN", "GNST", "PBCN", "SCAL"]
 
