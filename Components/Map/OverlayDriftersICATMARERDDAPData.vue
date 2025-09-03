@@ -85,11 +85,11 @@
             <!-- Show trajectory -->
             <!-- Button show trajectory only -->
             <div class="button-container">
-              <button v-show="!platforms[deployment_id].showTrajectoryOnly" class="more-data-button narrow-button-text"
-                @click="() => { platforms[deployment_id].showTrajectoryOnly = true; ERDDAPIconClicked(deployment_id); }">Show
+              <button v-show="!platformsData[deployment_id].showTrajectoryOnly" class="more-data-button narrow-button-text"
+                @click="() => { platformsData[deployment_id].showTrajectoryOnly = true; ERDDAPIconClicked(deployment_id); }">Show
                 trajectory only <span class="fa">&#xe51f;</span></button>
-              <button v-show="platforms[deployment_id].showTrajectoryOnly" class="more-data-button narrow-button-text"
-                @click="() => { platforms[deployment_id].showTrajectoryOnly = false; ERDDAPIconClicked(deployment_id); }">Hide
+              <button v-show="platformsData[deployment_id].showTrajectoryOnly" class="more-data-button narrow-button-text"
+                @click="() => { platformsData[deployment_id].showTrajectoryOnly = false; ERDDAPIconClicked(deployment_id); }">Hide
                 trajectory <span class="fa">&#xf041;</span></button>
             </div>
             <!-- Go to date -->
@@ -180,7 +180,7 @@
             platforms[deployment_id]['drifter_type'].includes('CODE') ? '/HFRadar/Assets/Images/code.svg' :
               platforms[deployment_id]['drifter_type'].includes('ARGO') ? '/HFRadar/Assets/Images/argo.svg' :
                 '/HFRadar/Assets/Images/drifter.svg']"
-          :class="{ 'icon-selected': platformsData[deployment_id].showInfo || platforms[deployment_id].showTrajectoryOnly }"
+          :class="{ 'icon-selected': platformsData[deployment_id].showInfo || platformsData[deployment_id].showTrajectoryOnly }"
           :style="{ 'opacity': Object.keys(platformsData[deployment_id].data).includes('tmstTimeDiffStr') ? (platformsData[deployment_id].data.tmstTimeDiffStr.includes('hour') ? 0.5 : 0.1) : 1 }"
           :title="Object.keys(platformsData[deployment_id].data).includes('tmstTimeDiffStr') ? platformsData[deployment_id].data.tmstTimeDiffStr + '. Source: ICATMAR' : 'Source: ICATMAR'">
         <!-- Indicator of ICATMAR -->
@@ -287,17 +287,19 @@ export default {
           // Load trajectory
           this.getTrajectoryFrom(deployment_id).then(() => {
             // Add trajectory to map
-            this.addTrajectoryToMap(deployment_id);
+            if (this.platformsData[deployment_id].showInfo || this.platformsData[deployment_id].showTrajectoryOnly) {
+              this.addTrajectoryToMap(deployment_id);
+            }
             // Update content as the currents were estimated with the trajectories
             this.updateContent(window.GUIManager.currentTmst);
           });
           // Only add if the trajectory was not shown, otherwise it is trying to add the same layer when it already exists https://openlayers.org/en/v7.0.0/doc/errors/#58
-        } else if (!this.platforms[deployment_id].showTrajectoryOnly)
+        } else if (!this.platformsData[deployment_id].showTrajectoryOnly)
           // Add the layer to the map
           this.map.addLayer(this.platforms[deployment_id].olTrajectoryLayer);
       }
       // Remove trajectory if panel is hidden and if showTrajectoryOnly is false
-      else if (!this.platformsData[deployment_id].showInfo && !this.platforms[deployment_id].showTrajectoryOnly) {
+      else if (!this.platformsData[deployment_id].showInfo && !this.platformsData[deployment_id].showTrajectoryOnly) {
         // Remove trajectory from map
         this.removeTrajectoryFromMap(deployment_id);
       }
@@ -402,8 +404,8 @@ export default {
         else {
           // Remove track layer from map (when users click on show trajectory only button and then change to a far away date)
           // Reset
-          platform.showInfo = false;
-          platform.showTrajectoryOnly = false;
+          this.platformsData[deployment_id].showInfo = false;
+          this.platformsData[deployment_id].showTrajectoryOnly = false;
           this.removeTrajectoryFromMap(deployment_id);
         }
 
