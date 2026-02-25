@@ -164,10 +164,9 @@
 
 
       <!-- Platform icon -->
-      <img class="icon-str icon-medium icon-img panel-icon-right clickable"
-        v-if="platformsData[platformCode].hasData"
+      <img class="icon-str icon-medium icon-img panel-icon-right clickable" v-if="platformsData[platformCode].hasData"
         :class="[!isTooFar ? 'showOverlayMap' : 'hideOverlayMap', { 'icon-selected': platformsData[platformCode].showInfo }]"
-        @click="ERDDAPIconClicked(platformCode)" :src="[platforms[platformCode]['type'].includes('SHIP') ||platforms[platformCode]['type'].includes('VOSCLIM') ? '/HFRadar/Assets/Images/boat.svg' :
+        @click="ERDDAPIconClicked(platformCode)" :src="[platforms[platformCode]['type'].includes('SHIP') || platforms[platformCode]['type'].includes('VOSCLIM') ? '/HFRadar/Assets/Images/boat.svg' :
           platforms[platformCode]['type'].includes('DRIFTING') ? '/HFRadar/Assets/Images/drifter.svg' :
             platforms[platformCode]['type'].includes('GLIDERS') ? '/HFRadar/Assets/Images/argo.svg' :
               '/HFRadar/Assets/Images/buoy.svg']"
@@ -297,10 +296,11 @@ export default {
         if (this.platforms[platformCode].olTrajectoryLayer == undefined) {
           // Load trajectory
           this.getTrajectoryFrom(platformCode).then(() => {
+            // Add trajectory to maps
+            if (this.platformsData[platformCode].showInfo)
+              this.addTrajectoryToMap(platformCode);
             // Update content
             this.updateContent(window.GUIManager.currentTmst);
-            // Add trajectory to map
-            this.addTrajectoryToMap(platformCode);
           });
         } else
           // Add the layer to the map
@@ -360,6 +360,18 @@ export default {
             Object.keys(platform.data[dataTmst]).forEach(key => {
               this.platformsData[platformCode].data[key] = platform.data[dataTmst][key];
             });
+
+
+            // Update trajectories points and opacities
+            if (platform.olTrajectoryLayer != undefined) {
+              // If layer is in map, update it
+              let ll = this.$parent.getMapLayer(platform.olTrajectoryLayer.get('name'));
+              if (ll != undefined) {
+                this.map.removeLayer(ll);
+                // Update trajectory layer
+                this.addTrajectoryToMap(platformCode);
+              }
+            }
 
             // Change layer location
             this.$nextTick(() => {
@@ -736,7 +748,7 @@ export default {
           pointFeatures.push(pointFeature);
         }
         // Point for current timestamp
-        else if (trajectory[i].time == tmst){
+        else if (trajectory[i].time == tmst) {
           // Create point feature for current timestamp
           let pointFeature = new ol.Feature({
             geometry: new ol.geom.Point(coords3857[i]),

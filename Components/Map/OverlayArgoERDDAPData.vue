@@ -317,7 +317,8 @@ export default {
           // Load trajectory
           this.getTrajectoryFrom(platformNumber).then(() => {
             // Add trajectory to map
-            this.addTrajectoryToMap(platformNumber);
+            if (this.platformsData[platformNumber].showInfo)
+              this.addTrajectoryToMap(platformNumber);
           });
         } else
           // Add the layer to the map
