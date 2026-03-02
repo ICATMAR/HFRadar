@@ -368,8 +368,11 @@ class DataManager {
     indexLat = 1 - indexLat;
 
     // If outside the box, return false
-    if (indexLon < 0 || indexLon > 1 || indexLat < 0 || indexLat > 1)
-      return "Outside bounds";
+    if (indexLon < 0 || indexLon > 1 || indexLat < 0 || indexLat > 1){
+      console.log("IsThereLand; point outside land mask bounds.");
+      return true;
+    }
+      
 
     // Find value in image data
     let index = Math.floor(indexLat * landMask.height) * landMask.width + Math.floor(indexLon * landMask.width);
