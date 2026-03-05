@@ -184,7 +184,7 @@ export default {
       let canvas = this.canvas;
       let ctx = this.ctx;
 
-      let radarNames = ['CATS','CREU','BEGU','TOSS','AREN','PBCN','GNST', 'SCAL'];
+      let radarNames = ['CATS','CNET','CREU','BEGU','TOSS','AREN','PBCN','GNST', 'SCAL'];
       let loadedColor = 'darkBlue';
       let existsColor = 'rgb(127, 127, 127)';
       // Time varying color (update canvas is painted contiously when loading data)

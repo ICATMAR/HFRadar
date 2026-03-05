@@ -19,6 +19,7 @@ class GUIManager {
     areParticlesVisible: true,
     arePointsVisible: false,
     radarsVisible: {
+      'CNET': true,
       'CREU': true,
       'BEGU': true,
       'TOSS': true,

@@ -41,6 +41,17 @@ class FileManager {
     // './Assets/BaseLayer/OSM.png'
   ];
 
+  HFANTENNAS = [
+    'CNET',
+    'CREU',
+    'BEGU',
+    'TOSS',
+    'AREN',
+    'PBCN',
+    'GNST',
+    'SCAL'
+  ];
+
   requestedFiles = [];
   loadedFilesLog = [];
 
@@ -300,37 +311,15 @@ class FileManager {
     }
     // Radials
     if (fileTypes.includes('ruv')){
-      //  Creus
-      urls.push(baseURL + 'L2/CREU/' + year + '/' + month + '/RDLm_CREU_' + year + '_' + month + '_' + day + '_' + hour + '00_l2b.ruv');
-      // Begur
-      urls.push(baseURL + 'L2/BEGU/' + year + '/' + month + '/RDLm_BEGU_' + year + '_' + month + '_' + day + '_' + hour + '00_l2b.ruv');
-      // Tossa
-      urls.push(baseURL + 'L2/TOSS/' + year + '/' + month + '/RDLm_TOSS_' + year + '_' + month + '_' + day + '_' + hour + '00_l2b.ruv');
-      // Arenys
-      urls.push(baseURL + 'L2/AREN/' + year + '/' + month + '/RDLm_AREN_' + year + '_' + month + '_' + day + '_' + hour + '00_l2b.ruv');
-      // Port de Barcelona
-      urls.push(baseURL + 'L2/PBCN/' + year + '/' + month + '/RDLm_PBCN_' + year + '_' + month + '_' + day + '_' + hour + '00_l2b.ruv');
-      // Port Ginesta
-      urls.push(baseURL + 'L2/GNST/' + year + '/' + month + '/RDLm_GNST_' + year + '_' + month + '_' + day + '_' + hour + '00_l2b.ruv');
-      // Segur de Calafell
-      urls.push(baseURL + 'L2/SCAL/' + year + '/' + month + '/RDLm_SCAL_' + year + '_' + month + '_' + day + '_' + hour + '00_l2b.ruv');
+      for (let i = 0; i < this.HFANTENNAS.length; i++){
+        urls.push(baseURL + 'L2/' + this.HFANTENNAS[i] + '/' + year + '/' + month + '/RDLm_' + this.HFANTENNAS[i] + '_' + year + '_' + month + '_' + day + '_' + hour + '00_l2b.ruv');
+      }
     }
     // Waves and wind
     if (fileTypes.includes('wls')){
-      // Waves Creus
-      urls.push(wavesBaseURL + 'CREU/WVLM_CREU_' + year + '_' + month + '_01_0000.wls');
-      // Waves Begur
-      urls.push(wavesBaseURL + 'BEGU/WVLM_BEGU_' + year + '_' + month + '_01_0000.wls');
-      // Waves Tossa
-      urls.push(wavesBaseURL + 'TOSS/WVLM_TOSS_' + year + '_' + month + '_01_0000.wls');
-      // Waves Arenys
-      urls.push(wavesBaseURL + 'AREN/WVLM_AREN_' + year + '_' + month + '_01_0000.wls');
-      // Waves Port de Barcelona
-      urls.push(wavesBaseURL + 'PBCN/WVLM_PBCN_' + year + '_' + month + '_01_0000.wls');
-      // Waves Port Ginesta
-      urls.push(wavesBaseURL + 'GNST/WVLM_GNST_' + year + '_' + month + '_01_0000.wls');
-      // Waves Segur de Calafell
-      urls.push(wavesBaseURL + 'SCAL/WVLM_SCAL_' + year + '_' + month + '_01_0000.wls');
+      for (let i = 0; i < this.HFANTENNAS.length; i++){
+        urls.push(wavesBaseURL + this.HFANTENNAS[i] + '/WVLM_' + this.HFANTENNAS[i] + '_' + year + '_' + month + '_01_0000.wls');
+      }
     }
 
 
