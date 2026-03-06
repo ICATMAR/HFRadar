@@ -53,6 +53,13 @@ export default fr = {
     denyButton: "Refuser"
   },
 
+  mapOptions: {
+    baseLayer: "Couche de base",
+    isobaths: "Isobathes",
+    inSituObservations: "Observations in situ",
+    weatherAndSeaModels: "Modèles météo-oceanographiques"
+  },
+
   "Auto-refresh": "Auto-actualisation",
 
   "Advanced interface": "Interface avancée",
@@ -90,20 +97,25 @@ export default fr = {
   "PSAL": "Salinitat (base submarina)",
 
   "Wind": "Vent",
-  "Waves": "Onatge",
+  "Waves": "Vagues",
 
-  "Wave height": "Altura d'onatge",
-  "Swell direction": "Direcció de l'onatge",
-  "Wave steepness": "Període",
+  "Wave height": "Hauteur des vagues",
+  "Swell direction": "Direction de la houle",
+  "Wave steepness": "Pente des vagues",
 
-  "Wind speed": "Velocitat del vent",
-  "Wind direction": "Direcció del vent",
-  "Wave significant height": "Altura significant d'onatge",
-  "Air temperature": "Temperatura de l'aire",
-  "Atmospheric pressure": "Pressió atmosfèrica",
-  "Sea surface temperature": "Temperatura superficial del mar",
-  "Sea bottom temperature": "Temperatura del fons del mar",
-  "Salinity": "Salinitat",
+  "Wind speed": "Vitesse du vent",
+  "Wind direction": "Direction du vent",
+  "Wave significant height": "Hauteur significative des vagues",
+  "Air temperature": "Température de l'air",
+  "Atmospheric pressure": "Pression atmosphérique",
+  "Sea surface temperature": "Température de surface de la mer",
+  "Sea bottom temperature": "Température du fond marin",
+  "Salinity": "Salinité",
+
+  "Chlorophyll": "Chlorophylle",
+  "Sea temperature anomaly": "Anomalie de température de la mer",
+  "Data from": "Données de",
+  "Current": "Courants",
 
 
   infoPanel: {

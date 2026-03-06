@@ -52,6 +52,13 @@ export default en = {
     denyButton: "Deny"
   },
 
+  mapOptions: {
+    baseLayer: "Base layer",
+    isobaths: "Isobaths",
+    inSituObservations: "In-situ observations",
+    weatherAndSeaModels: "Meteo-oceanographic models"
+  },
+
   "Auto-refresh": "Auto-refresh",
 
   "Advanced interface": "Advanced interface",
@@ -102,6 +109,11 @@ export default en = {
   "Sea surface temperature": "Sea surface temperature",
   "Sea bottom temperature": "Sea bottom temperature",
   "Salinity": "Salinity",
+
+  "Chlorophyll": "Chlorophyll",
+  "Sea temperature anomaly": "Sea temperature anomaly",
+  "Data from": "Data from",
+  "Current": "Currents",
 
 
   infoPanel: {

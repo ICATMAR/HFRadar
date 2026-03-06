@@ -51,6 +51,13 @@ export default es = {
     acceptButton: "Aceptar",
     denyButton: "Rechazar"
   },
+
+  mapOptions: {
+    baseLayer: "Capa base",
+    isobaths: "Isóbatas",
+    inSituObservations: "Observaciones in situ",
+    weatherAndSeaModels: "Modelos meteo-oceanográficos"
+  },
   
   "Auto-refresh": "Auto-actualización",
 
@@ -103,6 +110,11 @@ export default es = {
   "Sea surface temperature": "Temperatura superficial del mar",
   "Sea bottom temperature": "Temperatura del fondo del mar",
   "Salinity": "Salinidad",
+
+  "Chlorophyll": "Clorofila",
+  "Sea temperature anomaly": "Anomalía de temperatura del mar",
+  "Data from": "Datos de",
+  "Current": "Corrientes",
 
 
 

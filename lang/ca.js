@@ -51,6 +51,13 @@ export default ca = {
     denyButton: "Rebutjar"
   },
 
+  mapOptions: {
+    baseLayer: "Capa base",
+    isobaths: "Isòbates",
+    inSituObservations: "Observacions in situ",
+    weatherAndSeaModels: "Models meteo-oceanogràfics"
+  },
+
   "Auto-refresh": "Auto-atualització",
 
   "Advanced interface": "Interfície avançada",
@@ -101,6 +108,11 @@ export default ca = {
   "Sea surface temperature": "Temperatura superficial del mar",
   "Sea bottom temperature": "Temperatura del fons del mar",
   "Salinity": "Salinitat",
+
+  "Chlorophyll": "Clorofil·la",
+  "Sea temperature anomaly": "Anomalia de temperatura del mar",
+  "Data from": "Dades de",
+  "Current": "Corrents",
 
 
   infoPanel: {

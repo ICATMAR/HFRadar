@@ -13,20 +13,20 @@
           </div>
         </div>
         <!-- Text -->
-        <span>Base layer</span>
+        <span>{{ $t("mapOptions.baseLayer") }}</span>
       </div>
 
       <!-- Iso bars -->
       <div id="isobathsContainer" v-show="false">
         <onOffButton :checked="false" :inSize="'18px'" @change="isoOnOffChange($event)"></onOffButton>
-        <span>Isobaths</span>
+        <span>{{ $t("mapOptions.isobaths") }}</span>
       </div>
 
       <!-- External observations -->
       <div id="externalObsContainer" class="titleContainer" v-show="true">
         <div class="clickable menuElement">
           <onOffButton ref="externalObsOnOff" :checked="false" :inSize="'14px'" @change="externalObsOnOff($event)"></onOffButton>
-          <span @click="externalObsOnOff">In-situ observations</span>
+          <span @click="externalObsOnOff">{{ $t("mapOptions.inSituObservations") }}</span>
         </div>
       </div>
 
@@ -35,8 +35,8 @@
       <div class="titleContainer">
         <div class="clickable menuElement">
           <onOffButton ref="weatherOnOffButton" :checked="false" :inSize="'14px'" @change="weatherLayerOnOff($event)"></onOffButton>
-          <span class="visibleInMobile fa" :title="$t('Weather and sea models')">&#xf2c9;, C<sub>hl</sub>, ‰, &#xf72e;, &#xf773;</span>
-          <span class="hiddenInMobile" @click="weatherLayerOnOff">{{$t('Weather and sea models')}}</span>
+          <span class="visibleInMobile fa" :title="$t('mapOptions.weatherAndSeaModels')">&#xf2c9;, C<sub>hl</sub>, ‰, &#xf72e;, &#xf773;</span>
+          <span class="hiddenInMobile" @click="weatherLayerOnOff">{{ $t('mapOptions.weatherAndSeaModels') }}</span>
         </div>
       </div>
       <!-- Weather Layers -->
