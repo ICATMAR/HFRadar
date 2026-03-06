@@ -1,10 +1,11 @@
-let ca;
-export default ca = {
+let fr;
+export default fr = {
+
   banner: {
-    title: "Informació",
-    text: "Aquest lloc web està sent desenvolupat per Gerard Llorach-Tó. No dubteu a posar-vos en contacte amb mi si trobeu cap error o teniu suggeriments a {gerard} o a {icatmar}. Si esteu familiaritzats amb GitHub i els 'issues', feu servir el {github}.",
+    title: "Information",
+    text: "Ce site web est développé par Gerard Llorach-Tó. N'hésitez pas à me contacter si vous trouvez des erreurs ou si vous avez des suggestions à {gerard} ou à {icatmar}. Si vous êtes familier avec GitHub et les 'issues', veuillez utiliser le {github}.",
     links: {
-      github_repo: "repositori de GitHub"
+      github_repo: "dépôt GitHub"
     }
   },
 

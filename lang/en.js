@@ -1,5 +1,14 @@
 let en;
 export default en = {
+
+  banner: {
+    title: "Information",
+    text: "This website is being developed by Gerard Llorach-Tó. Please do not hesitate to contact me if you find any errors or have suggestions at {gerard} or at {icatmar}. If you are familiar with GitHub and issues, please use the {github}.",
+    links: {
+      github_repo: "GitHub repository"
+    }
+  },
+
   "Date": "Date",
 
   "buoyButtonTitle": "Center the camera on the surface buoy",
@@ -116,8 +125,8 @@ export default en = {
     "forward": "Fast-forward",
     "backward": "Rewind"
   },
-  
-  
+
+
 
 
   "Data": "Data",

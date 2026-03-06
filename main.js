@@ -3,6 +3,7 @@
 import ca from './lang/ca.js';
 import en from './lang/en.js';
 import es from './lang/es.js';
+import fr from './lang/fr.js';
 
 // Declare event emitter
 // https://github.com/developit/mitt
@@ -100,5 +101,6 @@ const app = Vue.createApp({
 i18n.global.mergeLocaleMessage('ca', ca);
 i18n.global.mergeLocaleMessage('en', en);
 i18n.global.mergeLocaleMessage('es', es);
+i18n.global.mergeLocaleMessage('fr', fr);
 app.use(i18n);
 app.mount(document.body);

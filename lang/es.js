@@ -1,5 +1,14 @@
 let es;
 export default es = {
+
+  banner: {
+    title: "Información",
+    text: "Este sitio web está siendo desarrollado por Gerard Llorach-Tó. No dude en ponerse en contacto conmigo si encuentra errores o tiene sugerencias en {gerard} o en {icatmar}. Si está familiarizado con GitHub y sus 'issues', por favor use el {github}.",
+    links: {
+      github_repo: "repositorio de GitHub"
+    }
+  },
+
   "Date": "Fecha",
 
   "buoyButtonTitle": "Centra la cámara en la boya de superfície",
@@ -119,38 +128,38 @@ export default es = {
     "stepBackward": "Desplázate al punto anterior",
     "forward": "Avance rápido",
     "backward": "Marcha atrás"
-  },  
-  
+  },
 
 
 
-  
-    "January": "Enero",
-    "February": "Febrero",
-    "March": "Marzo",
-    "April": "Abril",
-    "May": "Mayo",
-    "June": "Junio",
-    "July": "Julio",
-    "August": "Agosto",
-    "September": "Septiembre",
-    "October": "Octubre",
-    "November": "Noviembre",
-    "December": "Diciembre",
-    "Jan": "Ene",
-    // "Feb": ,
-    // "Mar": ,
-    "Apr": "Abr",
-    // "May": "May",
-    // "Jun": ,
-    // "Jul": ,
-    "Aug": "Ago",
-    // "Sep": "Sep",
-    // "Oct": ,
-    // "Nov": ,
-    "Dec": "Dic",
-  
-  
+
+
+  "January": "Enero",
+  "February": "Febrero",
+  "March": "Marzo",
+  "April": "Abril",
+  "May": "Mayo",
+  "June": "Junio",
+  "July": "Julio",
+  "August": "Agosto",
+  "September": "Septiembre",
+  "October": "Octubre",
+  "November": "Noviembre",
+  "December": "Diciembre",
+  "Jan": "Ene",
+  // "Feb": ,
+  // "Mar": ,
+  "Apr": "Abr",
+  // "May": "May",
+  // "Jun": ,
+  // "Jul": ,
+  "Aug": "Ago",
+  // "Sep": "Sep",
+  // "Oct": ,
+  // "Nov": ,
+  "Dec": "Dic",
+
+
 
   "Data": "Datos",
 
