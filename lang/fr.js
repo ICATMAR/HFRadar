@@ -44,6 +44,8 @@ export default fr = {
     downloadingData: "Téléchargement des données…",
     accessFTP: "Accéder au serveur FTP"
   },
+
+  "Auto-refresh": "Auto-actualisation",
   
   "Date": "Data",
 

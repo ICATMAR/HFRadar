@@ -43,6 +43,8 @@ export default ca = {
     accessFTP: "Accedeix al servidor FTP"
   },
 
+  "Auto-refresh": "Auto-atualització",
+
   "Date": "Data",
 
   "buoyButtonTitle": "Centra la càmara a la boia de superficie",

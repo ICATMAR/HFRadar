@@ -43,6 +43,8 @@ export default es = {
     downloadingData: "Descargando datos...",
     accessFTP: "Acceder al servidor FTP"
   },
+  
+  "Auto-refresh": "Auto-actualización",
 
   "Date": "Fecha",
 

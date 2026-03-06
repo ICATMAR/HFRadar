@@ -23,7 +23,7 @@
       <download-data-menu></download-data-menu>
 
       <!-- Active sync -->
-      <div class="hiddenInMobile activeSyncButton clickable" :class="[isActiveSyncOn ? 'activeSyncButtonOn' : '']" @click="changeActiveSync" title="Latest data is updated automatically when active"><span>Active Sync</span></div>
+      <div class="hiddenInMobile activeSyncButton clickable" :class="[isActiveSyncOn ? 'activeSyncButtonOn' : '']" @click="changeActiveSync" title="Latest data is updated automatically when active"><span>{{ $t('Auto-refresh') }}</span></div>
       <div class="visibleInMobile activeSyncButton activeSyncButtonIcon icon-str clickable" :class="[isActiveSyncOn ? 'activeSyncButtonOn' : '']" @click="changeActiveSync" title="Latest data is updated automatically when active">
         <span class="fa">&#xf2f1;</span>
       </div>

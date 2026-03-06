@@ -44,6 +44,8 @@ export default en = {
     accessFTP: "Access FTP server"
   },
 
+  "Auto-refresh": "Auto-refresh",
+
   "Date": "Date",
 
   "buoyButtonTitle": "Center the camera on the surface buoy",
