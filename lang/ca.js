@@ -55,6 +55,8 @@ export default ca = {
 
   "Advanced interface": "Interfície avançada",
 
+  "Data source": "Font de dades",
+
   "Date": "Data",
 
   "buoyButtonTitle": "Centra la càmara a la boia de superficie",

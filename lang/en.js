@@ -56,6 +56,8 @@ export default en = {
 
   "Advanced interface": "Advanced interface",
 
+  "Data source": "Data source",
+
   "Date": "Date",
 
   "buoyButtonTitle": "Center the camera on the surface buoy",

@@ -56,6 +56,8 @@ export default fr = {
   "Auto-refresh": "Auto-actualisation",
 
   "Advanced interface": "Interface avancée",
+
+  "Data source": "Source de données",
   
   "Date": "Data",
 

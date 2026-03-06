@@ -56,6 +56,8 @@ export default es = {
 
   "Advanced interface": "Interfaz avanzada",
 
+  "Data source": "Fuente de datos",
+
   "Date": "Fecha",
 
   "buoyButtonTitle": "Centra la cámara en la boya de superfície",
