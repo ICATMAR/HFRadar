@@ -44,6 +44,14 @@ export default en = {
     accessFTP: "Access FTP server"
   },
 
+  cookies: {
+    tooltipTitle: "Cookies and privacy",
+    bannerTitle: "Cookies settings",
+    bannerText: "We use cookies and collect information to improve the user experience and track our impact. No commercial use is given to the data.",
+    acceptButton: "Accept",
+    denyButton: "Deny"
+  },
+
   "Auto-refresh": "Auto-refresh",
 
   "Advanced interface": "Advanced interface",

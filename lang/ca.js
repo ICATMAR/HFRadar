@@ -43,6 +43,14 @@ export default ca = {
     accessFTP: "Accedeix al servidor FTP"
   },
 
+  cookies: {
+    tooltipTitle: "Galetes i privacitat",
+    bannerTitle: "Configuració de galetes",
+    bannerText: "Utilitzem galetes i recopilem informació per millorar l'experiència de l'usuari i seguir el nostre impacte. Sense ús comercial es dóna a les dades.",
+    acceptButton: "Acceptar",
+    denyButton: "Rebutjar"
+  },
+
   "Auto-refresh": "Auto-atualització",
 
   "Advanced interface": "Interfície avançada",

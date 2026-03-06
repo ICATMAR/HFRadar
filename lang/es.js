@@ -43,6 +43,14 @@ export default es = {
     downloadingData: "Descargando datos...",
     accessFTP: "Acceder al servidor FTP"
   },
+
+  cookies: {
+    tooltipTitle: "Cookies y privacidad",
+    bannerTitle: "Configuración de cookies",
+    bannerText: "Utilizamos cookies y recopilamos información para mejorar la experiencia del usuario y rastrear nuestro impacto. No se da uso comercial a los datos.",
+    acceptButton: "Aceptar",
+    denyButton: "Rechazar"
+  },
   
   "Auto-refresh": "Auto-actualización",
 

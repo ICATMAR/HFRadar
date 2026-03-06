@@ -1,7 +1,7 @@
 <template>
 
   <div class="logo-cookie-banner icon-str clickable" @click="isVisible = !isVisible" v-if="!isVisible"
-    title="Cookies and privacy">
+    :title="$t('cookies.tooltipTitle')">
     <span class="fa">&#xf563</span>
   </div>
 
@@ -12,20 +12,18 @@
 
       <!-- Title -->
       <div class="banner-title">
-        <span>Cookies settings</span>
+        <span>{{ $t('cookies.bannerTitle') }}</span>
       </div>
       <!-- Text -->
       <div class="banner-text">
-        <span>We use cookies and collect information to improve the user
-          experience and track our impact. No commercial use is given to the data.
-        </span>
+        <span>{{ $t('cookies.bannerText') }}</span>
       </div>
 
       <!-- Accept and deny buttons -->
       <div class="buttons-container">
         <!-- Accept -->
-        <button class="btn-accept" @click="acceptClicked">Accept</button>
-        <button class="btn-deny" @click="denyClicked">Deny</button>
+        <button class="btn-accept" @click="acceptClicked">{{ $t('cookies.acceptButton') }}</button>
+        <button class="btn-deny" @click="denyClicked">{{ $t('cookies.denyButton') }}</button>
       </div>
     </div>
   </Transition>
