@@ -60,7 +60,7 @@ export default ca = {
   "Currents": "Corrents",
   "particles": "partícules",
   "points": "punts",
-  "LOADING": "Carregant",
+  "LOADING": "CARREGANT",
 
   "Date": "Data",
 
