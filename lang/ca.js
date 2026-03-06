@@ -8,6 +8,18 @@ export default ca = {
     }
   },
 
+  information: {
+    tooltipTitle: "Galetes i privacitat",
+    warningTitle: "Avís!",
+    warningMessage: "Les dades en temps real podrien no estar disponibles del 4 al {lastDay} d'octubre de 2024 degut a manteniment. Disculpin les molèsties.",
+    closeButton: "Tancar",
+    acknowledgment1: "La xarxa ICATMAR HF Radar ha estat establerta amb el suport del Fons Europeu de Pesca i Assumptes Marítims, el Fons Europeu de Pesca, Assumptes Marítims i Aqüicultura i els fons proporcionats per la Generalitat de Catalunya. La xarxa ha estat dissenyada, implementada i gestionada pels esforços de la Direcció General de Política Marítima i Pesca Sostenible (Generalitat de Catalunya) i l'Institut de Ciències del Mar (CSIC), Barcelona.",
+    acknowledgment2: "Aquestes dades han estat recollides i posades a disposició de forma gratuïta per ICATMAR i els programes que hi contribueixen. Les dades han estat recollides per la Generalitat de Catalunya i processades per ICATMAR amb el suport del Fons Europeu de Pesca, Assumptes Marítims i Aqüicultura (FEPAM) i del Programa de Fons Climàtics de la Generalitat de Catalunya.",
+    acknowledgment3: "Aquestes dades segueixen els estàndards Copernicus; són públiques i gratuïtes. L'usuari assumeix tots els riscos d'ús de les dades. L'usuari ha de mostrar la citació en qualsevol publicació o producte que faci servir les dades. L'usuari ha de contactar ICATMAR abans de qualsevol ús comercial de les dades.",
+    acknowledgment4: "El conjunt de dades de velocitat dels corrents de la superfície marina per radar HF d'ICATMAR està sotmès a una llicència Creative Commons Attribution 4.0 International. Hauríeu de rebre una còpia de la llicència juntament amb aquest treball. Si no és així, vegeu http://creativecommons.org/licenses/by/4.0/."
+  },
+
+
   "Date": "Data",
 
   "buoyButtonTitle": "Centra la càmara a la boia de superficie",
@@ -124,6 +136,7 @@ export default ca = {
     "forward": "Avanç rápid",
     "backward": "Rebobinar"
   },
+
 
 
   "January": "Gener",

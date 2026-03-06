@@ -9,6 +9,18 @@ export default fr = {
     }
   },
 
+
+  information: {
+    tooltipTitle: "Cookies et confidentialité",
+    warningTitle: "Attention!",
+    warningMessage: "Les données en temps réel risquent d'être indisponibles du 4 au {lastDay} octobre 2024 en raison d'une maintenance. Nous nous excusons pour le désagrément.",
+    closeButton: "Fermer",
+    acknowledgment1: "Le réseau ICATMAR HF Radar a été établi avec le soutien du Fonds européen pour les affaires maritimes et la pêche, du Fonds européen pour les affaires maritimes, la pêche et l'aquaculture et des fonds fournis par le Gouvernement de la Catalogne. Le réseau a été conçu, mis en œuvre et géré par les efforts de la Direcció General de Política Marítima i Pesca Sostenible (Gouvernement de la Catalogne) et l'Institut de Sciences Marines (CSIC), Barcelone.",
+    acknowledgment2: "Ces données ont été collectées et mises à disposition gratuitement par ICATMAR et les programmes qui y contribuent. Les données ont été collectées par le Gouvernement de la Catalogne et traitées par ICATMAR avec le soutien du Fonds européen pour les affaires maritimes, la pêche et l'aquaculture (FEMAP) et du Programme de fonds climatiques du Gouvernement de la Catalogne.",
+    acknowledgment3: "Ces données suivent les normes Copernicus; elles sont publiques et gratuites. L'utilisateur assume tous les risques liés à l'utilisation des données. L'utilisateur doit afficher la citation dans toute publication ou produit utilisant les données. L'utilisateur doit contacter ICATMAR avant toute utilisation commerciale des données.",
+    acknowledgment4: "L'ensemble de données de vitesse des courants de surface de la mer par radar HF d'ICATMAR est sous licence Creative Commons Attribution 4.0 International. Vous devez avoir reçu une copie de la licence avec ce travail. Si ce n'est pas le cas, consultez http://creativecommons.org/licenses/by/4.0/."
+  },
+
   "Date": "Data",
 
   "buoyButtonTitle": "Centra la càmara a la boia de superficie",
@@ -125,6 +137,8 @@ export default fr = {
     "forward": "Avanç rápid",
     "backward": "Rebobinar"
   },
+
+
 
 
   "January": "Gener",

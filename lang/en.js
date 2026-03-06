@@ -8,6 +8,18 @@ export default en = {
       github_repo: "GitHub repository"
     }
   },
+  
+  information: {
+    tooltipTitle: "Cookies and privacy",
+    warningTitle: "Warning!",
+    warningMessage: "Real-time data might be unavailable from the 4th to the {lastDay}th of October 2024 due to maintenance. Sorry for the inconvenience.",
+    closeButton: "Close",
+    acknowledgment1: "ICATMAR HF Radar Network has been established with the support of the European Maritime and Fisheries Fund, the European Maritime, Fisheries and Aquaculture Fund and the fund provided by the Government of Catalonia. The network has been designed, implemented and managed through the efforts of the Direcció General de Política Marítima i Pesca Sostenible (Government of Catalonia) and the Insitut de Ciències del Mar (CSIC), Barcelona.",
+    acknowledgment2: "These data were collected and made freely available by ICATMAR and the programs that contribute to it. Data was collected by the Government of Catalonia and processed by ICATMAR with the support of the European Maritime, Fisheries and Aquaculture Fund (EMFAF) and the Climatic Funds Program of the Government of Catalonia.",
+    acknowledgment3: "These data follow Copernicus standards; they are public and free of charge. User assumes all risk for use of data. User must display citation in any publication or product using data. User must contact ICATMAR prior to any commercial use of data.",
+    acknowledgment4: "HF radar sea surface current velocity dataset by ICATMAR is licensed under a Creative Commons Attribution 4.0 International License. You should have received a copy of the license along with this work. If not, see http://creativecommons.org/licenses/by/4.0/."
+  },
+
 
   "Date": "Date",
 

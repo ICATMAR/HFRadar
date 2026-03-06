@@ -8,6 +8,18 @@ export default es = {
       github_repo: "repositorio de GitHub"
     }
   },
+  
+  information: {
+    tooltipTitle: "Cookies y privacidad",
+    warningTitle: "¡Advertencia!",
+    warningMessage: "Los datos en tiempo real podrían no estar disponibles del 4 al {lastDay} de octubre de 2024 debido a mantenimiento. Disculpen las molestias.",
+    closeButton: "Cerrar",
+    acknowledgment1: "La red ICATMAR HF Radar ha sido establecida con el apoyo del Fondo Europeo de Pesca y Asuntos Marítimos, el Fondo Europeo de Pesca, Asuntos Marítimos y Acuicultura y los fondos proporcionados por la Generalidad de Cataluña. La red ha sido diseñada, implementada y gestionada por los esfuerzos de la Dirección General de Política Marítima y Pesca Sostenible (Generalidad de Cataluña) e Instituto de Ciencias del Mar (CSIC), Barcelona.",
+    acknowledgment2: "Estos datos fueron recopilados y puestos a disposición de forma gratuita por ICATMAR y los programas que contribuyen a ella. Los datos fueron recopilados por la Generalidad de Cataluña y procesados por ICATMAR con el apoyo del Fondo Europeo de Pesca, Asuntos Marítimos y Acuicultura (FEAMP) y el Programa de Fondos Climáticos de la Generalidad de Cataluña.",
+    acknowledgment3: "Estos datos siguen los estándares Copernicus; son públicos y gratuitos. El usuario asume todos los riesgos por el uso de los datos. El usuario debe mostrar la citación en cualquier publicación o producto que utilice los datos. El usuario debe contactar con ICATMAR antes de cualquier uso comercial de los datos.",
+    acknowledgment4: "El conjunto de datos de velocidad de corrientes de la superficie marina por radar HF de ICATMAR está bajo licencia Creative Commons Atribución 4.0 Internacional. Debe haber recibido una copia de la licencia junto con este trabajo. Si no es así, consulte http://creativecommons.org/licenses/by/4.0/."
+  },
+
 
   "Date": "Fecha",
 

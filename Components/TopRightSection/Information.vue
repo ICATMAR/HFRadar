@@ -3,7 +3,7 @@
     class="logo-info icon-str clickable"
     @click="isVisible = !isVisible"
     v-if="!isVisible"
-    title="Cookies and privacy"
+    title="$t('information.tooltipTitle')"
   >
     <span>i</span>
     <div class="warning-circle" v-if="isWarningOn"></div>
@@ -19,14 +19,15 @@
       <!-- Title -->
       <div class="warning-container" v-if="isWarningOn">
         <div class="banner-title-warning">
-          <span>Warning!</span>
+          <span>{{ $t("information.warningTitle") }}</span>
         </div>
         <!-- Text -->
         <div class="banner-text-warning">
-          <span
-            >Real-time data might be unavailable from the 4th to the {{ lastDay }}th of
-            October 2024 due to manteinance. Sorry for the inconvenience.
-          </span>
+          <i18n-t keypath="information.warningMessage" tag="span">
+            <template #lastDay>
+              {{ lastDay }}
+            </template>
+          </i18n-t>
         </div>
       </div>
 
@@ -55,45 +56,22 @@
 
       <!-- Acknolwedgements -->
       <div class="banner-text">
-        <span>
-          ICATMAR HF Radar Network has been established with the support of the European
-          Maritime and Fisheries Fund, the European Maritime, Fisheries and Aquaculture
-          Fund and the fund provided by the Government of Catalonia. The network has been
-          designed, implemented and managed through the efforts of the Direcció General de
-          Política Marítima i Pesca Sostenible (Government of Catalonia) and the Insitut
-          de Ciències del Mar (CSIC), Barcelona.
-        </span>
+        <span>{{ $t("information.acknowledgment1") }}</span>
       </div>
       <div class="banner-text">
-        <span>
-          These data were collected and made freely available by ICATMAR and the programs
-          that contribute to it. Data was collected by the Government of Catalonia and
-          processed by ICATMAR with the support of the European Maritime, Fisheries and
-          Aquaculture Fund (EMFAF) and the Climatic Funds Program of the Government of
-          Catalonia.
-        </span>
+        <span>{{ $t("information.acknowledgment2") }}</span>
       </div>
       <div class="banner-text">
-        <span>
-          These data follow Copernicus standards; they are public and free of charge. User
-          assumes all risk for use of data. User must display citation in any publication
-          o product using data. User must contact ICATMAR prior to any commercial use of
-          data.
-        </span>
+        <span>{{ $t("information.acknowledgment3") }}</span>
       </div>
       <div class="banner-text">
-        <span>
-          HF radar sea surface current velocity dataset by ICATMAR is licensed under a
-          Creative Commons Attribution 4.0 International License. You should have received
-          a copy of the license along with this work. If not, see
-          http://creativecommons.org/licenses/by/4.0/.
-        </span>
+        <span>{{ $t("information.acknowledgment4") }}</span>
       </div>
 
       <!-- Accept button -->
       <div class="buttons-container">
         <!-- Accept -->
-        <button class="btn-accept" @click="acceptClicked">Close</button>
+        <button class="btn-accept" @click="acceptClicked">{{ $t("information.closeButton") }}</button>
       </div>
     </div>
   </Transition>
