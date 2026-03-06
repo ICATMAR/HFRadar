@@ -80,12 +80,12 @@ export default {
     return {
       climaLayers: [
         'Current',
-        'Sea Surface Temperature',
-        'Sea Temperature Anomaly',
-        'Sea Bottom Temperature',
+        'Sea surface temperature',
+        'Sea temperature anomaly',
+        'Sea bottom temperature',
         'Chlorophyll',
         'Salinity',
-        'Wave Significant Height',
+        'Wave significant height',
         //'Wind', 
       ],
       // https://origin.fontawesome.com/search?o=r&m=free&f=classic
