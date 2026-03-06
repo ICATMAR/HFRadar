@@ -58,6 +58,11 @@ export default en = {
 
   "Data source": "Data source",
 
+  "Currents": "Currents",
+  "particles": "particles",
+  "points": "points",
+  "LOADING": "LOADING",
+
   "Date": "Date",
 
   "buoyButtonTitle": "Center the camera on the surface buoy",

@@ -58,6 +58,11 @@ export default es = {
 
   "Data source": "Fuente de datos",
 
+  "Currents": "Corrientes",
+  "particles": "partículas",
+  "points": "puntos",
+  "LOADING": "CARGANDO",
+
   "Date": "Fecha",
 
   "buoyButtonTitle": "Centra la cámara en la boya de superfície",

@@ -57,6 +57,11 @@ export default ca = {
 
   "Data source": "Font de dades",
 
+  "Currents": "Corrents",
+  "particles": "partícules",
+  "points": "punts",
+  "LOADING": "Carregant",
+
   "Date": "Data",
 
   "buoyButtonTitle": "Centra la càmara a la boia de superficie",

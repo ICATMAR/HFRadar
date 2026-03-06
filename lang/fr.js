@@ -58,9 +58,15 @@ export default fr = {
   "Advanced interface": "Interface avancée",
 
   "Data source": "Source de données",
-  
+
+  "Currents": "Courants",
+  "particles": "particules",
+  "points": "points",
+  "LOADING": "CHARGEMENT",
+
   "Date": "Data",
 
+  
   "buoyButtonTitle": "Centra la càmara a la boia de superficie",
   "baseButtonTitle": "Centra la càmara a l'observatori submarí",
 
