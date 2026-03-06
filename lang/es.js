@@ -20,6 +20,29 @@ export default es = {
     acknowledgment4: "El conjunto de datos de velocidad de corrientes de la superficie marina por radar HF de ICATMAR está bajo licencia Creative Commons Atribución 4.0 Internacional. Debe haber recibido una copia de la licencia junto con este trabajo. Si no es así, consulte http://creativecommons.org/licenses/by/4.0/."
   },
 
+  download: {
+    downloadData: "Descargar datos",
+    downloadSettings: "Ajustes de descarga",
+    selectVariable: "Selecciona la variable",
+    currents: "Velocidades de superficie marina",
+    waves: "Olas",
+    chooseFileFormat: "Elige el formato de archivo",
+    netCDF: "netCDF",
+    geojson: "geojson",
+    warningTuv: "Advertencia: los archivos tuv no tienen control de calidad.",
+    selectTimeSpan: "Selecciona el intervalo de tiempo",
+    displayedTime: "Tiempo mostrado",
+    last24h: "Últimas 24h",
+    last3days: "Últimos 3 días",
+    latestMonth: "Último mes",
+    estimatedSize: "Tamaño estimado del archivo: {size} MB",
+    disclaimer: "Estos datos son públicos y gratuitos. El usuario asume todos los riesgos por el uso de los datos. El usuario debe mostrar la citación en cualquier publicación o producto que utilice los datos. El usuario debe contactar con ICATMAR antes de cualquier uso comercial de los datos. El conjunto de datos de velocidad de corrientes de la superficie marina por radar HF de ICATMAR está bajo una {ccby}.",
+    cookiesWarning: "Descargar los datos implica el reconocimiento de nuestro uso de cookies para monitorizar la actividad de descarga y mejorar nuestros servicios.",
+    downloadButton: "Descargar",
+    cancelButton: "Cancelar",
+    downloadingData: "Descargando datos...",
+    accessFTP: "Acceder al servidor FTP"
+  },
 
   "Date": "Fecha",
 

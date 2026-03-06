@@ -21,6 +21,30 @@ export default fr = {
     acknowledgment4: "L'ensemble de données de vitesse des courants de surface de la mer par radar HF d'ICATMAR est sous licence Creative Commons Attribution 4.0 International. Vous devez avoir reçu une copie de la licence avec ce travail. Si ce n'est pas le cas, consultez http://creativecommons.org/licenses/by/4.0/."
   },
 
+  download: {
+    downloadData: "Télécharger les données",
+    downloadSettings: "Télécharger les paramètres",
+    selectVariable: "Sélectionnez une variable",
+    currents: "Vitesses de surface de la mer",
+    waves: "Vagues",
+    chooseFileFormat: "Choisissez le format de fichier",
+    netCDF: "netCDF",
+    geojson: "geojson",
+    warningTuv: "Attention : les fichiers tuv n'ont pas de contrôle de qualité.",
+    selectTimeSpan: "Sélectionnez la période",
+    displayedTime: "Temps affiché",
+    last24h: "Dernières 24h",
+    last3days: "Derniers 3 jours",
+    latestMonth: "Dernier mois",
+    estimatedSize: "Taille estimée du fichier : {size} MB",
+    disclaimer: "Ces données sont publiques et gratuites. L'utilisateur assume tous les risques liés à l'utilisation des données. L'utilisateur doit afficher la citation dans toute publication ou produit utilisant les données. L'utilisateur doit contacter ICATMAR avant toute utilisation commerciale des données. L'ensemble de données de vitesse des courants de surface de la mer par radar HF d'ICATMAR est licencié sous une {ccby}.",
+    cookiesWarning: "Le téléchargement des données implique la reconnaissance de notre utilisation des cookies pour surveiller l'activité de téléchargement et améliorer nos services.",
+    downloadButton: "Télécharger",
+    cancelButton: "Annuler",
+    downloadingData: "Téléchargement des données…",
+    accessFTP: "Accéder au serveur FTP"
+  },
+  
   "Date": "Data",
 
   "buoyButtonTitle": "Centra la càmara a la boia de superficie",

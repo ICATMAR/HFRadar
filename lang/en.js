@@ -20,6 +20,29 @@ export default en = {
     acknowledgment4: "HF radar sea surface current velocity dataset by ICATMAR is licensed under a Creative Commons Attribution 4.0 International License. You should have received a copy of the license along with this work. If not, see http://creativecommons.org/licenses/by/4.0/."
   },
 
+  download: {
+    downloadData: "Download data",
+    downloadSettings: "Download settings",
+    selectVariable: "Select the variable",
+    currents: "Sea surface velocities",
+    waves: "Waves",
+    chooseFileFormat: "Choose the file format",
+    netCDF: "netCDF",
+    geojson: "geojson",
+    warningTuv: "Warning: tuv files do not have a quality control.",
+    selectTimeSpan: "Select the time span",
+    displayedTime: "Displayed time",
+    last24h: "Last 24h",
+    last3days: "Last 3 days",
+    latestMonth: "Latest month",
+    estimatedSize: "Estimated file size: {size} MB",
+    disclaimer: "These data are public and free of charge. User assumes all risk for use of data. User must display citation in any publication or product using data. User must contact ICATMAR prior to any commercial use of data. HF radar sea surface current velocity dataset by ICATMAR is licensed under a {ccby}.",
+    cookiesWarning: "Downloading the data implies acknowledgment of our use of cookies to monitor download activity and improve our services.",
+    downloadButton: "Download",
+    cancelButton: "Cancel",
+    downloadingData: "Downloading data...",
+    accessFTP: "Access FTP server"
+  },
 
   "Date": "Date",
 

@@ -18,7 +18,30 @@ export default ca = {
     acknowledgment3: "Aquestes dades segueixen els estàndards Copernicus; són públiques i gratuïtes. L'usuari assumeix tots els riscos d'ús de les dades. L'usuari ha de mostrar la citació en qualsevol publicació o producte que faci servir les dades. L'usuari ha de contactar ICATMAR abans de qualsevol ús comercial de les dades.",
     acknowledgment4: "El conjunt de dades de velocitat dels corrents de la superfície marina per radar HF d'ICATMAR està sotmès a una llicència Creative Commons Attribution 4.0 International. Hauríeu de rebre una còpia de la llicència juntament amb aquest treball. Si no és així, vegeu http://creativecommons.org/licenses/by/4.0/."
   },
-
+  
+  download: {
+    downloadData: "Descarregar dades",
+    downloadSettings: "Paràmetres de descàrrega",
+    selectVariable: "Selecciona la variable",
+    currents: "Velocitats de superfície marina",
+    waves: "Onades",
+    chooseFileFormat: "Tria el format de fitxer",
+    netCDF: "netCDF",
+    geojson: "geojson",
+    warningTuv: "Advertència: els fitxers tuv no tenen control de qualitat.",
+    selectTimeSpan: "Selecciona el període de temps",
+    displayedTime: "Temps mostrat",
+    last24h: "Últimes 24h",
+    last3days: "Últims 3 dies",
+    latestMonth: "Últim mes",
+    estimatedSize: "Mida estimada del fitxer: {size} MB",
+    disclaimer: "Aquestes dades són públiques i gratuïtes. L'usuari assumeix tots els riscos de l'ús de les dades. L'usuari ha de mostrar la cita en qualsevol publicació o producte que utilitzi dades. L'usuari ha de contactar amb ICATMAR amb antelació a qualsevol ús comercial de les dades. El conjunt de dades de velocitat de corrents de superfície marina per radar HF d'ICATMAR està llicenciat sota una {ccby}.",
+    cookiesWarning: "La descàrrega de dades implica el reconeixement del nostre ús de galetes per monitoritzar l'activitat de descàrrega i millorar els nostres serveis.",
+    downloadButton: "Descarregar",
+    cancelButton: "Cancel·lar",
+    downloadingData: "Descarregant dades...",
+    accessFTP: "Accedeix al servidor FTP"
+  },
 
   "Date": "Data",
 

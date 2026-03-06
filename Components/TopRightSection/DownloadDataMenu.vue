@@ -1,7 +1,7 @@
 <template>
   
   <!-- Download data top-right button -->
-  <button class="hiddenInMobile download-button clickable" @click="downloadIconClicked" v-if="!isVisible"><span>Download data</span></button>
+  <button class="hiddenInMobile download-button clickable" @click="downloadIconClicked" v-if="!isVisible"><span>{{ $t("download.downloadData") }}</span></button>
 
   <button class="visibleInMobile download-button-icon icon-str clickable" @click="downloadIconClicked" v-if="!isVisible">
     <span class="fa">&#xf019;</span>
@@ -15,17 +15,17 @@
 
       <!-- Title -->
       <div class="container-title">
-        <span>Download settings</span>
+        <span>{{ $t("download.downloadSettings") }}</span>
       </div>
 
 
       <!-- Variable option -->
       <div class="option-container">
-        <span>Select the variable</span>
+        <span>{{ $t("download.selectVariable") }}</span>
         <!-- Button group -->
         <div class="button-group">
-          <button class="clickable" :class="[selVariable == 'currents' ? 'button-active' : '']" @click="selVariable = 'currents'"><span>Sea surface velocities</span></button>
-          <button class="clickable" :class="[selVariable == 'waves' ? 'button-active' : '']" @click="selVariable = 'waves'"><span>Waves</span></button>
+          <button class="clickable" :class="[selVariable == 'currents' ? 'button-active' : '']" @click="selVariable = 'currents'"><span>{{ $t("download.currents") }}</span></button>
+          <button class="clickable" :class="[selVariable == 'waves' ? 'button-active' : '']" @click="selVariable = 'waves'"><span>{{ $t("download.waves") }}</span></button>
         </div>
       </div>
 
@@ -33,74 +33,76 @@
 
       <!-- File format option -->
       <div class="option-container" v-if="selVariable == 'currents'">
-        <span>Choose the file format</span>
+        <span>{{ $t("download.chooseFileFormat") }}</span>
         <!-- Button group -->
         <div class="button-group">
           <!-- <button class="clickable" :class="[selFormat == 'tuv' ? 'button-active' : '']" @click="selFormat = 'tuv'"><span>.tuv</span></button> -->
-          <button class="clickable" :class="[selFormat == 'nc' ? 'button-active' : '']" @click="selFormat = 'nc'"><span>netCDF</span></button>
-          <button class="clickable" :class="[selFormat == 'geojson' ? 'button-active' : '']" @click="selFormat = 'geojson'"><span>geojson</span></button>
+          <button class="clickable" :class="[selFormat == 'nc' ? 'button-active' : '']" @click="selFormat = 'nc'"><span>{{ $t("download.netCDF") }}</span></button>
+          <button class="clickable" :class="[selFormat == 'geojson' ? 'button-active' : '']" @click="selFormat = 'geojson'"><span>{{ $t("download.geojson") }}</span></button>
         </div>
         <!-- Warning -->
-        <span v-if="selFormat=='tuv'">Warning: tuv files do not have a quality control.</span>
+        <span v-if="selFormat=='tuv'">{{ $t("download.warningTuv") }}</span>
       </div>
 
 
       <!-- Time span option -->
       <div class="option-container" v-if="selVariable == 'currents'">
-        <span>Select the time span</span>
+        <span>{{ $t("download.selectTimeSpan") }}</span>
         <!-- Button group -->
         <div class="button-group">
-          <button class="clickable" :class="[selTimespan == 'selected' ? 'button-active' : '']" @click="selTimespan = 'selected'"><span>Displayed time</span></button>
-          <button class="clickable" :class="[selTimespan == 'lastDay' ? 'button-active' : '']" @click="selTimespan = 'lastDay'"><span>Last 24h</span></button>
-          <button class="clickable" :class="[selTimespan == 'last3days' ? 'button-active' : '']" @click="selTimespan = 'last3days'"><span>Last 3 days</span></button>
+          <button class="clickable" :class="[selTimespan == 'selected' ? 'button-active' : '']" @click="selTimespan = 'selected'"><span>{{ $t("download.displayedTime") }}</span></button>
+          <button class="clickable" :class="[selTimespan == 'lastDay' ? 'button-active' : '']" @click="selTimespan = 'lastDay'"><span>{{ $t("download.last24h") }}</span></button>
+          <button class="clickable" :class="[selTimespan == 'last3days' ? 'button-active' : '']" @click="selTimespan = 'last3days'"><span>{{ $t("download.last3days") }}</span></button>
         </div>
       </div>
 
       <!-- Time span option -->
       <div class="option-container" v-if="selVariable == 'waves'">
-        <span>Select the time span</span>
+        <span>{{ $t("download.selectTimeSpan") }}</span>
         <!-- Button group -->
         <div class="button-group">
-          <button class="clickable button-active"><span>Latest month</span></button>
+          <button class="clickable button-active"><span>{{ $t("download.latestMonth") }}</span></button>
         </div>
       </div>
       
 
       <!-- Estimated file size -->
       <div class="container-text">
-        <span v-if="selVariable == 'currents'">Estimated file size: {{ selTimespan == 'selected' ? estimatedSize[selFormat] : selTimespan == 'lastDay' ? Math.round(estimatedSize[selFormat]*24) : Math.round(estimatedSize[selFormat]* 24*7) }} MB
+        <span v-if="selVariable == 'currents'">
+          {{ $t('download.estimatedSize', { size: selTimespan == 'selected' ? estimatedSize[selFormat] : selTimespan == 'lastDay' ? Math.round(estimatedSize[selFormat]*24) : Math.round(estimatedSize[selFormat]* 24*7) }) }}
         </span>
 
-        <span v-if="selVariable == 'waves'">Estimated maximum file size: 4 MB
+        <span v-if="selVariable == 'waves'">
+          {{ $t('download.estimatedSize', { size: 4 }) }}
         </span>
       </div>
 
 
       <!-- Disclaimer -->
       <div class="container-text disclaimer">
-        <span>These data are public and free of charge. User assumes all risk for use of data. 
-          User must display citation in any publication o product using data. User must contact ICATMAR prior to any commercial use of data.
-          HF radar sea surface current velocity dataset by ICATMAR is licensed under a <a class="clickable" href="https://creativecommons.org/licenses/by/4.0/" target="_blank">CC-BY-4.0</a>.
-        </span>
+        <i18n-t keypath="download.disclaimer" tag="span">
+          <template #ccby>
+            <a class="clickable" href="https://creativecommons.org/licenses/by/4.0/" target="_blank">CC-BY-4.0</a>
+          </template>
+        </i18n-t>
       </div>
 
       <!-- Cookies warning -->
       <div class="container-text disclaimer" v-if="mustShowCookieWarning">
-        <span><strong>Downloading the data implies acknowledgment of our use of cookies to monitor download activity and improve our services.
-        </strong></span>
+        <strong>{{ $t("download.cookiesWarning") }}</strong>
       </div>
       
       <!-- Download buttons -->
       <div class="buttons-container">
         <!-- Download -->
-        <button class="btn-download" :class="[canDownload ? 'clickable' : 'unavailable']" @click="downloadClicked">Download</button>
+        <button class="btn-download" :class="[canDownload ? 'clickable' : 'unavailable']" @click="downloadClicked">{{ $t("download.downloadButton") }}</button>
         <!-- Close -->
-        <button class="btn-cancel clickable" @click="isVisible = false">Cancel</button>
+        <button class="btn-cancel clickable" @click="isVisible = false">{{ $t("download.cancelButton") }}</button>
       </div>
 
       <!-- Warning no data available -->
       <div class="container-text" v-if="!canDownload">
-        <span>Downloading data...</span>
+        <span>{{ $t("download.downloadingData") }}</span>
       </div>
 
       <!-- Horizontal white line -->
@@ -108,7 +110,7 @@
 
       <div class="buttons-container">
         <button class="btn-ftp clickable" onclick="window.open('https://icatmar.cat/visors/servei-de-dades/', '_blank')">
-          Access FTP server .
+          {{ $t("download.accessFTP") }}.
           <span class="fa"> &#xf1c0</span>.
         </button>
       </div>
