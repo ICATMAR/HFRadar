@@ -5,6 +5,9 @@
       <!-- Information -->
       <information></information>
 
+      <!-- Language selector -->
+      <language-selector></language-selector>
+
       <!-- Repository -->
       <a href="https://github.com/ICATMAR/HFRadar" target="_blank" title="Github repository">
         <svg height="32" aria-hidden="true" viewBox="0 0 16 16" version="1.1" width="32" data-view-component="true" class="clickable github-logo">
@@ -41,6 +44,7 @@
 import Information from "./Information.vue";
 import CookieBanner from "./CookieBanner.vue";
 import DownloadDataMenu from "./DownloadDataMenu.vue";
+import LanguageSelector from "./LanguageSelector.vue";
 
 export default {
   name: "TopRightSection",
@@ -84,6 +88,7 @@ export default {
     "information": Information,
     "cookie-banner": CookieBanner,
     "download-data-menu": DownloadDataMenu,
+    "language-selector": LanguageSelector
   }
 }
 </script>
