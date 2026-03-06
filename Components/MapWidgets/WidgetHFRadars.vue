@@ -31,13 +31,13 @@
         <!-- On/Off particle animation -->
         <div class='widgetButtonContainer'>
           <onOffButton ref="onOffParticles" :checked="true" :inSize="'15px'" @change="particlesButtonClicked($event)"></onOffButton>
-          <span class='widgetSpan'>particles</span>
+          <span class='widgetSpan'>{{ $t('particles') }}</span>
         </div>
 
         <!-- On/Off points -->
         <div class='widgetButtonContainer'>
           <onOffButton ref="onOffPoints" :checked="true" :inSize="'15px'" @change="pointsButtonClicked($event)"></onOffButton>
-          <span class='widgetSpan'>points</span>
+          <span class='widgetSpan'>{{ $t('points') }}</span>
         </div>
         <!-- Maybe point variable too here? -->
       </div>
@@ -58,7 +58,7 @@
 
     <Transition name="fade">
       <div v-show="isVisible && isDataManagerLoading">
-        <span>LOADING...</span>
+        <span>{{ $t('LOADING') }}...</span>
       </div>
     </Transition>
 

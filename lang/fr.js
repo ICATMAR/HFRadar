@@ -1,76 +1,79 @@
-let ca;
-export default ca = {
+let fr;
+export default fr = {
+
   banner: {
-    title: "Informació",
-    text: "Aquest lloc web està sent desenvolupat per Gerard Llorach-Tó. No dubteu a posar-vos en contacte amb mi si trobeu cap error o teniu suggeriments a {gerard} o a {icatmar}. Si esteu familiaritzats amb GitHub i els 'issues', feu servir el {github}.",
+    title: "Information",
+    text: "Ce site web est développé par Gerard Llorach-Tó. N'hésitez pas à me contacter si vous trouvez des erreurs ou si vous avez des suggestions à {gerard} ou à {icatmar}. Si vous êtes familier avec GitHub et les 'issues', veuillez utiliser le {github}.",
     links: {
-      github_repo: "repositori de GitHub"
+      github_repo: "dépôt GitHub"
     }
   },
 
+
   information: {
-    tooltipTitle: "Galetes i privacitat",
-    warningTitle: "Avís!",
-    warningMessage: "Les dades en temps real podrien no estar disponibles del 4 al {lastDay} d'octubre de 2024 degut a manteniment. Disculpin les molèsties.",
-    closeButton: "Tancar",
-    acknowledgment1: "La xarxa ICATMAR HF Radar ha estat establerta amb el suport del Fons Europeu de Pesca i Assumptes Marítims, el Fons Europeu de Pesca, Assumptes Marítims i Aqüicultura i els fons proporcionats per la Generalitat de Catalunya. La xarxa ha estat dissenyada, implementada i gestionada pels esforços de la Direcció General de Política Marítima i Pesca Sostenible (Generalitat de Catalunya) i l'Institut de Ciències del Mar (CSIC), Barcelona.",
-    acknowledgment2: "Aquestes dades han estat recollides i posades a disposició de forma gratuïta per ICATMAR i els programes que hi contribueixen. Les dades han estat recollides per la Generalitat de Catalunya i processades per ICATMAR amb el suport del Fons Europeu de Pesca, Assumptes Marítims i Aqüicultura (FEPAM) i del Programa de Fons Climàtics de la Generalitat de Catalunya.",
-    acknowledgment3: "Aquestes dades segueixen els estàndards Copernicus; són públiques i gratuïtes. L'usuari assumeix tots els riscos d'ús de les dades. L'usuari ha de mostrar la citació en qualsevol publicació o producte que faci servir les dades. L'usuari ha de contactar ICATMAR abans de qualsevol ús comercial de les dades.",
-    acknowledgment4: "El conjunt de dades de velocitat dels corrents de la superfície marina per radar HF d'ICATMAR està sotmès a una llicència Creative Commons Attribution 4.0 International. Hauríeu de rebre una còpia de la llicència juntament amb aquest treball. Si no és així, vegeu http://creativecommons.org/licenses/by/4.0/."
+    tooltipTitle: "Cookies et confidentialité",
+    warningTitle: "Attention!",
+    warningMessage: "Les données en temps réel risquent d'être indisponibles du 4 au {lastDay} octobre 2024 en raison d'une maintenance. Nous nous excusons pour le désagrément.",
+    closeButton: "Fermer",
+    acknowledgment1: "Le réseau ICATMAR HF Radar a été établi avec le soutien du Fonds européen pour les affaires maritimes et la pêche, du Fonds européen pour les affaires maritimes, la pêche et l'aquaculture et des fonds fournis par le Gouvernement de la Catalogne. Le réseau a été conçu, mis en œuvre et géré par les efforts de la Direcció General de Política Marítima i Pesca Sostenible (Gouvernement de la Catalogne) et l'Institut de Sciences Marines (CSIC), Barcelone.",
+    acknowledgment2: "Ces données ont été collectées et mises à disposition gratuitement par ICATMAR et les programmes qui y contribuent. Les données ont été collectées par le Gouvernement de la Catalogne et traitées par ICATMAR avec le soutien du Fonds européen pour les affaires maritimes, la pêche et l'aquaculture (FEMAP) et du Programme de fonds climatiques du Gouvernement de la Catalogne.",
+    acknowledgment3: "Ces données suivent les normes Copernicus; elles sont publiques et gratuites. L'utilisateur assume tous les risques liés à l'utilisation des données. L'utilisateur doit afficher la citation dans toute publication ou produit utilisant les données. L'utilisateur doit contacter ICATMAR avant toute utilisation commerciale des données.",
+    acknowledgment4: "L'ensemble de données de vitesse des courants de surface de la mer par radar HF d'ICATMAR est sous licence Creative Commons Attribution 4.0 International. Vous devez avoir reçu une copie de la licence avec ce travail. Si ce n'est pas le cas, consultez http://creativecommons.org/licenses/by/4.0/."
   },
-  
+
   download: {
-    downloadData: "Descarregar dades",
-    downloadSettings: "Paràmetres de descàrrega",
-    selectVariable: "Selecciona la variable",
-    currents: "Velocitats de superfície marina",
-    waves: "Onades",
-    chooseFileFormat: "Tria el format de fitxer",
+    downloadData: "Télécharger les données",
+    downloadSettings: "Télécharger les paramètres",
+    selectVariable: "Sélectionnez une variable",
+    currents: "Vitesses de surface de la mer",
+    waves: "Vagues",
+    chooseFileFormat: "Choisissez le format de fichier",
     netCDF: "netCDF",
     geojson: "geojson",
-    warningTuv: "Advertència: els fitxers tuv no tenen control de qualitat.",
-    selectTimeSpan: "Selecciona el període de temps",
-    displayedTime: "Temps mostrat",
-    last24h: "Últimes 24h",
-    last3days: "Últims 3 dies",
-    latestMonth: "Últim mes",
-    estimatedSize: "Mida estimada del fitxer: {size} MB",
-    disclaimer: "Aquestes dades són públiques i gratuïtes. L'usuari assumeix tots els riscos de l'ús de les dades. L'usuari ha de mostrar la cita en qualsevol publicació o producte que utilitzi dades. L'usuari ha de contactar amb ICATMAR amb antelació a qualsevol ús comercial de les dades. El conjunt de dades de velocitat de corrents de superfície marina per radar HF d'ICATMAR està llicenciat sota una {ccby}.",
-    cookiesWarning: "La descàrrega de dades implica el reconeixement del nostre ús de galetes per monitoritzar l'activitat de descàrrega i millorar els nostres serveis.",
-    downloadButton: "Descarregar",
-    cancelButton: "Cancel·lar",
-    downloadingData: "Descarregant dades...",
-    accessFTP: "Accedeix al servidor FTP"
+    warningTuv: "Attention : les fichiers tuv n'ont pas de contrôle de qualité.",
+    selectTimeSpan: "Sélectionnez la période",
+    displayedTime: "Temps affiché",
+    last24h: "Dernières 24h",
+    last3days: "Derniers 3 jours",
+    latestMonth: "Dernier mois",
+    estimatedSize: "Taille estimée du fichier : {size} MB",
+    disclaimer: "Ces données sont publiques et gratuites. L'utilisateur assume tous les risques liés à l'utilisation des données. L'utilisateur doit afficher la citation dans toute publication ou produit utilisant les données. L'utilisateur doit contacter ICATMAR avant toute utilisation commerciale des données. L'ensemble de données de vitesse des courants de surface de la mer par radar HF d'ICATMAR est licencié sous une {ccby}.",
+    cookiesWarning: "Le téléchargement des données implique la reconnaissance de notre utilisation des cookies pour surveiller l'activité de téléchargement et améliorer nos services.",
+    downloadButton: "Télécharger",
+    cancelButton: "Annuler",
+    downloadingData: "Téléchargement des données…",
+    accessFTP: "Accéder au serveur FTP"
   },
 
   cookies: {
-    tooltipTitle: "Galetes i privacitat",
-    bannerTitle: "Configuració de galetes",
-    bannerText: "Utilitzem galetes i recopilem informació per millorar l'experiència de l'usuari i seguir el nostre impacte. Sense ús comercial es dóna a les dades.",
-    acceptButton: "Acceptar",
-    denyButton: "Rebutjar"
+    tooltipTitle: "Cookies et confidentialité",
+    bannerTitle: "Paramètres des cookies",
+    bannerText: "Nous utilisons des cookies et collectons des informations pour améliorer l'expérience utilisateur et suivre notre impact. Aucun usage commercial n'est donné aux données.",
+    acceptButton: "Accepter",
+    denyButton: "Refuser"
   },
 
   mapOptions: {
-    baseLayer: "Capa base",
-    isobaths: "Isòbates",
-    inSituObservations: "Observacions in situ",
-    weatherAndSeaModels: "Models meteo-oceanogràfics"
+    baseLayer: "Couche de base",
+    isobaths: "Isobathes",
+    inSituObservations: "Observations in situ",
+    weatherAndSeaModels: "Modèles météo-oceanographiques"
   },
 
-  "Auto-refresh": "Auto-atualització",
+  "Auto-refresh": "Auto-actualisation",
 
-  "Advanced interface": "Interfície avançada",
+  "Advanced interface": "Interface avancée",
 
-  "Data source": "Font de dades",
+  "Data source": "Source de données",
 
-  "Currents": "Corrents",
-  "particles": "partícules",
-  "points": "punts",
-  "LOADING": "CARREGANT",
+  "Currents": "Courants",
+  "particles": "particules",
+  "points": "points",
+  "LOADING": "CHARGEMENT",
 
   "Date": "Data",
 
+  
   "buoyButtonTitle": "Centra la càmara a la boia de superficie",
   "baseButtonTitle": "Centra la càmara a l'observatori submarí",
 
@@ -94,25 +97,25 @@ export default ca = {
   "PSAL": "Salinitat (base submarina)",
 
   "Wind": "Vent",
-  "Waves": "Onatge",
+  "Waves": "Vagues",
 
-  "Wave height": "Altura d'onatge",
-  "Swell direction": "Direcció de l'onatge",
-  "Wave steepness": "Període",
+  "Wave height": "Hauteur des vagues",
+  "Swell direction": "Direction de la houle",
+  "Wave steepness": "Pente des vagues",
 
-  "Wind speed": "Velocitat del vent",
-  "Wind direction": "Direcció del vent",
-  "Wave significant height": "Altura significant d'onatge",
-  "Air temperature": "Temperatura de l'aire",
-  "Atmospheric pressure": "Pressió atmosfèrica",
-  "Sea surface temperature": "Temperatura superficial del mar",
-  "Sea bottom temperature": "Temperatura del fons del mar",
-  "Salinity": "Salinitat",
+  "Wind speed": "Vitesse du vent",
+  "Wind direction": "Direction du vent",
+  "Wave significant height": "Hauteur significative des vagues",
+  "Air temperature": "Température de l'air",
+  "Atmospheric pressure": "Pression atmosphérique",
+  "Sea surface temperature": "Température de surface de la mer",
+  "Sea bottom temperature": "Température du fond marin",
+  "Salinity": "Salinité",
 
-  "Chlorophyll": "Clorofil·la",
-  "Sea temperature anomaly": "Anomalia de temperatura del mar",
-  "Data from": "Dades de",
-  "Current": "Corrents",
+  "Chlorophyll": "Chlorophylle",
+  "Sea temperature anomaly": "Anomalie de température de la mer",
+  "Data from": "Données de",
+  "Current": "Courants",
 
 
   infoPanel: {
@@ -190,6 +193,7 @@ export default ca = {
     "forward": "Avanç rápid",
     "backward": "Rebobinar"
   },
+
 
 
 

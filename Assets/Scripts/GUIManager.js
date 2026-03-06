@@ -4,6 +4,8 @@ class GUIManager {
 
   firstDate = new Date('2023-04-01T00:00Z');
 
+  currentLanguage = 'en';
+
 
   // Currents widget
   widgetCombinedRadars = {
@@ -81,6 +83,22 @@ class GUIManager {
     }
 
 
+    // Set language
+    // Check if there is a language in the url
+    let langURL = window.location.getHashValue('LANG');
+    if (langURL != undefined){
+      this.setLanguage(langURL.substring(0,2));
+    } 
+    // Use default navigator language if available
+    else if (navigator.language.includes('es') || navigator.language.includes('en') || navigator.language.includes('ca') || navigator.language.includes('fr')){
+      this.setLanguage(navigator.language.substring(0,2));
+    } 
+    // Default is english
+    else {
+      this.setLanguage('en');
+    }
+
+
 
     // EVENTS
     // Hash changes
@@ -125,6 +143,14 @@ class GUIManager {
             window.eventBus.emit('GUIManager_URLRadialsChanged', radials);
           }
         }
+        // Language
+        let lang = window.location.getHashValue('LANG');
+        if (lang == undefined)
+          window.location.setHashValue('LANG', this.currentLanguage);
+        else if (lang.toLowerCase() != this.currentLanguage){
+          this.setLanguage(lang.toLowerCase());
+          window.eventBus.emit('GUIManager_LanguageChanged', this.currentLanguage);
+        }
 
       }
       window.location.isInternalChange = false;
@@ -159,6 +185,8 @@ class GUIManager {
     window.eventBus.on('AdvancedInterfaceOnOff', state => {
       this.isAdvancedInterface = state;
     })
+    // Language changes
+    window.eventBus.on('LanguageSelector_LanguageChanged', lang => this.setLanguage(lang));
 
 
     // Map
@@ -262,6 +290,17 @@ class GUIManager {
     }
 
     window.location.setHashValue('VIEW', this.mapView);
+  }
+
+  // Language
+  setLanguage(lang){
+    let isValid = lang == 'ca' || lang == 'es' || lang == 'en' || lang == 'fr';
+    if (!isValid)
+      lang = 'en'
+    this.currentLanguage = lang;
+    window.location.setHashValue('LANG', this.currentLanguage);
+    if (!isValid)
+      console.warn('Wrong hash introduced in the URL');
   }
 
 

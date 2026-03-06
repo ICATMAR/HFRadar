@@ -4,7 +4,7 @@
       <!-- Advanced menu -->
       <div id="advancedMenuContainer" class="clickable">
         <onOffButton ref="advancedOnOffButton" :checked="false" :inSize="'18px'" @change="advancedOnOffButtonClicked($event)"></onOffButton>
-        <span @click="advancedOnOffButtonClicked">Advanced interface</span>
+        <span @click="advancedOnOffButtonClicked">{{ $t('Advanced interface') }}</span>
       </div>
 
       <widgetMapOptions v-show="isAdvancedInterfaceOnOff"></widgetMapOptions>

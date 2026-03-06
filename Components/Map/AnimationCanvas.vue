@@ -14,7 +14,7 @@
           <widgetHFRadars v-show="isAdvancedInterfaceOnOff"></widgetHFRadars>
         </Transition>
         <!-- Disclaimer -->
-        <div class="widgetDataSource"><span>Data source: <a style="color:white; pointer-events: all;" href="https://www.icatmar.cat" target="_blank">ICATMAR</a></span></div>
+        <div class="widgetDataSource"><span>{{ $t('Data source')}}: <a style="color:white; pointer-events: all;" href="https://www.icatmar.cat" target="_blank">ICATMAR</a></span></div>
       </div>
 
 

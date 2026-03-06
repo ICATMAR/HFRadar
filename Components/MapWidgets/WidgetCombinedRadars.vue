@@ -4,7 +4,7 @@
 
     <!-- Title -->
     <div class="titleWidget clickable" :class="{'titleWidget-closed': !isVisible}" v-show="isAdvancedInterfaceOnOff" @click="currentsOnOffButtonClicked($event)">
-      <h4>Currents</h4>
+      <h4>{{ $t('Currents') }}</h4>
       <onOffButton ref="onOffCurrents" :checked="true" :inSize="'18px'" @change="currentsOnOffButtonClicked($event)"></onOffButton>
 
       <div class="icon-str" @click="infoClicked()" v-show="isVisible">i</div>
@@ -21,13 +21,13 @@
         <!-- On/Off particle animation -->
         <div class='widgetButtonContainer'>
           <onOffButton ref="onOffParticles" :checked="areParticlesVisible" :inSize="'15px'" @change="particlesButtonClicked($event)"></onOffButton>
-          <span class='widgetSpan'>particles</span>
+          <span class='widgetSpan'>{{ $t('particles') }}</span>
         </div>
 
         <!-- On/Off points -->
         <div class='widgetButtonContainer'>
           <onOffButton ref="onOffPoints" :checked="arePointsVisible" :inSize="'15px'" @change="pointsButtonClicked($event)"></onOffButton>
-          <span class='widgetSpan'>points</span>
+          <span class='widgetSpan'>{{ $t('points') }}</span>
         </div>
         <!-- Maybe point variable too here? -->
       </div>

@@ -1,5 +1,75 @@
 let en;
 export default en = {
+
+  banner: {
+    title: "Information",
+    text: "This website is being developed by Gerard Llorach-Tó. Please do not hesitate to contact me if you find any errors or have suggestions at {gerard} or at {icatmar}. If you are familiar with GitHub and issues, please use the {github}.",
+    links: {
+      github_repo: "GitHub repository"
+    }
+  },
+  
+  information: {
+    tooltipTitle: "Cookies and privacy",
+    warningTitle: "Warning!",
+    warningMessage: "Real-time data might be unavailable from the 4th to the {lastDay}th of October 2024 due to maintenance. Sorry for the inconvenience.",
+    closeButton: "Close",
+    acknowledgment1: "ICATMAR HF Radar Network has been established with the support of the European Maritime and Fisheries Fund, the European Maritime, Fisheries and Aquaculture Fund and the fund provided by the Government of Catalonia. The network has been designed, implemented and managed through the efforts of the Direcció General de Política Marítima i Pesca Sostenible (Government of Catalonia) and the Insitut de Ciències del Mar (CSIC), Barcelona.",
+    acknowledgment2: "These data were collected and made freely available by ICATMAR and the programs that contribute to it. Data was collected by the Government of Catalonia and processed by ICATMAR with the support of the European Maritime, Fisheries and Aquaculture Fund (EMFAF) and the Climatic Funds Program of the Government of Catalonia.",
+    acknowledgment3: "These data follow Copernicus standards; they are public and free of charge. User assumes all risk for use of data. User must display citation in any publication or product using data. User must contact ICATMAR prior to any commercial use of data.",
+    acknowledgment4: "HF radar sea surface current velocity dataset by ICATMAR is licensed under a Creative Commons Attribution 4.0 International License. You should have received a copy of the license along with this work. If not, see http://creativecommons.org/licenses/by/4.0/."
+  },
+
+  download: {
+    downloadData: "Download data",
+    downloadSettings: "Download settings",
+    selectVariable: "Select the variable",
+    currents: "Sea surface velocities",
+    waves: "Waves",
+    chooseFileFormat: "Choose the file format",
+    netCDF: "netCDF",
+    geojson: "geojson",
+    warningTuv: "Warning: tuv files do not have a quality control.",
+    selectTimeSpan: "Select the time span",
+    displayedTime: "Displayed time",
+    last24h: "Last 24h",
+    last3days: "Last 3 days",
+    latestMonth: "Latest month",
+    estimatedSize: "Estimated file size: {size} MB",
+    disclaimer: "These data are public and free of charge. User assumes all risk for use of data. User must display citation in any publication or product using data. User must contact ICATMAR prior to any commercial use of data. HF radar sea surface current velocity dataset by ICATMAR is licensed under a {ccby}.",
+    cookiesWarning: "Downloading the data implies acknowledgment of our use of cookies to monitor download activity and improve our services.",
+    downloadButton: "Download",
+    cancelButton: "Cancel",
+    downloadingData: "Downloading data...",
+    accessFTP: "Access FTP server"
+  },
+
+  cookies: {
+    tooltipTitle: "Cookies and privacy",
+    bannerTitle: "Cookies settings",
+    bannerText: "We use cookies and collect information to improve the user experience and track our impact. No commercial use is given to the data.",
+    acceptButton: "Accept",
+    denyButton: "Deny"
+  },
+
+  mapOptions: {
+    baseLayer: "Base layer",
+    isobaths: "Isobaths",
+    inSituObservations: "In-situ observations",
+    weatherAndSeaModels: "Meteo-oceanographic models"
+  },
+
+  "Auto-refresh": "Auto-refresh",
+
+  "Advanced interface": "Advanced interface",
+
+  "Data source": "Data source",
+
+  "Currents": "Currents",
+  "particles": "particles",
+  "points": "points",
+  "LOADING": "LOADING",
+
   "Date": "Date",
 
   "buoyButtonTitle": "Center the camera on the surface buoy",
@@ -39,6 +109,11 @@ export default en = {
   "Sea surface temperature": "Sea surface temperature",
   "Sea bottom temperature": "Sea bottom temperature",
   "Salinity": "Salinity",
+
+  "Chlorophyll": "Chlorophyll",
+  "Sea temperature anomaly": "Sea temperature anomaly",
+  "Data from": "Data from",
+  "Current": "Currents",
 
 
   infoPanel: {
@@ -116,8 +191,8 @@ export default en = {
     "forward": "Fast-forward",
     "backward": "Rewind"
   },
-  
-  
+
+
 
 
   "Data": "Data",

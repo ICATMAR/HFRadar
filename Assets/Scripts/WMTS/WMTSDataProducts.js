@@ -71,7 +71,7 @@ const products = {
     */
     //wmtsURL: 'https://wmts.marine.copernicus.eu/teroWmts/SST_MED_SST_L4_NRT_OBSERVATIONS_010_004?request=GetCapabilities&service=WMS',
     // There are two products with sst_anomaly, one with 1/16 resolution and the other with 1/100. The following url forces the 1/100
-    wmtsURL: 'https://wmts.marine.copernicus.eu/teroWmts/SST_MED_SST_L4_NRT_OBSERVATIONS_010_004/SST_MED_SSTA_L4_NRT_OBSERVATIONS_010_004_d?request=GetCapabilities&service=WMS',
+    wmtsURL: 'https://wmts.marine.copernicus.eu/teroWmts/SST_MED_SST_L4_NRT_OBSERVATIONS_010_004/SST_MED_SSTA_L4_NRT_OBSERVATIONS_010_004_d_202511?request=GetCapabilities&service=WMS',
     doi: 'https://doi.org/10.48670/moi-00172',
     timeScales: ['d'],
     dataSets: ['sst_anomaly']

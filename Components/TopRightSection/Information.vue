@@ -1,78 +1,86 @@
 <template>
-  
-  <div class="logo-info icon-str clickable" @click="isVisible = !isVisible" v-if="!isVisible" title="Cookies and privacy">
+  <div
+    class="logo-info icon-str clickable"
+    @click="isVisible = !isVisible"
+    v-if="!isVisible"
+    title="$t('information.tooltipTitle')"
+  >
     <span>i</span>
     <div class="warning-circle" v-if="isWarningOn"></div>
   </div>
-  
-
 
   <Transition>
     <div class="container" v-if="isVisible">
-
       <!-- Title -->
       <div class="banner-title">
-        <span>Information</span>
+        <span>{{ $t("banner.title") }}</span>
       </div>
 
       <!-- Title -->
       <div class="warning-container" v-if="isWarningOn">
         <div class="banner-title-warning">
-          <span>Warning!</span>
+          <span>{{ $t("information.warningTitle") }}</span>
         </div>
         <!-- Text -->
         <div class="banner-text-warning">
-          <span>Real-time data might be unavailable from the 4th to the {{ lastDay }}th of October 2024 due to manteinance. Sorry for the inconvenience.
-          </span>
+          <i18n-t keypath="information.warningMessage" tag="span">
+            <template #lastDay>
+              {{ lastDay }}
+            </template>
+          </i18n-t>
         </div>
       </div>
 
-      
+
       <!-- Text -->
       <div class="banner-text">
-        <span>This webiste is being developed by Gerard Llorach-Tó. Please do not hesitate to contact me 
-          if you find any errors or have suggestions at 
-          <a :href="mailtoGerard" v-text="gerardEmail"></a> or at
-          <a :href="mailtoIcatmar" v-text="icatmarEmail"></a>.
-          If you are familiar with github and issues, please use the
-           <a href="https://github.com/ICATMAR/HFRadar" target="_blank">github repository</a>.
-        </span>
+        <i18n-t keypath="banner.text" tag="span">
+          <template #gerard>
+            <a :href="mailtoGerard">{{ gerardEmail }}</a>
+          </template>
+
+          <template #icatmar>
+            <a :href="mailtoIcatmar">{{ icatmarEmail }}</a>
+          </template>
+
+          <template #github>
+            <a href="https://github.com/ICATMAR/HFRadar" target="_blank">
+              {{ $t("banner.links.github_repo") }}
+            </a>
+          </template>
+        </i18n-t>
       </div>
+
+      
+     
 
       <!-- Acknolwedgements -->
       <div class="banner-text">
-        <span>
-          ICATMAR HF Radar Network has been established with the support of the European Maritime and Fisheries Fund, the European Maritime, Fisheries and Aquaculture Fund and the fund provided by the Government of Catalonia. The network has been designed, implemented and managed through the efforts of the Direcció General de Política Marítima i Pesca Sostenible (Government of Catalonia) and the Insitut de Ciències del Mar (CSIC), Barcelona.
-        </span>
-      </div><div class="banner-text">
-        <span>
-          These data were collected and made freely available by ICATMAR and the programs that contribute to it. Data was collected by the Government of Catalonia and processed by ICATMAR with the support of the European Maritime, Fisheries and Aquaculture Fund (EMFAF) and the Climatic Funds Program of the Government of Catalonia.
-        </span>
-      </div><div class="banner-text">
-        <span>
-          These data follow Copernicus standards; they are public and free of charge. User assumes all risk for use of data. User must display citation in any publication o product using data. User must contact ICATMAR prior to any commercial use of data.
-        </span>
-      </div><div class="banner-text">
-        <span>
-          HF radar sea surface current velocity dataset by ICATMAR is licensed under a Creative Commons Attribution 4.0 International License. You should have received a copy of the license along with this work. If not, see http://creativecommons.org/licenses/by/4.0/.
-        </span>
+        <span>{{ $t("information.acknowledgment1") }}</span>
       </div>
-      
+      <div class="banner-text">
+        <span>{{ $t("information.acknowledgment2") }}</span>
+      </div>
+      <div class="banner-text">
+        <span>{{ $t("information.acknowledgment3") }}</span>
+      </div>
+      <div class="banner-text">
+        <span>{{ $t("information.acknowledgment4") }}</span>
+      </div>
+
       <!-- Accept button -->
       <div class="buttons-container">
         <!-- Accept -->
-        <button class="btn-accept" @click="acceptClicked">Close</button>
+        <button class="btn-accept" @click="acceptClicked">{{ $t("information.closeButton") }}</button>
       </div>
     </div>
   </Transition>
 </template>
 
-
 <script>
-
 export default {
   name: "Information",
-  created(){
+  created() {
     const domainCsic = "csic.es";
     const domainIcatmar = "icatmar.cat";
 
@@ -82,7 +90,7 @@ export default {
     this.icatmarEmail = "info" + "@" + domainIcatmar;
     this.mailtoIcatmar = "mailto:" + this.icatmarEmail;
   },
-  mounted(){
+  mounted() {
     this.isWarningOn = new Date() < new Date(2024, 10 - 1, this.lastDay);
     this.isVisible = this.isWarningOn;
   },
@@ -91,35 +99,30 @@ export default {
       isVisible: false,
       isWarningOn: false,
       lastDay: 11,
-      gerardEmail: "", 
+      gerardEmail: "",
       mailtoGerard: "",
       icatmarEmail: "",
       mailtoIcatmar: "",
-    }
+    };
   },
   methods: {
     // USER INTERACTION
     // Information about cookies settings is in index.html
-    acceptClicked: function(e){
+    acceptClicked: function (e) {
       this.isVisible = false;
     },
-  }
-}
-
+  },
+};
 </script>
 
-
-
 <style scoped>
-
-.logo-information{
+.logo-information {
   width: 28px;
   height: 28px;
 
   margin: 0px;
   margin-left: 3px;
   margin-right: 3px;
-  
 }
 .container {
   position: fixed;
@@ -145,7 +148,7 @@ export default {
 }
 
 .banner-text {
-  padding-bottom: 20px
+  padding-bottom: 20px;
 }
 
 .buttons-container {
@@ -153,7 +156,6 @@ export default {
   flex-direction: row;
   justify-content: space-evenly;
 }
-
 
 .banner-title-warning > span {
   font-size: large;
@@ -167,8 +169,6 @@ export default {
   margin-bottom: 20px;
   margin-top: 20px;
 }
-
-
 
 a {
   color: white;
@@ -187,19 +187,15 @@ a {
 }
 @keyframes colorChange {
   0% {
-    background: #ff8500;; /* Starting color */
+    background: #ff8500; /* Starting color */
   }
   50% {
-    background: #ffc281;; /* Middle color */
+    background: #ffc281; /* Middle color */
   }
   100% {
-    background: #ff8500;; /* End color (same as starting) */
+    background: #ff8500; /* End color (same as starting) */
   }
 }
-
-
-
-
 
 /* Transitions for elements */
 .v-enter-active,
@@ -212,5 +208,4 @@ a {
   opacity: 0;
   transform: translate(50vw, -70vh) scale(0.1);
 }
-
 </style>

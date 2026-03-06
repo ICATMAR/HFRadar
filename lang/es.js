@@ -1,5 +1,75 @@
 let es;
 export default es = {
+
+  banner: {
+    title: "Información",
+    text: "Este sitio web está siendo desarrollado por Gerard Llorach-Tó. No dude en ponerse en contacto conmigo si encuentra errores o tiene sugerencias en {gerard} o en {icatmar}. Si está familiarizado con GitHub y sus 'issues', por favor use el {github}.",
+    links: {
+      github_repo: "repositorio de GitHub"
+    }
+  },
+  
+  information: {
+    tooltipTitle: "Cookies y privacidad",
+    warningTitle: "¡Advertencia!",
+    warningMessage: "Los datos en tiempo real podrían no estar disponibles del 4 al {lastDay} de octubre de 2024 debido a mantenimiento. Disculpen las molestias.",
+    closeButton: "Cerrar",
+    acknowledgment1: "La red ICATMAR HF Radar ha sido establecida con el apoyo del Fondo Europeo de Pesca y Asuntos Marítimos, el Fondo Europeo de Pesca, Asuntos Marítimos y Acuicultura y los fondos proporcionados por la Generalidad de Cataluña. La red ha sido diseñada, implementada y gestionada por los esfuerzos de la Dirección General de Política Marítima y Pesca Sostenible (Generalidad de Cataluña) e Instituto de Ciencias del Mar (CSIC), Barcelona.",
+    acknowledgment2: "Estos datos fueron recopilados y puestos a disposición de forma gratuita por ICATMAR y los programas que contribuyen a ella. Los datos fueron recopilados por la Generalidad de Cataluña y procesados por ICATMAR con el apoyo del Fondo Europeo de Pesca, Asuntos Marítimos y Acuicultura (FEAMP) y el Programa de Fondos Climáticos de la Generalidad de Cataluña.",
+    acknowledgment3: "Estos datos siguen los estándares Copernicus; son públicos y gratuitos. El usuario asume todos los riesgos por el uso de los datos. El usuario debe mostrar la citación en cualquier publicación o producto que utilice los datos. El usuario debe contactar con ICATMAR antes de cualquier uso comercial de los datos.",
+    acknowledgment4: "El conjunto de datos de velocidad de corrientes de la superficie marina por radar HF de ICATMAR está bajo licencia Creative Commons Atribución 4.0 Internacional. Debe haber recibido una copia de la licencia junto con este trabajo. Si no es así, consulte http://creativecommons.org/licenses/by/4.0/."
+  },
+
+  download: {
+    downloadData: "Descargar datos",
+    downloadSettings: "Ajustes de descarga",
+    selectVariable: "Selecciona la variable",
+    currents: "Velocidades de superficie marina",
+    waves: "Olas",
+    chooseFileFormat: "Elige el formato de archivo",
+    netCDF: "netCDF",
+    geojson: "geojson",
+    warningTuv: "Advertencia: los archivos tuv no tienen control de calidad.",
+    selectTimeSpan: "Selecciona el intervalo de tiempo",
+    displayedTime: "Tiempo mostrado",
+    last24h: "Últimas 24h",
+    last3days: "Últimos 3 días",
+    latestMonth: "Último mes",
+    estimatedSize: "Tamaño estimado del archivo: {size} MB",
+    disclaimer: "Estos datos son públicos y gratuitos. El usuario asume todos los riesgos por el uso de los datos. El usuario debe mostrar la citación en cualquier publicación o producto que utilice los datos. El usuario debe contactar con ICATMAR antes de cualquier uso comercial de los datos. El conjunto de datos de velocidad de corrientes de la superficie marina por radar HF de ICATMAR está bajo una {ccby}.",
+    cookiesWarning: "Descargar los datos implica el reconocimiento de nuestro uso de cookies para monitorizar la actividad de descarga y mejorar nuestros servicios.",
+    downloadButton: "Descargar",
+    cancelButton: "Cancelar",
+    downloadingData: "Descargando datos...",
+    accessFTP: "Acceder al servidor FTP"
+  },
+
+  cookies: {
+    tooltipTitle: "Cookies y privacidad",
+    bannerTitle: "Configuración de cookies",
+    bannerText: "Utilizamos cookies y recopilamos información para mejorar la experiencia del usuario y rastrear nuestro impacto. No se da uso comercial a los datos.",
+    acceptButton: "Aceptar",
+    denyButton: "Rechazar"
+  },
+
+  mapOptions: {
+    baseLayer: "Capa base",
+    isobaths: "Isóbatas",
+    inSituObservations: "Observaciones in situ",
+    weatherAndSeaModels: "Modelos meteo-oceanográficos"
+  },
+  
+  "Auto-refresh": "Auto-actualización",
+
+  "Advanced interface": "Interfaz avanzada",
+
+  "Data source": "Fuente de datos",
+
+  "Currents": "Corrientes",
+  "particles": "partículas",
+  "points": "puntos",
+  "LOADING": "CARGANDO",
+
   "Date": "Fecha",
 
   "buoyButtonTitle": "Centra la cámara en la boya de superfície",
@@ -40,6 +110,11 @@ export default es = {
   "Sea surface temperature": "Temperatura superficial del mar",
   "Sea bottom temperature": "Temperatura del fondo del mar",
   "Salinity": "Salinidad",
+
+  "Chlorophyll": "Clorofila",
+  "Sea temperature anomaly": "Anomalía de temperatura del mar",
+  "Data from": "Datos de",
+  "Current": "Corrientes",
 
 
 
@@ -119,38 +194,38 @@ export default es = {
     "stepBackward": "Desplázate al punto anterior",
     "forward": "Avance rápido",
     "backward": "Marcha atrás"
-  },  
-  
+  },
 
 
 
-  
-    "January": "Enero",
-    "February": "Febrero",
-    "March": "Marzo",
-    "April": "Abril",
-    "May": "Mayo",
-    "June": "Junio",
-    "July": "Julio",
-    "August": "Agosto",
-    "September": "Septiembre",
-    "October": "Octubre",
-    "November": "Noviembre",
-    "December": "Diciembre",
-    "Jan": "Ene",
-    // "Feb": ,
-    // "Mar": ,
-    "Apr": "Abr",
-    // "May": "May",
-    // "Jun": ,
-    // "Jul": ,
-    "Aug": "Ago",
-    // "Sep": "Sep",
-    // "Oct": ,
-    // "Nov": ,
-    "Dec": "Dic",
-  
-  
+
+
+  "January": "Enero",
+  "February": "Febrero",
+  "March": "Marzo",
+  "April": "Abril",
+  "May": "Mayo",
+  "June": "Junio",
+  "July": "Julio",
+  "August": "Agosto",
+  "September": "Septiembre",
+  "October": "Octubre",
+  "November": "Noviembre",
+  "December": "Diciembre",
+  "Jan": "Ene",
+  // "Feb": ,
+  // "Mar": ,
+  "Apr": "Abr",
+  // "May": "May",
+  // "Jun": ,
+  // "Jul": ,
+  "Aug": "Ago",
+  // "Sep": "Sep",
+  // "Oct": ,
+  // "Nov": ,
+  "Dec": "Dic",
+
+
 
   "Data": "Datos",
 
