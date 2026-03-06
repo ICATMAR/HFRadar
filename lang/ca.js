@@ -45,6 +45,8 @@ export default ca = {
 
   "Auto-refresh": "Auto-atualització",
 
+  "Advanced interface": "Interfície avançada",
+
   "Date": "Data",
 
   "buoyButtonTitle": "Centra la càmara a la boia de superficie",

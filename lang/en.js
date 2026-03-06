@@ -46,6 +46,8 @@ export default en = {
 
   "Auto-refresh": "Auto-refresh",
 
+  "Advanced interface": "Advanced interface",
+
   "Date": "Date",
 
   "buoyButtonTitle": "Center the camera on the surface buoy",

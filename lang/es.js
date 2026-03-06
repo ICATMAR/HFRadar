@@ -46,6 +46,8 @@ export default es = {
   
   "Auto-refresh": "Auto-actualización",
 
+  "Advanced interface": "Interfaz avanzada",
+
   "Date": "Fecha",
 
   "buoyButtonTitle": "Centra la cámara en la boya de superfície",
