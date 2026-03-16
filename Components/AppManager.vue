@@ -17,15 +17,13 @@
     <central-panel></central-panel>
 
     <!-- ICONS -->
-    <template v-if="false">
-      <a href="https://icatmar.cat/">
-        <img class="logo clickable icatmar-logo" src="Assets/Images/icatmar-mini-logo.svg">
-      </a>
-      <a href="https://icatmar.cat/visors/xarxa-observacional/">
-        <img class="logo clickable obs-logo" src="Assets/Images/ocea-mini-1.svg">
-      </a>
-    </template>
-    
+    <a href="https://icatmar.cat/">
+      <img class="logo clickable icatmar-logo" src="Assets/Images/icatmar-mini-logo.svg">
+    </a>
+    <a href="https://icatmar.cat/visors/xarxa-observacional/">
+      <img class="logo clickable obs-logo" src="Assets/Images/ocea-mini-1.svg">
+    </a>
+
 
     <!-- Top Right Section -->
     <top-right-section></top-right-section>
