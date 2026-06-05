@@ -1,12 +1,19 @@
 <template>
   
-  <div id="overlay-buoy-data" ref="containerbuoyInfo">
+  <div id="overlay-msm-buoy-data" ref="containerbuoyInfo">
   <!-- Container -->
     <div v-for="buoyName in Object.keys(buoysData)" :id="buoyName" :ref="buoyName" class="buoyContainer"
       :class="[!isTooFar]">
       <!-- Buoy icon -->
       <!-- <div style="padding: 10px; border-radius:5px; background-color: red">Boya</div> -->
-      <img class="icon-str icon-medium icon-img" @click="buoyIconClicked(buoyName)" src="/HFRadar/Assets/Images/buoy.svg">
+      <div style="position: relative; display: flex">
+        <img class="icon-str icon-medium icon-img" 
+        @click="buoyIconClicked(buoyName)" 
+        src="/HFRadar/Assets/Images/buoy.svg">
+        <!-- Indicator of ICATMAR -->
+        <div class="icon-marker-icatmar"></div>
+      </div>
+      
 
       <!-- Buoy panel -->
       <Transition>
@@ -14,7 +21,7 @@
         <!-- Site -->
         <div class="buoyTitle">
           <span><strong>{{ buoyName }}'s buoy</strong></span>
-          <a href="https://portus.puertos.es/" target="_blank" rel="noopener noreferrer" class="icon-str">i</a>
+          <a href="https://www.icatmar.cat/" target="_blank" rel="noopener noreferrer" class="icon-str">i</a>
         </div>
 
         <!-- Buoy data -->
@@ -123,14 +130,14 @@ export default {
   mounted() {
     // Create buoysData and add to map
     // Fetch from API
-      fetch('https://api.icatmar.cat/MSM_fast_api/buoys').then(res => res.json()).then(apiData => {
-      if (apiData.buoys == undefined){
+    fetch('https://api.icatmar.cat/MSM_fast_api/buoys').then(res => res.json()).then(apiData => {
+      if (apiData.buoys == undefined) {
         console.error("Error loading buoys data from API");
         return;
       }
 
       // Fill buoysData
-      for (let i = 0; i < apiData.buoys.length; i++){
+      for (let i = 0; i < apiData.buoys.length; i++) {
         let buoyName = apiData.buoys[i].name;
         this.buoys[buoyName] = {
           id: apiData.buoys[i].id,
@@ -139,13 +146,36 @@ export default {
           latestTmst: apiData.buoys[i].latestTimestamp,
           data: {}, // tmst1: {Hm0: value, Tm02: value...}, tmst2: {...}
         };
-        this.buoysData[buoyName] = { "hasData": false, "showInfo": true };
+        this.buoysData[buoyName] = { "hasData": false, "showInfo": false };
         this.buoys[buoyName].coord3857 = ol.proj.fromLonLat([this.buoys[buoyName].lon, this.buoys[buoyName].lat]);
       }
+
+      console.log("Added MSM buoys: " + Object.keys(this.buoys));
+
+
+      // First initialization
+      // Get map
+      if (this.map == undefined) {
+        this.map = this.$parent.map;
+      }
+      // Relate overlay with map
+      this.$nextTick(() => {
+        Object.keys(this.buoys).forEach(buoyName => {
+          // Buoy info
+          const buoyInfo = new ol.Overlay({
+            position: this.buoys[buoyName].coord3857,
+            positioning: 'center-left',
+            element: this.$refs[buoyName],
+            stopEvent: false,
+          });
+          this.map.addOverlay(buoyInfo);
+        });
+      });
+      
     });
 
 
-    
+
     
 
     // EVENTS
@@ -170,78 +200,85 @@ export default {
       isTooFar: false,
       // https://portus.puertos.es/
       buoys:{},
-      buoys: {
-        "Begur": {
-          id: '2798',
-          params: ['Hm0', 'Hmax', 'Tm02', 'Tp','MeanDir','MeanDirPeak', 
-                    'WindSpeed', 'WindDir',
-                    'CurrentSpeed', 'CurrentDir',
-                    'WaterTemp',
-                    'AirTemp',
-                    'Salinity',
-                    'AirPressure'],
-          location: [3.65, 41.90],
-          coord3857: undefined,
-          data: {}, // tmst1: {Hm0: value, Tm02: value...}, tmst2: {...} 
-        },
-        "Barcelona": {
-          id: '1731',
-          params: ['Hm0', 'Hmax', 'Tm02', 'Tp','MeanDir', 
-                    'WaterTemp'],
-          location: [2.2072, 41.323],
-          coord3857: undefined,
-          data: {}, // tmst1: {Hm0: value, Tm02: value...}, tmst2: {...} 
-        },
-        "Tarragona": {
-          id: '1712',
-          params: ['Hm0', 'Hmax', 'Tm02', 'Tp','MeanDir','MeanDirPeak',
-                  'WaterTemp'],
-          location: [1.1900, 41.070],
-          coord3857: undefined,
-          data: {}
-        },
-        "Tarragona offshore": {
-          id: '2720',
-          params: ['Hm0', 'Hmax', 'Tm02', 'Tp','MeanDir','MeanDirPeak', 
-                    'WindSpeed', 'WindDir',
-                    'CurrentSpeed', 'CurrentDir',
-                    'WaterTemp',
-                    'AirTemp',
-                    'Salinity',
-                    'AirPressure'],
-          location: [1.4673, 40.6851],
-          coord3857: undefined,
-          data: {},
-        },
-        "Valencia": {
-          id: '2630',
-          params: ['Hm0', 'Hmax', 'Tm02', 'Tp','MeanDir','MeanDirPeak', 
-                    'WindSpeed', 'WindDir',
-                    'CurrentSpeed', 'CurrentDir',
-                    'WaterTemp',
-                    'AirTemp',
-                    'Salinity',
-                    'AirPressure'],
-          location: [0.2020, 39.5205],
-          coord3857: undefined,
-          data: {},
-        },
-        "Dragonera": {
-          id: '2820',
-          params: ['Hm0', 'Hmax', 'Tm02', 'Tp','MeanDir','MeanDirPeak', 
-                    'WindSpeed', 'WindDir',
-                    'CurrentSpeed', 'CurrentDir',
-                    'WaterTemp',
-                    'AirTemp',
-                    'Salinity',
-                    'AirPressure'],
-          location: [	2.0953, 39.5630],
-          coord3857: undefined,
-          data: {},
-        }
-      },
+      params: ['VGHS', 'VMTA', 'VMDR',
+        'VMHM', 'VTPK', 'VPED',
+        'temperature',
+        'WDIR', 'WSPD', 'GDIR', 'GSPD',
+        'RELH', 'DRYT', 'ATMS'],
+      // buoys: {
+      //   "Begur": {
+      //     id: '2798',
+      //     params: ['Hm0', 'Hmax', 'Tm02', 'Tp','MeanDir','MeanDirPeak', 
+      //               'WindSpeed', 'WindDir',
+      //               'CurrentSpeed', 'CurrentDir',
+      //               'WaterTemp',
+      //               'AirTemp',
+      //               'Salinity',
+      //               'AirPressure'],
+      //     location: [3.65, 41.90],
+      //     coord3857: undefined,
+      //     data: {}, // tmst1: {Hm0: value, Tm02: value...}, tmst2: {...} 
+      //   },
+      //   "Barcelona": {
+      //     id: '1731',
+      //     params: ['Hm0', 'Hmax', 'Tm02', 'Tp','MeanDir', 
+      //               'WaterTemp'],
+      //     location: [2.2072, 41.323],
+      //     coord3857: undefined,
+      //     data: {}, // tmst1: {Hm0: value, Tm02: value...}, tmst2: {...} 
+      //   },
+      //   "Tarragona": {
+      //     id: '1712',
+      //     params: ['Hm0', 'Hmax', 'Tm02', 'Tp','MeanDir','MeanDirPeak',
+      //             'WaterTemp'],
+      //     location: [1.1900, 41.070],
+      //     coord3857: undefined,
+      //     data: {}
+      //   },
+      //   "Tarragona offshore": {
+      //     id: '2720',
+      //     params: ['Hm0', 'Hmax', 'Tm02', 'Tp','MeanDir','MeanDirPeak', 
+      //               'WindSpeed', 'WindDir',
+      //               'CurrentSpeed', 'CurrentDir',
+      //               'WaterTemp',
+      //               'AirTemp',
+      //               'Salinity',
+      //               'AirPressure'],
+      //     location: [1.4673, 40.6851],
+      //     coord3857: undefined,
+      //     data: {},
+      //   },
+      //   "Valencia": {
+      //     id: '2630',
+      //     params: ['Hm0', 'Hmax', 'Tm02', 'Tp','MeanDir','MeanDirPeak', 
+      //               'WindSpeed', 'WindDir',
+      //               'CurrentSpeed', 'CurrentDir',
+      //               'WaterTemp',
+      //               'AirTemp',
+      //               'Salinity',
+      //               'AirPressure'],
+      //     location: [0.2020, 39.5205],
+      //     coord3857: undefined,
+      //     data: {},
+      //   },
+      //   "Dragonera": {
+      //     id: '2820',
+      //     params: ['Hm0', 'Hmax', 'Tm02', 'Tp','MeanDir','MeanDirPeak', 
+      //               'WindSpeed', 'WindDir',
+      //               'CurrentSpeed', 'CurrentDir',
+      //               'WaterTemp',
+      //               'AirTemp',
+      //               'Salinity',
+      //               'AirPressure'],
+      //     location: [	2.0953, 39.5630],
+      //     coord3857: undefined,
+      //     data: {},
+      //   }
+      // },
       // https://movil.puertos.es/cma2/app/CMA/adhoc/station_data?station=2798&params=Hm0,Tm02,Tp,MeanDir,MeanDirPeak&from=20231107@0000&to=20231128@0000
-      url: 'https://movil.puertos.es/cma2/app/CMA/adhoc/station_data?station={{id}}&params={{params}}&from={{sYear}}{{sMonth}}{{sDay}}@{{sHour}}{{sMinute}}&to={{eYear}}{{eMonth}}{{eDay}}@{{eHour}}{{eMinute}}', 
+      //url: 'https://movil.puertos.es/cma2/app/CMA/adhoc/station_data?station={{id}}&params={{params}}&from={{sYear}}{{sMonth}}{{sDay}}@{{sHour}}{{sMinute}}&to={{eYear}}{{eMonth}}{{eDay}}@{{eHour}}{{eMinute}}', 
+      url: 'https://api.icatmar.cat/MSM_fast_api/buoys/{{id}}/data?start_date={{startDate}}&end_date={{endDate}}&parameters={{params}}',
+      requests: {},
     }
   },
   methods: {
@@ -251,25 +288,7 @@ export default {
     },
     // INTERNAL
     selectedDateChanged: function(tmst){
-      // First initialization
-      if (!this.once){
-        // Get map
-        if (this.map == undefined){
-          this.map = this.$parent.map;
-        }
-        // Relate overlay with map
-        Object.keys(this.buoys).forEach(buoyName => {
-          // Buoy info
-          const buoyInfo = new ol.Overlay({
-            position: this.buoys[buoyName].coord3857,
-            positioning: 'center-left',
-            element: this.$refs[buoyName],
-            stopEvent: false,
-          });
-          this.map.addOverlay(buoyInfo);
-        })
-        this.once = true;
-      }
+      
 
       // Hide all data from buoyData
       Object.keys(this.buoys).forEach(buoyName => {
@@ -291,27 +310,31 @@ export default {
           let url = this.url.replace('{{id}}', buoy.id);
           // Params
           let paramsStr = '';
-          buoy.params.forEach(p => paramsStr += p + ",");
+          this.params.forEach(p => paramsStr += p + ",");
           paramsStr = paramsStr.substring(0, paramsStr.length - 1);
           url = url.replace('{{params}}', paramsStr);
           // Start date
-          url = url.replace('{{sYear}}', sDate.getUTCFullYear());
-          url = url.replace('{{sMonth}}', String(sDate.getUTCMonth() + 1).padStart(2,'0'));
-          url = url.replace('{{sDay}}', String(sDate.getUTCDate()).padStart(2,'0'));
-          url = url.replace('{{sHour}}', String(sDate.getUTCHours()).padStart(2,'0'));
-          url = url.replace('{{sMinute}}', String(sDate.getUTCMinutes()).padStart(2,'0'));
+          url = url.replace('{{startDate}}', sDate.toISOString().substring(0, 19) + 'Z');
           // End date
-          url = url.replace('{{eYear}}', eDate.getUTCFullYear());
-          url = url.replace('{{eMonth}}', String(eDate.getUTCMonth() + 1).padStart(2,'0'));
-          url = url.replace('{{eDay}}', String(eDate.getUTCDate()).padStart(2,'0'));
-          url = url.replace('{{eHour}}', String(eDate.getUTCHours()).padStart(2,'0'));
-          url = url.replace('{{eMinute}}', String(eDate.getUTCMinutes()).padStart(2,'0'));
-          
-          // Proxy
-          let proxyFullURL = this.proxyURL + '?url=' + encodeURIComponent(url);
+          url = url.replace('{{endDate}}', eDate.toISOString().substring(0, 19) + 'Z');
 
-          // Fetch
-          fetch(proxyFullURL).then(res => res.json()).then(r => {
+          // Proxy
+          let proxyFullURL = url;//this.proxyURL + '?url=' + encodeURIComponent(url);
+
+          // Request data for the first time
+          if (this.requests[proxyFullURL] == undefined) {
+            this.requests[proxyFullURL] = {
+              promise: getData(proxyFullURL).then(r => {
+                this.requests[proxyFullURL].response = r;
+                this.requests[proxyFullURL].lastResolved = Date.now();
+                return r;
+              }),
+              response: undefined,
+              lastResolved: undefined,
+            };
+          }
+          // Resolve promise and update content
+          this.requests[proxyFullURL].promise.then(r => {
             this.parseAPIResult(r, buoyName);
             // Update buoys content once loaded
             this.updateContent(buoyName, tmst);
@@ -323,6 +346,18 @@ export default {
           this.updateContent(buoyName, tmst);
         }
       });
+    },
+
+    // Keep track of requests as API is slow
+    async getData(url) {
+      // Already resolved
+      if (this.requests[url] && this.requests[url].lastResolved != undefined){
+        if (this.requests[url].lastResolved > Date.now() - 60 * 60 * 1000) {
+          return new Promise((resolve) => resolve(this.requests[url].response));
+        }
+      }
+      
+
     },
 
     updateContent: function(buoyName, tmst){
@@ -344,6 +379,7 @@ export default {
 
 
     parseAPIResult(result, buoyName){
+      debugger;
       let buoy = this.buoys[buoyName];
       let header = result.content[0];
       let content = result.content[1];
