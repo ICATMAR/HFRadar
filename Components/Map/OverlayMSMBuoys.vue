@@ -2,8 +2,7 @@
   
   <div id="overlay-msm-buoy-data" ref="containerbuoyInfo">
   <!-- Container -->
-    <div v-for="buoyName in Object.keys(buoysData)" :id="buoyName" :ref="buoyName" class="buoyContainer"
-      :class="[!isTooFar]">
+    <div v-for="buoyName in Object.keys(buoysData)" :id="buoyName" :ref="buoyName" class="buoyContainer">
       <!-- Buoy icon -->
       <!-- <div style="padding: 10px; border-radius:5px; background-color: red">Boya</div> -->
       <div style="position: relative; display: flex">
@@ -17,9 +16,16 @@
 
       <!-- Buoy panel -->
       <Transition>
-      <div class="wavepanel" v-if="buoysData[buoyName].showInfo">
+      <div class="wavepanel" v-if="buoysData[buoyName].showInfo"
+        :class="[!isTooFar ? 'showOverlayMap' : 'hideOverlayMap']">
         <!-- Site -->
         <div class="buoyTitle">
+          <div v-show="buoysData[buoyName].isLoading" class="lds-ring">
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+          </div>
           <span><strong>{{ buoyName }}'s buoy</strong></span>
           <a href="https://www.icatmar.cat/" target="_blank" rel="noopener noreferrer" class="icon-str">i</a>
         </div>
@@ -74,7 +80,7 @@
             <!-- Wind -->
             <div v-if="Object.keys(buoysData[buoyName].data).includes('GSPD')">
               <span>
-                <strong>Wind: </strong>
+                <strong>Wind gust: </strong>
                 {{buoysData[buoyName].data['GSPD'].toFixed(1)}} m/s, 
                 {{ bearing2compassRose(buoysData[buoyName].data['GDIR']) }}
                 <span class="fa" :style="{transform: 'rotate('+ (buoysData[buoyName].data['GDIR']-45+180) +'deg)' }">&#xf124;</span>
@@ -277,7 +283,8 @@ export default {
           // Request data for the first time
           if (this.requests[proxyFullURL] == undefined) {
             this.requests[proxyFullURL] = {
-              promise: this.getData(proxyFullURL).then(r => {
+              promise: this.getData(proxyFullURL, buoyName).then(r => {
+                this.buoysData[buoyName].isLoading = false;
                 this.requests[proxyFullURL].response = r;
                 this.requests[proxyFullURL].lastResolved = Date.now();
                 return r;
@@ -302,7 +309,8 @@ export default {
     },
 
     // Keep track of requests as API is slow
-    async getData(url) {
+    async getData(url, buoyName) {
+      this.buoysData[buoyName].isLoading = true;
       // Already resolved
       if (this.requests[url] && this.requests[url].lastResolved != undefined){
         if (this.requests[url].lastResolved > Date.now() - 60 * 60 * 1000) {
