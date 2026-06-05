@@ -88,17 +88,17 @@
             </div>
 
             <!-- Water temperature -->
-            <div v-if="Object.keys(buoysData[buoyName].data).includes('temperature')">
+            <div v-if="Object.keys(buoysData[buoyName].data).includes('TEMP')">
               <span>
                 <strong>Water temperature: </strong>
-                {{buoysData[buoyName].data['temperature'].toFixed(1)}} ºC
+                {{buoysData[buoyName].data['TEMP'].toFixed(1)}} ºC
               </span>
             </div>
             <!-- Salinity -->
-            <div v-if="Object.keys(buoysData[buoyName].data).includes('Salinity')">
+            <div v-if="Object.keys(buoysData[buoyName].data).includes('PSAL')">
               <span>
                 <strong>Salinity: </strong>
-                {{buoysData[buoyName].data['Salinity(PSU)'].toFixed(1)}} psu
+                {{buoysData[buoyName].data['PSAL'].toFixed(1)}} psu
               </span>
             </div>
             <!-- Air temperature -->
@@ -235,6 +235,7 @@ export default {
       params: ['VGHS', 'VMTA', 'VMDR',
         'VMHM', 'VTPK', 'VPED',
         'temperature',
+        'TEMP', 'PSAL', 'PRES',
         'WDIR', 'WSPD', 'GDIR', 'GSPD',
         'RELH', 'DRYT', 'ATMS'],
       url: 'https://api.icatmar.cat/MSM_fast_api/buoys/{{id}}/data?start_date={{startDate}}&end_date={{endDate}}&parameters={{params}}',
