@@ -195,7 +195,7 @@
 
       <!-- Platform icon -->
       <div style="position: relative; display: flex"
-        :class="[!isTooFar ? 'showOverlayMap' : 'hideOverlayMap']">
+        :class="platforms[platformNumber].pi_name == 'Emilio GARCIA-LADONA' ? 'showOverlayMap' : !isTooFar ? 'showOverlayMap' : 'hideOverlayMap'">
         <img class="icon-str icon-medium icon-img panel-icon-right clickable" @click="ERDDAPIconClicked(platformNumber)"
           src='/HFRadar/Assets/Images/argo.svg' v-if="platformsData[platformNumber].hasData"
           :class="{ 'icon-selected': platformsData[platformNumber].showInfo }"
@@ -212,7 +212,7 @@
 
       <!-- Marker when far away -->
       <!-- Hide / show depending on zoom level -->
-      <div :class="[isTooFar ? 'showOverlayMap' : 'hideOverlayMap']">
+      <div v-if="platforms[platformNumber].pi_name != 'Emilio GARCIA-LADONA'" :class="[isTooFar ? 'showOverlayMap' : 'hideOverlayMap']">
         <!-- Marker -->
         <div class="map-marker" :class="platforms[platformNumber].pi_name == 'Emilio GARCIA-LADONA' ? 'map-marker-icatmar' : ''" v-if="platformsData[platformNumber].hasData"
           :style="{ 'opacity': Object.keys(platformsData[platformNumber].data).includes('tmstTimeDiffStr') ? (platformsData[platformNumber].data.tmstTimeDiffStr.includes('hour') ? 0.75 : 0.33) : 1 }">
