@@ -91,7 +91,7 @@
             <div v-if="Object.keys(buoysData[buoyName].data).includes('TEMP')">
               <span>
                 <strong>Water temperature: </strong>
-                {{buoysData[buoyName].data['TEMP'].toFixed(1)}} ºC
+                {{(buoysData[buoyName].data['TEMP'] * 0.1).toFixed(1)}} ºC
               </span>
             </div>
             <!-- Salinity -->
@@ -105,14 +105,14 @@
             <div v-if="Object.keys(buoysData[buoyName].data).includes('DRYT')">
               <span>
                 <strong>Air temperature: </strong>
-                {{buoysData[buoyName].data['DRYT'].toFixed(1)}} ºC
+                   {{ (buoysData[buoyName].data['DRYT'] * 0.1).toFixed(1) }} ºC
               </span>
             </div>
             <!-- Air pressure -->
             <div v-if="Object.keys(buoysData[buoyName].data).includes('ATMS')">
               <span>
                 <strong>Air pressure: </strong>
-                {{buoysData[buoyName].data['ATMS'].toFixed(1)}} mb
+                {{(buoysData[buoyName].data['ATMS'] * 0.1).toFixed(1)}} mb
               </span>
             </div>
 
@@ -120,7 +120,7 @@
             <div v-if="Object.keys(buoysData[buoyName].data).includes('RELH')">
               <span>
                 <strong>Relative humidity: </strong>
-                {{buoysData[buoyName].data['RELH'].toFixed(1)}} % 
+                {{(buoysData[buoyName].data['RELH'] * 0.1).toFixed(1)}} % 
               </span>
             </div>
 
@@ -317,12 +317,11 @@ export default {
         if (this.requests[url].lastResolved > Date.now() - 60 * 60 * 1000) {
           return new Promise((resolve) => resolve(this.requests[url].response));
         }
+        // Request again if it was resolved more than X time ago
         return fetch(url).then(res => res.json());
       }
       // Fetch
       return fetch(url).then(res => res.json());
-
-
     },
 
     updateContent: function(buoyName, tmst){
@@ -342,8 +341,13 @@ export default {
     },
 
 
-    parseAPIResult(result, buoyName){
-      let dataArray = result.data;
+    parseAPIResult(response, buoyName){
+      let dataArray = response.data;
+      if (dataArray == undefined || dataArray.length == 0) {
+        console.log("API error for " + buoyName + ": " + response);
+        return;
+      }
+
       for (let i = 0; i < dataArray.length; i++) {
         let dd = dataArray[i];
         let date = new Date(dd.timestamp);
@@ -355,6 +359,11 @@ export default {
         date.setMilliseconds(0);
 
         let tmst = date.toISOString();
+
+        // Skip if timestamp already exists in buoy data
+        if (this.buoys[buoyName].data[tmst] != undefined){
+          continue;
+        }
 
         // Look for parameters inside the data array
         Object.keys(dd.data).forEach(sensor => {
@@ -368,7 +377,7 @@ export default {
               }
               // If parameter already exists, add to array for averaging later, if not create array
               let value = parseFloat(sensorData[param]);
-              if (this.buoys[buoyName].data[tmst][param] != undefined){
+              if (this.buoys[buoyName].data[tmst][param] != undefined) {
                 this.buoys[buoyName].data[tmst][param].push(value);
               } else {
                 this.buoys[buoyName].data[tmst][param] = [value];
@@ -380,10 +389,13 @@ export default {
       // Average values
       Object.keys(this.buoys[buoyName].data).forEach(tmst => {
         Object.keys(this.buoys[buoyName].data[tmst]).forEach(param => {
-          let values = this.buoys[buoyName].data[tmst][param];
-          let sum = values.reduce((a, b) => a + b, 0);
-          let avg = sum / values.length;
-          this.buoys[buoyName].data[tmst][param] = avg;
+          // If it is an array, average. Otherwise it means it was already averaged (tmst already existed)
+          if (Array.isArray(this.buoys[buoyName].data[tmst][param])){
+            let values = this.buoys[buoyName].data[tmst][param];
+            let sum = values.reduce((a, b) => a + b, 0);
+            let avg = sum / values.length;
+            this.buoys[buoyName].data[tmst][param] = avg;
+          }          
         });
       });
 
