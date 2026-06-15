@@ -98,7 +98,7 @@
             <div v-if="Object.keys(buoysData[buoyName].data).includes('PSAL')">
               <span>
                 <strong>Salinity: </strong>
-                {{(buoysData[buoyName].data['PSAL'] * 0.001).toFixed(1)}} psu
+                {{(buoysData[buoyName].data['PSAL'] * 0.0001).toFixed(1)}} psu
               </span>
             </div>
             <!-- Air temperature -->
