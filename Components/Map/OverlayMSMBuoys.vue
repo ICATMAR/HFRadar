@@ -137,7 +137,11 @@
 
         <!-- Latest timestamp TODO: only when ahead of latest? -->
         <div v-else-if="new Date(currentTmst) > new Date(buoys[buoyName].latestTmst)">
-          <span><strong>Latest data: </strong>{{ buoys[buoyName].latestTmst }}</span>
+          <span><strong>Latest data: </strong>{{ timeAgo(buoys[buoyName].latestTmst) }}</span>
+        </div>
+        <!-- Data is only ahead? -->
+        <div v-else>
+          <span><strong>Latest data: </strong>{{ timeAgo(buoys[buoyName].latestTmst) }}</span>
         </div>
         
       </div>
@@ -251,10 +255,10 @@ export default {
     // INTERNAL
     selectedDateChanged: function(tmst){
       // DEBUG
-      let now = new Date();
-      now.setDate(now.getDate() - 1);
-      now.setMinutes(0); now.setSeconds(0); now.setMilliseconds(0);
-      tmst = now.toISOString();
+      // let now = new Date();
+      // now.setDate(now.getDate() - 1);
+      // now.setMinutes(0); now.setSeconds(0); now.setMilliseconds(0);
+      // tmst = now.toISOString();
 
       console.log("Timestamp for buoy MSM data: " + tmst);
       // Hide all data from buoyData
@@ -350,8 +354,9 @@ export default {
 
     parseAPIResult(response, buoyName){
       let responseData = response.data;
-      if (responseData == undefined || responseData.length == 0) {
-        console.log("API error for " + buoyName + ": " + response);
+      if (responseData == undefined) {
+        console.log("API error for " + buoyName);
+        console.error(response.detail);
         return;
       }
 
@@ -419,26 +424,9 @@ export default {
       }
     },
 
-    // Timestime to current time ago
-    timeAgo(tmst) {
-      // DEBUG
-      let selectedDate = new Date();//Date.now(window.GUIManager.currentTmst);
-      selectedDate = selectedDate.setDate(selectedDate.getDate() - 1);
-      let diff = selectedDate - new Date(tmst).getTime();
 
-      if (diff < 60 * 1000) {
-        return "Just now";
-      } else if (diff < 60 * 60 * 1000) {
-        let minutes = Math.floor(diff / (60 * 1000));
-        return minutes + " minute" + (minutes > 1 ? "s" : "") + " ago";
-      } else if (diff < 24 * 60 * 60 * 1000) {
-        let hours = Math.floor(diff / (60 * 60 * 1000));
-        return hours + " hour" + (hours > 1 ? "s" : "") + " ago";
-      } else {
-        let days = Math.floor(diff / (24 * 60 * 60 * 1000));
-        return days + " day" + (days > 1 ? "s" : "") + " ago";
-      }
-    },
+
+    
     
     
     // Hide / Panel depending on zoom level
@@ -451,11 +439,41 @@ export default {
   },
   computed: {
     currentTmst() {
-      let now= new Date();
-      now.setDate(now.getDate() - 1);
-      return now.toISOString();
+      // DEBUG
+      // let now= new Date();
+      // now.setDate(now.getDate() - 1);
+      // return now.toISOString();
       return window.GUIManager.currentTmst;
-    }
+    },
+    timeAgo() {
+      // DEBUG
+      // let selectedDate = new Date();
+      // selectedDate = selectedDate.setDate(selectedDate.getDate() - 1);
+      // selectedDate = selectedDate.getTime();
+      const selectedDate = new Date(window.GUIManager.currentTmst).getTime();
+
+      return (tmst) => {
+        const diff = selectedDate - new Date(tmst).getTime();
+        // Data is in the past
+        if (diff > 0) {
+          if (diff < 60 * 1000) {
+            return "Just now";
+          } else if (diff < 60 * 60 * 1000) {
+            const minutes = Math.floor(diff / (60 * 1000));
+            return `${minutes} minute${minutes > 1 ? "s" : ""} ago`;
+          } else if (diff < 24 * 60 * 60 * 1000) {
+            const hours = Math.floor(diff / (60 * 60 * 1000));
+            return `${hours} hour${hours > 1 ? "s" : ""} ago`;
+          } else {
+            const days = Math.floor(diff / (24 * 60 * 60 * 1000));
+            return `${days} day${days > 1 ? "s" : ""} ago`;
+          }
+        } else {
+          const days = Math.floor(Math.abs(diff) / (24 * 60 * 60 * 1000));
+          return `${days} day${days > 1 ? "s" : ""} ahead from current date`;
+        }
+      };
+    },
   },
   components: {
 
