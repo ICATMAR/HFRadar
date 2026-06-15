@@ -46,7 +46,7 @@
           <div v-if="Object.keys(buoysData[buoyName].data).includes('WSPD')">
             <span>
               <strong>Wind: </strong>
-              {{(buoysData[buoyName].data['WSPD'] * 0.01).toFixed(1)}} m/s, 
+              {{(buoysData[buoyName].data['WSPD']).toFixed(1)}} m/s, 
               {{ bearing2compassRose(buoysData[buoyName].data['WDIR']) }}
               <span class="fa" :style="{transform: 'rotate('+ (buoysData[buoyName].data['WDIR']-45+180) +'deg)' }">&#xf124;</span>
             </span>
@@ -81,7 +81,7 @@
             <div v-if="Object.keys(buoysData[buoyName].data).includes('GSPD')">
               <span>
                 <strong>Wind gust: </strong>
-                {{(buoysData[buoyName].data['GSPD'] * 0.01).toFixed(1)}} m/s, 
+                {{(buoysData[buoyName].data['GSPD']).toFixed(1)}} m/s, 
                 {{ bearing2compassRose(buoysData[buoyName].data['GDIR']) }}
                 <span class="fa" :style="{transform: 'rotate('+ (buoysData[buoyName].data['GDIR']-45+180) +'deg)' }">&#xf124;</span>
               </span>
@@ -376,6 +376,9 @@ export default {
         // Look for parameters inside the data array
         Object.keys(dd).forEach(sensor => {
           let sensorData = dd[sensor]; // {RELH: '1232', DRYT: '1232', ...}
+          // Ignore data from GILL wind sensor
+          if (sensor == 'Gill') 
+            return;
           Object.keys(sensorData).forEach(param => {
             // Contemplated parameter
             if (this.params.includes(param)) {
