@@ -46,7 +46,7 @@
           <div v-if="Object.keys(buoysData[buoyName].data).includes('WSPD')">
             <span>
               <strong>Wind: </strong>
-              {{buoysData[buoyName].data['WSPD'].toFixed(1)}} m/s, 
+              {{(buoysData[buoyName].data['WSPD'] * 0.01).toFixed(1)}} m/s, 
               {{ bearing2compassRose(buoysData[buoyName].data['WDIR']) }}
               <span class="fa" :style="{transform: 'rotate('+ (buoysData[buoyName].data['WDIR']-45+180) +'deg)' }">&#xf124;</span>
             </span>
@@ -81,7 +81,7 @@
             <div v-if="Object.keys(buoysData[buoyName].data).includes('GSPD')">
               <span>
                 <strong>Wind gust: </strong>
-                {{buoysData[buoyName].data['GSPD'].toFixed(1)}} m/s, 
+                {{(buoysData[buoyName].data['GSPD'] * 0.01).toFixed(1)}} m/s, 
                 {{ bearing2compassRose(buoysData[buoyName].data['GDIR']) }}
                 <span class="fa" :style="{transform: 'rotate('+ (buoysData[buoyName].data['GDIR']-45+180) +'deg)' }">&#xf124;</span>
               </span>
@@ -91,14 +91,14 @@
             <div v-if="Object.keys(buoysData[buoyName].data).includes('TEMP')">
               <span>
                 <strong>Water temperature: </strong>
-                {{(buoysData[buoyName].data['TEMP'] * 0.1).toFixed(1)}} ºC
+                {{(buoysData[buoyName].data['TEMP'] * 0.0001).toFixed(1)}} ºC
               </span>
             </div>
             <!-- Salinity -->
             <div v-if="Object.keys(buoysData[buoyName].data).includes('PSAL')">
               <span>
                 <strong>Salinity: </strong>
-                {{buoysData[buoyName].data['PSAL'].toFixed(1)}} psu
+                {{(buoysData[buoyName].data['PSAL'] * 0.001).toFixed(1)}} psu
               </span>
             </div>
             <!-- Air temperature -->
