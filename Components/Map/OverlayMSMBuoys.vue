@@ -174,12 +174,13 @@ export default {
           lat: apiData.buoys[i].lat,
           latestTmst: apiData.buoys[i].latestTimestamp,
           data: {}, // tmst1: {Hm0: value, Tm02: value...}, tmst2: {...}
+          dataArray: {}, // tmst1: {Hm0: [value1, value2...], Tm02: [value1, value2...], ...}, tmst2: {...}
         };
         this.buoysData[buoyName] = { "hasData": false, "showInfo": false };
         this.buoys[buoyName].coord3857 = ol.proj.fromLonLat([this.buoys[buoyName].lon, this.buoys[buoyName].lat]);
       }
 
-      console.log("Added MSM buoys: " + Object.keys(this.buoys));
+      console.log("Added " + Object.keys(this.buoys).length + " MSM buoys: " + Object.keys(this.buoys));
 
 
       // First initialization
@@ -238,7 +239,7 @@ export default {
         'TEMP', 'PSAL', 'PRES',
         'WDIR', 'WSPD', 'GDIR', 'GSPD',
         'RELH', 'DRYT', 'ATMS'],
-      url: 'https://api.icatmar.cat/MSM_fast_api/buoys/{{id}}/data?start_date={{startDate}}&end_date={{endDate}}&parameters={{params}}',
+      url: 'https://api.icatmar.cat/MSM_fast_api/buoys/{{id}}/data?start_date={{startDate}}&end_date={{endDate}}&parameters={{params}}&limit=5000',
       requests: {},
     }
   },
@@ -249,8 +250,13 @@ export default {
     },
     // INTERNAL
     selectedDateChanged: function(tmst){
-      
+      // DEBUG
+      let now = new Date();
+      now.setDate(now.getDate() - 1);
+      now.setMinutes(0); now.setSeconds(0); now.setMilliseconds(0);
+      tmst = now.toISOString();
 
+      console.log("Timestamp for buoy MSM data: " + tmst);
       // Hide all data from buoyData
       Object.keys(this.buoys).forEach(buoyName => {
         this.buoysData[buoyName].hasData = false;
@@ -280,6 +286,7 @@ export default {
           url = url.replace('{{endDate}}', eDate.toISOString().substring(0, 19) + 'Z');
 
           // Proxy
+          console.log(url);
           let proxyFullURL = url;//this.proxyURL + '?url=' + encodeURIComponent(url);
           // Request data for the first time
           if (this.requests[proxyFullURL] == undefined) {
@@ -342,15 +349,15 @@ export default {
 
 
     parseAPIResult(response, buoyName){
-      let dataArray = response.data;
-      if (dataArray == undefined || dataArray.length == 0) {
+      let responseData = response.data;
+      if (responseData == undefined || responseData.length == 0) {
         console.log("API error for " + buoyName + ": " + response);
         return;
       }
 
-      for (let i = 0; i < dataArray.length; i++) {
-        let dd = dataArray[i];
-        let date = new Date(dd.timestamp);
+      Object.keys(responseData).forEach(resTimestamp => {
+        let dd = responseData[resTimestamp];
+        let date = new Date(resTimestamp);
         // Hourly dataset
         if (date.getMinutes() >= 30)
           date.setHours(date.getHours() + 1);
@@ -360,42 +367,38 @@ export default {
 
         let tmst = date.toISOString();
 
-        // Skip if timestamp already exists in buoy data
-        if (this.buoys[buoyName].data[tmst] != undefined){
-          continue;
-        }
 
         // Look for parameters inside the data array
-        Object.keys(dd.data).forEach(sensor => {
-          let sensorData = dd.data[sensor]; // {RELH: '1232', DRYT: '1232', ...}
+        Object.keys(dd).forEach(sensor => {
+          let sensorData = dd[sensor]; // {RELH: '1232', DRYT: '1232', ...}
           Object.keys(sensorData).forEach(param => {
-            // Contemplated parameter --> not really needed as we request the parameters to the API
+            // Contemplated parameter
             if (this.params.includes(param)) {
-              // Add to buoy data
-              if (this.buoys[buoyName].data[tmst] == undefined){
-                this.buoys[buoyName].data[tmst] = {};
+              // Add to buoy data array
+              if (this.buoys[buoyName].dataArray[tmst] == undefined){
+                this.buoys[buoyName].dataArray[tmst] = {};
               }
               // If parameter already exists, add to array for averaging later, if not create array
               let value = parseFloat(sensorData[param]);
-              if (this.buoys[buoyName].data[tmst][param] != undefined) {
-                this.buoys[buoyName].data[tmst][param].push(value);
+              if (this.buoys[buoyName].dataArray[tmst][param] != undefined) {
+                this.buoys[buoyName].dataArray[tmst][param].push(value);
               } else {
-                this.buoys[buoyName].data[tmst][param] = [value];
+                this.buoys[buoyName].dataArray[tmst][param] = [value];
               }
             }
           });
         });
-      }
+      })
       // Average values
-      Object.keys(this.buoys[buoyName].data).forEach(tmst => {
-        Object.keys(this.buoys[buoyName].data[tmst]).forEach(param => {
-          // If it is an array, average. Otherwise it means it was already averaged (tmst already existed)
-          if (Array.isArray(this.buoys[buoyName].data[tmst][param])){
-            let values = this.buoys[buoyName].data[tmst][param];
-            let sum = values.reduce((a, b) => a + b, 0);
-            let avg = sum / values.length;
-            this.buoys[buoyName].data[tmst][param] = avg;
-          }          
+      Object.keys(this.buoys[buoyName].dataArray).forEach(tmst => {
+        Object.keys(this.buoys[buoyName].dataArray[tmst]).forEach(param => {
+          let values = this.buoys[buoyName].dataArray[tmst][param];
+          let sum = values.reduce((a, b) => a + b, 0);
+          let avg = sum / values.length;
+          if (this.buoys[buoyName].data[tmst] == undefined){
+            this.buoys[buoyName].data[tmst] = {};
+          }
+          this.buoys[buoyName].data[tmst][param] = avg;
         });
       });
 
@@ -418,8 +421,10 @@ export default {
 
     // Timestime to current time ago
     timeAgo(tmst) {
-      let now = Date.now(window.GUIManager.currentTmst);
-      let diff = now - new Date(tmst).getTime();
+      // DEBUG
+      let selectedDate = new Date();//Date.now(window.GUIManager.currentTmst);
+      selectedDate = selectedDate.setDate(selectedDate.getDate() - 1);
+      let diff = selectedDate - new Date(tmst).getTime();
 
       if (diff < 60 * 1000) {
         return "Just now";
@@ -446,6 +451,9 @@ export default {
   },
   computed: {
     currentTmst() {
+      let now= new Date();
+      now.setDate(now.getDate() - 1);
+      return now.toISOString();
       return window.GUIManager.currentTmst;
     }
   },
