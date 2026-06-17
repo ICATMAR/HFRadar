@@ -31,6 +31,9 @@
     <!-- Overlay wave data -->
     <overlay-wave-data ref="overlayWaveData"></overlay-wave-data>
 
+    <!-- Overlay buoys MSM -->
+    <overlay-msm-buoys ref="overlayMSMBuoys"></overlay-msm-buoys>
+
     <!-- Overlay puertos del estado buoys data -->
     <overlay-puertos-buoy-data ref="overlayPuertosBuoyData"></overlay-puertos-buoy-data>
 
@@ -78,6 +81,7 @@ import AnimationCanvas from "./AnimationCanvas.vue";
 import ClimaDirectionCanvas from "./ClimaDirectionCanvas.vue";
 import BottomSection from "../BottomSection/BottomSection.vue";
 import OverlayWaveData from "./OverlayWaveData.vue";
+import OverlayMSMBuoys from "./OverlayMSMBuoys.vue";
 import OverlayPuertosBuoyData from "./OverlayPuertosBuoyData.vue";
 import OverlayOBSEAData from "./OverlayOBSEAData.vue";
 import OverlayNOAAERDDAPData from "./OverlayNOAAERDDAPData.vue";
@@ -851,6 +855,10 @@ export default {
         this.$refs.overlayWaveData.updatePanel(zoomLevel);
       }
       // Hide/show buoy info
+      if (this.$refs.overlayMSMBuoys) {
+        this.$refs.overlayMSMBuoys.updatePanel(zoomLevel);
+      }
+      // Hide/show buoy info
       if (this.$refs.overlayPuertosBuoyData) {
         this.$refs.overlayPuertosBuoyData.updatePanel(zoomLevel);
       }
@@ -1192,6 +1200,7 @@ export default {
     "climaDirectionCanvas": ClimaDirectionCanvas,
     "bottom-section": BottomSection,
     "overlay-wave-data": OverlayWaveData,
+    "overlay-msm-buoys": OverlayMSMBuoys,
     "overlay-puertos-buoy-data": OverlayPuertosBuoyData,
     "overlay-obsea-data": OverlayOBSEAData,
     "overlay-noaa-erddap-data": OverlayNOAAERDDAPData,
