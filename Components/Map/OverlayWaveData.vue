@@ -50,7 +50,7 @@
         @click="radarIconClicked(key)"
         src="/HFRadar/Assets/Images/radar.svg">
         <!-- Indicator of ICATMAR -->
-        <div class="icon-marker-icatmar"></div>
+        <div v-if="key!='CNET'" class="icon-marker-icatmar"></div>
       </div>
 
     </div>
