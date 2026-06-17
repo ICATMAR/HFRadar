@@ -27,7 +27,7 @@
             <div></div>
           </div>
           <span><strong>{{ buoyName }}'s buoy</strong></span>
-          <a href="https://www.icatmar.cat/" target="_blank" rel="noopener noreferrer" class="icon-str">i</a>
+          <a href="https://icatmar.github.io/visortemporalboies/" target="_blank" rel="noopener noreferrer" class="icon-str"><span class="fa">&#xf08e;</span></a>
         </div>
 
         <!-- Buoy data -->
