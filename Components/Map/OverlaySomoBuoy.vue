@@ -1,0 +1,503 @@
+<template>
+  
+  <div id="overlay-msm-buoy-data" ref="containerbuoyInfo">
+  <!-- Container -->
+    <div class="buoyContainer">
+      <!-- Buoy icon -->
+      <!-- <div style="padding: 10px; border-radius:5px; background-color: red">Boya</div> -->
+      <div style="position: relative; display: flex">
+        <img class="icon-str icon-medium icon-img" 
+        @click="buoyIconClicked()" 
+        src="/HFRadar/Assets/Images/buoy.svg">
+        <!-- Indicator of ICATMAR -->
+        <div class="icon-marker-icatmar"></div>
+      </div>
+      
+
+      <!-- Buoy panel -->
+      <Transition>
+      <div class="wavepanel" v-if="buoyData.showInfo"
+        :class="[!isTooFar ? 'showOverlayMap' : 'hideOverlayMap']">
+        <!-- Site -->
+        <div class="buoyTitle">
+          <div v-show="buoyData.isLoading" class="lds-ring">
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+          </div>
+          <span><strong>{{ buoyName }}'s buoy</strong></span>
+          <a href="https://www.icatmar.cat/" target="_blank" rel="noopener noreferrer" class="icon-str">i</a>
+        </div>
+
+        <!-- Buoy data -->
+        <div v-if="buoyData.hasData">
+          <!-- Wind -->
+          <div v-if="Object.keys(buoyData.data).includes('WSPD')">
+            <span>
+              <strong>Wind: </strong>
+              {{buoyData.data['WSPD'].toFixed(1)}} m/s, 
+              {{ bearing2compassRose(buoyData.data['WDIR']) }}
+              <span class="fa" :style="{transform: 'rotate('+ (buoyData.data['WDIR']-45+180) +'deg)' }">&#xf124;</span>
+            </span>
+          </div>
+          <!-- Currents -->
+          <!-- <div v-if="Object.keys(buoyData.data).includes('CurrentSpeed')">
+            <span>
+              <strong>Current: </strong>
+              {{buoyData.data['CurrentSpeed(cm/s)'].toFixed(1)}} cm/s, 
+              {{ bearing2compassRose(buoyData.data['CurrentDir(º)']) }}
+              <span class="fa" :style="{transform: 'rotate('+ (buoyData.data['CurrentDir(º)']-45) +'deg)' }">&#xf124;</span>
+            </span>
+          </div> -->
+          
+          <!-- Extra data -->
+          <Transition>
+          <div v-show="buoys[buoyName].showAllData">
+            <!-- Wave max -->
+            <div v-if="Object.keys(buoyData.data).includes('WMHM')">
+              <span>
+                <strong>Wave max: </strong>
+                {{buoyData.data['WMHM'].toFixed(1)}} m, 
+                {{buoyData.data['VTPK'].toFixed(1)}} s
+                <template v-if="buoyData.data['VPED'] != undefined">,
+                  {{ bearing2compassRose(buoyData.data['VPED']) }}
+                  <span class="fa" :style="{transform: 'rotate('+ (buoyData.data['VPED']-45+180) +'deg)' }">&#xf124;</span>
+                </template>
+              </span>
+            </div>
+
+            <!-- Wind -->
+            <div v-if="Object.keys(buoyData.data).includes('GSPD')">
+              <span>
+                <strong>Wind gust: </strong>
+                {{buoyData.data['GSPD'].toFixed(1)}} m/s, 
+                {{ bearing2compassRose(buoyData.data['GDIR']) }}
+                <span class="fa" :style="{transform: 'rotate('+ (buoyData.data['GDIR']-45+180) +'deg)' }">&#xf124;</span>
+              </span>
+            </div>
+
+            <!-- Water temperature -->
+            <div v-if="Object.keys(buoyData.data).includes('TEMP')">
+              <span>
+                <strong>Water temperature: </strong>
+                {{(buoyData.data['TEMP'] * 0.1).toFixed(1)}} ºC
+              </span>
+            </div>
+            <!-- Salinity -->
+            <div v-if="Object.keys(buoyData.data).includes('PSAL')">
+              <span>
+                <strong>Salinity: </strong>
+                {{buoyData.data['PSAL'].toFixed(1)}} psu
+              </span>
+            </div>
+            <!-- Air temperature -->
+            <div v-if="Object.keys(buoyData.data).includes('DRYT')">
+              <span>
+                <strong>Air temperature: </strong>
+                   {{ (buoyData.data['DRYT'] * 0.1).toFixed(1) }} ºC
+              </span>
+            </div>
+            <!-- Air pressure -->
+            <div v-if="Object.keys(buoyData.data).includes('ATMS')">
+              <span>
+                <strong>Air pressure: </strong>
+                {{(buoyData.data['ATMS'] * 0.1).toFixed(1)}} mb
+              </span>
+            </div>
+
+            <!-- Relative humidity -->
+            <div v-if="Object.keys(buoyData.data).includes('RELH')">
+              <span>
+                <strong>Relative humidity: </strong>
+                {{(buoyData.data['RELH'] * 0.1).toFixed(1)}} % 
+              </span>
+            </div>
+
+          </div>
+          </Transition>
+
+          <!-- Button showAllData ON OFF-->
+          <div class="button-container">
+            <button v-show="!buoys[buoyName].showAllData" class="more-data-button" @click="buoys[buoyName].showAllData = true">+</button>
+            <button v-show="buoys[buoyName].showAllData" class="more-data-button" @click="buoys[buoyName].showAllData = false">-</button>
+          </div>
+          
+        </div>
+
+        <!-- Latest timestamp TODO: only when ahead of latest? -->
+        <div v-else-if="new Date(currentTmst) > new Date(buoys[buoyName].latestTmst)">
+          <span><strong>Latest data: </strong>{{ buoys[buoyName].latestTmst }}</span>
+        </div>
+        
+      </div>
+      </Transition>
+
+    </div>
+  </div>
+
+</template>
+
+
+<script>
+
+
+
+export default {
+  name: 'overlay-msm-buoys',
+  created(){},
+  mounted() {
+    // Create buoyData and add to map
+    // Fetch from API
+    fetch('https://api.icatmar.cat/MSM_fast_api/buoys').then(res => res.json()).then(apiData => {
+      if (apiData.buoys == undefined) {
+        console.error("Error loading buoys data from API");
+        return;
+      }
+
+      // Fill buoyData
+      for (let i = 0; i < apiData.buoys.length; i++) {
+        let buoyName = apiData.buoys[i].name;
+        this.buoys[buoyName] = {
+          id: apiData.buoys[i].id,
+          lon: apiData.buoys[i].lon,
+          lat: apiData.buoys[i].lat,
+          latestTmst: apiData.buoys[i].latestTimestamp,
+          data: {}, // tmst1: {Hm0: value, Tm02: value...}, tmst2: {...}
+        };
+        this.buoyData = { "hasData": false, "showInfo": false };
+        this.buoys[buoyName].coord3857 = ol.proj.fromLonLat([this.buoys[buoyName].lon, this.buoys[buoyName].lat]);
+      }
+
+      console.log("Added MSM buoys: " + Object.keys(this.buoys));
+
+
+      // First initialization
+      // Get map
+      if (this.map == undefined) {
+        this.map = this.$parent.map;
+      }
+      // Relate overlay with map
+      this.$nextTick(() => {
+        Object.keys(this.buoys).forEach(buoyName => {
+          // Buoy info
+          const buoyInfo = new ol.Overlay({
+            position: this.buoys[buoyName].coord3857,
+            positioning: 'center-left',
+            element: this.$refs[buoyName],
+            stopEvent: false,
+          });
+          this.map.addOverlay(buoyInfo);
+        });
+
+        // Trigger interface update
+        this.selectedDateChanged(window.GUIManager.currentTmst);
+      });
+      
+    });
+
+
+
+    
+
+    // EVENTS
+    // HFRadarLoaded
+    window.eventBus.on('HFRadarDataLoaded', tmst => {
+      if (tmst)
+        this.selectedDateChanged(tmst);
+    });
+    // Selected date changed (slider moves or drag and drop files)
+    window.eventBus.on('DataStreamsBar_SelectedDateChanged', this.selectedDateChanged);
+    // Initial load and user changing hash TIME in URL
+    window.eventBus.on('GUIManager_URLDateChanged', this.selectedDateChanged);
+    // User clicked on Active sync and turned it on
+    window.eventBus.on('TopRightCanvas_ActiveSyncClickedAndOn', this.selectedDateChanged);
+
+  },
+  data () {
+    return {
+      once: false,
+      proxyURL: 'https://api.icatmar.cat/proxy/',
+      buoyData: {},
+      isTooFar: false,
+      // https://portus.puertos.es/
+      buoys:{},
+      params: ['VGHS', 'VMTA', 'VMDR',
+        'VMHM', 'VTPK', 'VPED',
+        'temperature',
+        'TEMP', 'PSAL', 'PRES',
+        'WDIR', 'WSPD', 'GDIR', 'GSPD',
+        'RELH', 'DRYT', 'ATMS'],
+      url: 'https://api.icatmar.cat/MSM_fast_api/buoys/{{id}}/data?start_date={{startDate}}&end_date={{endDate}}&parameters={{params}}',
+      requests: {},
+    }
+  },
+  methods: {
+    // USER ACTIONS
+    buoyIconClicked: function(buoyName){
+      this.buoyData.showInfo = !this.buoyData.showInfo;
+    },
+    // INTERNAL
+    selectedDateChanged: function(tmst){
+      
+
+      // Hide all data from buoyData
+      Object.keys(this.buoys).forEach(buoyName => {
+        this.buoyData.hasData = false;
+      });
+
+      // Add one day before and after of the tmst
+      let currentDate = new Date(tmst);
+      let sDate = new Date(currentDate.getTime() - 24 * 60 * 60  * 1000);
+      let eDate = new Date(currentDate.getTime() + 24 * 60 * 60  * 1000);
+      // Iterate buoys
+      Object.keys(this.buoys).forEach(buoyName => {
+        let buoy = this.buoys[buoyName];
+        // Check if the buoy data has all timestamps (timestep of 1h)
+        if (buoy.data[tmst] == undefined){
+          // Load data (yesteray, today, tomorrow)
+          // Generate url
+          // Id
+          let url = this.url.replace('{{id}}', buoy.id);
+          // Params
+          let paramsStr = '';
+          this.params.forEach(p => paramsStr += p + ",");
+          paramsStr = paramsStr.substring(0, paramsStr.length - 1);
+          url = url.replace('{{params}}', paramsStr);
+          // Start date
+          url = url.replace('{{startDate}}', sDate.toISOString().substring(0, 19) + 'Z');
+          // End date
+          url = url.replace('{{endDate}}', eDate.toISOString().substring(0, 19) + 'Z');
+
+          // Proxy
+          let proxyFullURL = url;//this.proxyURL + '?url=' + encodeURIComponent(url);
+          // Request data for the first time
+          if (this.requests[proxyFullURL] == undefined) {
+            this.requests[proxyFullURL] = {
+              promise: this.getData(proxyFullURL, buoyName).then(r => {
+                this.buoyData.isLoading = false;
+                this.requests[proxyFullURL].response = r;
+                this.requests[proxyFullURL].lastResolved = Date.now();
+                return r;
+              }),
+              response: undefined,
+              lastResolved: undefined,
+            };
+          }
+          // Resolve promise and update content
+          this.requests[proxyFullURL].promise.then(r => {
+            this.parseAPIResult(r, buoyName);
+            // Update buoys content once loaded
+            this.updateContent(buoyName, tmst);
+          });
+        }
+        // Data already exists
+        else {
+          // Update buoys content
+          this.updateContent(buoyName, tmst);
+        }
+      });
+    },
+
+    // Keep track of requests as API is slow
+    async getData(url, buoyName) {
+      this.buoyData.isLoading = true;
+      // Already resolved
+      if (this.requests[url] && this.requests[url].lastResolved != undefined){
+        if (this.requests[url].lastResolved > Date.now() - 60 * 60 * 1000) {
+          return new Promise((resolve) => resolve(this.requests[url].response));
+        }
+        // Request again if it was resolved more than X time ago
+        return fetch(url).then(res => res.json());
+      }
+      // Fetch
+      return fetch(url).then(res => res.json());
+    },
+
+    updateContent: function(buoyName, tmst){
+      if (this.buoys[buoyName].data[tmst] == undefined){
+        this.buoyData.hasData = false;
+        return;
+      }
+
+      
+      this.buoyData.hasData = true;
+      this.buoyData.data = {};
+      
+      Object.keys(this.buoys[buoyName].data[tmst]).forEach(key => {
+        this.buoyData.data[key] = this.buoys[buoyName].data[tmst][key];
+      });
+      //console.log(this.buoyData.data)
+    },
+
+
+    parseAPIResult(response, buoyName){
+      let dataArray = response.data;
+      if (dataArray == undefined || dataArray.length == 0) {
+        console.log("API error for " + buoyName + ": " + response);
+        return;
+      }
+
+      for (let i = 0; i < dataArray.length; i++) {
+        let dd = dataArray[i];
+        let date = new Date(dd.timestamp);
+        // Hourly dataset
+        if (date.getMinutes() >= 30)
+          date.setHours(date.getHours() + 1);
+        date.setMinutes(0);
+        date.setSeconds(0);
+        date.setMilliseconds(0);
+
+        let tmst = date.toISOString();
+
+        // Skip if timestamp already exists in buoy data
+        if (this.buoys[buoyName].data[tmst] != undefined){
+          continue;
+        }
+
+        // Look for parameters inside the data array
+        Object.keys(dd.data).forEach(sensor => {
+          let sensorData = dd.data[sensor]; // {RELH: '1232', DRYT: '1232', ...}
+          Object.keys(sensorData).forEach(param => {
+            // Contemplated parameter --> not really needed as we request the parameters to the API
+            if (this.params.includes(param)) {
+              // Add to buoy data
+              if (this.buoys[buoyName].data[tmst] == undefined){
+                this.buoys[buoyName].data[tmst] = {};
+              }
+              // If parameter already exists, add to array for averaging later, if not create array
+              let value = parseFloat(sensorData[param]);
+              if (this.buoys[buoyName].data[tmst][param] != undefined) {
+                this.buoys[buoyName].data[tmst][param].push(value);
+              } else {
+                this.buoys[buoyName].data[tmst][param] = [value];
+              }
+            }
+          });
+        });
+      }
+      // Average values
+      Object.keys(this.buoys[buoyName].data).forEach(tmst => {
+        Object.keys(this.buoys[buoyName].data[tmst]).forEach(param => {
+          // If it is an array, average. Otherwise it means it was already averaged (tmst already existed)
+          if (Array.isArray(this.buoys[buoyName].data[tmst][param])){
+            let values = this.buoys[buoyName].data[tmst][param];
+            let sum = values.reduce((a, b) => a + b, 0);
+            let avg = sum / values.length;
+            this.buoys[buoyName].data[tmst][param] = avg;
+          }          
+        });
+      });
+
+    },
+
+    // Bearing to direction
+    bearing2compassRose(bearing){
+      if (bearing == undefined)
+        debugger;
+      // Define directional ranges in degrees
+      const directions = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW', 'N'];
+      const ranges = [22.5, 67.5, 112.5, 157.5, 202.5, 247.5, 292.5, 337.5, 360];
+      // Find the index of the range that includes the given bearing
+      for (let i = 0; i < ranges.length; i++) {
+          if (bearing < ranges[i]) {
+              return directions[i];
+          }
+      }
+    },
+
+    // Timestime to current time ago
+    timeAgo(tmst) {
+      let now = Date.now(window.GUIManager.currentTmst);
+      let diff = now - new Date(tmst).getTime();
+
+      if (diff < 60 * 1000) {
+        return "Just now";
+      } else if (diff < 60 * 60 * 1000) {
+        let minutes = Math.floor(diff / (60 * 1000));
+        return minutes + " minute" + (minutes > 1 ? "s" : "") + " ago";
+      } else if (diff < 24 * 60 * 60 * 1000) {
+        let hours = Math.floor(diff / (60 * 60 * 1000));
+        return hours + " hour" + (hours > 1 ? "s" : "") + " ago";
+      } else {
+        let days = Math.floor(diff / (24 * 60 * 60 * 1000));
+        return days + " day" + (days > 1 ? "s" : "") + " ago";
+      }
+    },
+    
+    
+    // Hide / Panel depending on zoom level
+    updatePanel(zoomLevel){
+      if (zoomLevel < 9){
+        this.isTooFar = true;
+      } else
+        this.isTooFar = false;
+    }
+  },
+  computed: {
+    currentTmst() {
+      return window.GUIManager.currentTmst;
+    }
+  },
+  components: {
+
+  }
+}
+
+</script>
+
+
+
+<style scoped>
+
+a {
+  text-decoration: none;
+}
+
+.buoyContainer {
+  display: flex;
+  align-items: center;
+}
+
+.buoyTitle {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: solid 2px white;
+}
+.wavepanel {
+  background: rgb(15 48 98 / 71%);/*var(--darkBlue);*/
+  padding: 10px;
+  border-radius: 17px;
+
+  transition: all 1s;
+}
+
+.button-container {
+  display: flex;
+  width: 100%;
+  justify-content: center;
+}
+.more-data-button {
+  height: 10px;
+  background: var(--blue);
+  width: 80%;
+  padding: 5px;
+  margin-top: 5px;
+}
+.more-data-button:hover{
+  background: var(--lightBlue);
+}
+
+
+.v-enter-active,
+.v-leave-active {
+  transition: all 0.5s ease;
+}
+
+.v-enter-from,
+.v-leave-to {
+  opacity: 0;
+  transform: scale(0.9);
+}
+</style>
