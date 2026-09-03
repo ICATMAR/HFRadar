@@ -257,7 +257,6 @@ export default {
     // Unlike the MSM buoys there is no catalogue to ask: this is one buoy at a
     // known position, so it is placed straight away.
     this.buoy.coord3857 = ol.proj.fromLonLat([this.buoy.lon, this.buoy.lat]);
-    debugger;
     console.log("Added SOMO buoy: " + this.buoyName);
 
     // First initialization
