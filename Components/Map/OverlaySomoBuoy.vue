@@ -1,18 +1,18 @@
 <template>
-  
-  <div id="overlay-msm-buoy-data" ref="containerbuoyInfo">
-  <!-- Container -->
-    <div class="buoyContainer">
+
+  <div id="overlay-somo-buoy-data" ref="containerbuoyInfo">
+  <!-- Container. Only one buoy, so no v-for: the overlay is bound to this
+       element directly (see mounted) -->
+    <div :id="buoyName" ref="buoyContainer" class="buoyContainer">
       <!-- Buoy icon -->
-      <!-- <div style="padding: 10px; border-radius:5px; background-color: red">Boya</div> -->
       <div style="position: relative; display: flex">
-        <img class="icon-str icon-medium icon-img" 
-        @click="buoyIconClicked()" 
+        <img class="icon-str icon-medium icon-img"
+        @click="buoyIconClicked()"
         src="/HFRadar/Assets/Images/buoy.svg">
         <!-- Indicator of ICATMAR -->
         <div class="icon-marker-icatmar"></div>
       </div>
-      
+
 
       <!-- Buoy panel -->
       <Transition>
@@ -27,7 +27,7 @@
             <div></div>
           </div>
           <span><strong>{{ buoyName }}'s buoy</strong></span>
-          <a href="https://www.icatmar.cat/" target="_blank" rel="noopener noreferrer" class="icon-str">i</a>
+          <a href="https://icatmar.github.io/boiasomorrostro/" target="_blank" rel="noopener noreferrer" class="icon-str"><span class="fa">&#xf08e;</span></a>
         </div>
 
         <!-- Buoy data -->
@@ -36,54 +36,77 @@
           <div v-if="Object.keys(buoyData.data).includes('WSPD')">
             <span>
               <strong>Wind: </strong>
-              {{buoyData.data['WSPD'].toFixed(1)}} m/s, 
+              {{(buoyData.data['WSPD']).toFixed(1)}} m/s,
               {{ bearing2compassRose(buoyData.data['WDIR']) }}
               <span class="fa" :style="{transform: 'rotate('+ (buoyData.data['WDIR']-45+180) +'deg)' }">&#xf124;</span>
             </span>
           </div>
-          <!-- Currents -->
-          <!-- <div v-if="Object.keys(buoyData.data).includes('CurrentSpeed')">
+          <!-- Water temperature (SBE37, at 0.5 m) -->
+          <div v-if="Object.keys(buoyData.data).includes('TEMP')">
             <span>
-              <strong>Current: </strong>
-              {{buoyData.data['CurrentSpeed(cm/s)'].toFixed(1)}} cm/s, 
-              {{ bearing2compassRose(buoyData.data['CurrentDir(º)']) }}
-              <span class="fa" :style="{transform: 'rotate('+ (buoyData.data['CurrentDir(º)']-45) +'deg)' }">&#xf124;</span>
+              <strong>Water temperature (0.5m): </strong>
+              {{buoyData.data['TEMP'].toFixed(1)}} ºC
             </span>
-          </div> -->
-          
+          </div>
+
           <!-- Extra data -->
           <Transition>
-          <div v-show="buoys[buoyName].showAllData">
-            <!-- Wave max -->
-            <div v-if="Object.keys(buoyData.data).includes('WMHM')">
+          <div v-show="buoy.showAllData">
+
+            <!-- METEO -->
+            <!-- Relative wind (measured on the moving buoy, before the correction) -->
+            <div v-if="Object.keys(buoyData.data).includes('WRSP')">
               <span>
-                <strong>Wave max: </strong>
-                {{buoyData.data['WMHM'].toFixed(1)}} m, 
-                {{buoyData.data['VTPK'].toFixed(1)}} s
-                <template v-if="buoyData.data['VPED'] != undefined">,
-                  {{ bearing2compassRose(buoyData.data['VPED']) }}
-                  <span class="fa" :style="{transform: 'rotate('+ (buoyData.data['VPED']-45+180) +'deg)' }">&#xf124;</span>
-                </template>
+                <strong>Relative wind: </strong>
+                {{(buoyData.data['WRSP']).toFixed(1)}} m/s,
+                {{ bearing2compassRose(buoyData.data['WRDR']) }}
+                <span class="fa" :style="{transform: 'rotate('+ (buoyData.data['WRDR']-45+180) +'deg)' }">&#xf124;</span>
+              </span>
+            </div>
+            <!-- Air temperature -->
+            <div v-if="Object.keys(buoyData.data).includes('DRYT')">
+              <span>
+                <strong>Air temperature: </strong>
+                   {{ buoyData.data['DRYT'].toFixed(1) }} ºC
+              </span>
+            </div>
+            <!-- Dew point temperature -->
+            <div v-if="Object.keys(buoyData.data).includes('DEWT')">
+              <span>
+                <strong>Dew point: </strong>
+                {{ buoyData.data['DEWT'].toFixed(1) }} ºC
+              </span>
+            </div>
+            <!-- Wet bulb temperature -->
+            <div v-if="Object.keys(buoyData.data).includes('WETT')">
+              <span>
+                <strong>Wet bulb temperature: </strong>
+                {{ buoyData.data['WETT'].toFixed(1) }} ºC
+              </span>
+            </div>
+            <!-- Air pressure -->
+            <div v-if="Object.keys(buoyData.data).includes('ATMS')">
+              <span>
+                <strong>Air pressure: </strong>
+                {{buoyData.data['ATMS'].toFixed(1)}} mb
+              </span>
+            </div>
+            <!-- Relative humidity -->
+            <div v-if="Object.keys(buoyData.data).includes('RELH')">
+              <span>
+                <strong>Relative humidity: </strong>
+                {{buoyData.data['RELH'].toFixed(0)}} %
+              </span>
+            </div>
+            <!-- Air density -->
+            <div v-if="Object.keys(buoyData.data).includes('ADNS')">
+              <span>
+                <strong>Air density: </strong>
+                {{buoyData.data['ADNS'].toFixed(2)}} kg/m³
               </span>
             </div>
 
-            <!-- Wind -->
-            <div v-if="Object.keys(buoyData.data).includes('GSPD')">
-              <span>
-                <strong>Wind gust: </strong>
-                {{buoyData.data['GSPD'].toFixed(1)}} m/s, 
-                {{ bearing2compassRose(buoyData.data['GDIR']) }}
-                <span class="fa" :style="{transform: 'rotate('+ (buoyData.data['GDIR']-45+180) +'deg)' }">&#xf124;</span>
-              </span>
-            </div>
-
-            <!-- Water temperature -->
-            <div v-if="Object.keys(buoyData.data).includes('TEMP')">
-              <span>
-                <strong>Water temperature: </strong>
-                {{(buoyData.data['TEMP'] * 0.1).toFixed(1)}} ºC
-              </span>
-            </div>
+            <!-- CTD -->
             <!-- Salinity -->
             <div v-if="Object.keys(buoyData.data).includes('PSAL')">
               <span>
@@ -91,26 +114,25 @@
                 {{buoyData.data['PSAL'].toFixed(1)}} psu
               </span>
             </div>
-            <!-- Air temperature -->
-            <div v-if="Object.keys(buoyData.data).includes('DRYT')">
+            <!-- Dissolved oxygen -->
+            <div v-if="Object.keys(buoyData.data).includes('DOX1')">
               <span>
-                <strong>Air temperature: </strong>
-                   {{ (buoyData.data['DRYT'] * 0.1).toFixed(1) }} ºC
+                <strong>Dissolved oxygen: </strong>
+                {{buoyData.data['DOX1'].toFixed(2)}} ml/L
               </span>
             </div>
-            <!-- Air pressure -->
-            <div v-if="Object.keys(buoyData.data).includes('ATMS')">
+            <!-- Sea pressure -->
+            <div v-if="Object.keys(buoyData.data).includes('PRES')">
               <span>
-                <strong>Air pressure: </strong>
-                {{(buoyData.data['ATMS'] * 0.1).toFixed(1)}} mb
+                <strong>Sea pressure: </strong>
+                {{buoyData.data['PRES'].toFixed(2)}} dbar
               </span>
             </div>
-
-            <!-- Relative humidity -->
-            <div v-if="Object.keys(buoyData.data).includes('RELH')">
+            <!-- Electrical conductivity -->
+            <div v-if="Object.keys(buoyData.data).includes('CNDC')">
               <span>
-                <strong>Relative humidity: </strong>
-                {{(buoyData.data['RELH'] * 0.1).toFixed(1)}} % 
+                <strong>Electrical conductivity: </strong>
+                {{buoyData.data['CNDC'].toFixed(2)}} S/m
               </span>
             </div>
 
@@ -119,17 +141,21 @@
 
           <!-- Button showAllData ON OFF-->
           <div class="button-container">
-            <button v-show="!buoys[buoyName].showAllData" class="more-data-button" @click="buoys[buoyName].showAllData = true">+</button>
-            <button v-show="buoys[buoyName].showAllData" class="more-data-button" @click="buoys[buoyName].showAllData = false">-</button>
+            <button v-show="!buoy.showAllData" class="more-data-button" @click="buoy.showAllData = true">+</button>
+            <button v-show="buoy.showAllData" class="more-data-button" @click="buoy.showAllData = false">-</button>
           </div>
-          
+
         </div>
 
-        <!-- Latest timestamp TODO: only when ahead of latest? -->
-        <div v-else-if="new Date(currentTmst) > new Date(buoys[buoyName].latestTmst)">
-          <span><strong>Latest data: </strong>{{ buoys[buoyName].latestTmst }}</span>
+        <!-- Latest timestamp -->
+        <div v-else-if="buoy.latestTmst != undefined">
+          <span><strong>Latest data: </strong>{{ timeAgo(buoy.latestTmst) }}</span>
         </div>
-        
+        <!-- Nothing could be loaded -->
+        <div v-else>
+          <span>No data available</span>
+        </div>
+
       </div>
       </Transition>
 
@@ -141,64 +167,123 @@
 
 <script>
 
+// Somorrostro buoy, in front of Barcelona. Same panel as OverlayMSMBuoys, but
+// for a single buoy, and the data does not come from the MSM API: it is read
+// from the logger files the ICATMAR data repository publishes, which is what
+// the buoy's own web application falls back on (see boiasomorrostro/wind/wind.js).
+
+// Buoy location, same values as boiasomorrostro's main.js
+const BUOY_NAME = 'Somorrostro';
+const LATITUDE = 41.375694;
+const LONGITUDE = 2.216194;
+
+// GitHub Pages is not on the proxy's allowlist, but it serves the files with
+// access-control-allow-origin: *, so they are fetched directly.
+const REPO_URL = 'https://icatmar.github.io/data/observational/insitu/Boies/SOMO/';
+
+const MINUTE = 60 * 1000;
+const REFRESH_LIMIT = 15 * MINUTE;  // the buoy reports every 15 min
+// The logger writes 1000 m/s for a failed wind reading and the repository
+// serves it raw. On those rows the direction columns still hold
+// plausible-looking numbers, so dropping the whole wind reading on its speed is
+// what keeps a bogus bearing off the panel too. The strongest real reading in
+// the record is 27 m/s, so the exact threshold hardly matters.
+const MAX_WIND_SPEED = 500;
+const WIND_PARAMS = ['WSPD', 'WDIR', 'WRSP', 'WRDR', 'WCDR'];
+// Averaging the 15-minute samples into the hour has to go around the circle for
+// these: 350º and 10º average to 0º, not to 180º.
+const DIRECTION_PARAMS = ['WDIR', 'WRDR', 'WCDR'];
+
+// The two logger files this overlay reads, and the code each of their columns
+// is stored under - the same codes the ERDDAP datasets built from these files
+// publish. The SAMI file (raw encoded frames, pH only exists once ERDDAP has
+// run its regression), the ADCP's Doppler.dat and the Status/System files are
+// left out.
+const SENSORS = {
+  METEO: {
+    file: 'BoiaSomorrostro_cr1000xs_Meteo.dat',
+    columns: {
+      'WindDir_True': 'WDIR',   // WDIR is "wind from direction (true north)"
+      'Corr_WindS': 'WSPD',
+      'Corr_WindDir': 'WCDR',   // corrected, but magnetic - not the same as WDIR
+      'Rel_WindDir': 'WRDR',
+      'Rel_WS': 'WRSP',
+      'BP': 'ATMS',
+      'RH': 'RELH',
+      'AirTemp': 'DRYT',
+      'DP': 'DEWT',
+      'AD': 'ADNS',
+      'WBT': 'WETT',
+    },
+  },
+  CTD: {
+    // SBE37, at 0.5 m
+    file: 'BoiaSomorrostro_cr1000xs_SBE37_SMPO.dat',
+    columns: {
+      'SBE37Temp': 'TEMP',
+      'SBE37Sal': 'PSAL',
+      'SBE37OXY': 'DOX1',
+      'SBE37Pres': 'PRES',
+      'SBE37Cond': 'CNDC',
+    },
+  },
+};
+
+// The files timestamp their rows with the buoy's own wall clock: at the time of
+// writing a file's HTTP Last-Modified is 08:10 UTC while its newest row reads
+// 09:45, so the rows are Europe/Madrid (UTC+2 in summer, +1 in winter), not UTC.
+// Taking them at face value puts every measurement an hour or two in the future,
+// so they are converted to the real instant here, at the only place timestamps
+// enter. Drop this if the logger is ever changed to write real UTC.
+const BUOY_TIMEZONE = 'Europe/Madrid';
+
+function parseBuoyDate(wallClock) {
+  const asIfUTC = new Date(wallClock + 'Z');
+  const offset = new Date(asIfUTC.toLocaleString('en-US', { timeZone: 'UTC' }))
+    - new Date(asIfUTC.toLocaleString('en-US', { timeZone: BUOY_TIMEZONE }));
+  return new Date(asIfUTC.getTime() + offset);
+}
 
 
 export default {
-  name: 'overlay-msm-buoys',
-  created(){},
+  name: 'overlay-somo-buoy',
+  created(){
+    // Per sensor: { entries, loadedAt } - the whole parsed logger file. Each
+    // file holds months of data in one download, so every window is served
+    // from it (see loadRepoFile).
+    this.repoFiles = {};
+  },
   mounted() {
-    // Create buoyData and add to map
-    // Fetch from API
-    fetch('https://api.icatmar.cat/MSM_fast_api/buoys').then(res => res.json()).then(apiData => {
-      if (apiData.buoys == undefined) {
-        console.error("Error loading buoys data from API");
-        return;
-      }
+    // Unlike the MSM buoys there is no catalogue to ask: this is one buoy at a
+    // known position, so it is placed straight away.
+    this.buoy.coord3857 = ol.proj.fromLonLat([this.buoy.lon, this.buoy.lat]);
+    debugger;
+    console.log("Added SOMO buoy: " + this.buoyName);
 
-      // Fill buoyData
-      for (let i = 0; i < apiData.buoys.length; i++) {
-        let buoyName = apiData.buoys[i].name;
-        this.buoys[buoyName] = {
-          id: apiData.buoys[i].id,
-          lon: apiData.buoys[i].lon,
-          lat: apiData.buoys[i].lat,
-          latestTmst: apiData.buoys[i].latestTimestamp,
-          data: {}, // tmst1: {Hm0: value, Tm02: value...}, tmst2: {...}
-        };
-        this.buoyData = { "hasData": false, "showInfo": false };
-        this.buoys[buoyName].coord3857 = ol.proj.fromLonLat([this.buoys[buoyName].lon, this.buoys[buoyName].lat]);
-      }
-
-      console.log("Added MSM buoys: " + Object.keys(this.buoys));
-
-
-      // First initialization
+    // First initialization
+    // Get map
+    if (this.map == undefined) {
+      this.map = this.$parent.map;
+    }
+    // Relate overlay with map
+    this.$nextTick(() => {
+      // Buoy info
+      const buoyInfo = new ol.Overlay({
+        position: this.buoy.coord3857,
+        positioning: 'center-left',
+        element: this.$refs.buoyContainer,
+        stopEvent: false,
+      });
       // Get map
       if (this.map == undefined) {
         this.map = this.$parent.map;
       }
-      // Relate overlay with map
-      this.$nextTick(() => {
-        Object.keys(this.buoys).forEach(buoyName => {
-          // Buoy info
-          const buoyInfo = new ol.Overlay({
-            position: this.buoys[buoyName].coord3857,
-            positioning: 'center-left',
-            element: this.$refs[buoyName],
-            stopEvent: false,
-          });
-          this.map.addOverlay(buoyInfo);
-        });
+      this.map.addOverlay(buoyInfo);
 
-        // Trigger interface update
-        this.selectedDateChanged(window.GUIManager.currentTmst);
-      });
-      
+      // Trigger interface update
+      this.selectedDateChanged(window.GUIManager.currentTmst);
     });
 
-
-
-    
 
     // EVENTS
     // HFRadarLoaded
@@ -217,67 +302,60 @@ export default {
   data () {
     return {
       once: false,
-      proxyURL: 'https://api.icatmar.cat/proxy/',
-      buoyData: {},
       isTooFar: false,
-      // https://portus.puertos.es/
-      buoys:{},
-      params: ['VGHS', 'VMTA', 'VMDR',
-        'VMHM', 'VTPK', 'VPED',
-        'temperature',
-        'TEMP', 'PSAL', 'PRES',
-        'WDIR', 'WSPD', 'GDIR', 'GSPD',
-        'RELH', 'DRYT', 'ATMS'],
-      url: 'https://api.icatmar.cat/MSM_fast_api/buoys/{{id}}/data?start_date={{startDate}}&end_date={{endDate}}&parameters={{params}}',
+      // https://icatmar.github.io/boiasomorrostro/
+      buoyName: BUOY_NAME,
+      buoy: {
+        lon: LONGITUDE,
+        lat: LATITUDE,
+        latestTmst: undefined,
+        showAllData: false,
+        data: {}, // tmst1: {WSPD: value, TEMP: value...}, tmst2: {...}
+        dataArray: {}, // tmst1: {WSPD: [value1, value2...], TEMP: [value1, value2...], ...}, tmst2: {...}
+      },
+      // What the panel shows for the currently selected timestamp
+      buoyData: { hasData: false, showInfo: false },
+      // Every code the panel knows about, across the two files (see SENSORS)
+      params: ['WSPD', 'WDIR', 'WRSP', 'WRDR',
+        'DRYT', 'DEWT', 'WETT',
+        'ATMS', 'RELH', 'ADNS',
+        'TEMP', 'PSAL', 'DOX1', 'PRES', 'CNDC'],
+      url: REPO_URL + '{{file}}?time>={{startDate}}&time<={{endDate}}',
       requests: {},
     }
   },
   methods: {
     // USER ACTIONS
-    buoyIconClicked: function(buoyName){
+    buoyIconClicked: function(){
       this.buoyData.showInfo = !this.buoyData.showInfo;
     },
     // INTERNAL
     selectedDateChanged: function(tmst){
-      
-
-      // Hide all data from buoyData
-      Object.keys(this.buoys).forEach(buoyName => {
-        this.buoyData.hasData = false;
-      });
+      console.log("Timestamp for buoy SOMO data: " + tmst);
+      // Hide the data currently shown
+      this.buoyData.hasData = false;
 
       // Add one day before and after of the tmst
       let currentDate = new Date(tmst);
       let sDate = new Date(currentDate.getTime() - 24 * 60 * 60  * 1000);
       let eDate = new Date(currentDate.getTime() + 24 * 60 * 60  * 1000);
-      // Iterate buoys
-      Object.keys(this.buoys).forEach(buoyName => {
-        let buoy = this.buoys[buoyName];
-        // Check if the buoy data has all timestamps (timestep of 1h)
-        if (buoy.data[tmst] == undefined){
-          // Load data (yesteray, today, tomorrow)
-          // Generate url
-          // Id
-          let url = this.url.replace('{{id}}', buoy.id);
-          // Params
-          let paramsStr = '';
-          this.params.forEach(p => paramsStr += p + ",");
-          paramsStr = paramsStr.substring(0, paramsStr.length - 1);
-          url = url.replace('{{params}}', paramsStr);
-          // Start date
-          url = url.replace('{{startDate}}', sDate.toISOString().substring(0, 19) + 'Z');
-          // End date
-          url = url.replace('{{endDate}}', eDate.toISOString().substring(0, 19) + 'Z');
+      // Each sensor is its own file, and its own request
+      Object.keys(SENSORS).forEach(sensorId => {
+        // Check if the buoy data has this sensor's readings for the timestamp
+        if (!this.hasSensorData(sensorId, tmst)){
+          // Load data (yesterday, today, tomorrow)
+          // Generate url. The file itself is downloaded whole, so this is the
+          // window's key in this.requests rather than a query the server sees.
+          let url = this.buildURL(sensorId, sDate, eDate);
 
-          // Proxy
-          let proxyFullURL = url;//this.proxyURL + '?url=' + encodeURIComponent(url);
+          console.log(url);
           // Request data for the first time
-          if (this.requests[proxyFullURL] == undefined) {
-            this.requests[proxyFullURL] = {
-              promise: this.getData(proxyFullURL, buoyName).then(r => {
+          if (this.requests[url] == undefined) {
+            this.requests[url] = {
+              promise: this.getData(url, sensorId, sDate, eDate).then(r => {
                 this.buoyData.isLoading = false;
-                this.requests[proxyFullURL].response = r;
-                this.requests[proxyFullURL].lastResolved = Date.now();
+                this.requests[url].response = r;
+                this.requests[url].lastResolved = Date.now();
                 return r;
               }),
               response: undefined,
@@ -285,22 +363,49 @@ export default {
             };
           }
           // Resolve promise and update content
-          this.requests[proxyFullURL].promise.then(r => {
-            this.parseAPIResult(r, buoyName);
-            // Update buoys content once loaded
-            this.updateContent(buoyName, tmst);
+          this.requests[url].promise.then(r => {
+            this.parseAPIResult(r);
+            // Update buoy content once loaded
+            this.updateContent(tmst);
           });
         }
         // Data already exists
         else {
-          // Update buoys content
-          this.updateContent(buoyName, tmst);
+          // Update buoy content
+          this.updateContent(tmst);
         }
       });
     },
 
-    // Keep track of requests as API is slow
-    async getData(url, buoyName) {
+    // Whether this sensor has already answered for a timestamp. A sensor that
+    // simply has nothing for that hour asks again, but the request cache
+    // answers it without going back to the network (see getData).
+    hasSensorData: function(sensorId, tmst){
+      let data = this.buoy.data[tmst];
+      if (data == undefined)
+        return false;
+      return this.codesOf(sensorId).some(code => data[code] != undefined);
+    },
+
+    // The codes a sensor's columns are stored under (see SENSORS)
+    codesOf: function(sensorId){
+      return Object.values(SENSORS[sensorId].columns);
+    },
+
+    // Request url for one sensor over a time range
+    buildURL: function(sensorId, sDate, eDate){
+      let url = this.url;
+      // File
+      url = url.replace('{{file}}', SENSORS[sensorId].file);
+      // Start date
+      url = url.replace('{{startDate}}', sDate.toISOString().substring(0, 19) + 'Z');
+      // End date
+      url = url.replace('{{endDate}}', eDate.toISOString().substring(0, 19) + 'Z');
+      return url;
+    },
+
+    // Keep track of requests as the files are large
+    async getData(url, sensorId, sDate, eDate) {
       this.buoyData.isLoading = true;
       // Already resolved
       if (this.requests[url] && this.requests[url].lastResolved != undefined){
@@ -308,40 +413,110 @@ export default {
           return new Promise((resolve) => resolve(this.requests[url].response));
         }
         // Request again if it was resolved more than X time ago
-        return fetch(url).then(res => res.json());
+        return this.fetchRepoData(sensorId, sDate, eDate);
       }
       // Fetch
-      return fetch(url).then(res => res.json());
+      return this.fetchRepoData(sensorId, sDate, eDate);
     },
 
-    updateContent: function(buoyName, tmst){
-      if (this.buoys[buoyName].data[tmst] == undefined){
+    // One sensor's readings inside the window, in the shape the panel parses:
+    // { data: { tmst: { METEO: {WSPD: value, ...} } } }
+    async fetchRepoData(sensorId, sDate, eDate) {
+      const entries = await this.loadRepoFile(sensorId).catch(e => {
+        console.error("Could not load " + SENSORS[sensorId].file, e);
+        return {};
+      });
+      // Only the requested window, so a day of scrolling does not carry the
+      // whole file into this.buoy.data
+      const data = {};
+      Object.keys(entries).forEach(tmst => {
+        const date = new Date(tmst);
+        if (date >= sDate && date <= eDate)
+          data[tmst] = entries[tmst];
+      });
+      return { data: data };
+    },
+
+    // The whole parsed logger file, downloaded again only once what we hold has
+    // gone stale - the buoy reports every 15 min, so most windows are served
+    // without touching the network.
+    async loadRepoFile(sensorId) {
+      const cached = this.repoFiles[sensorId];
+      if (cached != undefined && Date.now() - cached.loadedAt < REFRESH_LIMIT)
+        return cached.entries;
+
+      const res = await fetch(REPO_URL + SENSORS[sensorId].file, { cache: 'no-cache' });
+      if (!res.ok) throw new Error(res.status);
+      const entries = this.parseRepoFile(sensorId, await res.text());
+      this.repoFiles[sensorId] = { entries: entries, loadedAt: Date.now() };
+      return entries;
+    },
+
+    // TOA5 logger file: line 1 = file metadata, line 2 = quoted column names,
+    // lines 3-4 = units and aggregation, then one row per timestamp (buoy wall
+    // clock, see parseBuoyDate).
+    parseRepoFile(sensorId, text) {
+      const sensor = SENSORS[sensorId];
+      const lines = text.trim().split(/\r?\n/); // the logger writes CRLF
+      const columns = lines[1].split(',').map(name => name.replace(/"/g, ''));
+      const iTime = columns.indexOf('TIMESTAMP');
+      if (iTime < 0) throw new Error('Unexpected columns in ' + sensor.file);
+
+      const entries = {};
+      lines.slice(4).forEach(line => {
+        const cells = line.split(',');
+        const values = {};
+        columns.forEach((name, i) => {
+          const code = sensor.columns[name];
+          if (code == undefined) return;
+          // Values the logger could not read come as a quoted "NAN"
+          const value = parseFloat(cells[i]);
+          if (isNaN(value)) return;
+          values[code] = value;
+        });
+        this.dropBogusWind(values);
+        const date = parseBuoyDate(cells[iTime].replace(/"/g, '').replace(' ', 'T'));
+        entries[date.toISOString()] = { [sensorId]: values };
+      });
+      return entries;
+    },
+
+    // A failed wind reading comes out of the logger as 1000 m/s, with
+    // plausible-looking numbers still in the direction columns - the whole wind
+    // reading goes, so no bogus bearing reaches the panel (see MAX_WIND_SPEED).
+    dropBogusWind(values) {
+      if (values['WSPD'] == undefined || values['WSPD'] <= MAX_WIND_SPEED) return;
+      WIND_PARAMS.forEach(param => delete values[param]);
+    },
+
+    updateContent: function(tmst){
+      if (this.buoy.data[tmst] == undefined){
         this.buoyData.hasData = false;
         return;
       }
 
-      
+
       this.buoyData.hasData = true;
       this.buoyData.data = {};
-      
-      Object.keys(this.buoys[buoyName].data[tmst]).forEach(key => {
-        this.buoyData.data[key] = this.buoys[buoyName].data[tmst][key];
+
+      Object.keys(this.buoy.data[tmst]).forEach(key => {
+        this.buoyData.data[key] = this.buoy.data[tmst][key];
       });
       //console.log(this.buoyData.data)
     },
 
 
-    parseAPIResult(response, buoyName){
-      let dataArray = response.data;
-      if (dataArray == undefined || dataArray.length == 0) {
-        console.log("API error for " + buoyName + ": " + response);
+    parseAPIResult(response){
+      let responseData = response.data;
+      if (responseData == undefined || Object.keys(responseData).length == 0) {
+        console.log("No data for " + this.buoyName);
         return;
       }
 
-      for (let i = 0; i < dataArray.length; i++) {
-        let dd = dataArray[i];
-        let date = new Date(dd.timestamp);
-        // Hourly dataset
+      Object.keys(responseData).forEach(resTimestamp => {
+        let dd = responseData[resTimestamp];
+        let date = new Date(resTimestamp);
+        // Hourly dataset (the buoy reports every 15 min)
         if (date.getMinutes() >= 30)
           date.setHours(date.getHours() + 1);
         date.setMinutes(0);
@@ -350,51 +525,69 @@ export default {
 
         let tmst = date.toISOString();
 
-        // Skip if timestamp already exists in buoy data
-        if (this.buoys[buoyName].data[tmst] != undefined){
-          continue;
-        }
 
         // Look for parameters inside the data array
-        Object.keys(dd.data).forEach(sensor => {
-          let sensorData = dd.data[sensor]; // {RELH: '1232', DRYT: '1232', ...}
+        Object.keys(dd).forEach(sensor => {
+          let sensorData = dd[sensor]; // {WSPD: '4.78', WDIR: '197', ...}
           Object.keys(sensorData).forEach(param => {
-            // Contemplated parameter --> not really needed as we request the parameters to the API
+            // Contemplated parameter
             if (this.params.includes(param)) {
-              // Add to buoy data
-              if (this.buoys[buoyName].data[tmst] == undefined){
-                this.buoys[buoyName].data[tmst] = {};
+              // Add to buoy data array
+              if (this.buoy.dataArray[tmst] == undefined){
+                this.buoy.dataArray[tmst] = {};
               }
               // If parameter already exists, add to array for averaging later, if not create array
               let value = parseFloat(sensorData[param]);
-              if (this.buoys[buoyName].data[tmst][param] != undefined) {
-                this.buoys[buoyName].data[tmst][param].push(value);
+              if (this.buoy.dataArray[tmst][param] != undefined) {
+                this.buoy.dataArray[tmst][param].push(value);
               } else {
-                this.buoys[buoyName].data[tmst][param] = [value];
+                this.buoy.dataArray[tmst][param] = [value];
               }
             }
           });
         });
-      }
+      })
       // Average values
-      Object.keys(this.buoys[buoyName].data).forEach(tmst => {
-        Object.keys(this.buoys[buoyName].data[tmst]).forEach(param => {
-          // If it is an array, average. Otherwise it means it was already averaged (tmst already existed)
-          if (Array.isArray(this.buoys[buoyName].data[tmst][param])){
-            let values = this.buoys[buoyName].data[tmst][param];
+      Object.keys(this.buoy.dataArray).forEach(tmst => {
+        Object.keys(this.buoy.dataArray[tmst]).forEach(param => {
+          let values = this.buoy.dataArray[tmst][param];
+          let avg;
+          // Directions have to be averaged around the circle
+          if (DIRECTION_PARAMS.includes(param)) {
+            let sin = values.reduce((sum, deg) => sum + Math.sin(deg * Math.PI / 180), 0);
+            let cos = values.reduce((sum, deg) => sum + Math.cos(deg * Math.PI / 180), 0);
+            avg = (Math.atan2(sin, cos) * 180 / Math.PI + 360) % 360;
+          } else {
             let sum = values.reduce((a, b) => a + b, 0);
-            let avg = sum / values.length;
-            this.buoys[buoyName].data[tmst][param] = avg;
-          }          
+            avg = sum / values.length;
+          }
+          if (this.buoy.data[tmst] == undefined){
+            this.buoy.data[tmst] = {};
+          }
+          this.buoy.data[tmst][param] = avg;
         });
       });
 
+      this.updateLatestTmst();
+    },
+
+    // Newest measurement loaded so far. Only ever moves forward - scrolling
+    // back in time loads an old window, it does not make the buoy's latest
+    // data older.
+    updateLatestTmst(){
+      let tmsts = Object.keys(this.buoy.data);
+      if (tmsts.length == 0)
+        return;
+      let newest = new Date(Math.max(...tmsts.map(t => new Date(t))));
+      let latest = this.buoy.latestTmst;
+      if (latest == undefined || newest > new Date(latest))
+        this.buoy.latestTmst = newest.toISOString();
     },
 
     // Bearing to direction
     bearing2compassRose(bearing){
       if (bearing == undefined)
-        debugger;
+        return '';
       // Define directional ranges in degrees
       const directions = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW', 'N'];
       const ranges = [22.5, 67.5, 112.5, 157.5, 202.5, 247.5, 292.5, 337.5, 360];
@@ -406,26 +599,11 @@ export default {
       }
     },
 
-    // Timestime to current time ago
-    timeAgo(tmst) {
-      let now = Date.now(window.GUIManager.currentTmst);
-      let diff = now - new Date(tmst).getTime();
 
-      if (diff < 60 * 1000) {
-        return "Just now";
-      } else if (diff < 60 * 60 * 1000) {
-        let minutes = Math.floor(diff / (60 * 1000));
-        return minutes + " minute" + (minutes > 1 ? "s" : "") + " ago";
-      } else if (diff < 24 * 60 * 60 * 1000) {
-        let hours = Math.floor(diff / (60 * 60 * 1000));
-        return hours + " hour" + (hours > 1 ? "s" : "") + " ago";
-      } else {
-        let days = Math.floor(diff / (24 * 60 * 60 * 1000));
-        return days + " day" + (days > 1 ? "s" : "") + " ago";
-      }
-    },
-    
-    
+
+
+
+
     // Hide / Panel depending on zoom level
     updatePanel(zoomLevel){
       if (zoomLevel < 9){
@@ -437,7 +615,32 @@ export default {
   computed: {
     currentTmst() {
       return window.GUIManager.currentTmst;
-    }
+    },
+    timeAgo() {
+      const selectedDate = new Date(window.GUIManager.currentTmst).getTime();
+
+      return (tmst) => {
+        const diff = selectedDate - new Date(tmst).getTime();
+        // Data is in the past
+        if (diff > 0) {
+          if (diff < 60 * 1000) {
+            return "Just now";
+          } else if (diff < 60 * 60 * 1000) {
+            const minutes = Math.floor(diff / (60 * 1000));
+            return `${minutes} minute${minutes > 1 ? "s" : ""} ago`;
+          } else if (diff < 24 * 60 * 60 * 1000) {
+            const hours = Math.floor(diff / (60 * 60 * 1000));
+            return `${hours} hour${hours > 1 ? "s" : ""} ago`;
+          } else {
+            const days = Math.floor(diff / (24 * 60 * 60 * 1000));
+            return `${days} day${days > 1 ? "s" : ""} ago`;
+          }
+        } else {
+          const days = Math.floor(Math.abs(diff) / (24 * 60 * 60 * 1000));
+          return `${days} day${days > 1 ? "s" : ""} ahead from current date`;
+        }
+      };
+    },
   },
   components: {
 
