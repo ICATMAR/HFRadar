@@ -27,7 +27,7 @@
             <div></div>
           </div>
           <span><strong>{{ buoyName }}'s buoy</strong></span>
-          <a href="https://icatmar.github.io/boiasomorrostro/" target="_blank" rel="noopener noreferrer" class="icon-str"><span class="fa">&#xf08e;</span></a>
+          <a href="https://www.icatmar.cat/boiasomorrostro/" target="_blank" rel="noopener noreferrer" class="icon-str"><span class="fa">&#xf08e;</span></a>
         </div>
 
         <!-- Buoy data -->
@@ -302,7 +302,7 @@ export default {
     return {
       once: false,
       isTooFar: false,
-      // https://icatmar.github.io/boiasomorrostro/
+      // https://www.icatmar.cat/boiasomorrostro/
       buoyName: BUOY_NAME,
       buoy: {
         lon: LONGITUDE,
