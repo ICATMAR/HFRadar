@@ -29,6 +29,9 @@ class GUIManager {
       'PBCN': true,
       'GNST': true,
       'SCAL': true,
+      'SALO': true,
+      'ALFA': true,
+      'VINA': true,
     }
   };
 

@@ -49,7 +49,10 @@ class FileManager {
     'AREN',
     'PBCN',
     'GNST',
-    'SCAL'
+    'SCAL',
+    'SALO', 
+    'ALFA', 
+    'VINA'
   ];
 
   requestedFiles = [];

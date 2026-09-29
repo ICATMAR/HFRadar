@@ -10,7 +10,10 @@ HFANTENNAS = [
   'AREN',
   'PBCN',
   'GNST',
-  'SCAL'
+  'SCAL',
+  'SALO',
+  'ALFA',
+  'VINA'
 ];
 
   parseText = function(rawText){
