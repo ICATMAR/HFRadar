@@ -58,7 +58,7 @@ export default ca = {
     weatherAndSeaModels: "Models meteo-oceanogràfics"
   },
 
-  "Auto-refresh": "Auto-atualització",
+  "Auto-refresh": "Auto-actualització",
 
   "Advanced interface": "Interfície avançada",
 
