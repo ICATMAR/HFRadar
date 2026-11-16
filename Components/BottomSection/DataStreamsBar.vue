@@ -265,6 +265,11 @@ export default {
         
       } else { // Use hourly data
         this.isDailyVisible = false;
+        if (this.hourlyData == undefined){
+          console.log("Hourly data is undefined but it was loaded?");
+          debugger;
+          return;
+        }
         if (Object.keys(this.hourlyData).length == 0){
           console.log("Hourly data is empty but it was loaded?");
           debugger;
